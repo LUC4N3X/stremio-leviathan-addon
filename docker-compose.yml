@@ -1,0 +1,19 @@
+services:
+  stremio-addon:
+    build: .
+    container_name: my-stremio-addon
+    restart: always
+    ports:
+      - "7000:7000"
+    environment:
+      - PORT=7000
+      - NODE_ENV=production
+   
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+
+
+
+
+
