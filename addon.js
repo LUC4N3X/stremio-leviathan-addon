@@ -403,9 +403,9 @@ app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "index.ht
 app.get("/:conf/manifest.json", (req, res) => { 
     const m = { 
         id: "org.corsaro.brain.v33.0", 
-        version: "33.0.0", 
-        name: "Leviathan (Hybrid)", 
-        description: "Best of Both Worlds: User Logic + Debrid Cache", 
+        version: "1.0.0", 
+        name: "Leviathan", 
+        description: "Hybrid Architecture: Algorithmic Logic & High-Throughput Caching", 
         logo: "https://img.icons8.com/ios-filled/500/00f2ea/dragon.png",
         resources: ["catalog", "stream"], 
         types: ["movie", "series"], 
