@@ -14,8 +14,7 @@ const helmet = require("helmet");
 const path = require("path");
 const axios = require("axios");
 const Bottleneck = require("bottleneck");
-const NodeCache = require("node-cache"); // ASSICURATI DI AVERLO: npm install node-cache
-
+const NodeCache = require("node-cache"); 
 // --- IMPORTIAMO I MODULI SMART ---
 const { generateSmartQueries } = require("./ai_query");
 const { smartMatch } = require("./smart_parser");
