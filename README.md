@@ -62,9 +62,9 @@
        letter-spacing: 2px;">
        🚀 Installa Addon
     </a>
-
+```
     <br><br>
-
+```
     <a href="https://leaviathan-leviathan.hf.space" target="_blank" style="text-decoration: none;">
       <div style="
           display: inline-flex;
