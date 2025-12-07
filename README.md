@@ -162,6 +162,7 @@ Copia l'intera sequenza e incollala nel terminale per l'inizializzazione immedia
 ✅ Fatto! Leviathan sarà raggiungibile su:
 http://localhost:7000
 
+
 > [!TIP]
 > **Status Operativo:**
 > * ✔️ **Full Auto:** Avvio completamente automatizzato senza intervento umano.
