@@ -173,27 +173,35 @@ http://localhost:7000
 
 ## ⚖️ Legal Disclaimer & Liability Warning
 
-> [!WARNING]
-> **LEGGERE ATTENTAMENTE PRIMA DELL'USO**
+> [!CAUTION]
+> **LEGGERE ATTENTAMENTE PRIMA DELL'USO / READ CAREFULLY**
 >
-> **1. Natura del Software**
-> **Leviathan** è un motore di ricerca e *web scraper* automatizzato. Funziona esclusivamente come aggregatore di metadati già disponibili pubblicamente sul World Wide Web.
-> * **Nessun File Ospitato:** Leviathan **NON** ospita, carica o gestisce alcun file video, torrent o contenuto protetto sui propri server.
-> * **Solo Indicizzazione:** Il software si limita a processare testo HTML e restituire Magnet Link (hash) trovati su siti di terze parti, agendo come un comune browser o motore di ricerca (es. Google).
+> ### 1. 🌐 Architettura & Funzionamento
+> **Leviathan** è un motore di ricerca e web scraper automatizzato.
+> * **`NO HOSTING`**: Il sistema **NON** ospita, carica o gestisce file video, torrent o contenuti protetti.
+> * **`METADATA ONLY`**: Il software processa esclusivamente testo HTML e magnet link (hash) pubblici, agendo come un comune browser (es. Chrome/Firefox) o motore di ricerca (es. Google).
 >
-> **2. Scopo Educativo**
-> Questo progetto è stato sviluppato esclusivamente per fini di **ricerca, studio dell'architettura web, parsing HTML e test di automazione**. Il codice sorgente è fornito "così com'è" per dimostrare capacità tecniche.
+> ### 2. 🎓 Finalità di Ricerca
+> Questo progetto è rilasciato esclusivamente per **scopi educativi**, studio dell'architettura web, parsing HTML e test di automazione distribuita. Il codice è fornito *"AS IS"* (così com'è).
 >
-> **3. Responsabilità dell'Utente**
-> L'autore del repository e i contributori non hanno alcun controllo su come l'utente finale utilizzerà questo software.
-> * L'utente si assume la **piena ed esclusiva responsabilità** legale per l'utilizzo di Leviathan.
-> * È responsabilità dell'utente verificare la conformità con le leggi locali sul copyright e sulla proprietà intellettuale (es. DMCA, EU Copyright Directive).
+> ### 3. 🛡️ Responsabilità Utente
+> L'autore e i contributori declinano ogni responsabilità sull'utilizzo finale del software.
+> * L'utente si assume la **piena ed esclusiva responsabilità penale e civile**.
+> * È obbligo dell'utente verificare la conformità con le leggi locali (es. DMCA, EU Copyright Directive).
 >
-> **4. Divieto di Pirateria**
-> **Scaricare e condividere opere protette da diritto d'autore senza autorizzazione è un reato.** L'autore condanna fermamente la pirateria informatica e non incoraggia, supporta o facilita in alcun modo la violazione del copyright.
+> ### 4. 🚫 Copyright & Pirateria
+> **La violazione del diritto d'autore è un reato.**
+> Questo progetto condanna fermamente la pirateria. Non è inteso per supportare, facilitare o incoraggiare il download illegale di opere protette.
 >
-> **Se non accetti queste condizioni, disinstalla e cancella immediatamente questo software.**
+> ---
+> **⚠️ SE NON ACCETTI QUESTE CONDIZIONI, DISINSTALLA IMMEDIATAMENTE IL SOFTWARE.**
 
----
+<br>
 
-<div align="center"> <sub>Engineered with ❤️ & ☕ by the LUC4N3X</sub> </div>
+<div align="center">
+
+<sub>Engineered with ❤️ & ☕ by <b>LUC4N3X</b></sub>
+<br>
+<sub><i>Leviathan Core © 2024 - All Rights Reserved</i></sub>
+
+</div>
