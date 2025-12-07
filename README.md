@@ -47,7 +47,7 @@
 
 <div align="center">
   <a href="https://leaviathan-leviathanaddon.hf.space" target="_blank">
-    <img src="public/button.svg" width="350" alt="Installa Leviatano">
+    <img src="public/button.svg" width="350" alt="Installa Leviathan">
   </a>
 
   <br>
