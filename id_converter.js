@@ -1,7 +1,9 @@
 const axios = require("axios");
-const NodeCache = require("node-cache");
+const Database = require("better-sqlite3");
+const path = require("path");
+const fs = require("fs-extra");
 
-// --- ⚙️ CONFIGURAZIONE API ⚙️ ---
+// --- ⚙️ CONFIGURAZIONE API (GOD MODE) ⚙️ ---
 const CONFIG = {
     TMDB_KEY: '4b9dfb8b1c9f1720b5cd1d7efea1d845',
     TMDB_URL: 'https://api.themoviedb.org/3',
@@ -11,10 +13,39 @@ const CONFIG = {
     OMDB_URL: 'http://www.omdbapi.com',
 };
 
-// --- 🧠 CACHE IN MEMORIA (RAM) ---
-// Sostituisce SQLite per Vercel. 
-// stdTTL: 7200 secondi (2 ore) di memoria prima che scada.
-const idCache = new NodeCache({ stdTTL: 7200, checkperiod: 600 });
+// --- 💾 DATABASE PERSISTENTE (SQLITE) ---
+// Ispirato alla robustezza del "DatabaseManager" Python
+const DATA_DIR = path.join(__dirname, 'data');
+fs.ensureDirSync(DATA_DIR); // Crea la cartella se non esiste
+
+const dbPath = path.join(DATA_DIR, 'ids_cache.db');
+const db = new Database(dbPath); // Sincrono e velocissimo
+
+// Attiviamo la modalità WAL per prestazioni estreme
+db.pragma('journal_mode = WAL');
+
+// Creazione Tabella (Se non esiste)
+db.exec(`
+  CREATE TABLE IF NOT EXISTS media_map (
+    imdb_id TEXT PRIMARY KEY,
+    tmdb_id INTEGER,
+    tvdb_id INTEGER,
+    trakt_id INTEGER,
+    type TEXT,
+    slug TEXT,
+    timestamp INTEGER
+  );
+  
+  CREATE INDEX IF NOT EXISTS idx_tmdb ON media_map(tmdb_id);
+`);
+
+// Prepared Statements (Query Precompilate per velocità)
+const stmtGetByImdb = db.prepare('SELECT * FROM media_map WHERE imdb_id = ?');
+const stmtGetByTmdb = db.prepare('SELECT * FROM media_map WHERE tmdb_id = ?');
+const stmtInsert = db.prepare(`
+    INSERT OR REPLACE INTO media_map (imdb_id, tmdb_id, tvdb_id, trakt_id, type, slug, timestamp)
+    VALUES (@imdb, @tmdb, @tvdb, @trakt, @type, @slug, @timestamp)
+`);
 
 // --- ⚡ AXIOS CLIENTS ---
 const tmdbClient = axios.create({ baseURL: CONFIG.TMDB_URL, timeout: 4000 });
@@ -106,20 +137,32 @@ async function searchOmdb(imdbId) {
 }
 
 // ==========================================
-// 🛠️ FUNZIONE CORE (NO DB - SOLO API + RAM)
+// 🛠️ FUNZIONE CORE (DB MANAGER)
 // ==========================================
 
 async function resolveIds(id, typeHint = null) {
     const isImdb = id.toString().startsWith('tt');
     const cleanId = id.toString().split(':')[0]; // Rimuove :season:episode se presente
 
-    // 1. 🧠 RAM CACHE CHECK
-    const cached = idCache.get(cleanId);
+    // 1. 💾 DB CHECK (Lettura immediata)
+    let cached = null;
+    try {
+        cached = isImdb ? stmtGetByImdb.get(cleanId) : stmtGetByTmdb.get(cleanId);
+    } catch (err) { console.error("DB Read Error:", err); }
+
     if (cached) {
-        return { ...cached, foundVia: 'ram_cache' };
+        // Riformatta come oggetto pulito
+        return {
+            imdb: cached.imdb_id,
+            tmdb: cached.tmdb_id,
+            tvdb: cached.tvdb_id,
+            trakt: cached.trakt_id,
+            type: cached.type,
+            foundVia: 'sqlite_db'
+        };
     }
 
-    // 2. 🌍 LIVE SEARCH
+    // 2. 🌍 LIVE SEARCH (Se non è nel DB)
     let identity = { 
         imdb: isImdb ? cleanId : null, 
         tmdb: !isImdb ? parseInt(cleanId) : null,
@@ -144,10 +187,11 @@ async function resolveIds(id, typeHint = null) {
         identity = { ...identity, ...ext };
     }
 
-    // C. Trakt Fallback
+    // C. Trakt Fallback (Cruciale per Anime/Serie complesse)
     if ((!identity.tmdb || !identity.imdb) && CONFIG.TRAKT_CLIENT_ID) {
         const traktRes = await searchTrakt(cleanId, isImdb ? 'imdb' : 'tmdb');
         if (traktRes) {
+            // console.log(`🦅 Trakt Rescue: ${cleanId}`);
             identity = { ...identity, ...traktRes };
         }
     }
@@ -158,11 +202,21 @@ async function resolveIds(id, typeHint = null) {
         if (omdbRes) identity = { ...identity, ...omdbRes };
     }
 
-    // 3. 🧠 SAVE TO RAM CACHE
-    // Salviamo in cache sia con chiave IMDB che TMDB per trovarlo in entrambi i modi
-    if (identity.imdb || identity.tmdb) {
-        if (identity.imdb) idCache.set(identity.imdb, identity);
-        if (identity.tmdb) idCache.set(identity.tmdb.toString(), identity);
+    // 3. 💾 SAVE TO DB (Scrittura Persistente)
+    // Salviamo solo se abbiamo almeno una coppia solida (IMDB+TMDB) o (IMDB solo)
+    if (identity.imdb) {
+        try {
+            stmtInsert.run({
+                imdb: identity.imdb,
+                tmdb: identity.tmdb || null,
+                tvdb: identity.tvdb || null,
+                trakt: identity.trakt || null,
+                type: identity.type || 'movie',
+                slug: identity.slug || null,
+                timestamp: Date.now()
+            });
+            // console.log(`💾 Saved to DB: ${identity.imdb} <-> ${identity.tmdb}`);
+        } catch (err) { console.error("DB Write Error:", err.message); }
     }
 
     return identity;
