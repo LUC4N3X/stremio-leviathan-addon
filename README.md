@@ -154,9 +154,9 @@ Il modo più veloce e pulito per eseguire Leviatano in locale o in produzione.
 Copia l'intera sequenza e incollala nel terminale per l'inizializzazione immediata:
 
 ```bash
-                git clone https://github.com/LUC4N3X/stremio-leviathan-addon
-                 cd stremio-leviathan-addon
-                 docker compose up -d --build
+                                          git clone https://github.com/LUC4N3X/stremio-leviathan-addon
+                                                    cd stremio-leviathan-addon
+                                                    docker compose up -d --build
 
 ```
 </div>
