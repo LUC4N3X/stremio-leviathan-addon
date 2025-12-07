@@ -47,14 +47,10 @@
 
 <div align="center">
   <a href="https://leaviathan-leviathanaddon.hf.space" target="_blank">
-    <img src="./button.svg" width="350" alt="Installa Addon">
+    <img src="./public/button.svg" width="500" alt="Installa Leviatano">
   </a>
   
-  <p>
-    <em>Hosted on Hugging Face Spaces</em>
-  </p>
-  
-  <hr style="width: 50%; border: 0; height: 1px; background: linear-gradient(to right, transparent, #00eaff, transparent);">
+  <hr style="width: 60%; border: 0; height: 1px; background: linear-gradient(to right, transparent, #00eaff, transparent); margin-top: 10px; opacity: 0.5;">
 </div>
 
 
