@@ -1,102 +1,125 @@
-<div align="center">
+<div style="margin-top: 60px;">
 
-  <img src="https://api.iconify.design/game-icons:sea-dragon.svg?color=%2300eaff&width=200" style="filter: drop-shadow(0 0 15px rgba(0, 234, 255, 0.6)); margin-bottom: 20px;" />
+  <!-- BLOCCO SUPERIORE -->
+  <div style="
+      text-align: center;
+      margin-bottom: 40px;
+  ">
+      <img src="https://api.iconify.design/material-symbols:cloud-sync-rounded.svg?color=%2300eaff&width=110"
+           style="filter: drop-shadow(0 0 12px #00eaffaa);" />
 
-  <h1 style="font-size: 5rem; font-weight: 800; margin: 0; line-height: 1; letter-spacing: -3px; color: #fff; text-shadow: 0 0 20px rgba(0, 234, 255, 0.3);">
-    LEVIATHAN
-  </h1>
+      <h2 style="
+          font-size: 3rem;
+          color: #00eaff;
+          text-shadow: 0 0 15px #00eaff99;
+          margin-top: 10px;
+          margin-bottom: 5px;
+          letter-spacing: 2px;
+          font-weight: 800;
+      ">
+        LEVIATHAN CLOUD GATEWAY
+      </h2>
 
-  <div style="font-size: 1.1rem; color: #94a3b8; margin-top: 10px; font-weight: 400; letter-spacing: 2px; text-transform: uppercase;">
-    Advanced Torrent Aggregation Protocol
+      <p style="
+          font-size: 1.1rem;
+          color: #93a4b4;
+          max-width: 780px;
+          margin: auto;
+          line-height: 1.7;
+      ">
+        Accesso diretto all’istanza cloud di Leviathan: ottimizzata, scalabile,
+        protetta da sandbox avanzata e aggiornata automaticamente al motore
+        HyperMode <b>v3.5</b>.  
+        Protocolli di stabilizzazione e routing dinamico garantiscono
+        tempi di risposta <b>ultra-bassi</b>.
+      </p>
   </div>
 
-  <br>
 
-  <p>
-    <img src="https://img.shields.io/badge/Real_Debrid-NATIVE_SUPPORT-A2B9F0?style=for-the-badge&logo=realdebrid&logoColor=black" />
-    <img src="https://img.shields.io/badge/AllDebrid-MODULE_ACTIVE-F5A623?style=for-the-badge&logo=alldebrid&logoColor=white" />
-    <img src="https://img.shields.io/badge/TorBox-COMPATIBLE-7A4EE3?style=for-the-badge&logo=torbox&logoColor=white" />
-  </p>
-
-  <p>
-    <img src="https://img.shields.io/badge/Node.js-v18_LTS-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
-    <img src="https://img.shields.io/badge/Architecture-HyperMode_v3.5-8A2BE2?style=for-the-badge&logo=dependabot&logoColor=white" />
-    <img src="https://img.shields.io/badge/Status-OPERATIONAL-success?style=for-the-badge&logo=githubactions&logoColor=white" />
-  </p>
-
-  <br>
-
-  <div style="background: linear-gradient(145deg, #050a10, #0a1520); border: 1px solid rgba(0, 234, 255, 0.2); border-radius: 12px; padding: 25px; width: 90%; max-width: 800px; box-shadow: 0 10px 40px rgba(0,0,0,0.6);">
-    <strong style="font-size: 1.3rem; color: #00eaff; display: block; margin-bottom: 12px; letter-spacing: 0.5px;">
-      🇮🇹 Engineered for Italian Content Precision
-    </strong>
-    <span style="color: #cbd5e1; line-height: 1.7; font-size: 1rem;">
-      Leviathan ridefinisce lo standard dei metamotori torrent attraverso un'architettura <b>Italy-First</b>.
-      Integra un sistema di validazione semantica dei titoli, gestione automatizzata delle challenge WAF e un algoritmo di routing a bassa latenza per garantire risultati pertinenti e immediati.
-    </span>
-  </div>
-
-  <br>
-
-  <p>
-    <img src="https://img.shields.io/badge/⚡_Adaptive-Latency_Scaling-000?style=for-the-badge&labelColor=00eaff" />
-    <img src="https://img.shields.io/badge/🔍_Smart-Query_Morphing-000?style=for-the-badge&labelColor=00eaff" />
-    <img src="https://img.shields.io/badge/🛡️_WAF-Bypass_Protocol-000?style=for-the-badge&labelColor=00eaff" />
-    <img src="https://img.shields.io/badge/🔗_Magnet-Fusion_Engine-000?style=for-the-badge&labelColor=00eaff" />
-  </p>
-
-  <div style="margin-top: 40px; margin-bottom: 25px;">
-    <a href="https://leaviathan-leviathan.hf.space" target="_blank" style="
-       display: inline-block;
-       background: #00eaff;
-       color: #020617;
-       font-family: sans-serif;
-       font-weight: 900;
-       font-size: 1.3rem;
-       padding: 18px 45px;
-       border-radius: 50px;
-       text-decoration: none;
-       box-shadow: 0 0 30px rgba(0, 234, 255, 0.5);
-       border: 3px solid #fff;
-       text-transform: uppercase;
-       letter-spacing: 2px;">
-       🚀 Installa Addon
-    </a>
+  <!-- CARD CENTRALE -->
+  <div style="
+      background: linear-gradient(145deg, #02070d 0%, #03101c 100%);
+      border: 1px solid rgba(0, 234, 255, 0.18);
+      border-radius: 20px;
+      padding: 40px 35px;
+      width: 90%;
+      max-width: 880px;
+      margin: auto;
+      box-shadow:
+        0 0 18px rgba(0, 234, 255, 0.12),
+        inset 0 0 25px rgba(0, 234, 255, 0.05);
+  ">
 ```
-    <br><br>
-
-    <a href="https://leaviathan-leviathan.hf.space" target="_blank" style="text-decoration: none;">
-      <div style="
-          display: inline-flex;
-          align-items: center;
-          gap: 12px;
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          padding: 10px 24px;
-          border-radius: 100px;
-          transition: all 0.3s ease;
-          backdrop-filter: blur(10px);
-        ">
-        <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" width="22" style="opacity: 0.9;" />
-        <span style="color: #94a3b8; font-family: monospace; font-size: 0.9rem; letter-spacing: 0.5px;">
-          HOSTED ON <span style="color: #fff; font-weight: bold;">HUGGING FACE</span>
-        </span>
-        <span style="
-          display: inline-block;
-          width: 8px;
-          height: 8px;
-          background-color: #10b981;
-          border-radius: 50%;
-          box-shadow: 0 0 8px #10b981;
-          margin-left: 5px;
-        "></span>
+      <div style="text-align: center; margin-bottom: 25px;">
+        <img src="https://api.iconify.design/mdi:shield-lock.svg?color=%2300eaff&width=70"
+             style="filter: drop-shadow(0 0 8px #00eaff77);" />
       </div>
-    </a>
-  </div>
+```
+      <h3 style="
+          text-align: center;
+          color: #00eaff;
+          font-size: 2rem;
+          letter-spacing: 1px;
+          margin: 0;
+          font-weight: 700;
+          text-shadow: 0 0 10px #00eaff77;
+      ">
+        Hosted on Hugging Face • Secure Node
+      </h3>
+```
+      <p style="
+          text-align: center;
+          color: #b4c4d6;
+          margin-top: 15px;
+          font-size: 1rem;
+          line-height: 1.6;
+      ">
+        Nodo ufficiale Leviathan deployato su infrastruttura HF cloud
+        con <b>auto-healing</b>, <b>caching distribuita</b> e <b>scansione semantica</b>
+        real-time per garantire qualità dei risultati e uptime costante.
+      </p>
+```
+      <!-- PULSANTE GIGANTE -->
+      <div style="text-align: center; margin-top: 35px;">
+          <a href="https://leaviathan-leviathan.hf.space" target="_blank" style="
+              display: inline-block;
+              padding: 20px 55px;
+              background: linear-gradient(90deg, #00eaff, #00c6ff);
+              color: #000;
+              font-size: 1.4rem;
+              font-weight: 900;
+              letter-spacing: 2px;
+              text-decoration: none;
+              border-radius: 80px;
+              border: 2px solid #0ff;
+              text-transform: uppercase;
+              box-shadow:
+                0 0 25px rgba(0, 234, 255, 0.7),
+                inset 0 0 10px rgba(255,255,255,0.3);
+          ">
+            🚀 Launch Leviathan Node
+          </a>
+```
+          <div style="margin-top: 15px; color: #6b7b8e; font-size: 0.9rem;">
+            Public Gateway • Auto-Scaling • Instant Deployment
+          </div>
+      </div>
 
-  <hr style="border: 0; height: 1px; background: linear-gradient(to right, transparent, #00eaff, transparent); margin: 50px auto; width: 50%; opacity: 0.3;">
+  </div>
 
 </div>
+
+<br><br>
+
+<hr style="
+    border: 0;
+    height: 1px;
+    width: 75%;
+    margin: 50px auto;
+    background: linear-gradient(to right, transparent, #00eaff, transparent);
+    opacity: 0.35;
+">
+
 
 ## ⚡ Architettura del Sistema
 
