@@ -141,7 +141,7 @@ Non si limita a trovare il link. Lo potenzia.
 
 ---
 # 🐳 DEPLOYMENT PROTOCOL
-<div align="center">
+
 
 **Il modo più veloce e pulito per eseguire Leviathan in locale o in produzione.**
 
@@ -151,8 +151,9 @@ Non si limita a trovare il link. Lo potenzia.
 ### 💠 Sequenza di Avvio Rapido
 
 Copia l'intera sequenza e incollala nel terminale per l'inizializzazione immediata:
+<div align="center">
 
-```bash
+  ```bash
 git clone https://github.com/LUC4N3X/stremio-leviathan-addon
 cd stremio-leviathan-addon
 docker compose up -d --build
