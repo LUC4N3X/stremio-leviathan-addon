@@ -1,96 +1,168 @@
-<div align="center" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d1117; padding: 40px 20px; border-radius: 20px; border: 1px solid #30363d;">
+<div align="center">
 
-  <img src="https://api.iconify.design/game-icons:sea-dragon.svg?color=%2300dbff&width=120" style="filter: drop-shadow(0 0 25px rgba(0, 219, 255, 0.6)); margin-bottom: 10px;" />
-  
-  <h1 style="color: #fff; font-size: 4rem; margin: 10px 0 0 0; letter-spacing: -2px; text-transform: uppercase; font-weight: 800; line-height: 1;">
+  <!-- LOGO -->
+  <div style="
+      background: radial-gradient(circle at 50% 0%, rgba(0,234,255,0.25), transparent 70%);
+      padding: 35px 0 10px 0;
+  ">
+    <img 
+      src="https://api.iconify.design/game-icons:sea-dragon.svg?color=%2300eaff&width=200" 
+      style="filter: drop-shadow(0 0 35px rgba(0, 234, 255, 0.5));" 
+    />
+  </div>
+
+  <!-- TITOLONE -->
+  <h1 style="
+      font-size: 5rem; 
+      font-weight: 900; 
+      margin: 0; 
+      letter-spacing: -3px; 
+      text-transform: uppercase; 
+      color: #00eaff;
+      text-shadow: 0 0 35px rgba(0, 234, 255, 0.45);
+  ">
     LEVIATHAN
   </h1>
-  <div style="width: 60px; height: 4px; background: #00dbff; margin: 15px auto; border-radius: 2px; box-shadow: 0 0 15px #00dbff;"></div>
-  
-  <p style="color: #8b949e; font-family: monospace; font-size: 1rem; letter-spacing: 3px; margin-bottom: 30px;">
-    SYSTEM_V.3.5 // TORRENT_AGGREGATOR
+
+  <!-- Subtitle -->
+  <div style="
+      font-size: 1.1rem; 
+      color: #7dd3fc; 
+      margin-top: 8px; 
+      font-weight: 400; 
+      letter-spacing: 3px; 
+      text-transform: uppercase; 
+      font-family: monospace;
+      opacity: 0.8;
+  ">
+    Adaptive Meta-Scraping Intelligence
+  </div>
+
+  <br>
+
+  <!-- BADGE BAR -->
+  <p>
+    <img src="https://img.shields.io/badge/Real_Debrid-NATIVE_SUPPORT-00eaff?style=for-the-badge&logo=realdebrid&logoColor=black" />
+    <img src="https://img.shields.io/badge/WAF_Bypass-ACTIVE-0ea5e9?style=for-the-badge&logo=cloudflare&logoColor=white" />
+    <img src="https://img.shields.io/badge/Latency_Profile-HYPERMODE-14b8a6?style=for-the-badge&logo=speedtest&logoColor=white" />
   </p>
 
-  <div style="margin-bottom: 30px;">
-    <img src="https://img.shields.io/badge/NODE.JS-Active-1f6feb?style=for-the-badge&labelColor=232830" />
-    <img src="https://img.shields.io/badge/REAL_DEBRID-Native-1f6feb?style=for-the-badge&labelColor=232830" />
-    <img src="https://img.shields.io/badge/ALL_DEBRID-Active-1f6feb?style=for-the-badge&labelColor=232830" />
-  </div>
-
+  <!-- CARD PRINCIPALE -->
   <div style="
-    background: linear-gradient(135deg, rgba(31, 111, 235, 0.1) 0%, rgba(13, 17, 23, 0) 100%);
-    border-left: 4px solid #00dbff;
-    padding: 20px;
-    max-width: 700px;
-    margin: 0 auto 40px auto;
-    text-align: left;
-    border-radius: 0 10px 10px 0;
+      margin-top: 25px;
+      background: rgba(4, 10, 20, 0.75);
+      border-radius: 20px;
+      padding: 40px;
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(0, 234, 255, 0.2);
+      width: 90%;
+      max-width: 850px;
+      box-shadow: 
+         0 0 25px rgba(0, 234, 255, 0.25),
+         inset 0 0 25px rgba(0, 234, 255, 0.08);
+      animation: levipulse 4s infinite ease-in-out;
   ">
-    <strong style="color: #00dbff; font-size: 1.1rem; display: block; margin-bottom: 8px; font-family: monospace;">
-      > TARGET: ITALIAN_ECOSYSTEM
-    </strong>
-    <span style="color: #c9d1d9; line-height: 1.6;">
-      L'architettura è stata ricalibrata per l'ecosistema italiano.
-      Integrazione nativa di <b>validazione semantica</b> e bypass automatico dei <b>WAF</b>.
-      Non è solo un motore di ricerca, è un protocollo di estrazione dati ad alta precisione.
-    </span>
-  </div>
 
-  <div style="position: relative; padding: 30px 0;">
-    
-  <div style="
-      position: absolute; 
-      top: 50%; left: 50%; 
-      transform: translate(-50%, -50%); 
-      width: 300px; height: 100px; 
-      background: radial-gradient(circle, rgba(0, 219, 255, 0.15) 0%, transparent 70%); 
-      z-index: 0;">
+    <div style="
+        font-size: 1.4rem; 
+        font-weight: 700; 
+        color: #00eaff;
+        margin-bottom: 12px; 
+        letter-spacing: 0.5px;
+    ">
+      🇮🇹 Precisione Assoluta per Contenuti Italiani
     </div>
 
-  <a href="https://leaviathan-leviathan.hf.space" target="_blank" style="text-decoration: none; position: relative; z-index: 1;">
-      <div style="
-        background: #00dbff;
-        color: #0d1117;
-        display: inline-block;
-        padding: 18px 50px;
+    <div style="
+        color: #d0dbe7; 
+        line-height: 1.7; 
+        font-size: 1rem;
         font-family: sans-serif;
-        font-weight: 900;
-        font-size: 1.2rem;
-        border-radius: 4px;
-        box-shadow: 0 0 30px rgba(0, 219, 255, 0.4);
-        text-transform: uppercase;
-        border: 2px solid #fff;
-        transition: transform 0.2s;
+    ">
+      Leviathan utilizza una catena neurale di filtraggio semantico, validazione linguistica avanzata e
+      un sistema di query morphing capace di adattarsi in tempo reale alle protezioni WAF.  
+      Progettato per **accuratezza, velocità e pulizia dei risultati**, con priorità italiana nativa.
+    </div>
+  </div>
+
+  <style>
+    @keyframes levipulse {
+      0%, 100% { border-color: rgba(0,234,255,0.25); }
+      50% { border-color: rgba(0,234,255,0.55); }
+    }
+  </style>
+
+  <!-- FEATURE TAGS -->
+  <p style="margin-top: 35px;">
+    <img src="https://img.shields.io/badge/⚡_Hyper-Latency_Scaling-000?style=for-the-badge&labelColor=00eaff" />
+    <img src="https://img.shields.io/badge/🧠_Semantic-Title_Engine-000?style=for-the-badge&labelColor=00eaff" />
+    <img src="https://img.shields.io/badge/🛡️_Dynamic-WAF_Bypass-000?style=for-the-badge&labelColor=00eaff" />
+    <img src="https://img.shields.io/badge/🔗_Magnet-Fusion_Core-000?style=for-the-badge&labelColor=00eaff" />
+  </p>
+
+  <!-- BUTTONS -->
+  <div style="margin-top: 45px; margin-bottom: 30px;">
+    
+   <a href="#" target="_blank" style="text-decoration: none;">
+      <div style="
+          display: inline-block;
+          background: linear-gradient(90deg, #00eaff, #0088cc);
+          color: #020617;
+          font-family: sans-serif;
+          font-weight: 900;
+          font-size: 1.3rem;
+          padding: 16px 48px;
+          border-radius: 50px;
+          box-shadow: 0 0 40px rgba(0, 234, 255, 0.55);
+          border: 2px solid rgba(255,255,255,0.8);
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          transition: transform 0.2s;
       ">
-        ⚡ Inizializza Addon
+        🚀 Install Addon
       </div>
     </a>
 
-  <div style="margin-top: 25px;">
-      <a href="https://leaviathan-leviathan.hf.space" target="_blank" style="text-decoration: none;">
-        <span style="
-          background: #161b22;
-          border: 1px solid #30363d;
-          padding: 8px 16px;
-          border-radius: 50px;
-          font-family: monospace;
-          color: #8b949e;
-          font-size: 0.85rem;
+  <br><br>
+
+  <a href="#" target="_blank" style="text-decoration: none;">
+      <div style="
           display: inline-flex;
           align-items: center;
-          gap: 8px;
-        ">
-          <span style="width: 8px; height: 8px; background: #2ea043; border-radius: 50%; box-shadow: 0 0 5px #2ea043;"></span>
-          HOSTED ON <strong style="color: #fff;">HUGGING FACE</strong>
+          gap: 10px;
+          background: rgba(15, 23, 42, 0.8);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          padding: 8px 20px;
+          border-radius: 100px;
+          backdrop-filter: blur(5px);
+      ">
+        <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" width="22" />
+        <span style="color: #94a3b8; font-family: monospace; font-size: 0.85rem; font-weight: bold;">
+          DEPLOYED ON <span style="color: #fff;">HUGGING FACE</span>
         </span>
-      </a>
-    </div>
+        <span style="
+            width: 6px;
+            height: 6px;
+            background-color: #4ade80;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #4ade80;
+        "></span>
+      </div>
+    </a>
 
   </div>
 
-  <div style="color: #30363d; font-size: 2rem; margin-top: 20px;">•••</div>
+  <hr style="
+      border: 0; 
+      height: 1px; 
+      background: linear-gradient(to right, transparent, #00eaff, transparent); 
+      margin: 50px auto; 
+      width: 50%; 
+      opacity: 0.25;
+  ">
 
 </div>
+
 
 ---
 
