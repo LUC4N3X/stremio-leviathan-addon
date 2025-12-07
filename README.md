@@ -140,23 +140,21 @@ Non si limita a trovare il link. Lo potenzia.
 
 
 ---
-# 🐳 Leviathan Core – Stremio Addon
+## ⚡ DEPLOYMENT PROTOCOL
 
-**Il modo più veloce e pulito per eseguire Leviathan in locale o in produzione.**
+![Status](https://img.shields.io/badge/SYSTEM-OPERATIONAL-success?style=for-the-badge)
+![Docker](https://img.shields.io/badge/DOCKER-REQUIRED-blue?style=for-the-badge&logo=docker&logoColor=white)
 
-[![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker)](https://www.docker.com/)
-[![Stremio Addon](https://img.shields.io/badge/Stremio-Addon-green?logo=stremio)](https://www.stremio.com/)
+Il metodo **Docker Compose** è l'unico che garantisce l'isolamento dei processi, la persistenza dei dati e il bypass nativo dei WAF.
 
-## 🚀 Installazione Rapida (Metodo Consigliato)
+### 💠 Sequenza di Avvio Rapido
 
-### Metodo 1 – Clone & Docker Compose (Deploy Automatico)
+Copia l'intera sequenza e incollala nel terminale per l'inizializzazione immediata:
 
 ```bash
-# Clona il repository
-git clone https://github.com/LUC4N3X/stremio-leviathan-addon.git
-
-# Entra nella directory
-cd stremio-leviathan-addon
+git clone https://github.com/LUC4N3X/stremio-leviathan-addon && \
+cd stremio-leviathan-addon && \
+docker compose up -d --build
 
 ```
 > [!TIP]
