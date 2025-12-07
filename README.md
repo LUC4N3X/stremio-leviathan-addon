@@ -209,21 +209,9 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 > Se non concordi con anche solo una delle clausole sopra esposte, o se la legislazione del tuo paese non consente tale limitazione di responsabilità, non sei autorizzato a utilizzare questo software.
 >
 > **⚠️ INTERROMPI L'ESECUZIONE, ELIMINA IL CONTAINER E DISTRUGGI IL CODICE SORGENTE IMMEDIATAMENTE.**
-
-<div align="center">
-
-<br>
-
-```text
-_root@leviathan:~$ check_consent --force
-
-[!] WARNING: LIABILITY WAIVED.
-[!] PROTOCOL: UNRESTRICTED.
-
-... altrimenti ...
+> ... altrimenti ...
 
 👁‍🗨 BENVENUTO NELL'ABISSO.
-```
 ---
 
 <div align="center">
