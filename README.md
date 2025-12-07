@@ -171,44 +171,74 @@ http://localhost:7000
 
 ---
 
-## ⚖️ Legal Disclaimer & Liability Warning
+<div align="center">
 
-> [!WARNING]
-> **LEGGERE ATTENTAMENTE PRIMA DELL'USO / READ CAREFULLY**
->
-> ### 1. 🌐 Architettura & Funzionamento
-> **Leviathan** è un motore di ricerca e web scraper automatizzato.
-> * **`NO HOSTING`**: Il sistema **NON** ospita, carica o gestisce file video, torrent o contenuti protetti.
-> * **`METADATA ONLY`**: Il software processa esclusivamente testo HTML e magnet link pubblici.
->
-> ### 2. 🛡️ Responsabilità Utente
-> L'autore e i contributori declinano ogni responsabilità sull'utilizzo finale del software.
-> * L'utente si assume la **piena ed esclusiva responsabilità penale e civile**.
-> * È obbligo dell'utente verificare la conformità con le leggi locali.
->
-> ### 3. 🚫 Copyright
-> Questo progetto condanna la pirateria e non incoraggia la violazione del copyright.
->
-> ---
->
-> **⚠️ SE NON ACCETTI QUESTI TERMINI:**
+# ⚡ LEVIATHAN  
+**Advanced Public Metadata Search & Web Scraping Engine**
 
-> Ferma il container.
-> Elimina l'immagine.
-> Brucia il disco.
-> E vattene dal mio server.
+<div>
+  <img src="https://img.shields.io/badge/status-active-brightgreen?style=for-the-badge" alt="Status"/>
+  <img src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge" alt="License"/>
+  <img src="https://img.shields.io/badge/version-2.0-black?style=for-the-badge" alt="Version"/>
+  <img src="https://img.shields.io/github/stars/yourusername/leviathan?style=for-the-badge" alt="Stars"/>
+</div>
 
-# Altrimenti... Benvenuto nell'abisso.
+<br>
+
+<sub><b>High-performance crawler • Metadata only • Zero file hosting</b></sub>
+
+</div>
+
+---
+
+## ⚖️ Legal Disclaimer & Terms of Use
+
+> **Last updated: December 2025**
+
+### 1. Software Architecture & Operation
+**Leviathan** is an automated open-source search engine and web scraping framework designed **exclusively** for the collection and indexing of **publicly available metadata** (HTML text, titles, descriptions, and magnet/hash links).
+
+- No hosting, uploading, or distribution of copyrighted files  
+- No storage or transfer of video, audio, or executable content  
+- Operates solely as a web reader/parser (similar to Googlebot, Bingbot, or any public search engine crawler)
+
+### 2. Project Purpose
+This software is released **exclusively** for:
+- Academic and scientific research
+- Study of web architectures and distributed automation
+- Authorized security research, penetration testing, and red teaming
+- Development of parsing and data extraction techniques
+
+The code is provided **"AS IS"** without warranty of any kind.
+
+### 3. User Responsibility
+The author(s), contributors, and distributors **disclaim all liability** for how the software is used.
+
+By using Leviathan, you fully and exclusively assume:
+- All civil, criminal, and administrative liability
+- The obligation to ensure compliance with applicable laws in your jurisdiction (including but not limited to DMCA, EU Copyright Directive 2019/790, national copyright laws)
+
+### 4. Position on Copyright Infringement
+We strongly condemn piracy and copyright violation.
+
+**Leviathan is not designed, developed, or distributed to facilitate, encourage, or enable unauthorized downloading of copyrighted works.**  
+Any illegal use is strictly prohibited and will not be supported.
+
+---
+
+**By installing, running, or using this software, you unconditionally accept all terms above.**  
+If you do not agree, you must immediately cease use and delete all copies.
+
+---
 
 <div align="center">
 
-Plaintext
+**Engineered with precision and caffeine**  
+by [**LUC4N3X**](https://github.com/LUC4N3X)  
+Leviathan Project © 2024–2025 — All Rights Reserved
 
-╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮
-│  PROGETTATO AL BUIO CON ❤️ E 300MG DI CAFFEINA   │
-│                   DA LUC4N3X                     │
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
-Leviathan Core © 2024-2025 — Tutti i diritti riservati
+<br>
 
-» Restate vigili. Restate illegali. Restate vivi. «
+<img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=22&pause=1000&color=39FF14&center=true&vCenter=true&width=500&lines=Stay+legal.+Stay+sharp." alt="Typing SVG" />
+
 </div>
