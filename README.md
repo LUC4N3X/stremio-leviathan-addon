@@ -47,10 +47,12 @@
 
 <div align="center">
   <a href="https://leaviathan-leviathanaddon.hf.space" target="_blank">
-    <img src="./public/button.svg" width="500" alt="Installa Leviatano">
+    <img src="public/button.svg" width="550" alt="Installa Leviatano">
   </a>
-  
-  <hr style="width: 60%; border: 0; height: 1px; background: linear-gradient(to right, transparent, #00eaff, transparent); margin-top: 10px; opacity: 0.5;">
+
+  <br>
+
+  <hr style="width: 60%; border: 0; height: 1px; background: linear-gradient(90deg, transparent, #00eaff, transparent); margin-top: 15px; opacity: 0.4;">
 </div>
 
 
