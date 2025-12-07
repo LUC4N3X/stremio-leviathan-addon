@@ -1,7 +1,7 @@
 {
   "name": "stremio-corsaro-unleashed",
-  "version": "31.4.0",
-  "description": "Leviathan Edition - AI Core + NLP Parser + Debrid + Cache + Stealth Browser",
+  "version": "31.3.0",
+  "description": "Leviathan Edition - AI Core + NLP Parser + Debrid + Cache",
   "main": "addon.js",
   "scripts": {
     "start": "node addon.js",
@@ -13,15 +13,13 @@
     "better-sqlite3": "^9.4.3",
     "bottleneck": "^2.19.5",
     "cheerio": "^1.0.0-rc.12",
+    "cloudscraper": "^4.6.0",
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "fs-extra": "^11.2.0",
     "fuzzyset": "^1.0.7",
     "helmet": "^7.1.0",
     "node-cache": "^5.1.2",
-    "puppeteer": "^22.6.0",
-    "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "stremio-addon-sdk": "^1.6.9"
   },
   "devDependencies": {
