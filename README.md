@@ -140,7 +140,7 @@ Non si limita a trovare il link. Lo potenzia.
 
 
 ---
-## ⚡ DEPLOYMENT PROTOCOL
+## 📦 DEPLOYMENT PROTOCOL
 
 ![Status](https://img.shields.io/badge/SYSTEM-OPERATIONAL-success?style=for-the-badge)
 ![Docker](https://img.shields.io/badge/DOCKER-REQUIRED-blue?style=for-the-badge&logo=docker&logoColor=white)
@@ -152,7 +152,7 @@ Il metodo **Docker Compose** è l'unico che garantisce l'isolamento dei processi
 Copia l'intera sequenza e incollala nel terminale per l'inizializzazione immediata:
 
 ```bash
-git clone [https://github.com/LUC4N3X/stremio-leviathan-addon](https://github.com/LUC4N3X/stremio-leviathan-addon) && \
+git clone [https://github.com/LUC4N3X/stremio-leviathan-addon] && \
 cd stremio-leviathan-addon && \
 docker compose up -d --build
 
