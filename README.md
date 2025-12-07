@@ -221,11 +221,11 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 <br>
 da [**LUC4N3X**](https://github.com/LUC4N3X)
 <br>
-<sub>Leviathan Project © 2024–2025 — Tutti i diritti riservati</sub>
+<sub>Leviathan Project © 2025 — Tutti i diritti riservati</sub>
 
 <br>
 <br>
 
-<img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=22&pause=1000&color=39FF14&center=true&vCenter=true&width=550&lines=Rimani+legale.;Rimani+lucido.;Lunga+vita+al+codice." alt="Typing SVG" />
+<img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=22&pause=1000&color=00E0FF&center=true&vCenter=true&width=550&lines=Rimani+legale.;Rimani+lucido.;Lunga+vita+al+codice." alt="Typing SVG" />
 
 </div>
