@@ -462,13 +462,6 @@ function withTimeout(promise, ms) {
     return Promise.race([promise, new Promise(r => setTimeout(() => r([]), ms))]);
 }
 
-// Avvio Server (Compatibile Vercel)
+// Avvio Server
 const PORT = process.env.PORT || 7860;
-
-// Se stiamo eseguendo il file in locale, avvia il server sulla porta
-if (require.main === module) {
-    app.listen(PORT, () => console.log(`🚀 Leviathan (Hybrid) v33.2 attivo su porta ${PORT}`));
-}
-
-// Esporta l'app per permettere a Vercel di gestirla come Serverless Function
-module.exports = app;
+app.listen(PORT, () => console.log(`🚀 Leviathan (Hybrid) v33.2 attivo su porta ${PORT}`));
