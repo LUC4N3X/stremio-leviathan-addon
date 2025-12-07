@@ -140,21 +140,12 @@ Non si limita a trovare il link. Lo potenzia.
 
 
 ---
-## 📦 DEPLOYMENT PROTOCOL
-
-![Status](https://img.shields.io/badge/SYSTEM-OPERATIONAL-success?style=for-the-badge)
-![Docker](https://img.shields.io/badge/DOCKER-REQUIRED-blue?style=for-the-badge&logo=docker&logoColor=white)
-
-Il metodo **Docker Compose** è l'unico che garantisce l'isolamento dei processi, la persistenza dei dati e il bypass nativo dei WAF.
-
-### 💠 Sequenza di Avvio Rapido
-
-Copia l'intera sequenza e incollala nel terminale per l'inizializzazione immediata:
-
-```bash
-git clone [https://github.com/LUC4N3X/stremio-leviathan-addon] && \
-cd stremio-leviathan-addon && \
-docker compose up -d --build
+| Fase | Obiettivo | Comando |
+| :--- | :--- | :--- |
+| **01** | **📥 Acquisizione** | `git clone https://github.com/LUC4N3X/stremio-leviathan-addon` |
+| **02** | **📂 Iniezione** | `cd stremio-leviathan-addon` |
+| **03** | **🚀 Deploy** | `docker compose up -d --build` |
+| **04** | **📡 Verifica** | `docker compose logs -f` |
 
 ```
 > [!TIP]
