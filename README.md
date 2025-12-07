@@ -1,17 +1,60 @@
 <div align="center">
-  
+
+  <img src="https://api.iconify.design/game-icons:sea-dragon.svg?color=%2300eaff&width=200" style="filter: drop-shadow(0 0 10px rgba(0, 234, 255, 0.4)); margin-bottom: 15px;" />
+
+  <h1 style="font-size: 5rem; font-weight: 800; margin: 0; line-height: 1; letter-spacing: -2px; color: #fff;">
+    LEVIATHAN
+  </h1>
+
+  <div style="font-size: 1.1rem; color: #94a3b8; margin-top: 10px; font-weight: 400; letter-spacing: 1px;">
+    ADVANCED TORRENT AGGREGATION PROTOCOL
+  </div>
+
+  <br>
+
+  <p>
+    <img src="https://img.shields.io/badge/Real_Debrid-NATIVE_SUPPORT-A2B9F0?style=for-the-badge&logo=realdebrid&logoColor=black" />
+    <img src="https://img.shields.io/badge/AllDebrid-MODULE_ACTIVE-F5A623?style=for-the-badge&logo=alldebrid&logoColor=white" />
+    <img src="https://img.shields.io/badge/TorBox-COMPATIBLE-7A4EE3?style=for-the-badge&logo=torbox&logoColor=white" />
+  </p>
+
+  <p>
+    <img src="https://img.shields.io/badge/Node.js-v18_LTS-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
+    <img src="https://img.shields.io/badge/Architecture-HyperMode_v3.5-8A2BE2?style=for-the-badge&logo=dependabot&logoColor=white" />
+    <img src="https://img.shields.io/badge/Status-OPERATIONAL-success?style=for-the-badge&logo=githubactions&logoColor=white" />
+  </p>
+
+  <br>
+
+  <div style="background: #050a10; border: 1px solid rgba(0, 234, 255, 0.15); border-radius: 8px; padding: 25px; width: 85%; max-width: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+    <strong style="font-size: 1.3rem; color: #00eaff; display: block; margin-bottom: 10px;">
+      🇮🇹 Engineered for Italian Content Precision
+    </strong>
+    <span style="color: #cbd5e1; line-height: 1.6; font-size: 1rem;">
+      Leviathan ridefinisce lo standard dei metamotori torrent attraverso un'architettura <b>Italy-First</b>.
+      Integra un sistema di validazione semantica dei titoli, gestione automatizzata delle challenge WAF e un algoritmo di routing a bassa latenza per garantire risultati pertinenti e immediati.
+    </span>
+  </div>
+
+  <br>
+
+  <p>
+    <img src="https://img.shields.io/badge/⚡_Adaptive-Latency_Scaling-000?style=for-the-badge&labelColor=00eaff" />
+    <img src="https://img.shields.io/badge/🔍_Smart-Query_Morphing-000?style=for-the-badge&labelColor=00eaff" />
+    <img src="https://img.shields.io/badge/🛡️_WAF-Bypass_Protocol-000?style=for-the-badge&labelColor=00eaff" />
+    <img src="https://img.shields.io/badge/🔗_Magnet-Fusion_Engine-000?style=for-the-badge&labelColor=00eaff" />
+  </p>
+
+  <div align="center">
   <a href="https://leaviathan-leviathanaddon.hf.space" target="_blank">
-    <img src="https://img.shields.io/badge/🚀_Installa-Addon-00eaff?style=for-the-badge&logo=huggingface&logoColor=black&labelColor=050a10&color=00eaff" alt="Installa Addon" height="45" />
+    <img src="https://via.placeholder.com/300x80/050a10/00eaff?text=🚀+INSTALLA+ADDON" width="300" alt="Installa Addon">
   </a>
-
-  <br><br>
-
-  <a href="https://huggingface.co/spaces" target="_blank">
-    <img src="https://img.shields.io/badge/Hosted_on-Hugging_Face-gray?style=flat-square&logo=huggingface&color=f5f5f5&logoColor=black" alt="Hosted on Hugging Face" />
-  </a>
-
-  <hr style="border: 0; height: 1px; opacity: 0.5; margin-top: 20px; background: #00eaff;">
-
+  
+  <p>
+    <sub>Hosted on Hugging Face Spaces</sub>
+  </p>
+  
+  <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.png" width="70%">
 </div>
 
 
