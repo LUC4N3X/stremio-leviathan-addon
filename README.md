@@ -173,13 +173,13 @@ http://localhost:7000
 
 ## ⚖️ Legal Disclaimer & Liability Warning
 
-> [!CAUTION]
+> [!WARNING]
 > **LEGGERE ATTENTAMENTE PRIMA DELL'USO / READ CAREFULLY**
 >
 > ### 1. 🌐 Architettura & Funzionamento
 > **Leviathan** è un motore di ricerca e web scraper automatizzato.
 > * **`NO HOSTING`**: Il sistema **NON** ospita, carica o gestisce file video, torrent o contenuti protetti.
-> * **`METADATA ONLY`**: Il software processa esclusivamente testo HTML e magnet link (hash) pubblici, agendo come un comune browser (es. Chrome/Firefox) o motore di ricerca (es. Google).
+> * **`METADATA ONLY`**: Il software processa esclusivamente testo HTML e magnet link (hash) pubblici, agendo come un comune browser o motore di ricerca (es. Google).
 >
 > ### 2. 🎓 Finalità di Ricerca
 > Questo progetto è rilasciato esclusivamente per **scopi educativi**, studio dell'architettura web, parsing HTML e test di automazione distribuita. Il codice è fornito *"AS IS"* (così com'è).
@@ -194,7 +194,7 @@ http://localhost:7000
 > Questo progetto condanna fermamente la pirateria. Non è inteso per supportare, facilitare o incoraggiare il download illegale di opere protette.
 >
 > ---
-> **⚠️ SE NON ACCETTI QUESTE CONDIZIONI, DISINSTALLA IMMEDIATAMENTE IL SOFTWARE.**
+> **⚠️ SE NON ACCETTI QUESTE CONDIZIONI, ARRESTA IL CONTAINER E RIMUOVI L'ADDON IMMEDIATAMENTE.**
 
 <br>
 
