@@ -45,49 +45,110 @@
     <img src="https://img.shields.io/badge/🔗_Magnet-Fusion_Engine-000?style=for-the-badge&labelColor=00eaff" />
   </p>
 
- <div style="margin-top: 45px; margin-bottom: 20px; text-align: center;">
+<div style="
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 10px;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+">
+    <div style="
+        position: relative;
+        background: radial-gradient(circle at top right, #1a2236, #050a10);
+        border: 1px solid #334155;
+        border-bottom: 4px solid #00eaff;
+        padding: 30px 40px;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+        text-align: center;
+        max-width: 400px;
+        overflow: hidden;
+    ">
+        <div style="
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: linear-gradient(rgba(0, 234, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 234, 255, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+        "></div>
 
-  <!-- Pulsante disattivato ma ultra figo -->
-  <div style="
-      display: inline-block;
-      background: linear-gradient(135deg, #00eaff, #007bff);
-      color: #050a10;
-      font-family: 'Segoe UI', sans-serif;
-      font-weight: 900;
-      font-size: 1.5rem;
-      padding: 18px 55px;
-      border-radius: 60px;
-      text-decoration: none;
-      box-shadow:
-        0 0 25px rgba(0, 234, 255, 0.6),
-        0 0 60px rgba(0, 140, 255, 0.4),
-        inset 0 0 20px rgba(255, 255, 255, 0.35);
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      cursor: not-allowed;
-      opacity: 0.65;
-      filter: grayscale(15%);
-      border: 3px solid rgba(255,255,255,0.9);
-      backdrop-filter: blur(4px);
-      user-select: none;
-  ">
-    🚀 INSTALAZIONE DISABILITATA
-  </div>
+   <div style="position: relative; z-index: 2;">
+            <div style="
+                font-size: 0.7rem;
+                color: #64748b;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                margin-bottom: 5px;
+            ">
+                System Protocol
+            </div>
+            <div style="
+                font-size: 1.8rem;
+                font-weight: 900;
+                color: #fff;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                text-shadow: 0 0 15px rgba(0, 234, 255, 0.4);
+                margin-bottom: 25px;
+            ">
+                Installa <span style="color: #00eaff;">Addon</span>
+            </div>
+        </div>
 
-  <div style="margin-top: 12px; font-size: 0.85rem; color: #00eaff; opacity: 0.8;">
-    <span style="font-size: 0.9rem; letter-spacing: 2px;">HUGGING FACE SPACE ACTIVE</span>
-  </div>
+   <div style="
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #334155, transparent);
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 2;
+        "></div>
+
+   <a href="https://leaviathan-leviathanaddon.hf.space" target="_blank" style="
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(0, 234, 255, 0.1);
+            color: #00eaff;
+            font-weight: 700;
+            font-size: 0.95rem;
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            border: 1px solid rgba(0, 234, 255, 0.3);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 15px rgba(0, 234, 255, 0.05);
+        " 
+        onmouseover="this.style.background='rgba(0, 234, 255, 0.2)'; this.style.boxShadow='0 0 25px rgba(0, 234, 255, 0.4)'; this.style.color='#fff';" 
+        onmouseout="this.style.background='rgba(0, 234, 255, 0.1)'; this.style.boxShadow='0 0 15px rgba(0, 234, 255, 0.05)'; this.style.color='#00eaff';">
+            
+   <span style="font-size: 1.2rem;">🚀</span>
+            
+   <span>Launch on Hugging Face</span>
+            
+   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+        </a>
+
+ <div style="
+            margin-top: 15px;
+            font-size: 0.65rem;
+            color: #475569;
+            font-family: monospace;
+            z-index: 2;
+            position: relative;
+        ">
+            HOSTING: HF_SPACES // STATUS: ONLINE
+        </div>
+    </div>
 </div>
-
-<hr style="border: 0; height: 1px;
-    background: linear-gradient(to right, transparent, #00eaff, transparent);
-    margin: 45px auto; width: 65%; opacity: 0.5;">
-
-
-
-
-
-
 ## ⚡ Architettura del Sistema
 
 > **Leviathan trascende il concetto di scraper tradizionale.** È un motore di aggregazione predittivo progettato per navigare ecosistemi torrent complessi, restituendo dataset puliti, validati e ordinati per rilevanza.
