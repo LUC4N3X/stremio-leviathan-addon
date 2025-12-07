@@ -141,7 +141,7 @@ Non si limita a trovare il link. Lo potenzia.
 
 ---
 
-```html
+
 <h2 style="border-bottom: 2px solid #00eaff; padding-bottom: 10px;">
   📦 INSTALLATION & DEPLOYMENT
 </h2>
