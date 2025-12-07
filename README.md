@@ -63,7 +63,7 @@
       animation: levipulse 4s infinite ease-in-out;
   ">
 
-    <div style="
+  <div style="
         font-size: 1.4rem; 
         font-weight: 700; 
         color: #00eaff;
@@ -73,7 +73,7 @@
       🇮🇹 Precisione Assoluta per Contenuti Italiani
     </div>
 
-    <div style="
+   <div style="
         color: #d0dbe7; 
         line-height: 1.7; 
         font-size: 1rem;
