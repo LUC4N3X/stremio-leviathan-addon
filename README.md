@@ -171,37 +171,60 @@ http://localhost:7000
 
 ---
 
-## ⚖️ Legal Disclaimer & Liability Warning
+# ⚔️  L E V I A T H A N   //  A C C C E S S   P R O T O C O L
+> [ ! ]  WARNING: HIGH VOLTAGE NEURAL INTERFACE DETECTED
 
-> [!WARNING]
-> **LEGGERE ATTENTAMENTE PRIMA DELL'USO / READ CAREFULLY**
->
-> ### 1. 🌐 Architettura & Funzionamento
-> **Leviathan** è un motore di ricerca e web scraper automatizzato.
-> * **`NO HOSTING`**: Il sistema **NON** ospita, carica o gestisce file video, torrent o contenuti protetti.
-> * **`METADATA ONLY`**: Il software processa esclusivamente testo HTML e magnet link (hash) pubblici, agendo come un comune browser o motore di ricerca (es. Google).
->
-> ### 2. 🎓 Finalità di Ricerca
-> Questo progetto è rilasciato esclusivamente per **scopi educativi**, studio dell'architettura web, parsing HTML e test di automazione distribuita. Il codice è fornito *"AS IS"* (così com'è).
->
-> ### 3. 🛡️ Responsabilità Utente
-> L'autore e i contributori declinano ogni responsabilità sull'utilizzo finale del software.
-> * L'utente si assume la **piena ed esclusiva responsabilità penale e civile**.
-> * È obbligo dell'utente verificare la conformità con le leggi locali (es. DMCA, EU Copyright Directive).
->
-> ### 4. 🚫 Copyright & Pirateria
-> **La violazione del diritto d'autore è un reato.**
-> Questo progetto condanna fermamente la pirateria. Non è inteso per supportare, facilitare o incoraggiare il download illegale di opere protette.
->
-> ---
-> **⚠️ SE NON ACCETTI QUESTE CONDIZIONI, ARRESTA IL CONTAINER E RIMUOVI L'ADDON IMMEDIATAMENTE.**
+────────────────────────────────────────────────────────────
+░█▀█░█░█░█▀▀░█▄█░█▀█░█▀█░█▀▀░█░█▀▀░█▀▄░█▀█░█░░░█▀▀░█▀▀░█▀█
+░█▀▀░█▀█░█▀▀░█░█░█▀█░█░█░█░█░█▀▀░█▀▄░█░█░█░░░█▀▀░█░█░█░█
+░▀░░░▀░▀░▀▀▀░▀░▀░▀░▀░▀░▀░▀▀▀░▀▀▀░▀░▀░▀░░░▀▀▀░▀▀▀░▀▀▀░▀░▀
+────────────────────────────────────────────────────────────
 
-<br>
+### 1. 🔴 SYSTEM ARCHITECTURE
+**LEVIATHAN** è un hunter-killer autonomo di metadati e magnet link.
+- `NO HOSTING` → Zero storage. Zero upload. Zero file transfer.
+- `METADATA ONLY` → Legge solo HTML pubblico HTML + hash (come un browser su steroidi).
+Funziona esattamente come Google, ma senza ipocrisie aziendali.
+
+### 2. 🎓 PURPOSE & ORIGIN
+Progetto rilasciato **esclusivamente** per:
+- Ricerca accademica
+- Reverse engineering di architetture web
+- Stress-test di sistemi di scraping distribuiti
+- Cyber-security training & red teaming
+
+Codice fornito **AS-IS**. Nessuna garanzia. Nessun supporto ufficiale.
+
+### 3. 🛡️ USER LIABILITY // FULL DISCLOSURE
+Tu premi il tasto. Tu paghi il conto.
+
+- L’autore (LUC4N3X) e tutti i contributori **declinano OGNI responsabilità**.
+- L’utente finale si assume **100% responsabilità civile e penale**.
+- Verifica TU la conformità con DMCA, Direttiva UE Copyright, leggi nazionali e trattati internazionali.
+
+Noi ti diamo il bisturi. Come lo usi è solo affar tuo.
+
+### 4. ☠️ COPYRIGHT & PIRACY STATEMENT
+**LA PIRATERIA È UN REATO. PUNTO.**
+
+LEVIATHAN **non supporta, non facilita e non incoraggia** il download illegale di contenuti protetti da copyright.
+Chi lo usa per scopi illeciti verrà tracciato, esposto e abbandonato al suo destino digitale.
+
+────────────────────────────────────────────────────────────
+[ ! ]  SE NON ACCETTI QUESTI TERMINI:
+> Ferma il container.  
+> Elimina l'immagine.  
+> Brucia il disco.  
+> E vattene dal mio server.
+
+Altrimenti… benvenuto nell’abisso.
 
 <div align="center">
-
-<sub>Engineered with ❤️ & ☕ by <b>LUC4N3X</b></sub>
-<br>
-<sub><i>Leviathan Core © 2024 - All Rights Reserved</i></sub>
-
+  <b>╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮</b><br>
+    Engineered in the dark with ❤️ & 300mg caffeine<br>
+         by <b>LUC4N3X</b><br>
+  <b>╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯</b><br>
+  <i>Leviathan Core © 2024-2025 — All Rights Reserved</i><br>
+  <br>
+  <b>» Stay sharp. Stay illegal. Stay alive. «</b>
 </div>
