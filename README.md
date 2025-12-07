@@ -210,6 +210,20 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 >
 > **⚠️ INTERROMPI L'ESECUZIONE, ELIMINA IL CONTAINER E DISTRUGGI IL CODICE SORGENTE IMMEDIATAMENTE.**
 
+<div align="center">
+
+<br>
+
+```text
+_root@leviathan:~$ check_consent --force
+
+[!] WARNING: LIABILITY WAIVED.
+[!] PROTOCOL: UNRESTRICTED.
+
+... altrimenti ...
+
+👁‍🗨 BENVENUTO NELL'ABISSO.
+```
 ---
 
 <div align="center">
