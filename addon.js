@@ -1,3 +1,8 @@
+// Aggiunto per forzare i DNS di Google, risolvendo l'errore Read-only file system
+const dns = require('dns');
+// Configura Node.js per usare i resolver DNS di Google
+dns.setServers(['8.8.8.8', '8.8.4.4']); 
+
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
