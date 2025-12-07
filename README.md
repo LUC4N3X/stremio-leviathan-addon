@@ -157,8 +157,9 @@ git clone https://github.com/LUC4N3X/stremio-leviathan-addon.git
 
 # Entra nella directory
 cd stremio-leviathan-addon
----
 ```
+---
+
 ## ⚖️ Legal Disclaimer & Liability Warning
 
 > [!WARNING]
