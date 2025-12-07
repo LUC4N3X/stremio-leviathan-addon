@@ -141,25 +141,31 @@ Non si limita a trovare il link. Lo potenzia.
 
 ---
 
-# 📦 Installazione
+```html
+<h2 style="border-bottom: 2px solid #00eaff; padding-bottom: 10px;">
+  📦 INSTALLATION & DEPLOYMENT
+</h2>
 
-🔥 Metodo 1 — Clone & Docker Compose (Full Auto-Deploy)
+<p>
+  <img src="https://img.shields.io/badge/METHOD-DOCKER_COMPOSE-blue?style=for-the-badge&logo=docker&logoColor=white" />
+  <img src="https://img.shields.io/badge/DIFFICULTY-EASY-success?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/TIME-30_SEC-orange?style=for-the-badge" />
+</p>
 
-Il modo più semplice, pulito e professionale per avviare Leviathan Core.
-
-```bash
-
-📂  Clona il repository:
-git clone https://github.com/LUC4N3X/stremio-leviathan-addon
-
-➡️  Entra nella cartella:
-cd stremio-leviathan-addon
-
-```
-# 🐳 Avvia Leviathan tramite Docker Compose
+Il metodo **Full Auto-Deploy**. Clona, compila e lancia in una singola manovra.
 
 ```bash
+# -----------------------------------------------
+#  🚀 LEVIATHAN INITIALIZATION SEQUENCE
+# -----------------------------------------------
+
+git clone [https://github.com/LUC4N3X/stremio-leviathan-addon](https://github.com/LUC4N3X/stremio-leviathan-addon) && \
+cd stremio-leviathan-addon && \
 docker compose up -d --build
+
+# -----------------------------------------------
+#  ✅ SYSTEM ONLINE
+# -----------------------------------------------
 
 ```
 
