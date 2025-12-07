@@ -5,7 +5,9 @@ const crypto = require("crypto");
    STEALTH ENGINE v3.6 — Optimized & Modular
    =========================================================== */
 
-const TIMEOUT_MS = 6500;
+// ⚠️ MODIFICATO: Abbassato a 3500ms per sopravvivere su Vercel/HuggingFace
+const TIMEOUT_MS = 3500; 
+
 const MIN_DELAY = 350;
 const MAX_DELAY = 1250;
 
