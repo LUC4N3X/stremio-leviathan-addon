@@ -45,18 +45,21 @@
     <img src="https://img.shields.io/badge/🔗_Magnet-Fusion_Engine-000?style=for-the-badge&labelColor=00eaff" />
   </p>
 
-  <div align="center">
+<div align="center">
+  
   <a href="https://leaviathan-leviathanaddon.hf.space" target="_blank">
-    <img src="https://via.placeholder.com/300x80/050a10/00eaff?text=🚀+INSTALLA+ADDON" width="300" alt="Installa Addon">
+    <img src="https://img.shields.io/badge/🚀_Installa-Addon-00eaff?style=for-the-badge&logo=huggingface&logoColor=black&labelColor=050a10&color=00eaff" alt="Installa Addon" height="45" />
   </a>
-  
-  <p>
-    <sub>Hosted on Hugging Face Spaces</sub>
-  </p>
-  
-  <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.png" width="70%">
-</div>
 
+  <br><br>
+
+  <a href="https://huggingface.co/spaces" target="_blank">
+    <img src="https://img.shields.io/badge/Hosted_on-Hugging_Face-gray?style=flat-square&logo=huggingface&color=f5f5f5&logoColor=black" alt="Hosted on Hugging Face" />
+  </a>
+
+  <hr style="border: 0; height: 1px; opacity: 0.5; margin-top: 20px; background: #00eaff;">
+
+</div>
 
 
 
