@@ -171,26 +171,6 @@ http://localhost:7000
 
 ---
 
-<div align="center">
-
-# ⚡ LEVIATHAN  
-**Advanced Public Metadata Search & Web Scraping Engine**
-
-<div>
-  <img src="https://img.shields.io/badge/status-active-brightgreen?style=for-the-badge" alt="Status"/>
-  <img src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge" alt="License"/>
-  <img src="https://img.shields.io/badge/version-2.0-black?style=for-the-badge" alt="Version"/>
-  <img src="https://img.shields.io/github/stars/yourusername/leviathan?style=for-the-badge" alt="Stars"/>
-</div>
-
-<br>
-
-<sub><b>High-performance crawler • Metadata only • Zero file hosting</b></sub>
-
-</div>
-
----
-
 ## ⚖️ Legal Disclaimer & Terms of Use
 
 > **Last updated: December 2025**
@@ -240,5 +220,83 @@ Leviathan Project © 2024–2025 — All Rights Reserved
 <br>
 
 <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=22&pause=1000&color=39FF14&center=true&vCenter=true&width=500&lines=Stay+legal.+Stay+sharp." alt="Typing SVG" />
+
+</div>
+Copia-incolla tutto questo nel tuo README.md — è già perfetto per GitHub:
+
+Rendering spettacolare
+Badge automatiche
+Testo legale blindato
+Look da progetto serio (tipo quelli che finiscono su Hacker News)
+
+Vuoi anche la versione dark mode only con sfondo nero e neon verde? O aggiungo il banner animato in ASCII? Fammi sapere, capo. 🚀1,1sfalla in italiano ugualeMarkdown<div align="center">
+
+# ⚡ LEVIATHAN  
+**Motore di Ricerca Avanzato per Metadati Pubblici e Web Scraping**
+
+<div>
+  <img src="https://img.shields.io/badge/stato-attivo-brightgreen?style=for-the-badge" alt="Stato"/>
+  <img src="https://img.shields.io/badge/licenza-MIT-blue?style=for-the-badge" alt="Licenza"/>
+  <img src="https://img.shields.io/badge/versione-2.0-black?style=for-the-badge" alt="Versione"/>
+  <img src="https://img.shields.io/github/stars/tuo-username/leviathan?style=for-the-badge" alt="Stelle"/>
+</div>
+
+<br>
+
+<sub><b>Crawler ad alte prestazioni • Solo metadati • Zero hosting di file</b></sub>
+
+</div>
+
+---
+
+## ⚖️ Disclaimer Legale e Condizioni d’Uso
+
+> **Ultimo aggiornamento: Dicembre 2025**
+
+### 1. Architettura e Funzionamento del Software
+**Leviathan** è un motore di ricerca automatizzato open-source e framework di web scraping progettato **esclusivamente** per l’acquisizione e l’indicizzazione di **metadati pubblici** (testo HTML, titoli, descrizioni e magnet link/hash) presenti su pagine web accessibili a tutti.
+
+- Nessun hosting, upload o distribuzione di file protetti da copyright  
+- Nessuna memorizzazione o trasferimento di contenuti video, audio o eseguibili  
+- Opera esclusivamente come lettore/parser di pagine web pubbliche (analogo a Googlebot, Bingbot o qualsiasi comune crawler)
+
+### 2. Finalità del Progetto
+Il software è rilasciato **esclusivamente** per:
+- Ricerca accademica e scientifica
+- Studio di architetture web e automazione distribuita
+- Penetration testing autorizzato, red teaming e security research
+- Sviluppo di tecniche avanzate di parsing ed estrazione dati
+
+Il codice viene fornito **“AS IS”** senza alcuna garanzia, espressa o implicita.
+
+### 3. Responsabilità dell’Utente
+L’autore, i contributori e i distributori **declinano ogni responsabilità** sull’uso che verrà fatto del software.
+
+Utilizzando Leviathan l’utente si assume **in via esclusiva e totale**:
+- Ogni responsabilità civile, penale e amministrativa
+- L’obbligo di verificare la piena conformità alle leggi vigenti nel proprio Paese (a titolo esemplificativo: DMCA, Direttiva UE 2019/790 sul diritto d’autore, normative nazionali)
+
+### 4. Posizione sulla Pirateria e sul Copyright
+Condanniamo fermamente ogni forma di pirateria e violazione del diritto d’autore.
+
+**Leviathan non è stato ideato, sviluppato né distribuito per facilitare, incoraggiare o consentire il download non autorizzato di opere protette.**  
+Ogni utilizzo illecito è espressamente vietato e non sarà in alcun modo supportato.
+
+---
+
+**L’installazione, l’esecuzione o l’utilizzo del software comportano l’accettazione integrale e incondizionata di tutte le condizioni sopra indicate.**  
+In caso di mancata accettazione, interrompere immediatamente l’uso ed eliminare ogni copia del software.
+
+---
+
+<div align="center">
+
+**Sviluppato con precisione e caffeina**  
+da [**LUC4N3X**](https://github.com/LUC4N3X)  
+Leviathan Project © 2024–2025 — Tutti i diritti riservati
+
+<br>
+
+<img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=22&pause=1000&color=39FF14&center=true&vCenter=true&width=550&lines=Rimani+legale.+Rimani+lucido." alt="Typing SVG" />
 
 </div>
