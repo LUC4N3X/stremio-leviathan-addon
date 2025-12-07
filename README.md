@@ -1,96 +1,72 @@
-<div align="center">
+<div align="center" style="font-family: 'Segoe UI', Helvetica, Arial, sans-serif; background-color: #0d1117; color: #c9d1d9; padding: 40px 20px; border-radius: 20px; border: 1px solid #30363d; max-width: 900px; margin: 0 auto; box-shadow: 0 0 50px rgba(0,0,0,0.5);">
 
-  <img src="https://api.iconify.design/game-icons:sea-dragon.svg?color=%2300eaff&width=200" style="filter: drop-shadow(0 0 10px rgba(0, 234, 255, 0.4)); margin-bottom: 15px;" />
+  <img src="https://api.iconify.design/game-icons:sea-dragon.svg?color=%2300dbff&width=150" style="filter: drop-shadow(0 0 40px rgba(0, 219, 255, 0.5)); margin-bottom: 15px;" />
 
-  <h1 style="font-size: 5rem; font-weight: 800; margin: 0; line-height: 1; letter-spacing: -2px; color: #fff;">
+  <h1 style="font-size: 5rem; font-weight: 900; margin: 0; line-height: 1; letter-spacing: -3px; color: #fff; text-shadow: 0 0 80px rgba(0, 219, 255, 0.4);">
     LEVIATHAN
   </h1>
 
-  <div style="font-size: 1.1rem; color: #94a3b8; margin-top: 10px; font-weight: 400; letter-spacing: 1px;">
-    ADVANCED TORRENT AGGREGATION PROTOCOL
+  <div style="font-family: 'Courier New', monospace; color: #00dbff; font-size: 1.1rem; letter-spacing: 5px; margin-top: 15px; text-transform: uppercase; opacity: 0.9;">
+    Advanced Torrent Protocol
   </div>
 
   <br>
 
   <p>
-    <img src="https://img.shields.io/badge/Real_Debrid-NATIVE_SUPPORT-A2B9F0?style=for-the-badge&logo=realdebrid&logoColor=black" />
-    <img src="https://img.shields.io/badge/AllDebrid-MODULE_ACTIVE-F5A623?style=for-the-badge&logo=alldebrid&logoColor=white" />
-    <img src="https://img.shields.io/badge/TorBox-COMPATIBLE-7A4EE3?style=for-the-badge&logo=torbox&logoColor=white" />
-  </p>
-
-  <p>
-    <img src="https://img.shields.io/badge/Node.js-v18_LTS-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
-    <img src="https://img.shields.io/badge/Architecture-HyperMode_v3.5-8A2BE2?style=for-the-badge&logo=dependabot&logoColor=white" />
-    <img src="https://img.shields.io/badge/Status-OPERATIONAL-success?style=for-the-badge&logo=githubactions&logoColor=white" />
+    <img src="https://img.shields.io/badge/NODE.JS-v18_LTS-238636?style=for-the-badge&logo=nodedotjs&logoColor=white" />
+    <img src="https://img.shields.io/badge/REAL_DEBRID-NATIVE-3498db?style=for-the-badge&logo=realdebrid&logoColor=white" />
+    <img src="https://img.shields.io/badge/STATUS-OPERATIONAL-success?style=for-the-badge&logo=githubactions&logoColor=white" />
   </p>
 
   <br>
-
-  <div style="background: #050a10; border: 1px solid rgba(0, 234, 255, 0.15); border-radius: 8px; padding: 25px; width: 85%; max-width: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-    <strong style="font-size: 1.3rem; color: #00eaff; display: block; margin-bottom: 10px;">
-      🇮🇹 Engineered for Italian Content Precision
-    </strong>
-    <span style="color: #cbd5e1; line-height: 1.6; font-size: 1rem;">
-      Leviathan ridefinisce lo standard dei metamotori torrent attraverso un'architettura <b>Italy-First</b>.
-      Integra un sistema di validazione semantica dei titoli, gestione automatizzata delle challenge WAF e un algoritmo di routing a bassa latenza per garantire risultati pertinenti e immediati.
-    </span>
-  </div>
-
-  <br>
-
-  <p>
-    <img src="https://img.shields.io/badge/⚡_Adaptive-Latency_Scaling-000?style=for-the-badge&labelColor=00eaff" />
-    <img src="https://img.shields.io/badge/🔍_Smart-Query_Morphing-000?style=for-the-badge&labelColor=00eaff" />
-    <img src="https://img.shields.io/badge/🛡️_WAF-Bypass_Protocol-000?style=for-the-badge&labelColor=00eaff" />
-    <img src="https://img.shields.io/badge/🔗_Magnet-Fusion_Engine-000?style=for-the-badge&labelColor=00eaff" />
-  </p>
-
- <div align="center" style="font-family: 'Segoe UI', Helvetica, Arial, sans-serif; background-color: #0d1117; padding: 40px 20px; border-radius: 12px; border: 1px solid #30363d; max-width: 900px; margin: 0 auto;">
-
-  <img src="https://api.iconify.design/game-icons:sea-dragon.svg?color=%2300dbff&width=140" style="filter: drop-shadow(0 0 35px rgba(0, 219, 255, 0.4)); margin-bottom: 20px;" />
-
-  <h1 style="font-size: 4.5rem; font-weight: 900; margin: 0; line-height: 1; letter-spacing: -2px; color: #fff; text-shadow: 0 0 60px rgba(0, 219, 255, 0.3);">
-    LEVIATHAN
-  </h1>
-
-  <div style="font-family: 'Courier New', monospace; color: #00dbff; font-size: 1rem; letter-spacing: 4px; margin-top: 10px; text-transform: uppercase; opacity: 0.8;">
-    Protocollo Aggregazione v3.5
-  </div>
-
-  <br><br>
 
   <div style="
-    background: linear-gradient(180deg, rgba(13, 17, 23, 1) 0%, rgba(22, 27, 34, 1) 100%);
+    background: linear-gradient(135deg, rgba(13, 17, 23, 1) 0%, rgba(30, 41, 59, 0.5) 100%);
     border: 1px solid rgba(0, 219, 255, 0.2);
-    border-left: 3px solid #00dbff;
-    border-radius: 6px;
-    padding: 25px;
-    width: 85%;
-    max-width: 700px;
-    box-shadow: 0 10px 40px -10px rgba(0,0,0,0.8);
+    border-left: 4px solid #00dbff;
+    border-radius: 8px;
+    padding: 30px;
+    width: 90%;
+    max-width: 750px;
+    box-shadow: 0 20px 60px -10px rgba(0,0,0,0.7);
     text-align: left;
+    margin-bottom: 40px;
   ">
-    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-      <span style="font-size: 1.5rem;">🇮🇹</span>
-      <strong style="font-size: 1.2rem; color: #fff; letter-spacing: 0.5px;">Engineered for Italian Precision</strong>
+    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+      <span style="font-size: 2rem;">🇮🇹</span>
+      <div>
+        <strong style="font-size: 1.3rem; color: #fff; display: block;">Engineered for Italian Precision</strong>
+        <span style="color: #00dbff; font-family: monospace; font-size: 0.8rem;">REGION_LOCK: ENABLED</span>
+      </div>
     </div>
-    <span style="color: #8b949e; line-height: 1.6; font-size: 0.95rem; font-family: sans-serif;">
+    <span style="color: #8b949e; line-height: 1.7; font-size: 1rem;">
       Leviathan ridefinisce lo standard dei metamotori torrent attraverso un'architettura <b>Italy-First</b>.
-      Integra un sistema di validazione semantica dei titoli e gestione automatizzata delle challenge WAF.
+      Integra un sistema di validazione semantica dei titoli in italiano e un algoritmo di routing a bassa latenza per garantire risultati pertinenti.
     </span>
   </div>
 
-  <br><br>
+  <h3 style="color: #fff; text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px solid #30363d; display: inline-block; padding-bottom: 10px; margin-bottom: 30px;">
+    System Architecture
+  </h3>
 
-  <p>
-    <img src="https://img.shields.io/badge/CORE-HYPERMODE_ENABLED-00dbff?style=for-the-badge&labelColor=0d1117&logoColor=fff" />
-    <img src="https://img.shields.io/badge/LATENCY-ADAPTIVE-00dbff?style=for-the-badge&labelColor=0d1117&logoColor=fff" />
-    <img src="https://img.shields.io/badge/BYPASS-WAF_ACTIVE-00dbff?style=for-the-badge&labelColor=0d1117&logoColor=fff" />
-  </p>
+  <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 50px;">
+    <div style="background: #161b22; border: 1px solid #30363d; padding: 15px 25px; border-radius: 8px; display: flex; align-items: center; gap: 10px;">
+      <span style="font-size: 1.2rem;">⚡</span>
+      <span style="color: #c9d1d9; font-weight: bold;">Adaptive Latency</span>
+    </div>
+    <div style="background: #161b22; border: 1px solid #30363d; padding: 15px 25px; border-radius: 8px; display: flex; align-items: center; gap: 10px;">
+      <span style="font-size: 1.2rem;">🛡️</span>
+      <span style="color: #c9d1d9; font-weight: bold;">WAF Bypass Protocol</span>
+    </div>
+    <div style="background: #161b22; border: 1px solid #30363d; padding: 15px 25px; border-radius: 8px; display: flex; align-items: center; gap: 10px;">
+      <span style="font-size: 1.2rem;">🔗</span>
+      <span style="color: #c9d1d9; font-weight: bold;">Magnet Fusion Engine</span>
+    </div>
+  </div>
 
-  <div style="margin-top: 50px; position: relative;">
+  <div style="position: relative; margin-top: 20px;">
 
-  <div style="width: 2px; height: 40px; background: linear-gradient(to bottom, transparent, #00dbff); margin: 0 auto;"></div>
+  <div style="width: 2px; height: 50px; background: linear-gradient(to bottom, transparent, #00dbff); margin: 0 auto;"></div>
 
   <a href="https://leaviathan-leviathan.hf.space" target="_blank" style="text-decoration: none;">
       <div style="
@@ -99,48 +75,47 @@
         color: #050a10;
         font-family: sans-serif;
         font-weight: 900;
-        font-size: 1.4rem;
-        padding: 20px 70px;
-        border-radius: 4px;
+        font-size: 1.5rem;
+        padding: 22px 60px;
+        border-radius: 6px;
         text-transform: uppercase;
         letter-spacing: 1px;
-        box-shadow: 0 0 50px rgba(0, 219, 255, 0.4), inset 0 0 0 2px rgba(255,255,255,0.2);
-        border: 1px solid #fff;
+        box-shadow: 0 0 60px rgba(0, 219, 255, 0.5), inset 0 0 0 2px rgba(255,255,255,0.4);
+        border: 2px solid #fff;
         position: relative;
         z-index: 10;
+        transition: transform 0.2s;
       ">
-        🚀 INIZIALIZZA ADDON
+        🚀 INST ALLA ADDON
       </div>
     </a>
 
-   <div style="width: 2px; height: 25px; background: #00dbff; margin: 0 auto; opacity: 0.5;"></div>
+  <div style="width: 2px; height: 30px; background: #00dbff; margin: 0 auto; opacity: 0.6;"></div>
 
   <a href="https://leaviathan-leviathan.hf.space" target="_blank" style="text-decoration: none;">
       <div style="
         display: inline-block;
         background: rgba(13, 17, 23, 0.95);
         border: 1px solid #30363d;
-        border-bottom: 3px solid #FFD21E; /* Colore Giallo Hugging Face */
-        border-radius: 8px;
-        padding: 15px 30px;
-        min-width: 280px;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        border-bottom: 4px solid #FFD21E; /* Hugging Face Yellow */
+        border-radius: 12px;
+        padding: 20px 40px;
+        min-width: 300px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.8);
         backdrop-filter: blur(10px);
-        margin-top: -2px;
       ">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 8px;">
-           <span style="color: #8b949e; font-size: 0.7rem; font-family: monospace; letter-spacing: 1px;">HOST SERVER STATUS</span>
-           <div style="display: flex; align-items: center; gap: 5px;">
-             <span style="width: 6px; height: 6px; background-color: #2ea043; border-radius: 50%; box-shadow: 0 0 6px #2ea043;"></span>
-             <span style="color: #2ea043; font-size: 0.7rem; font-weight: bold; font-family: monospace;">ONLINE</span>
-           </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+           <span style="color: #8b949e; font-size: 0.75rem; font-family: monospace; letter-spacing: 1px;">DEPLOYMENT STATUS</span>
+           <span style="color: #2ea043; font-size: 0.75rem; font-weight: bold; font-family: monospace; display: flex; align-items: center; gap: 5px;">
+             ● ONLINE
+           </span>
         </div>
         
-   <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
-          <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" width="28" />
+   <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+          <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" width="32" />
           <div style="text-align: left;">
-            <div style="color: #fff; font-weight: bold; font-size: 1.1rem; line-height: 1;">HUGGING FACE</div>
-            <div style="color: #8b949e; font-size: 0.8rem; font-family: monospace;">Space Deployment v3.5</div>
+            <div style="color: #fff; font-weight: 800; font-size: 1.2rem;">HUGGING FACE</div>
+            <div style="color: #8b949e; font-size: 0.85rem; font-family: monospace;">Cloud Space v3.5</div>
           </div>
         </div>
       </div>
@@ -148,8 +123,8 @@
 
   </div>
 
-  <div style="margin-top: 60px; color: #30363d;">
-    /////////////// END OF LINE ///////////////
+  <div style="margin-top: 60px; color: #30363d; font-family: monospace;">
+    // SYSTEM_READY
   </div>
 
 </div>
