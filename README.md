@@ -215,6 +215,11 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 👁‍🗨 BENVENUTO NELL'ABISSO.
 ---
 
+
+
+
+
+
 <div align="center">
 
 **Sviluppato con precisione e caffeina**
