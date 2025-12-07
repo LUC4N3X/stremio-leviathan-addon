@@ -258,7 +258,7 @@ async function searchKnaben(title, year, type, reqSeason, reqEpisode) {
                 'Content-Type': 'application/json',
                 'User-Agent': getRandomUA()
             },
-            timeout: CONFIG.TIMEOUT_API
+            timeout: CONFIG.TIMEOUT_API // Usa timeout breve per API
         });
 
         if (!data || !data.hits) return [];
@@ -296,7 +296,7 @@ async function searchUindex(title, year, type, reqSeason, reqEpisode) {
         const { data } = await axios.get(url, { 
             headers: { 'User-Agent': getRandomUA() }, 
             httpsAgent, 
-            timeout: 4000,
+            timeout: 4000, // Timeout medio
             validateStatus: s => s < 500 
         });
         if (!data || typeof data !== 'string') return [];
@@ -357,7 +357,7 @@ async function searchTPB(title, year, type, reqSeason, reqEpisode) {
         const { data } = await axios.get("https://apibay.org/q.php", {
             params: { q, cat: type === 'tv' ? 0 : 201 },
             headers: { 'User-Agent': getRandomUA() },
-            timeout: CONFIG.TIMEOUT_API
+            timeout: CONFIG.TIMEOUT_API // Timeout breve per API
         }).catch(() => ({ data: [] }));
 
         if (!Array.isArray(data) || data[0]?.name === "No results returned") return [];
@@ -465,27 +465,10 @@ async function searchBitSearch(title, year, type, reqSeason, reqEpisode) {
     } catch { return []; }
 }
 
-// --- MODIFICATO PER HUGGING FACE / CLOUDFLARE ---
 async function searchLime(title, year, type, reqSeason, reqEpisode) {
     try {
-        // 1. Cambio mirror: .lol è più tollerante di .info sui datacenter IP
-        const BASE_DOMAIN = "https://www.limetorrents.lol";
-        const url = `${BASE_DOMAIN}/search/all/${encodeURIComponent(clean(title) + " ITA")}/seeds/1/`;
-
-        // 2. Headers Mimic: Sembra un browser reale
-        const headers = {
-            'User-Agent': getRandomUA(),
-            'Referer': BASE_DOMAIN,
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'DNT': '1'
-        };
-
-        const { data } = await cfGet(url, { headers, timeout: CONFIG.TIMEOUT });
-        
-        // Check preventivo
-        if (!data || data.includes("Just a moment") || data.includes("Enable JavaScript")) return [];
-
+        const url = `https://limetorrents.info/search/all/${encodeURIComponent(clean(title) + " ITA")}/seeds/1/`;
+        const { data } = await cfGet(url, { timeout: CONFIG.TIMEOUT });
         const $ = cheerio.load(data || "");
         const candidates = [];
 
@@ -494,27 +477,19 @@ async function searchLime(title, year, type, reqSeason, reqEpisode) {
             if (tds.length < 4) return;
             const nameLink = tds.eq(0).find("div.tt-name a").eq(1);
             const name = nameLink.text().trim();
-            const relLink = nameLink.attr("href");
+            const link = nameLink.attr("href");
             const seeders = parseInt(tds.eq(3).text().replace(/,/g, "")) || 0;
             const sizeStr = tds.eq(2).text();
-
-            if (name && relLink && isItalianResult(name) && checkYear(name, year, type) && isCorrectFormat(name, reqSeason, reqEpisode)) {
-                const fullLink = relLink.startsWith("http") ? relLink : `${BASE_DOMAIN}${relLink}`;
-                candidates.push({ name, link: fullLink, seeders, sizeStr });
+            if (name && link && isItalianResult(name) && checkYear(name, year, type) && isCorrectFormat(name, reqSeason, reqEpisode)) {
+                candidates.push({ name, link: `https://limetorrents.info${link}`, seeders, sizeStr });
             }
         });
 
-        // 3. Concorrenza ridotta (2) e Delay casuale per HF
-        const limit = limitConcurrency(2);
+        const limit = limitConcurrency(4);
         const promises = candidates.slice(0, 5).map(cand => limit(async () => {
             try {
-                // Delay casuale 500-1200ms
-                await new Promise(r => setTimeout(r, Math.floor(Math.random() * 700) + 500));
-                
-                const { data } = await cfGet(cand.link, { headers, timeout: 3500 });
-                const $d = cheerio.load(data);
-                const magnet = $d("a[href^='magnet:?']").first().attr("href");
-                
+                const { data } = await cfGet(cand.link, { timeout: 3000 });
+                const magnet = cheerio.load(data)("a[href^='magnet:?']").first().attr("href");
                 return magnet ? {
                     title: cand.name, magnet, seeders: cand.seeders, size: cand.sizeStr, sizeBytes: parseSize(cand.sizeStr), source: "Lime"
                 } : null;
@@ -584,14 +559,15 @@ async function searchMagnet(title, year, type, imdbId) {
     const engineTimeouts = new Map([
         [searchKnaben, CONFIG.TIMEOUT_API],
         [searchTPB, CONFIG.TIMEOUT_API],
-        [searchUindex, 4000] 
+        [searchUindex, 4000] // Una via di mezzo per Uindex
+        // Tutti gli altri useranno il default CONFIG.TIMEOUT (6000ms)
     ]);
 
     // Esecuzione parallela con timeout specifici per engine
     const promises = CONFIG.ENGINES.map(engine => {
         const specificTimeout = engineTimeouts.get(engine) || CONFIG.TIMEOUT;
         return withTimeout(engine(title, year, type, reqSeason, reqEpisode), specificTimeout)
-            .catch(e => []); 
+            .catch(e => []); // Se timeout o errore, ritorna array vuoto subito
     });
 
     const resultsArrays = await Promise.allSettled(promises);
