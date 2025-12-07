@@ -2,11 +2,12 @@ const axios = require("axios");
 const crypto = require("crypto");
 
 /* ===========================================================
-   STEALTH ENGINE v3.8 — POWER EDITION (Vercel Optimized)
+   STEALTH ENGINE v3.6 — Optimized & Modular
    =========================================================== */
 
-// ⚠️ TIMEOUT: 3.8s (Il massimo sicuro per Vercel senza crashare)
-const TIMEOUT_MS = 3800; 
+const TIMEOUT_MS = 6500;
+const MIN_DELAY = 350;
+const MAX_DELAY = 1250;
 
 // Pool pesato: simula una distribuzione realistica dei browser
 const USER_AGENTS = [
@@ -25,7 +26,7 @@ const REFERERS = [
 ];
 
 /* ===========================================================
-   UTILITY FUNCTIONS
+   UTILITY FUNCTIONS (Exportable)
    =========================================================== */
 
 function formatBytes(bytes) {
@@ -40,7 +41,9 @@ function generateFakeHash() {
     return `BRN-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 }
 
-// ⚠️ RIMOSSO 'wait' per Vercel (causava timeout)
+function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 /* ===========================================================
    HEADER & FINGERPRINTING LOGIC
@@ -51,34 +54,54 @@ function pickWeightedUserAgent() {
     return expanded[Math.floor(Math.random() * expanded.length)];
 }
 
+function getDynamicLanguage() {
+    const langs = [
+        'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
+        'en-US,en;q=0.9,it-IT;q=0.8,it;q=0.7',
+        'it-IT,it;q=0.9'
+    ];
+    return langs[Math.floor(Math.random() * langs.length)];
+}
+
 function getStealthHeaders() {
-    return {
-        'User-Agent': pickWeightedUserAgent(),
+    const ua = pickWeightedUserAgent();
+    const referer = REFERERS[Math.floor(Math.random() * REFERERS.length)];
+    
+    const headers = {
+        'User-Agent': ua,
         'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': getDynamicLanguage(),
         'Accept-Encoding': 'gzip, deflate, br',
         'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
         'DNT': '1',
-        'Referer': REFERERS[Math.floor(Math.random() * REFERERS.length)]
+        'Upgrade-Insecure-Requests': '1',
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'cross-site',
+        'Sec-Fetch-User': '?1'
     };
+
+    if (referer) headers['Referer'] = referer;
+    return headers;
 }
 
 /* ===========================================================
-   SCORING SYSTEM (LOGICA ORIGINALE RIPRISTINATA)
+   SCORING SYSTEM
    =========================================================== */
 
 function scoreItalian(item) {
     const t = (item.title || "").toLowerCase();
     const s = (item.source || "").toLowerCase();
-    const d = (item.description || "").toLowerCase(); // Aggiunto check descrizione
+    const d = (item.description || "").toLowerCase();
 
     let score = 0;
 
-    // Aumentato il punteggio per i tag forti
     const HARD_ITA = [
         " ita ", "[ita]", "(ita)", "dual ita", "multi ita",
         "mux ita", "ita mux", "ita-eng", "ita/eng", "italian", "italiano", "🇮🇹"
     ];
-    HARD_ITA.forEach(k => { if (t.includes(k) || d.includes(k)) score += 5; });
+    HARD_ITA.forEach(k => { if (t.includes(k) || d.includes(k)) score += 4; });
 
     const TRACKERS = ["corsaro", "corsaronero", "tntvillage", "luna nuova", "crew", "icv"];
     TRACKERS.forEach(k => { if (t.includes(k) || s.includes(k)) score += 3; });
@@ -88,6 +111,8 @@ function scoreItalian(item) {
     const SOFT = ["it ", "it- ", " it/", "webdl ita", "h264 ita", "ac3 ita"];
     SOFT.forEach(k => { if (t.includes(k)) score += 1; });
 
+    if (/(\b[12][0-9]{3}\b)/.test(t)) score += 0.5;
+
     return score;
 }
 
@@ -95,10 +120,7 @@ function filterItalianSmart(list) {
     const scored = list.map(i => ({ ...i, _score: scoreItalian(i) }));
     const maxScore = Math.max(...scored.map(i => i._score));
 
-    // Se non troviamo nulla di esplicitamente italiano, ritorniamo tutto (fallback)
-    // Ma se troviamo italiano, filtriamo severamente.
     if (maxScore < 1) return scored;
-    
     return scored.filter(i => i._score === maxScore || i._score >= 2);
 }
 
@@ -159,7 +181,7 @@ const YTS = {
                             title: `${movie.title} ${t.quality} ${t.type.toUpperCase()} YTS`,
                             size: t.size,
                             sizeBytes: t.size_bytes,
-                            magnet: `magnet:?xt=urn:btih:${t.hash}&dn=${encodeURIComponent(movie.title)}`,
+                            magnet: `magnet:?xt=urn:btih:${t.hash}&dn=${encodeURIComponent(movie.title)}&tr=udp://open.demonii.com:1337/announce`,
                             seeders: t.seeds || 0,
                             source: "YTS"
                         });
@@ -172,7 +194,7 @@ const YTS = {
 };
 
 /* ===========================================================
-   PART 2: ADDON PROXIES (PARSING AVANZATO RIPRISTINATO)
+   PART 2: ADDON PROXIES
    =========================================================== */
 
 const ADDON_PROVIDERS = [
@@ -194,9 +216,7 @@ async function fetchFromAddon(provider, id, type) {
             let sizeBytes = 0;
             let seeders = 0;
             let source = provider.name === "Torrentio" ? "External" : provider.name;
-            let description = stream.description || stream.title || "";
 
-            // --- LOGICA TORRENTIO (Ripristinata dal tuo file originale) ---
             if (provider.parseType === "torrentio") {
                 const lines = stream.title.split('\n');
                 title = lines[0] || stream.title;
@@ -217,14 +237,11 @@ async function fetchFromAddon(provider, id, type) {
                     }
                 }
             } 
-            // --- LOGICA MEDIAFUSION (Ripristinata e potenziata per l'Italia) ---
             else if (provider.parseType === "mediafusion") {
                 const desc = stream.description || stream.title; 
                 const lines = desc.split('\n');
                 title = lines[0].replace("📂 ", "").replace("/", "").trim();
                 
-                // Se la descrizione dice ITALIAN ma il titolo no, forziamo il tag [ITA]
-                // Questo risolve il problema "trova cose in inglese"
                 const fullText = desc.toLowerCase();
                 if ((fullText.includes("🇮🇹") || fullText.includes("italian")) && !title.toLowerCase().includes("ita")) {
                     title += " [ITA]";
@@ -242,7 +259,6 @@ async function fetchFromAddon(provider, id, type) {
                 }
             }
 
-            // Normalizzazione SizeBytes
             if (sizeBytes === 0 && size !== "Unknown") {
                 const num = parseFloat(size);
                 if (size.includes("GB")) sizeBytes = num * 1024 * 1024 * 1024;
@@ -250,7 +266,7 @@ async function fetchFromAddon(provider, id, type) {
             }
 
             return {
-                title, size, sizeBytes, seeders, source, description,
+                title, size, sizeBytes, seeders, source,
                 magnet: stream.infoHash ? `magnet:?xt=urn:btih:${stream.infoHash}` : stream.url
             };
         });
@@ -274,16 +290,21 @@ async function searchMagnet(query, year, type, id) {
         promises.push(SolidTorrents.search(query));
     }
 
-    // 3. Movie Specific
+    // 3. Movie Specific (YTS)
     if (type === 'movie' && baseImdbId) {
         promises.push(YTS.search(baseImdbId));
     }
 
-    // Esegui tutto in parallelo
+    // PERFORMANCE: Promise.all è sicuro qui perché ogni sub-funzione
+    // ha un catch interno che ritorna [] invece di throware errore.
     const results = await Promise.all(promises);
+
+    // FLATTENING: Unisce tutti gli array di risultati in uno solo (molto più veloce)
     const allMagnets = results.flat();
 
-    // ⚠️ RIMOSSO "wait" per evitare timeout su Vercel
+    // STEALTH DELAY
+    const randomDelay = Math.floor(Math.random() * (MAX_DELAY - MIN_DELAY + 1) + MIN_DELAY);
+    await wait(randomDelay);
 
     // MARKERS & FILTERING
     const tagged = allMagnets.map(item => ({
@@ -297,5 +318,5 @@ async function searchMagnet(query, year, type, id) {
 
 module.exports = { 
     searchMagnet, 
-    formatBytes 
+    formatBytes // Ora esportato per uso esterno
 };
