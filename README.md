@@ -140,24 +140,20 @@ Non si limita a trovare il link. Lo potenzia.
 
 
 ---
-# 📦 DEPLOYMENT PROTOCOL
+## ⚡ DEPLOYMENT PROTOCOL
 
-### 🐳 Docker Compose Integration
-Il metodo **Docker Compose** è l'unico che garantisce l'isolamento dei processi e il bypass nativo dei WAF.
+![Status](https://img.shields.io/badge/SYSTEM-OPERATIONAL-success?style=for-the-badge)
+![Docker](https://img.shields.io/badge/DOCKER-REQUIRED-blue?style=for-the-badge&logo=docker&logoColor=white)
 
-| Step | Azione | Comando |
-| :--- | :--- | :--- |
-| **01** | **Acquisizione** | `git clone https://github.com/LUC4N3X/stremio-leviathan-addon` |
-| **02** | **Accesso** | `cd stremio-leviathan-addon` |
-| **03** | **Inizializzazione** | `docker compose up -d --build` |
+Il metodo **Docker Compose** è l'unico che garantisce l'isolamento dei processi, la persistenza dei dati e il bypass nativo dei WAF.
 
-<div align="center">
+### 💠 Sequenza di Avvio Rapido
 
-**⬇️ Oppure usa il blocco unico ⬇️**
+Copia l'intera sequenza e incollala nel terminale per l'inizializzazione immediata:
 
 ```bash
-git clone [https://github.com/LUC4N3X/stremio-leviathan-addon](https://github.com/LUC4N3X/stremio-leviathan-addon)
-cd stremio-leviathan-addon
+git clone [https://github.com/LUC4N3X/stremio-leviathan-addon](https://github.com/LUC4N3X/stremio-leviathan-addon) && \
+cd stremio-leviathan-addon && \
 docker compose up -d --build
 
 ```
