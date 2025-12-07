@@ -1,13 +1,3 @@
-/**
- * addon.js
- * Corsaro Brain — LEVIATHAN EDITION (AI Enhanced)
- * * Changelog:
- * - FIXED: Aggiunta rotta /manifest.json diretta (risolve errore "Cannot GET").
- * - REFACTOR: Manifesto caricato da file esterno manifest.js
- * - FIXED: Passaggio parametri Stagione/Episodio a smartMatch.
- * - FIXED: Filtro "Lisa Frankenstein" specifico e Tolleranza anno ±1.
- */
-
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
