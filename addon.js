@@ -192,7 +192,7 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
 // 🧠 CORE LOGIC
 // ==========================================
 
-// 🔥 FIX SICUREZZA APPLICATO QUI 🔥
+// 🔥 FIX SICUREZZA APPLICATO QUI (WHITELIST STRICT) 🔥
 async function getMetadata(id, type) {
   try {
     // 1. VALIDAZIONE STRICT DEL TYPE (Whitelist)
@@ -205,12 +205,17 @@ async function getMetadata(id, type) {
     let tmdbId = id, s = 1, e = 1;
     if (type === "series" && id.includes(":")) [tmdbId, s, e] = id.split(":");
     
-    // 2. SANIFICAZIONE DELL'ID
-    // Blocca path traversal (es. "../") permettendo solo caratteri sicuri
+    // 2. SANIFICAZIONE STRICT DELL'ID
     const rawId = tmdbId.split(":")[0];
-    const cleanId = rawId.replace(/[^a-zA-Z0-9_-]/g, ""); 
+    
+    // Accetta SOLO: "tt" + numeri (IMDb) OPPURE solo numeri (TMDB)
+    // Rimuove qualsiasi altro carattere o tentativo di injection
+    const cleanId = rawId.match(/^(tt\d+|\d+)$/i)?.[0] || "";
 
-    if (!cleanId) return null;
+    if (!cleanId) {
+        console.warn(`[Security] ID non valido o formato sconosciuto: ${rawId}`);
+        return null;
+    }
 
     // 3. COSTRUZIONE URL SICURA
     const { data: cData } = await axios.get(`${CONFIG.CINEMETA_URL}/meta/${type}/${cleanId}.json`, { timeout: CONFIG.TIMEOUT_TMDB }).catch(() => ({ data: {} }));
