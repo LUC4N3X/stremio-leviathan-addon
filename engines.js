@@ -182,11 +182,21 @@ function extractInfo(name) {
 }
 
 function isCorrectFormat(name, reqSeason, reqEpisode) {
+    // SEZIONI FILM: Se non è richiesta stagione o episodio, accetta tutto (logica per film o ricerche generiche)
     if (!reqSeason && !reqEpisode) return true;
+
     const info = extractInfo(name);
     const upperName = name.toUpperCase();
-    const isPack = upperName.includes("COMPLET") || upperName.includes("PACK") || upperName.includes("TUTTE") || upperName.includes("STAGIONE");
+    
+    // Identifica se è un pacchetto completo
+    // Nota: "STAGIONE" o "SEASON" senza un numero di episodio specifico spesso indicano un pack
+    const isPack = upperName.includes("COMPLET") || 
+                   upperName.includes("PACK") || 
+                   upperName.includes("TUTTE") || 
+                   upperName.includes("STAGIONE") ||
+                   upperName.includes("SEASON");
 
+    // Gestione Range (es. S01-S03)
     const rangeMatch = upperName.match(/(?:S|STAGIONE)?\s*(\d{1,2})\s*-\s*(?:S|STAGIONE)?\s*(\d{1,2})/);
     if (rangeMatch && reqSeason) {
         const start = parseInt(rangeMatch[1]);
@@ -194,11 +204,24 @@ function isCorrectFormat(name, reqSeason, reqEpisode) {
         if (reqSeason >= start && reqSeason <= end) return true;
     }
 
+    // Controllo Stagione (Deve sempre corrispondere, sia per episodi singoli che per pack)
     if (reqSeason && info.season !== null && info.season !== reqSeason) return false;
+
+    // Controllo Episodio
     if (reqEpisode) {
+        // MODIFICA QUI:
+        // Se è identificato come Pack ed ha passato il controllo stagione qui sopra, ACCETTALO SUBITO.
+        // Questo evita che titoli come "Stagione 1 Episodi 1-10" vengano scartati perché il parser legge "Episodio 1"
+        // e tu stai cercando l'episodio 5.
+        if (isPack) return true;
+
+        // Se non è un pack, procedi con il controllo rigoroso dell'episodio
         if (info.episode !== null) {
             if (info.episode !== reqEpisode) return false;
-        } else if (!isPack) return false;
+        } else {
+            // Se non c'è numero episodio e NON è un pack, scarta.
+            return false;
+        }
     }
     return true;
 }
