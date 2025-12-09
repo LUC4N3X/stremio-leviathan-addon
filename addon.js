@@ -30,6 +30,23 @@ const CONFIG = {
   MAX_RESULTS: 40, 
 };
 
+// --- CACHE SYSTEM CONFIGURATION (NUOVO) ---
+const CACHE_TTL = 15 * 60 * 1000; // 15 Minuti in millisecondi
+const STREAM_CACHE = new Map();
+
+// Garbage Collector: Pulisce la memoria ogni 20 minuti eliminando item scaduti
+setInterval(() => {
+    const now = Date.now();
+    let cleaned = 0;
+    for (const [key, value] of STREAM_CACHE.entries()) {
+        if (now > value.expiry) {
+            STREAM_CACHE.delete(key);
+            cleaned++;
+        }
+    }
+    if (cleaned > 0) console.log(`🧹 [CACHE] Puliti ${cleaned} elementi scaduti.`);
+}, 20 * 60 * 1000);
+
 // --- LIMITERS ---
 const LIMITERS = {
   scraper: new Bottleneck({ maxConcurrent: 40, minTime: 10 }), 
@@ -470,7 +487,41 @@ app.get("/:conf/configure", (req, res) => res.sendFile(path.join(__dirname, "pub
 app.get("/manifest.json", (req, res) => { const manifest = getManifest(); res.setHeader("Access-Control-Allow-Origin", "*"); res.json(manifest); });
 app.get("/:conf/manifest.json", (req, res) => { const manifest = getManifest(); res.setHeader("Access-Control-Allow-Origin", "*"); res.json(manifest); });
 app.get("/:conf/catalog/:type/:id/:extra?.json", async (req, res) => { res.setHeader("Access-Control-Allow-Origin", "*"); res.json({metas:[]}); });
-app.get("/:conf/stream/:type/:id.json", async (req, res) => { const result = await generateStream(req.params.type, req.params.id.replace(".json", ""), getConfig(req.params.conf), req.params.conf); res.setHeader("Access-Control-Allow-Origin", "*"); res.json(result); });
+
+// --- ROUTE STREAM CON CACHE IMPLEMENTATA ---
+app.get("/:conf/stream/:type/:id.json", async (req, res) => { 
+    res.setHeader("Access-Control-Allow-Origin", "*");
+
+    const { conf, type, id } = req.params;
+    // Crea una chiave unica per la cache basata sulla configurazione utente (API Key) e sul contenuto richiesto
+    const cacheKey = `${conf}:${type}:${id}`;
+
+    // 1. Controllo se esiste in Cache
+    if (STREAM_CACHE.has(cacheKey)) {
+        const cachedEntry = STREAM_CACHE.get(cacheKey);
+        // Controlla se è scaduta
+        if (Date.now() < cachedEntry.expiry) {
+            console.log(`⚡ [CACHE HIT] Servo "${id}" dalla memoria (Nessuna chiamata API).`);
+            return res.json(cachedEntry.data);
+        } else {
+            STREAM_CACHE.delete(cacheKey); // Rimuovi se scaduta
+        }
+    }
+
+    // 2. Se non c'è in cache, genera i risultati
+    const result = await generateStream(type, id.replace(".json", ""), getConfig(conf), conf);
+
+    // 3. Salva in cache solo se abbiamo trovato risultati validi
+    // (Non cachiamo gli errori gravi o i risultati vuoti per troppo tempo se si vuole, ma qui cachiamo tutto per 15 min)
+    if (result && result.streams && result.streams.length > 0 && result.streams[0].name !== "⛔") {
+        STREAM_CACHE.set(cacheKey, {
+            data: result,
+            expiry: Date.now() + CACHE_TTL
+        });
+    }
+
+    res.json(result); 
+});
 
 function getConfig(configStr) { try { return JSON.parse(Buffer.from(configStr, "base64").toString()); } catch { return {}; } }
 function withTimeout(promise, ms) { return Promise.race([promise, new Promise(r => setTimeout(() => r([]), ms))]); }
