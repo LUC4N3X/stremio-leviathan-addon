@@ -4,6 +4,8 @@ const helmet = require("helmet");
 const path = require("path");
 const axios = require("axios");
 const Bottleneck = require("bottleneck");
+// NUOVO: Importiamo il limitatore di richieste
+const rateLimit = require("express-rate-limit");
 
 // --- IMPORTIAMO I NUOVI MODULI SMART ---
 const { generateSmartQueries } = require("./ai_query");
@@ -30,7 +32,24 @@ const CONFIG = {
   MAX_RESULTS: 40, 
 };
 
-// --- LIMITERS ---
+// --- CACHE SYSTEM CONFIGURATION ---
+const CACHE_TTL = 15 * 60 * 1000; // 15 Minuti
+const STREAM_CACHE = new Map();
+
+// Garbage Collector
+setInterval(() => {
+    const now = Date.now();
+    let cleaned = 0;
+    for (const [key, value] of STREAM_CACHE.entries()) {
+        if (now > value.expiry) {
+            STREAM_CACHE.delete(key);
+            cleaned++;
+        }
+    }
+    if (cleaned > 0) console.log(`🧹 [CACHE] Puliti ${cleaned} elementi scaduti.`);
+}, 20 * 60 * 1000);
+
+// --- LIMITERS (Interni per API) ---
 const LIMITERS = {
   scraper: new Bottleneck({ maxConcurrent: 40, minTime: 10 }), 
   rd: new Bottleneck({ maxConcurrent: 25, minTime: 40 }), 
@@ -46,6 +65,21 @@ const FALLBACK_SCRAPERS = [
 ];
 
 const app = express();
+
+// --- SICUREZZA & RATE LIMITING (FIX CODEQL) ---
+app.set('trust proxy', 1); // Necessario se hostato su Render, Heroku, HF, ecc.
+
+// Definiamo il limitatore: Max 300 richieste ogni 15 minuti per IP
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000, 
+	max: 300, 
+	standardHeaders: true, 
+	legacyHeaders: false,
+    message: "Troppe richieste da questo IP, riprova più tardi."
+});
+
+// Applichiamo il limitatore a tutte le richieste
+app.use(limiter);
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors());
 app.use(express.static(path.join(__dirname, "public")));
@@ -70,7 +104,7 @@ function parseSize(sizeStr) {
 }
 
 // ==========================================
-//  HELPER DI FORMATTAZIONE & FILTRO AGGIUNTIVI
+//  HELPER DI FORMATTAZIONE & FILTRO
 // ==========================================
 
 function isSafeForItalian(item) {
@@ -463,16 +497,54 @@ async function generateStream(type, id, config, userConfStr) {
 }
 
 // --- ROUTES ---
+
+// 1. Home Page
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
-// Route per configurazione esistente
+
+// 2. Configurazione Esistente
 app.get("/:conf/configure", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
-// 🔥 FIX: Route per configurazione NUOVA (resolve "Cannot GET /configure")
+
+// 3. Nuova Configurazione (FIX PER I TUOI ERRORI)
 app.get("/configure", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 
+// 4. Manifest
 app.get("/manifest.json", (req, res) => { const manifest = getManifest(); res.setHeader("Access-Control-Allow-Origin", "*"); res.json(manifest); });
 app.get("/:conf/manifest.json", (req, res) => { const manifest = getManifest(); res.setHeader("Access-Control-Allow-Origin", "*"); res.json(manifest); });
+
+// 5. Catalog (Dummy)
 app.get("/:conf/catalog/:type/:id/:extra?.json", async (req, res) => { res.setHeader("Access-Control-Allow-Origin", "*"); res.json({metas:[]}); });
-app.get("/:conf/stream/:type/:id.json", async (req, res) => { const result = await generateStream(req.params.type, req.params.id.replace(".json", ""), getConfig(req.params.conf), req.params.conf); res.setHeader("Access-Control-Allow-Origin", "*"); res.json(result); });
+
+// 6. STREAMING CON CACHE
+app.get("/:conf/stream/:type/:id.json", async (req, res) => { 
+    res.setHeader("Access-Control-Allow-Origin", "*");
+
+    const { conf, type, id } = req.params;
+    const cacheKey = `${conf}:${type}:${id}`;
+
+    // 1. Controllo Cache
+    if (STREAM_CACHE.has(cacheKey)) {
+        const cachedEntry = STREAM_CACHE.get(cacheKey);
+        if (Date.now() < cachedEntry.expiry) {
+            console.log(`⚡ [CACHE HIT] Servo "${id}" dalla memoria.`);
+            return res.json(cachedEntry.data);
+        } else {
+            STREAM_CACHE.delete(cacheKey);
+        }
+    }
+
+    // 2. Generazione
+    const result = await generateStream(type, id.replace(".json", ""), getConfig(conf), conf);
+
+    // 3. Salvataggio Cache
+    if (result && result.streams && result.streams.length > 0 && result.streams[0].name !== "⛔") {
+        STREAM_CACHE.set(cacheKey, {
+            data: result,
+            expiry: Date.now() + CACHE_TTL
+        });
+    }
+
+    res.json(result); 
+});
 
 function getConfig(configStr) { try { return JSON.parse(Buffer.from(configStr, "base64").toString()); } catch { return {}; } }
 function withTimeout(promise, ms) { return Promise.race([promise, new Promise(r => setTimeout(() => r([]), ms))]); }
