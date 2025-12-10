@@ -1,8 +1,4 @@
-// ai_query.js - VERSIONE DEFINITIVA "SOLO ITA"
-
-// ==========================================
 // 1. CONFIGURAZIONE JUNK & PATTERN
-// ==========================================
 
 // Token tecnici da rimuovere per trovare il "vero" titolo
 const ULTRA_JUNK_TOKENS = new Set([
