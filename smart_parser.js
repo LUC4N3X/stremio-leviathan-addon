@@ -1,36 +1,41 @@
 const FuzzySet = require("fuzzyset");
 
-// 1. JUNK TECNICO
+// 1. JUNK TECNICO (ALLINEATO CON AI_QUERY BOMBA EDITION)
+// Questi token vengono rimossi PRIMA del confronto per capire se è il film giusto.
 const JUNK_TOKENS = new Set([
-    "h264","x264","h265","x265","hevc","1080p","720p","4k","2160p",
-    "hdr","web","web-dl","bluray","rip","ita","eng","multi","sub",
-    "ac3","aac","mkv","mp4","avi","divx","xvid","dts","truehd",
-    "atmos","vision","repack","remux","proper","complete","pack",
-    "uhd","sdr","season","stagione","episode","episodio","cam","ts",
-    "hdtv", "amzn", "dsnp", "nf", "series", "vol"
+    // Video
+    "h264","x264","h265","x265","hevc","1080p","720p","4k","2160p","480p","sd","hd","fhd","uhd",
+    "hdr","web","web-dl","webrip","bdrip","dvdrip","bluray","rip","remux","proper","repack",
+    "internal","extended","director","cut","edition","remastered",
+    // Audio & Lingua (Li rimuoviamo per il match del TITOLO, il controllo lingua si fa dopo)
+    "ita","eng","multi","sub","dub","ac3","aac","dts","truehd","atmos","dd5.1","5.1","7.1",
+    // Container & Extra
+    "mkv","mp4","avi","complete","pack","season","stagione","episode","episodio","vol",
+    "torrent","magnet","streaming"
 ]);
 
-// 2. STOP WORDS
+// 2. STOP WORDS (Parole grammaticali da ignorare)
 const STOP_WORDS = new Set([
-    "il","lo","la","i","gli","le","un","uno","una",
+    "il","lo","la","i","gli","le","un","uno","una","del","della","dei","al","alla","ai",
     "the","a","an","of","in","on","at","to","for","by","with","and","&",
-    "it", "chapter", "capitolo"
+    "chapter", "capitolo", "part", "parte"
 ]);
 
-// 3. BLACKLIST
+// 3. BLACKLIST (Parole che se presenti nel file ma non nella query indicano un altro film)
 const FORBIDDEN_EXPANSIONS = new Set([
     "new","blood","resurrection","returns","reborn",
     "origins","legacy","revival","sequel",
     "redemption", "evolution", "dead city", "world beyond", "fear the"
 ]);
 
+// Spinoff noti da escludere
 const SPINOFF_KEYWORDS = {
     "dexter": ["new blood"],
     "the walking dead": ["dead city", "world beyond", "fear", "daryl"],
     "breaking bad": ["better call saul"],
     "game of thrones": ["house of the dragon"],
-    "csi": ["miami", "ny", "cyber", "vegas"],
-    "ncis": ["los angeles", "new orleans", "hawaii", "sydney"]
+    "naruto": ["shippuden", "boruto"], // Aggiunto per anime
+    "dragon ball": ["z", "super", "gt", "kai"] // Aggiunto per anime
 };
 
 function romanToArabic(str) {
@@ -45,13 +50,15 @@ function romanToArabic(str) {
     return total;
 }
 
+// Normalizzazione "Ultra" (Coerente con ai_query)
 function normalizeTitle(t) {
+    if (!t) return "";
     return t.toLowerCase()
-        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-        .replace(/[':;-]/g, " ")
-        .replace(/[^a-z0-9\s]/g, " ")
-        .replace(/\b(ii|iii|iv|vi|vii|viii|ix|x)\b/gi, r => romanToArabic(r))
-        .replace(/\s+/g, " ").trim();
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Via accenti
+        .replace(/[':;-]/g, " ") // Punteggiatura -> Spazi
+        .replace(/[^a-z0-9\s]/g, " ") // Via simboli strani
+        .replace(/\b(ii|iii|iv|vi|vii|viii|ix|x)\b/gi, r => romanToArabic(r)) // Romani -> Arabi
+        .replace(/\s+/g, " ").trim(); // Trim spazi
 }
 
 function tokenize(str) {
@@ -60,21 +67,28 @@ function tokenize(str) {
 
 function extractEpisodeInfo(filename) {
     const upper = filename.toUpperCase();
+    // Match Standard: S01E01, S1E1
     const sxeMatch = upper.match(/S(\d{1,2})(?:[._\s-]*E|x)(\d{1,3})/i);
     if (sxeMatch) return { season: parseInt(sxeMatch[1]), episode: parseInt(sxeMatch[2]) };
     
-    // Supporto per "1x01"
+    // Match Alternativo: 1x01
     const xMatch = upper.match(/(\d{1,2})X(\d{1,3})/i);
     if (xMatch) return { season: parseInt(xMatch[1]), episode: parseInt(xMatch[2]) };
     
+    // Match Italiano: Stagione 1 Episodio 1 (Raro nei filename torrent, ma possibile)
+    const itaMatch = upper.match(/STAGIONE\s*(\d{1,2}).*EPISODIO\s*(\d{1,3})/i);
+    if (itaMatch) return { season: parseInt(itaMatch[1]), episode: parseInt(itaMatch[2]) };
+
     return null;
 }
 
 function isUnwantedSpinoff(cleanMeta, cleanFile) {
     for (const [parent, spinoffs] of Object.entries(SPINOFF_KEYWORDS)) {
-        if (cleanMeta.includes(parent)) {
+        // Se cerchiamo il padre (es. "The Walking Dead")
+        if (cleanMeta.includes(parent) && !spinoffs.some(s => cleanMeta.includes(s))) {
+            // Ma il file contiene uno spinoff (es. "Dead City")
             for (const sp of spinoffs) {
-                if (cleanFile.includes(sp) && !cleanMeta.includes(sp)) return true;
+                if (cleanFile.includes(sp)) return true; // Scarta
             }
         }
     }
@@ -88,6 +102,7 @@ function smartMatch(metaTitle, filename, isSeries = false, metaSeason = null, me
     if (!filename) return false;
     const fLower = filename.toLowerCase();
     
+    // Filtri preliminari rapidi
     if (fLower.includes("sample") || fLower.includes("trailer") || fLower.includes("bonus")) return false;
 
     const cleanMetaString = normalizeTitle(metaTitle);
@@ -95,75 +110,76 @@ function smartMatch(metaTitle, filename, isSeries = false, metaSeason = null, me
 
     if (isUnwantedSpinoff(cleanMetaString, cleanFileString)) return false;
 
+    // Tokenizzazione
     const fTokens = tokenize(filename).filter(t => !JUNK_TOKENS.has(t) && !STOP_WORDS.has(t));
     const mTokens = tokenize(metaTitle).filter(t => !STOP_WORDS.has(t));
 
     if (mTokens.length === 0) return false;
 
+    // Controllo "Forbidden Expansions" (Sequel/Prequel non richiesti)
     const isCleanSearch = !mTokens.some(mt => FORBIDDEN_EXPANSIONS.has(mt));
     if (isCleanSearch) {
         if (fTokens.some(ft => FORBIDDEN_EXPANSIONS.has(ft))) return false;
     }
 
-    // 6. LOGICA SERIE TV (AGGIORNATA PER PACK)
-    if (isSeries && metaSeason !== null && metaEpisode !== null) {
+    // === LOGICA SERIE TV ===
+    if (isSeries && metaSeason !== null) {
+        // 1. Cerca Episodio Specifico
         const epInfo = extractEpisodeInfo(filename);
-        
-        // CASO A: Troviamo un numero di episodio specifico nel file (es. S01E05)
         if (epInfo) {
-            // I numeri DEVONO coincidere.
+            // Se c'è info episodio, deve combaciare perfettamente
             if (epInfo.season !== metaSeason || epInfo.episode !== metaEpisode) return false;
             
-            // Verifica semantica titolo
-            let matchCount = 0;
-            mTokens.forEach(mt => {
-                if (fTokens.some(ft => ft.includes(mt) || mt.includes(ft))) matchCount++;
-            });
-            const matchRatio = matchCount / mTokens.length;
-            if (matchRatio >= 0.6) return true;
-            
+            // Verifica semantica titolo (il nome della serie deve combaciare)
             const fuz = FuzzySet([mTokens.join(" ")]).get(fTokens.join(" "));
-            if (fuz && fuz[0][0] > 0.8) return true;
+            if (fuz && fuz[0][0] > 0.75) return true; // Soglia 0.75 per tollerare piccole differenze
+            
+            // Fallback Token Match (se Fuzzy fallisce)
+            let matchCount = 0;
+            mTokens.forEach(mt => { if (fTokens.some(ft => ft.includes(mt))) matchCount++; });
+            if (matchCount / mTokens.length >= 0.6) return true;
 
             return false;
         }
 
-        // CASO B: Non troviamo episodio, ma cerchiamo se è un "Season Pack" (es. Serie S01)
-        const seasonMatch = filename.match(/S(?:eason|tagione)?\s*(\d{1,2})/i);
+        // 2. Cerca Season Pack (Senza info episodio)
+        // Regex per: "S01", "Season 1", "Stagione 1", "Complete S1"
+        const seasonMatch = filename.match(/(?:S|Season|Stagione|Stg)[._\s-]*(\d{1,2})(?!\d|E|x)/i);
         if (seasonMatch) {
              const foundSeason = parseInt(seasonMatch[1]);
-             // La stagione DEVE coincidere
              if (foundSeason !== metaSeason) return false;
 
-             
+             // Verifica titolo per i pack
              const fuz = FuzzySet([mTokens.join(" ")]).get(fTokens.join(" "));
-             // Soglia abbassata a 0.75 per i pack
-             if (fuz && fuz[0][0] > 0.75) return true;
+             // Soglia leggermente più bassa per i pack (spesso hanno nomi strani)
+             if (fuz && fuz[0][0] > 0.70) return true; 
              
-             // Fallback token match
+             // Fallback Token
              let matchCount = 0;
              mTokens.forEach(mt => { if (fTokens.includes(mt)) matchCount++; });
              if (matchCount / mTokens.length >= 0.7) return true;
         }
         
-        // Se non è né episodio singolo né pack valido, scarta.
-        return false;
+        return false; // Se è serie ma non è match episodio né match stagione -> scarta
     }
 
-    // 7. LOGICA FILM
+    // === LOGICA FILM ===
     const cleanF = fTokens.join(" ");
     const cleanM = mTokens.join(" ");
-    const fuzzyScore = FuzzySet([cleanM]).get(cleanF)?.[0]?.[0] || 0;
     
+    // 1. Fuzzy Match (Alta precisione)
+    const fuzzyScore = FuzzySet([cleanM]).get(cleanF)?.[0]?.[0] || 0;
     if (fuzzyScore > 0.85) return true;
 
+    // 2. Token Inclusion (Fallback per titoli lunghi)
     if (!isSeries) {
         let found = 0;
         fTokens.forEach(ft => {
+            // Match esatto o substring significativa (>3 char)
             if (mTokens.some(mt => mt === ft || (mt.length > 3 && ft.includes(mt)))) found++;
         });
         const ratio = found / mTokens.length;
-        if (ratio >= 0.75) return true;
+        if (ratio >= 0.80) return true; // 80% dei token devono esserci
     }
 
     return false;
