@@ -25,7 +25,7 @@ const DYNAMIC_PATTERNS = {
 };
 
 // ==========================================
-// 2. DIZIONARIO AI "BOMBA EDITION" (ITA)
+// 2. DIZIONARIO AI  (ITA)
 // ==========================================
 const ULTRA_SEMANTIC_ALIASES = {
     // --- SERIE TV POPOLARI ---
