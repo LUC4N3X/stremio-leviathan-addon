@@ -78,7 +78,7 @@ async function cfGet(url, config = {}) {
     }
 }
 
-// --- HELPER DI PARSING (OTTIMIZZATI) ---
+// --- HELPER DI PARSING BASE ---
 
 function clean(title) {
     if (!title) return "";
@@ -127,58 +127,100 @@ function parseImdbId(imdbId) {
     return { season: null, episode: null };
 }
 
-function extractInfo(name) {
-    const upper = name.toUpperCase();
-    let season = null;
-    let episode = null;
+// --- NUOVI HELPER DI PARSING (DAL INDEX.JS) ---
 
-    const dotMatch = upper.match(/S(\d{1,2})\.E(\d{1,3})/);
-    if (dotMatch) { 
-        season = parseInt(dotMatch[1]); 
-        episode = parseInt(dotMatch[2]); 
-    } else {
-        const standardMatch = upper.match(/S(\d{1,2})[._\s-]*E(\d{1,3})/);
-        if (standardMatch) {
-            season = parseInt(standardMatch[1]);
-            episode = parseInt(standardMatch[2]);
-        } else {
-            const xMatch = upper.match(/(\d{1,2})X(\d{1,3})/);
-            if (xMatch) {
-                season = parseInt(xMatch[1]);
-                episode = parseInt(xMatch[2]);
-            } else {
-                const sMatch = upper.match(/(?:STAGIONE|SEASON|S)\s?(\d{1,2})(?![0-9])/);
-                if (sMatch) season = parseInt(sMatch[1]);
-                const eMatch = upper.match(/(?:EPISODIO|EP\.|_|\s)(\d{1,3})(?!\d|p|k|bit|mb|gb)/);
-                if (eMatch) episode = parseInt(eMatch[1]);
-            }
-        }
+// Funzioni di utilità per Regex
+const createRegex = (pattern) => new RegExp(`(?<![^\\s\\[(_\\-.,])(${pattern})(?=[\\s\\)\\]_.\\-,]|$)`, 'i');
+const createLanguageRegex = (pattern) => createRegex(`${pattern}(?![ .\\-_]?sub(title)?s?)`);
+
+const PARSE_REGEX = {
+    resolutions: {
+        '2160p': createRegex('(bd|hd|m)?(4k|2160(p|i)?)|u(ltra)?[ .\\-_]?hd|3840\\s?x\\s?(\\d{4})'),
+        '1080p': createRegex('(bd|hd|m)?(1080(p|i)?)|f(ull)?[ .\\-_]?hd|1920\\s?x\\s?(\\d{3,4})'),
+        '720p': createRegex('(bd|hd|m)?((720|800)(p|i)?)|hd|1280\\s?x\\s?(\\d{3,4})'),
+        '480p': createRegex('(bd|hd|m)?(480(p|i)?)|sd'),
+    },
+    qualities: {
+        'BluRay REMUX': createRegex('(bd|br|b|uhd)?remux'),
+        'BluRay': createRegex('(?<!remux.*)(bd|blu[ .\\-_]?ray|((bd|br)[ .\\-_]?rip))(?!.*remux)'),
+        'WEB-DL': createRegex('web[ .\\-_]?(dl)?(?![ .\\-_]?(rip|DLRip|cam))'),
+        'WEBRip': createRegex('web[ .\\-_]?rip'),
+        'HDRip': createRegex('hd[ .\\-_]?rip|web[ .\\-_]?dl[ .\\-_]?rip'),
+        'HDTV': createRegex('hd[ .\\-_]?tv|pdtv'),
+    },
+    languages: {
+        'Multi': createLanguageRegex('multi'),
+        'Dual Audio': createLanguageRegex('dual[ .\\-_]?(audio|lang(uage)?|flac|ac3|aac2?)'),
+        'Italian': createRegex('italian|ita|sub[.\\s\\-_]?ita'),
     }
-    return { season, episode };
+};
+
+function matchPattern(filename, patterns) {
+    for (const [name, pattern] of Object.entries(patterns)) {
+        if (pattern.test(filename)) return name;
+    }
+    return undefined;
 }
 
+function parseTorrentTitle(filename) {
+    if (!filename) return { title: '', year: null, season: null, episode: null, quality: 'Unknown', languages: [] };
+    
+    let normalized = filename.replace(/\./g, ' ').replace(/_/g, ' ').trim();
+    const result = {
+        title: filename,
+        year: null,
+        seasons: [],
+        episodes: [],
+        resolution: matchPattern(filename, PARSE_REGEX.resolutions) || 'Unknown',
+        quality: matchPattern(filename, PARSE_REGEX.qualities) || 'Unknown',
+        isMulti: PARSE_REGEX.languages['Multi'].test(filename) || PARSE_REGEX.languages['Dual Audio'].test(filename)
+    };
+
+    // Estrazione Anno
+    const yearMatch = filename.match(/[[(. _-]?((?:19|20)\d{2})[\]).\s_-]/);
+    if (yearMatch) result.year = parseInt(yearMatch[1]);
+
+    // Estrazione Stagione/Episodio (Migliorata)
+    const seasonEpisodePatterns = [
+        /S(\d{1,2})[ .\-_]?E(\d{1,3})/i,
+        /(\d{1,2})x(\d{1,3})/i,
+        /Stagione\s?(\d{1,2})/i,
+        /Season\s?(\d{1,2})/i
+    ];
+
+    for (const pattern of seasonEpisodePatterns) {
+        const match = filename.match(pattern);
+        if (match) {
+            if (match[1]) result.seasons.push(parseInt(match[1]));
+            if (match[2]) result.episodes.push(parseInt(match[2]));
+        }
+    }
+    
+    // Assegna valori singoli per compatibilità
+    result.season = result.seasons[0] || null;
+    result.episode = result.episodes[0] || null;
+
+    return result;
+}
+
+// Helper aggiornato per il controllo formato
 function isCorrectFormat(name, reqSeason, reqEpisode) {
     if (!reqSeason && !reqEpisode) return true;
-    const info = extractInfo(name);
-    const upperName = name.toUpperCase();
-    const isPack = upperName.includes("COMPLET") || upperName.includes("PACK") || upperName.includes("TUTTE") || upperName.includes("STAGIONE") || upperName.includes("SEASON");
-    const rangeMatch = upperName.match(/(?:S|STAGIONE)?\s*(\d{1,2})\s*-\s*(?:S|STAGIONE)?\s*(\d{1,2})/);
-    if (rangeMatch && reqSeason) {
-        const start = parseInt(rangeMatch[1]);
-        const end = parseInt(rangeMatch[2]);
-        if (reqSeason >= start && reqSeason <= end) return true;
-    }
+    const info = parseTorrentTitle(name);
+    
+    // Logica Pack Stagione (es. "Stagione 1" senza episodi specifici = pack)
+    const isPack = /PACK|COMPLET|TUTTE|STAGIONE\s\d+(?!.*E\d)/i.test(name);
+    
     if (reqSeason && info.season !== null && info.season !== reqSeason) return false;
+    
     if (reqEpisode) {
-        if (isPack) return true;
-        if (info.episode !== null) {
-            if (info.episode !== reqEpisode) return false;
-        } else {
-            return false;
-        }
+        if (isPack) return true; // Accetta pack completi se cerco un episodio
+        if (info.episode !== null && info.episode !== reqEpisode) return false;
     }
     return true;
 }
+
+// --- FINE NUOVI HELPER DI PARSING ---
 
 function parseSize(sizeStr) {
     if (!sizeStr) return 0;
