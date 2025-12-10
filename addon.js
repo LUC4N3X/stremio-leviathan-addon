@@ -104,22 +104,28 @@ function parseSize(sizeStr) {
 }
 
 // ==========================================
-//  HELPER DI FORMATTAZIONE & FILTRO
+//  HELPER DI FORMATTAZIONE & FILTRO (AGGIORNATI PER BOMBA ITA)
 // ==========================================
 
 function isSafeForItalian(item) {
   if (!item || !item.title) return false;
   const t = item.title.toUpperCase();
+  
+  // Lista bianca ESPANSA per "Bomba Edition"
   const itaPatterns = [
-    /\b(ITA|ITALIAN|IT|ITL|ITALY)\b/,
-    /\b(MULTI|MUII|MUL|MULTILANGUAGE)\b.*\b(ITA|IT|ITALIAN)\b/,
-    /\b(AC3|DTS).*\b(ITA|IT|ITALIAN)\b/, 
-    /\b(SUB.?ITA|SUBS.?ITA|SOTTOTITOLI.?ITA)\b/,
-    /\b(VC[._-]?I|VO.?ITA|AUD.?ITA)\b/,            
-    /\b(ITA.?ENG)\b/,                      
-    /ITALIAN.*(DL|Mux|WEBRip|BluRay)/i,
-    /\b(SPEEDVIDEO|WMS|TRIDIM|iDN_CreW)\b/
+    // 1. Standard ITA
+    /\bITA\b/, /\bITALIAN\b/, /\bITALY\b/,
+    // 2. Multilingua / Audio
+    /MULTI.*ITA/, /DUAL.*ITA/, /AUDIO.*ITA/,
+    /AC3.*ITA/, /AAC.*ITA/, /DTS.*ITA/, /TRUEHD.*ITA/,
+    // 3. Sottotitoli (Se accettati)
+    /SUB.*ITA/, /SUBS.*ITA/, /SOTTOTITOLI.*ITA/,
+    // 4. Codec + ITA
+    /H\.?264.*ITA/, /H\.?265.*ITA/, /X264.*ITA/, /HEVC.*ITA/,
+    // 5. Release Groups & Keywords ITA
+    /STAGIONE/, /EPISODIO/, /MUX/, /iDN_CreW/, /WMS/, /TRIDIM/, /SPEEDVIDEO/, /CORSARO/
   ];
+  
   return itaPatterns.some(p => p.test(t));
 }
 
@@ -132,8 +138,13 @@ function cleanFilename(filename) {
     year = ` (${yearMatch[0]})`;
     cleanTitle = filename.substring(0, yearMatch.index);
   }
-  cleanTitle = cleanTitle.replace(/[._]/g, " ").trim();
-  cleanTitle = cleanTitle.replace(/\b(ita|eng|sub|h264|h265|x264|x265|1080p|720p|4k|bluray|webdl|rip)\b.*/yi, "");
+  
+  cleanTitle = cleanTitle.replace(/[._]/g, " "); // Punti/Underscore -> Spazi
+  
+  // Rimuovi Junk "Bomba" per la UI (Espanso)
+  const uiJunk = /\b(ita|eng|sub|h264|h265|x264|x265|hevc|1080p|720p|4k|2160p|bluray|web-?dl|rip|ac3|aac|dts|multi|truehd|remux|complete|pack)\b.*/yi;
+  cleanTitle = cleanTitle.replace(uiJunk, "");
+  
   return `${cleanTitle.trim()}${year}`;
 }
 
@@ -171,13 +182,11 @@ function extractStreamInfo(title, source) {
   if (/5\.1/.test(t)) audioTags.push("5.1");
 
   let lang = "🇬🇧 ENG"; 
-  if (source === "Corsaro") {
+  if (source === "Corsaro" || isSafeForItalian({ title })) {
       lang = "🇮🇹 ITA";
       if (/multi|mui/i.test(t)) lang = "🇮🇹 MULTI";
   } 
-  else if (/\b(ita|italian|it)\b/i.test(t)) {
-      lang = "🇮🇹 ITA";
-  } else if (/multi|mui/i.test(t)) {
+  else if (/multi|mui/i.test(t)) {
       lang = "🌐 MULTI"; 
   }
 
@@ -338,7 +347,7 @@ async function generateStream(type, id, config, userConfStr) {
   if (!meta) return { streams: [] };
   
   const queries = generateSmartQueries(meta);
-  const onlyIta = config.filters?.onlyIta !== false;
+  const onlyIta = config.filters?.onlyIta !== false; // Default: SOLO ITA
 
   console.log(`\n🧠 [AI-CORE] Cerco "${meta.title}" (${meta.year}): ${queries.length} varianti.`);
 
@@ -361,32 +370,21 @@ async function generateStream(type, id, config, userConfStr) {
   resultsRaw = resultsRaw.filter(item => {
     if (!item?.magnet) return false;
     
+    // Check Anno
     const fileYearMatch = item.title.match(/\b(19|20)\d{2}\b/);
     if (fileYearMatch) {
         const fileYear = parseInt(fileYearMatch[0]);
         const metaYear = parseInt(meta.year);
         if (Math.abs(fileYear - metaYear) > 1) return false;
-        
-        if (/\bLisa\b/i.test(item.title) && !/\bLisa\b/i.test(meta.title)) return false;
-
-        const tLower = item.title.toLowerCase();
-        const mLower = meta.title.toLowerCase();
-        const idx = tLower.indexOf(mLower);
-        if (idx > 0) {
-            const prefix = tLower.substring(0, idx).trim();
-            if (/[a-z0-9]$/i.test(prefix)) {
-                const words = prefix.split(/[^a-z0-9]+/);
-                const lastWord = words[words.length - 1];
-                const badPrefixes = ["lisa", "bride", "son", "curse", "house", "i", "return", "revenge"];
-                if (badPrefixes.includes(lastWord)) return false;
-            }
-        }
     }
 
+    // Check Semantico (Smart Parser)
     const isSemanticallySafe = smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode);
     if (!isSemanticallySafe) return false;
 
+    // Check ITA (Rigido se richiesto)
     if (onlyIta && !isSafeForItalian(item)) return false;
+    
     return true;
   });
 
@@ -395,6 +393,7 @@ async function generateStream(type, id, config, userConfStr) {
     const extPromises = FALLBACK_SCRAPERS.map(fb => {
         return LIMITERS.scraper.schedule(async () => {
             try {
+                // Usiamo la query più generica/pulita per il fallback
                 return await withTimeout(fb.searchMagnet(queries[0], meta.year, type, finalId), CONFIG.SCRAPER_TIMEOUT);
             } catch (err) { return []; }
         });
@@ -410,7 +409,8 @@ async function generateStream(type, id, config, userConfStr) {
         
         if (Array.isArray(extResultsRaw)) {
             const filteredExt = extResultsRaw.flat().filter(item => 
-                smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode)
+                smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode) &&
+                (!onlyIta || isSafeForItalian(item))
             );
             resultsRaw = [...resultsRaw, ...filteredExt];
         }
@@ -432,7 +432,7 @@ async function generateStream(type, id, config, userConfStr) {
     } catch (err) { continue; }
   }
   
-  if (!cleanResults.length) return { streams: [{ name: "⛔", title: "Nessun risultato trovato" }] };
+  if (!cleanResults.length) return { streams: [{ name: "⛔", title: "Nessun risultato ITA trovato" }] };
 
   // Ranking
   const ranked = rankAndFilterResults(cleanResults, meta, config).slice(0, CONFIG.MAX_RESULTS);
@@ -451,22 +451,21 @@ async function generateStream(type, id, config, userConfStr) {
     console.log(`⚠️ Tutti i link RD iniziali sono uncached/falliti. Attivo EXTERNAL.JS di emergenza...`);
     
     try {
-        // Forza l'uso di External anche se non è stato usato prima
         const externalEngine = require("./external");
         
-        // Cerca usando la query principale (la più accurata)
+        // Cerca usando la query più efficace (probabilmente quella con "ITA" esplicito)
         const fallbackRaw = await withTimeout(
             externalEngine.searchMagnet(queries[0], meta.year, type, finalId),
             CONFIG.SCRAPER_TIMEOUT + 1000
         );
 
         if (Array.isArray(fallbackRaw)) {
-            // Filtra e prepara
             const fallbackFiltered = fallbackRaw.filter(item => 
-                smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode)
+                smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode) &&
+                (!onlyIta || isSafeForItalian(item))
             );
 
-            // Deduplica rapida (opzionale, per evitare di riprocessare gli stessi hash se external era già partito)
+            // Deduplica rapida
             const newItems = fallbackFiltered.filter(item => {
                 const hashMatch = item.magnet.match(/btih:([a-f0-9]{40})/i);
                 const hash = hashMatch ? hashMatch[1].toUpperCase() : item.magnet;
@@ -475,7 +474,6 @@ async function generateStream(type, id, config, userConfStr) {
 
             console.log(`🔥 External Emergency Found: ${newItems.length} nuovi candidati.`);
 
-            // Risolvi RD sui nuovi item
             const fallbackRdPromises = newItems.map(item => {
                 item.season = meta.season;
                 item.episode = meta.episode;
@@ -483,14 +481,14 @@ async function generateStream(type, id, config, userConfStr) {
             });
 
             const fallbackStreams = (await Promise.all(fallbackRdPromises)).filter(Boolean);
-            streams = fallbackStreams; // Assegna i nuovi stream
+            streams = fallbackStreams; 
         }
     } catch (e) {
         console.error("External Fallback Error:", e.message);
     }
   }
 
-  // Se ancora vuoto, mostra messaggio
+  // Se ancora vuoto
   if (!streams.length) return { streams: [{ name: "⛔", title: "Nessun link cached trovato" }] };
 
   return { streams }; 
@@ -501,20 +499,18 @@ async function generateStream(type, id, config, userConfStr) {
 // 1. Home Page
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 
-// 2. Configurazione Esistente
+// 2. Configurazione
 app.get("/:conf/configure", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
-
-// 3. Nuova Configurazione (FIX PER I TUOI ERRORI)
 app.get("/configure", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 
-// 4. Manifest
+// 3. Manifest
 app.get("/manifest.json", (req, res) => { const manifest = getManifest(); res.setHeader("Access-Control-Allow-Origin", "*"); res.json(manifest); });
 app.get("/:conf/manifest.json", (req, res) => { const manifest = getManifest(); res.setHeader("Access-Control-Allow-Origin", "*"); res.json(manifest); });
 
-// 5. Catalog (Dummy)
+// 4. Catalog (Dummy)
 app.get("/:conf/catalog/:type/:id/:extra?.json", async (req, res) => { res.setHeader("Access-Control-Allow-Origin", "*"); res.json({metas:[]}); });
 
-// 6. STREAMING CON CACHE
+// 5. STREAMING CON CACHE
 app.get("/:conf/stream/:type/:id.json", async (req, res) => { 
     res.setHeader("Access-Control-Allow-Origin", "*");
 
@@ -550,4 +546,4 @@ function getConfig(configStr) { try { return JSON.parse(Buffer.from(configStr, "
 function withTimeout(promise, ms) { return Promise.race([promise, new Promise(r => setTimeout(() => r([]), ms))]); }
 
 const PORT = process.env.PORT || 7000;
-app.listen(PORT, () => console.log(`🚀 Leviathan (AI-Core) v31.3 attivo su porta ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Leviathan (AI-Core) v32 ITA attivo su porta ${PORT}`));
