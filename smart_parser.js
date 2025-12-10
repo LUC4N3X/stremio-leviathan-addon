@@ -45,7 +45,9 @@ const ULTRA_FORBIDDEN_EXPANSIONS = new Set([
     "origins","legacy","revival","sequel",
     "redemption", "evolution", "dead city", "world beyond", "fear the",
     "remake", "reimagined", "extended edition", "fan edit", "bootleg", 
-    "unaired", "pilot"
+    "unaired", "pilot",
+    // Specifici per evitare casi come "Lisa Frankenstein"
+    "lisa", "bride", "son", "curse", "revenge"
 ]);
 
 // Regex per contenuti spazzatura (Fanfic, Parodie)
@@ -112,14 +114,17 @@ function extractEpisodeInfo(filename) {
     return null;
 }
 
+function extractYear(filename) {
+    // Cerca anno formato (19xx o 20xx)
+    const match = filename.match(/\b(19|20)\d{2}\b/);
+    return match ? parseInt(match[0]) : null;
+}
+
 // Funzione Aggiornata per leggere ULTRA_SPINOFF_GRAPH
 function isUnwantedSpinoff(cleanMeta, cleanFile) {
     for (const [parent, data] of Object.entries(ULTRA_SPINOFF_GRAPH)) {
-        
         if (cleanMeta.includes(parent)) {
-            
             const isSearchingForSpinoff = data.spinoffs.some(s => cleanMeta.includes(s));
-            
             if (!isSearchingForSpinoff) {
                 // Se NON cerco uno spinoff, ma il FILE ne contiene uno -> SCARTA
                 for (const sp of data.spinoffs) {
@@ -134,7 +139,8 @@ function isUnwantedSpinoff(cleanMeta, cleanFile) {
 // ==========================================
 // 3. FUNZIONE PRINCIPALE: SMART MATCH
 // ==========================================
-function smartMatch(metaTitle, filename, isSeries = false, metaSeason = null, metaEpisode = null) {
+// Aggiunto parametro opzionale metaYear
+function smartMatch(metaTitle, filename, isSeries = false, metaSeason = null, metaEpisode = null, metaYear = null) {
     if (!filename) return false;
     const fLower = filename.toLowerCase();
     
@@ -155,7 +161,6 @@ function smartMatch(metaTitle, filename, isSeries = false, metaSeason = null, me
     if (mTokens.length === 0) return false;
 
     // Controllo "Forbidden Expansions" (Sequel/Remake non richiesti)
-    
     const isCleanSearch = !mTokens.some(mt => ULTRA_FORBIDDEN_EXPANSIONS.has(mt));
     if (isCleanSearch) {
         if (fTokens.some(ft => ULTRA_FORBIDDEN_EXPANSIONS.has(ft))) return false;
@@ -163,57 +168,94 @@ function smartMatch(metaTitle, filename, isSeries = false, metaSeason = null, me
 
     // === LOGICA SERIE TV ===
     if (isSeries && metaSeason !== null) {
-        // 1. Cerca Episodio Specifico
+        // [LOGICA SERIE INVARIATA...]
         const epInfo = extractEpisodeInfo(filename);
         if (epInfo) {
             if (epInfo.season !== metaSeason || epInfo.episode !== metaEpisode) return false;
-            
-            // Verifica Titolo Serie
             const fuz = FuzzySet([mTokens.join(" ")]).get(fTokens.join(" "));
             if (fuz && fuz[0][0] > 0.75) return true;
-            
-            // Fallback Token Match
             let matchCount = 0;
             mTokens.forEach(mt => { if (fTokens.some(ft => ft.includes(mt))) matchCount++; });
             if (matchCount / mTokens.length >= 0.6) return true;
-
             return false;
         }
 
-        // 2. Cerca Season Pack
         const seasonMatch = filename.match(/(?:S|Season|Stagione|Stg)[._\s-]*(\d{1,2})(?!\d|E|x)/i);
         if (seasonMatch) {
              const foundSeason = parseInt(seasonMatch[1]);
              if (foundSeason !== metaSeason) return false;
-
              const fuz = FuzzySet([mTokens.join(" ")]).get(fTokens.join(" "));
              if (fuz && fuz[0][0] > 0.70) return true; 
-             
              let matchCount = 0;
              mTokens.forEach(mt => { if (fTokens.includes(mt)) matchCount++; });
              if (matchCount / mTokens.length >= 0.7) return true;
         }
-        
         return false;
     }
 
     // === LOGICA FILM ===
+    
+    // 1. Controllo Anno (Cruciale per Frankenstein 2025 vs Lisa Frankenstein 2024)
+    if (metaYear) {
+        const fileYear = extractYear(filename);
+        if (fileYear) {
+            // Se gli anni sono diversi e la distanza è >= 1 anno, stai attento
+            // Esempio: Cerco 2025, trovo 2024. Se il titolo non è IDENTICO, scarta.
+            if (Math.abs(fileYear - metaYear) >= 1) {
+                // Tolleranza zero se il titolo non è esattamente lo stesso
+                // Se cerco "Frankenstein" (2025) e trovo "Lisa Frankenstein" (2024), qui verrebbe bloccato
+                // perché "Lisa" sporca il match esatto.
+                const strictFuzzy = FuzzySet([cleanMetaString]).get(cleanFileString);
+                // Se il fuzzy score è basso (< 0.95) e l'anno è diverso, è un altro film
+                if (!strictFuzzy || strictFuzzy[0][0] < 0.95) return false;
+            }
+        }
+    }
+
+    // 2. Controllo Prefisso Intruso ("Lisa" Check)
+    // Se la prima parola del file (pulito) NON è la prima parola del titolo cercato
+    // E la prima parola del file non è contenuta nel titolo cercato... è un altro film.
+    if (fTokens.length > 0 && mTokens.length > 0) {
+        const firstMeta = mTokens[0];
+        const firstFile = fTokens[0];
+        
+        // Esempio: Meta="Frankenstein", File="Lisa Frankenstein"
+        // firstMeta="frankenstein", firstFile="lisa"
+        // "lisa" != "frankenstein" e "lisa" non è in mTokens -> SCARTA
+        if (firstFile !== firstMeta && !mTokens.includes(firstFile)) {
+            
+            // Eccezione: a volte il file ha il titolo inglese prima?
+            // Controlliamo se il titolo cercato appare DOPO interamente
+            const joinedFile = fTokens.join(" ");
+            const joinedMeta = mTokens.join(" ");
+            
+            // Se il titolo cercato è "Frankenstein" e il file è "Lisa Frankenstein"
+            // joinedFile include joinedMeta, MA c'è robaccia prima.
+            if (joinedFile.includes(joinedMeta)) {
+                // Se c'è un prefisso significativo, scarta.
+                return false;
+            }
+        }
+    }
+
     const cleanF = fTokens.join(" ");
     const cleanM = mTokens.join(" ");
     
     // Fuzzy Match
     const fuzzyScore = FuzzySet([cleanM]).get(cleanF)?.[0]?.[0] || 0;
+    
+    // Aumentato threshold per evitare falsi positivi corti
     if (fuzzyScore > 0.85) return true;
 
     // Token Match Fallback
-    if (!isSeries) {
-        let found = 0;
-        fTokens.forEach(ft => {
-            if (mTokens.some(mt => mt === ft || (mt.length > 3 && ft.includes(mt)))) found++;
-        });
-        const ratio = found / mTokens.length;
-        if (ratio >= 0.80) return true;
-    }
+    let found = 0;
+    fTokens.forEach(ft => {
+        if (mTokens.some(mt => mt === ft || (mt.length > 3 && ft.includes(mt)))) found++;
+    });
+    
+    // Richiedi che quasi tutte le parole del titolo siano presenti
+    const ratio = found / mTokens.length;
+    if (ratio >= 0.90) return true; // Alzato da 0.80 a 0.90 per precisione
 
     return false;
 }
