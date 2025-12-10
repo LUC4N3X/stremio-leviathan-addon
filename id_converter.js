@@ -15,8 +15,7 @@ const CONFIG = {
 
 
 
-// --- 💾 DATABASE PERSISTENTE (SQLITE) ---
-// Ispirato alla robustezza del "DatabaseManager" Python
+// ---  DATABASE PERSISTENTE (SQLITE) ---
 const DATA_DIR = path.join(__dirname, 'data');
 fs.ensureDirSync(DATA_DIR); // Crea la cartella se non esiste
 
@@ -49,7 +48,7 @@ const stmtInsert = db.prepare(`
     VALUES (@imdb, @tmdb, @tvdb, @trakt, @type, @slug, @timestamp)
 `);
 
-// --- ⚡ AXIOS CLIENTS ---
+// ---  AXIOS CLIENTS ---
 const tmdbClient = axios.create({ baseURL: CONFIG.TMDB_URL, timeout: 4000 });
 const traktClient = axios.create({ 
     baseURL: CONFIG.TRAKT_URL, 
@@ -63,7 +62,7 @@ const traktClient = axios.create({
 const omdbClient = axios.create({ baseURL: CONFIG.OMDB_URL, timeout: 4000 });
 
 // ==========================================
-// 🕵️‍♂️ LOGICA DI RICERCA ESTERNA
+//  LOGICA DI RICERCA ESTERNA
 // ==========================================
 
 async function searchTmdb(id, source = 'imdb_id') {
@@ -144,14 +143,14 @@ async function searchOmdb(imdbId) {
 }
 
 // ==========================================
-// 🛠️ FUNZIONE CORE (DB MANAGER)
+//  FUNZIONE CORE (DB MANAGER)
 // ==========================================
 
 async function resolveIds(id, typeHint = null) {
     const isImdb = id.toString().startsWith('tt');
     const cleanId = id.toString().split(':')[0]; // Rimuove :season:episode se presente
 
-    // 1. 💾 DB CHECK (Lettura immediata)
+    // 1.  DB CHECK (Lettura immediata)
     let cached = null;
     try {
         cached = isImdb ? stmtGetByImdb.get(cleanId) : stmtGetByTmdb.get(cleanId);
@@ -169,7 +168,7 @@ async function resolveIds(id, typeHint = null) {
         };
     }
 
-    // 2. 🌍 LIVE SEARCH (Se non è nel DB)
+    // 2.  LIVE SEARCH (Se non è nel DB)
     let identity = { 
         imdb: isImdb ? cleanId : null, 
         tmdb: !isImdb ? parseInt(cleanId) : null,
@@ -209,7 +208,7 @@ async function resolveIds(id, typeHint = null) {
         if (omdbRes) identity = { ...identity, ...omdbRes };
     }
 
-    // 3. 💾 SAVE TO DB (Scrittura Persistente)
+    // 3. SAVE TO DB (Scrittura Persistente)
     // Salviamo solo se abbiamo almeno una coppia solida (IMDB+TMDB) o (IMDB solo)
     if (identity.imdb) {
         try {
@@ -222,7 +221,7 @@ async function resolveIds(id, typeHint = null) {
                 slug: identity.slug || null,
                 timestamp: Date.now()
             });
-            // console.log(`💾 Saved to DB: ${identity.imdb} <-> ${identity.tmdb}`);
+            // console.log(` Saved to DB: ${identity.imdb} <-> ${identity.tmdb}`);
         } catch (err) { console.error("DB Write Error:", err.message); }
     }
 
