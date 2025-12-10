@@ -1,82 +1,232 @@
-// ai_query.js
+// ai_query.js - VERSIONE DEFINITIVA "SOLO ITA"
 
-// Dizionario AI statico
-const SEMANTIC_ALIASES = {
-    // Serie Popolari
-    "la casa di carta": ["money heist", "la casa de papel"],
-    "il trono di spade": ["game of thrones"],
-    "l'attacco dei giganti": ["attack on titan", "shingeki no kyojin"],
-    "demon slayer": ["kimetsu no yaiba"],
-    "jujutsu kaisen": ["sorcery fight"],
-    "my hero academia": ["boku no hero academia"],
-    "one piece": ["one piece ita"],
-    // Film / Franchise complessi
-    "fast and furious": ["fast & furious", "f9", "fast x"],
-    "harry potter": ["hp"],
-    // Correzioni comuni & Prequel
-    "dr house": ["house md", "house m.d.", "dr. house"],
-    "it welcome to derry": ["welcome to derry"],
-    "it: welcome to derry": ["welcome to derry"]
+// ==========================================
+// 1. CONFIGURAZIONE JUNK & PATTERN
+// ==========================================
+
+// Token tecnici da rimuovere per trovare il "vero" titolo
+const ULTRA_JUNK_TOKENS = new Set([
+    // Lingua e Audio
+    "ita", "eng", "sub", "subita", "dub", "multi", "dual", "audio",
+    "ac3", "aac", "aac5.1", "dd5.1", "ddp5.1", "dts", "truehd", "stereo", "5.1", "7.1",
+    // Video Codec e Qualità
+    "x264", "x265", "h264", "hevc", "divx", "xvid",
+    "webrip", "bdrip", "dvdrip", "hdrip", "brrip", "tsrip", "camrip", "web-dl", "bluray", "remux",
+    "1080i", "720i", "480p", "576p", "sd", "hd", "fhd", "uhd", "4k", "8k", "2160p", "1080p", "720p",
+    // Edizioni e Sorgenti
+    "extended", "directors cut", "unrated", "theatrical", "imax", "remastered",
+    "netflix", "amazon", "disney", "hulu", "hbo", "prime", "apple tv",
+    // Network & Release
+    "torrent", "magnet", "ddl", "direct download", "subs included",
+    "multi sub", "forced subs", "hardcoded", "softsubs", "complete", "pack", "season pack"
+]);
+
+// Pattern dinamici per identificare variazioni del titolo (Reboot, Sequel, Spinoff)
+const DYNAMIC_PATTERNS = {
+    reboot: [/reboot/i, /remake/i, /legacy/i, /returns/i, /resurrection/i],
+    sequel: [/part \d/i, /chapter \d/i, /\d{1,2}/, /sequel/i, /ii/i, /iii/i],
+    spinoff: [/origins/i, /begins/i, /rises/i, /chronicles/i, /story/i]
 };
 
-function generateSmartQueries(meta) {
-    const { title, originalTitle, year, season, episode, isSeries } = meta;
+// ==========================================
+// 2. DIZIONARIO AI "BOMBA EDITION" (ITA)
+// ==========================================
+const ULTRA_SEMANTIC_ALIASES = {
+    // --- SERIE TV POPOLARI ---
+    "la casa di carta": ["money heist", "la casa de papel", "lcdp"],
+    "il trono di spade": ["game of thrones", "got", "a song of ice and fire"],
+    "l'attacco dei giganti": ["attack on titan", "shingeki no kyojin", "aot"],
+    "demon slayer": ["kimetsu no yaiba", "ds"],
+    "jujutsu kaisen": ["sorcery fight", "jjk"],
+    "my hero academia": ["boku no hero academia", "mha"],
+    "one piece": ["one piece ita", "op"],
+    "breaking bad": ["bb", "brba"],
+    "stranger things": ["st"],
+    "the mandalorian": ["mando", "star wars mandalorian"],
+    "the witcher": ["witcher"],
+    "squid game": ["ojingeo geim"],
+    "naruto": ["naruto shippuden"],
+    "dragon ball": ["dbz", "dbs", "dragonball", "dragon ball z", "dragon ball super"],
     
-    // Normalizzazione base
-    const cleanTitle = title.toLowerCase().trim();
-    const cleanOriginal = originalTitle ? originalTitle.toLowerCase().trim() : "";
-    
-    // 1. Base Set: Titolo Italiano e Originale
-    let titles = new Set();
-    titles.add(title);
-    if (originalTitle) titles.add(originalTitle);
+    // --- SERIE ITALIANE ---
+    "gomorra": ["gomorrah", "gomorra la serie"],
+    "mare fuori": ["the sea beyond"],
+    "zero calcare": ["strappare lungo i bordi", "questo mondo non mi rendera cattivo"],
+    "l'amica geniale": ["my brilliant friend"],
+    "suburra": ["suburra la serie"],
 
-    // 2. Espansione Semantica (AI Dictionary)
-    [cleanTitle, cleanOriginal].forEach(t => {
-        if (SEMANTIC_ALIASES[t]) {
-            SEMANTIC_ALIASES[t].forEach(alias => titles.add(alias));
+    // --- FRANCHISE & FILM ---
+    "fast and furious": ["fast & furious", "f9", "fast x", "the fast saga"],
+    "harry potter": ["hp", "philosopher stone", "chamber secrets", "prisoner azkaban", "goblet fire", "order phoenix", "half blood prince", "deathly hallows"],
+    "star wars": ["sw", "a new hope", "empire strikes back", "return jedi", "phantom menace", "attack clones", "revenge sith", "force awakens", "last jedi", "rise skywalker"],
+    "marvel": ["mcu", "avengers", "iron man", "captain america", "thor", "black widow", "spider-man", "guardians of the galaxy"],
+    "dc": ["dceu", "batman", "superman", "wonder woman", "justice league", "joker", "the batman"],
+    "il signore degli anelli": ["lord of the rings", "lotr", "fellowship ring", "two towers", "return king"],
+    
+    // --- CORREZIONI COMUNI ---
+    "dr house": ["house md", "house m.d.", "dr. house"],
+    "it welcome to derry": ["welcome to derry"],
+    "the walking dead": ["twd"],
+    "better call saul": ["bcs"],
+    "house of the dragon": ["hotd"]
+};
+
+// ==========================================
+// 3. FUNZIONI DI NORMALIZZAZIONE E LOGICA
+// ==========================================
+
+// Funzione potente per pulire i titoli (rimuove accenti e caratteri strani)
+function ultraNormalizeTitle(t) {
+    if (!t) return "";
+    return t.toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Rimuove accenti (è -> e)
+        .replace(/[':;,-.?!]/g, " ") // Punteggiatura diventa spazio
+        .replace(/[^a-z0-9\s]/g, "") // Via tutto ciò che non è testo/numeri
+        .replace(/\s+/g, " ").trim(); // Via doppi spazi
+}
+
+// Espansione intelligente tramite Pattern e Dizionario
+function autoExpandAliases(cleanTitle) {
+    let aliases = new Set();
+    
+    // 1. Controllo Dizionario Statico
+    if (ULTRA_SEMANTIC_ALIASES[cleanTitle]) {
+        ULTRA_SEMANTIC_ALIASES[cleanTitle].forEach(a => aliases.add(a));
+    }
+    // Controllo inverso (se la chiave è contenuta nel titolo)
+    Object.keys(ULTRA_SEMANTIC_ALIASES).forEach(key => {
+        if (cleanTitle.includes(key)) {
+             ULTRA_SEMANTIC_ALIASES[key].forEach(a => aliases.add(a));
         }
     });
 
-    // 3. Generazione Query Combinate
+    // 2. Pattern Matching Dinamico (Sequel, Reboot, ecc.)
+    for (const [type, patterns] of Object.entries(DYNAMIC_PATTERNS)) {
+        patterns.forEach(p => {
+            if (p.test(cleanTitle)) {
+                // Rimuove il pattern (es: "Batman Returns" -> "Batman")
+                const stripped = cleanTitle.replace(p, '').trim();
+                
+                // SICUREZZA: Evitiamo alias troppo corti (< 3 caratteri)
+                if (stripped.length > 3) {
+                    aliases.add(stripped);
+                }
+            }
+        });
+    }
+    return Array.from(aliases);
+}
+
+// ==========================================
+// 4. GENERATORE QUERY (CORE)
+// ==========================================
+function generateSmartQueries(meta) {
+    // Impostiamo "ITA" come lingua predefinita se non specificata
+    const { title, originalTitle, year, season, episode, isSeries, language = "ita" } = meta;
+    
+    // Normalizzazione
+    const cleanTitle = ultraNormalizeTitle(title);
+    const cleanOriginal = originalTitle ? ultraNormalizeTitle(originalTitle) : "";
+    
+    // Creazione set base dei titoli
+    let titles = new Set();
+    if (title) titles.add(title);
+    if (cleanTitle && cleanTitle.length > 2) titles.add(cleanTitle);
+    if (originalTitle) titles.add(originalTitle);
+    
+    // Espansione Aliases
+    [cleanTitle, cleanOriginal].forEach(t => {
+        if (t) {
+            autoExpandAliases(t).forEach(alias => titles.add(alias));
+        }
+    });
+
     let queries = new Set();
     const sStr = season ? String(season).padStart(2, "0") : "";
     const eStr = episode ? String(episode).padStart(2, "0") : "";
+    const langSuffix = "ITA"; // Forziamo ITA per le ricerche prioritarie
 
     titles.forEach(t => {
-        if (isSeries) {
-            // A. Query Specifiche per Episodio (Alta precisione)
-            queries.add(`${t} S${sStr}E${eStr}`);     // Es: Serie S01E01
-            queries.add(`${t} ${season}x${eStr}`);     // Es: Serie 1x01
-            
-            // B. Query Generiche per Stagione (FONDAMENTALE PER I PACK)
-            // Aggiungiamo queste per trovare i "Season Pack" che contengono l'episodio
-            queries.add(`${t} Stagione ${season}`);    // Es: Serie Stagione 1
-            queries.add(`${t} Season ${season}`);      // Es: Serie Season 1
-            queries.add(`${t} S${sStr}`);              // Es: Serie S01 (Cattura molti pack)
+        if (!t) return;
+        
+        // Pulizia finale del titolo (trim)
+        t = t.trim();
 
-            // C. Varianti con Anno (utile per reboot o omonimie)
+        if (isSeries) {
+            // === SERIE TV ===
+            
+            // A. EPISODIO SPECIFICO
+            if (episode) {
+                // Query prioritarie (con ITA)
+                queries.add(`${t} S${sStr}E${eStr} ${langSuffix}`);
+                queries.add(`${t} ${season}x${eStr} ${langSuffix}`);
+                
+                // Query secondarie (Senza ITA, per file Multilang/DL)
+                queries.add(`${t} S${sStr}E${eStr}`);
+                queries.add(`${t} ${season}x${eStr}`);
+            }
+            
+            // B. PACK STAGIONE (Fondamentale per serie vecchie o finite)
+            // ITA Prima
+            queries.add(`${t} Stagione ${season} ${langSuffix}`);
+            queries.add(`${t} Season ${season} ${langSuffix}`);
+            queries.add(`${t} S${sStr} ${langSuffix}`);
+            
+            // Varianti generiche
+            queries.add(`${t} Stagione ${season}`);
+            queries.add(`${t} S${sStr}`); // Spesso trova pack tipo "Nome Serie S01 1080p"
+            
+            // C. Varianti con Anno (utile per reboot)
             if (year) {
                 queries.add(`${t} ${year} S${sStr}E${eStr}`);
                 queries.add(`${t} ${year} S${sStr}`);
             }
+
         } else {
-            // Film
+            // === FILM ===
+            
+            // 1. Titolo + Anno + ITA (Massima precisione)
+            queries.add(`${t} ${year} ${langSuffix}`);
+            
+            // 2. Titolo + ITA (Senza anno)
+            queries.add(`${t} ${langSuffix}`);
+            
+            // 3. Fallback (Solo Titolo + Anno)
+            // Utile per file MKV che contengono audio ITA ma non lo scrivono nel titolo
             queries.add(`${t} ${year}`);
-            // Se il titolo non contiene già "ita", proviamo ad aggiungerlo per filtrare
-            if (!t.toLowerCase().includes("ita")) queries.add(`${t} ITA`);
-            queries.add(t); // Titolo secco come fallback
+            
+            // 4. Titolo secco (Solo se molto specifico/lungo)
+            if (t.length > 5 && !year) {
+                queries.add(t);
+            }
         }
     });
 
-    // Ordiniamo: prima le query più specifiche (con E), poi i pack, per dare priorità ai file singoli
+    // ==========================================
+    // 5. ORDINAMENTO INTELLIGENTE (ITA FIRST)
+    // ==========================================
     return Array.from(queries).sort((a, b) => {
-        const hasEpisodeA = a.includes("E" + eStr) || a.includes("x" + eStr);
-        const hasEpisodeB = b.includes("E" + eStr) || b.includes("x" + eStr);
-        if (hasEpisodeA && !hasEpisodeB) return -1;
-        if (!hasEpisodeA && hasEpisodeB) return 1;
-        return 0;
+        // Calcolo punteggio per ordinamento
+        let scoreA = 0;
+        let scoreB = 0;
+
+        // Regole di punteggio
+        if (a.includes("ITA")) scoreA += 10;
+        if (b.includes("ITA")) scoreB += 10;
+        
+        if (a.includes("E" + eStr)) scoreA += 5; // Episodio specifico
+        if (b.includes("E" + eStr)) scoreB += 5;
+        
+        if (a.includes("Stagione")) scoreA += 2; // Preferisci "Stagione" a "Season" per ITA
+        if (b.includes("Stagione")) scoreB += 2;
+
+        // Ordinamento decrescente (punteggio più alto prima)
+        if (scoreA !== scoreB) return scoreB - scoreA;
+        
+        // A parità di punteggio, preferisci la query più corta (spesso meno rumorosa)
+        return a.length - b.length;
     });
 }
 
-module.exports = { generateSmartQueries };
+// Export moduli
+module.exports = { generateSmartQueries, ultraNormalizeTitle, ULTRA_SEMANTIC_ALIASES, ULTRA_JUNK_TOKENS };
