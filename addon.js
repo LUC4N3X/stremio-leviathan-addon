@@ -1,24 +1,26 @@
-// --- 1. CARICAMENTO VARIABILI D'AMBIENTE (.ENV) ---
-require("dotenv").config();
-
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const path = require("path");
 const axios = require("axios");
 const Bottleneck = require("bottleneck");
+// NUOVO: Importiamo il limitatore di richieste
 const rateLimit = require("express-rate-limit");
-const Redis = require("ioredis"); // IMPORTIAMO IL CLIENT REDIS
 
-// --- IMPORTIAMO I MODULI INTERNI ---
+// --- IMPORTIAMO I NUOVI MODULI SMART ---
 const { generateSmartQueries } = require("./ai_query");
 const { smartMatch } = require("./smart_parser");
+// IMPORTIAMO IL RANKING ESTERNO
 const { rankAndFilterResults } = require("./ranking");
+
+//  IMPORTIAMO ALTRI MODULI
 const { tmdbToImdb } = require("./id_converter");
 const kitsuHandler = require("./kitsu_handler");
 const RD = require("./debrid/realdebrid");
 const AD = require("./debrid/alldebrid");
 const TB = require("./debrid/torbox");
+
+// --- IMPORTIAMO IL MANIFEST ---
 const { getManifest } = require("./manifest");
 
 // --- CONFIGURAZIONE ---
@@ -30,22 +32,22 @@ const CONFIG = {
   MAX_RESULTS: 40, 
 };
 
-// --- CACHE SYSTEM CONFIGURATION (REDIS EDITION) ---
-const CACHE_TTL = 15 * 60; // 15 Minuti (IN SECONDI per Redis)
+// --- CACHE SYSTEM CONFIGURATION ---
+const CACHE_TTL = 15 * 60 * 1000; // 15 Minuti
+const STREAM_CACHE = new Map();
 
-// Inizializzazione Redis con gestione errori
-let redis = null;
-if (process.env.REDIS_URL) {
-    redis = new Redis(process.env.REDIS_URL, {
-        maxRetriesPerRequest: null,
-        connectTimeout: 10000
-    });
-
-    redis.on("connect", () => console.log("✅ [REDIS] Connesso al database esterno!"));
-    redis.on("error", (err) => console.error("❌ [REDIS] Errore connessione:", err.message));
-} else {
-    console.warn("⚠️ [REDIS] Variabile REDIS_URL mancante nel .env! La cache è disabilitata.");
-}
+// Garbage Collector
+setInterval(() => {
+    const now = Date.now();
+    let cleaned = 0;
+    for (const [key, value] of STREAM_CACHE.entries()) {
+        if (now > value.expiry) {
+            STREAM_CACHE.delete(key);
+            cleaned++;
+        }
+    }
+    if (cleaned > 0) console.log(`🧹 [CACHE] Puliti ${cleaned} elementi scaduti.`);
+}, 20 * 60 * 1000);
 
 // --- LIMITERS (Interni per API) ---
 const LIMITERS = {
@@ -64,10 +66,10 @@ const FALLBACK_SCRAPERS = [
 
 const app = express();
 
-// --- SICUREZZA & RATE LIMITING ---
-app.set('trust proxy', 1); // Necessario per Render, Heroku, HF
+// --- SICUREZZA & RATE LIMITING (FIX CODEQL) ---
+app.set('trust proxy', 1); // Necessario se hostato su Render, Heroku, HF, ecc.
 
-// Limitatore: Max 300 richieste ogni 15 minuti per IP
+// Definiamo il limitatore: Max 300 richieste ogni 15 minuti per IP
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000, 
 	max: 300, 
@@ -76,6 +78,7 @@ const limiter = rateLimit({
     message: "Troppe richieste da questo IP, riprova più tardi."
 });
 
+// Applichiamo il limitatore a tutte le richieste
 app.use(limiter);
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors());
@@ -101,19 +104,25 @@ function parseSize(sizeStr) {
 }
 
 // ==========================================
-//  HELPER DI FORMATTAZIONE & FILTRO
-
+//  HELPER DI FORMATTAZIONE & FILTRO (AGGIORNATI PER BOMBA ITA)
+// ==========================================
 
 function isSafeForItalian(item) {
   if (!item || !item.title) return false;
   const t = item.title.toUpperCase();
   
+  // Lista bianca ESPANSA per "Bomba Edition"
   const itaPatterns = [
+    // 1. Standard ITA
     /\bITA\b/, /\bITALIAN\b/, /\bITALY\b/,
+    // 2. Multilingua / Audio
     /MULTI.*ITA/, /DUAL.*ITA/, /AUDIO.*ITA/,
     /AC3.*ITA/, /AAC.*ITA/, /DTS.*ITA/, /TRUEHD.*ITA/,
+    // 3. Sottotitoli (Se accettati)
     /SUB.*ITA/, /SUBS.*ITA/, /SOTTOTITOLI.*ITA/,
+    // 4. Codec + ITA
     /H\.?264.*ITA/, /H\.?265.*ITA/, /X264.*ITA/, /HEVC.*ITA/,
+    // 5. Release Groups & Keywords ITA
     /STAGIONE/, /EPISODIO/, /MUX/, /iDN_CreW/, /WMS/, /TRIDIM/, /SPEEDVIDEO/, /CORSARO/
   ];
   
@@ -130,7 +139,9 @@ function cleanFilename(filename) {
     cleanTitle = filename.substring(0, yearMatch.index);
   }
   
-  cleanTitle = cleanTitle.replace(/[._]/g, " "); 
+  cleanTitle = cleanTitle.replace(/[._]/g, " "); // Punti/Underscore -> Spazi
+  
+  // Rimuovi Junk "Bomba" per la UI (Espanso)
   const uiJunk = /\b(ita|eng|sub|h264|h265|x264|x265|hevc|1080p|720p|4k|2160p|bluray|web-?dl|rip|ac3|aac|dts|multi|truehd|remux|complete|pack)\b.*/yi;
   cleanTitle = cleanTitle.replace(uiJunk, "");
   
@@ -382,7 +393,7 @@ async function generateStream(type, id, config, userConfStr) {
     const extPromises = FALLBACK_SCRAPERS.map(fb => {
         return LIMITERS.scraper.schedule(async () => {
             try {
-                
+                // Usiamo la query più generica/pulita per il fallback
                 return await withTimeout(fb.searchMagnet(queries[0], meta.year, type, finalId), CONFIG.SCRAPER_TIMEOUT);
             } catch (err) { return []; }
         });
@@ -435,14 +446,14 @@ async function generateStream(type, id, config, userConfStr) {
   
   let streams = (await Promise.all(rdPromises)).filter(Boolean);
 
-  //  FALLBACK ESTREMO
+  // 🔥🔥🔥 FALLBACK ESTREMO: SE RD NON RESTITUISCE NULLA 🔥🔥🔥
   if (streams.length === 0) {
     console.log(`⚠️ Tutti i link RD iniziali sono uncached/falliti. Attivo EXTERNAL.JS di emergenza...`);
     
     try {
         const externalEngine = require("./external");
         
-        // Cerca usando la query più efficace 
+        // Cerca usando la query più efficace (probabilmente quella con "ITA" esplicito)
         const fallbackRaw = await withTimeout(
             externalEngine.searchMagnet(queries[0], meta.year, type, finalId),
             CONFIG.SCRAPER_TIMEOUT + 1000
@@ -499,46 +510,40 @@ app.get("/:conf/manifest.json", (req, res) => { const manifest = getManifest(); 
 // 4. Catalog (Dummy)
 app.get("/:conf/catalog/:type/:id/:extra?.json", async (req, res) => { res.setHeader("Access-Control-Allow-Origin", "*"); res.json({metas:[]}); });
 
-// 5. STREAMING CON REDIS CACHE (GOD TIER)
+// 5. STREAMING CON CACHE
 app.get("/:conf/stream/:type/:id.json", async (req, res) => { 
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Cache-Control", "max-age=3600"); // Cache Browser
 
     const { conf, type, id } = req.params;
-    // Chiave strutturata per Redis
-    const cacheKey = `stream:${conf}:${type}:${id}`;
+    const cacheKey = `${conf}:${type}:${id}`;
 
-    try {
-        // A. Controllo Cache Redis
-        if (redis) {
-            const cachedEntry = await redis.get(cacheKey);
-            if (cachedEntry) {
-                console.log(`⚡ [REDIS HIT] Servo "${id}" dalla cache remota.`);
-                return res.json(JSON.parse(cachedEntry));
-            }
+    // 1. Controllo Cache
+    if (STREAM_CACHE.has(cacheKey)) {
+        const cachedEntry = STREAM_CACHE.get(cacheKey);
+        if (Date.now() < cachedEntry.expiry) {
+            console.log(`⚡ [CACHE HIT] Servo "${id}" dalla memoria.`);
+            return res.json(cachedEntry.data);
+        } else {
+            STREAM_CACHE.delete(cacheKey);
         }
-
-        // B. Generazione (Se non in cache)
-        const result = await generateStream(type, id.replace(".json", ""), getConfig(conf), conf);
-
-        // C. Salvataggio in Redis (solo se risultato valido)
-        if (redis && result && result.streams && result.streams.length > 0 && result.streams[0].name !== "⛔") {
-            // Salva con scadenza automatica 
-            await redis.set(cacheKey, JSON.stringify(result), "EX", CACHE_TTL);
-            console.log(`💾 [REDIS SAVE] Salvato "${id}" per ${CACHE_TTL}s.`);
-        }
-
-        res.json(result); 
-
-    } catch (err) {
-        console.error("🔥 [STREAM ERROR]:", err);
-        // Risposta di emergenza in caso di crash
-        res.status(500).json({ streams: [{ name: "⚠️ ERROR", title: "Errore interno server o database" }] });
     }
+
+    // 2. Generazione
+    const result = await generateStream(type, id.replace(".json", ""), getConfig(conf), conf);
+
+    // 3. Salvataggio Cache
+    if (result && result.streams && result.streams.length > 0 && result.streams[0].name !== "⛔") {
+        STREAM_CACHE.set(cacheKey, {
+            data: result,
+            expiry: Date.now() + CACHE_TTL
+        });
+    }
+
+    res.json(result); 
 });
 
 function getConfig(configStr) { try { return JSON.parse(Buffer.from(configStr, "base64").toString()); } catch { return {}; } }
 function withTimeout(promise, ms) { return Promise.race([promise, new Promise(r => setTimeout(() => r([]), ms))]); }
 
 const PORT = process.env.PORT || 7000;
-app.listen(PORT, () => console.log(`🚀 Leviathan (AI-Core) v32 ITA (REDIS ENABLED) attivo su porta ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Leviathan (AI-Core) v32 ITA attivo su porta ${PORT}`));
