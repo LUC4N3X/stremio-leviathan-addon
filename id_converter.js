@@ -5,7 +5,7 @@ const fs = require("fs-extra");
 
 // --- ⚙️ CONFIGURAZIONE API (GOD MODE) ⚙️ ---
 const CONFIG = {
-    TMDB_KEY: '4b9dfb8b1c9f1720b5cd1d7efea1d845',
+    TMDB_KEY: '4b9dfb8b1c9f1720b5cd1d7efea1d845', // Usa la tua chiave o questa pubblica
     TMDB_URL: 'https://api.themoviedb.org/3',
     TRAKT_CLIENT_ID: 'ad521cf009e68d4304eeb82edf0e5c918055eef47bf38c8d568f6a9d8d6da4d1',
     TRAKT_URL: 'https://api.trakt.tv',
@@ -13,19 +13,17 @@ const CONFIG = {
     OMDB_URL: 'http://www.omdbapi.com',
 };
 
-
-
 // ---  DATABASE PERSISTENTE (SQLITE) ---
 const DATA_DIR = path.join(__dirname, 'data');
-fs.ensureDirSync(DATA_DIR); // Crea la cartella se non esiste
+fs.ensureDirSync(DATA_DIR); 
 
 const dbPath = path.join(DATA_DIR, 'ids_cache.db');
-const db = new Database(dbPath); // Sincrono e velocissimo
+const db = new Database(dbPath); 
 
 // Attiviamo la modalità WAL per prestazioni estreme
 db.pragma('journal_mode = WAL');
 
-// Creazione Tabella (Se non esiste)
+// Creazione Tabella
 db.exec(`
   CREATE TABLE IF NOT EXISTS media_map (
     imdb_id TEXT PRIMARY KEY,
@@ -36,11 +34,9 @@ db.exec(`
     slug TEXT,
     timestamp INTEGER
   );
-  
   CREATE INDEX IF NOT EXISTS idx_tmdb ON media_map(tmdb_id);
 `);
 
-// Prepared Statements (Query Precompilate per velocità)
 const stmtGetByImdb = db.prepare('SELECT * FROM media_map WHERE imdb_id = ?');
 const stmtGetByTmdb = db.prepare('SELECT * FROM media_map WHERE tmdb_id = ?');
 const stmtInsert = db.prepare(`
@@ -62,14 +58,13 @@ const traktClient = axios.create({
 const omdbClient = axios.create({ baseURL: CONFIG.OMDB_URL, timeout: 4000 });
 
 // ==========================================
-//  LOGICA DI RICERCA ESTERNA
+//  LOGICA DI RICERCA IDS
 // ==========================================
 
 async function searchTmdb(id, source = 'imdb_id') {
     try {
         const url = `/find/${id}?api_key=${CONFIG.TMDB_KEY}&external_source=${source}`;
         const { data } = await tmdbClient.get(url);
-        
         let res = null;
         if (data.movie_results?.length) res = { ...data.movie_results[0], _type: 'movie' };
         else if (data.tv_results?.length) res = { ...data.tv_results[0], _type: 'series' };
@@ -91,25 +86,15 @@ async function getTmdbExternalIds(tmdbId, type) {
     try {
         const t = type === 'series' || type === 'tv' ? 'tv' : 'movie';
         const { data } = await tmdbClient.get(`/${t}/${tmdbId}/external_ids?api_key=${CONFIG.TMDB_KEY}`);
-        return {
-            imdb: data.imdb_id,
-            tvdb: data.tvdb_id,
-            foundVia: 'tmdb_ext'
-        };
+        return { imdb: data.imdb_id, tvdb: data.tvdb_id, foundVia: 'tmdb_ext' };
     } catch (e) { return {}; }
 }
 
 async function searchTrakt(id, type = 'imdb') {
     if (!CONFIG.TRAKT_CLIENT_ID) return null;
-    // SSRF Protection: Only allow certain id formats
-    if (!isValidTraktId(id, type)) {
-        console.warn(`[SECURITY] Blocked suspicious Trakt ID: ${id} [type: ${type}]`);
-        return null;
-    }
     try {
         const url = `/search/${type}/${id}?type=movie,show`;
         const { data } = await traktClient.get(url);
-        
         if (data && data.length > 0) {
             const item = data[0];
             const meta = item.movie || item.show;
@@ -132,11 +117,7 @@ async function searchOmdb(imdbId) {
     try {
         const { data } = await omdbClient.get(`/?i=${imdbId}&apikey=${CONFIG.OMDB_KEY}`);
         if (data && data.Response === 'True') {
-            return {
-                imdb: data.imdbID,
-                type: data.Type === 'series' ? 'series' : 'movie',
-                foundVia: 'omdb'
-            };
+            return { imdb: data.imdbID, type: data.Type === 'series' ? 'series' : 'movie', foundVia: 'omdb' };
         }
     } catch (e) { }
     return null;
@@ -148,16 +129,12 @@ async function searchOmdb(imdbId) {
 
 async function resolveIds(id, typeHint = null) {
     const isImdb = id.toString().startsWith('tt');
-    const cleanId = id.toString().split(':')[0]; // Rimuove :season:episode se presente
+    const cleanId = id.toString().split(':')[0]; 
 
-    // 1.  DB CHECK (Lettura immediata)
     let cached = null;
-    try {
-        cached = isImdb ? stmtGetByImdb.get(cleanId) : stmtGetByTmdb.get(cleanId);
-    } catch (err) { console.error("DB Read Error:", err); }
+    try { cached = isImdb ? stmtGetByImdb.get(cleanId) : stmtGetByTmdb.get(cleanId); } catch (err) {}
 
     if (cached) {
-        // Riformatta come oggetto pulito
         return {
             imdb: cached.imdb_id,
             tmdb: cached.tmdb_id,
@@ -168,48 +145,32 @@ async function resolveIds(id, typeHint = null) {
         };
     }
 
-    // 2.  LIVE SEARCH (Se non è nel DB)
     let identity = { 
         imdb: isImdb ? cleanId : null, 
         tmdb: !isImdb ? parseInt(cleanId) : null,
-        tvdb: null,
-        trakt: null,
-        slug: null,
-        type: typeHint
+        tvdb: null, trakt: null, slug: null, type: typeHint
     };
 
-    // A. TMDB Primary Search
     if (isImdb && !identity.tmdb) {
         const tmdbRes = await searchTmdb(cleanId, 'imdb_id');
-        if (tmdbRes) {
-            identity.tmdb = tmdbRes.tmdb;
-            identity.type = identity.type || tmdbRes.type;
-        }
+        if (tmdbRes) { identity.tmdb = tmdbRes.tmdb; identity.type = identity.type || tmdbRes.type; }
     }
 
-    // B. Expand details with TMDB External IDs
     if (identity.tmdb) {
         const ext = await getTmdbExternalIds(identity.tmdb, identity.type || 'movie');
         identity = { ...identity, ...ext };
     }
 
-    // C. Trakt Fallback (Cruciale per Anime/Serie complesse)
     if ((!identity.tmdb || !identity.imdb) && CONFIG.TRAKT_CLIENT_ID) {
         const traktRes = await searchTrakt(cleanId, isImdb ? 'imdb' : 'tmdb');
-        if (traktRes) {
-            // console.log(`🦅 Trakt Rescue: ${cleanId}`);
-            identity = { ...identity, ...traktRes };
-        }
+        if (traktRes) identity = { ...identity, ...traktRes };
     }
 
-    // D. OMDB Last Resort
     if (isImdb && !identity.tmdb && CONFIG.OMDB_KEY) {
         const omdbRes = await searchOmdb(cleanId);
         if (omdbRes) identity = { ...identity, ...omdbRes };
     }
 
-    // 3. SAVE TO DB (Scrittura Persistente)
-    // Salviamo solo se abbiamo almeno una coppia solida (IMDB+TMDB) o (IMDB solo)
     if (identity.imdb) {
         try {
             stmtInsert.run({
@@ -221,33 +182,58 @@ async function resolveIds(id, typeHint = null) {
                 slug: identity.slug || null,
                 timestamp: Date.now()
             });
-            // console.log(` Saved to DB: ${identity.imdb} <-> ${identity.tmdb}`);
-        } catch (err) { console.error("DB Write Error:", err.message); }
+        } catch (err) {}
     }
 
     return identity;
 }
 
 // ==========================================
-// 🔌 EXPORT PUBBLICI
+//  🆕 NUOVA FUNZIONE: TITOLI ALTERNATIVI
 // ==========================================
+
+async function getTmdbAltTitles(tmdbId, type) {
+    if (!tmdbId || !CONFIG.TMDB_KEY) return [];
+    try {
+        const endpoint = type === 'series' || type === 'tv' ? 'tv' : 'movie';
+        // Richiediamo Traduzioni e Titoli Alternativi in un colpo solo
+        const url = `/${endpoint}/${tmdbId}?api_key=${CONFIG.TMDB_KEY}&append_to_response=alternative_titles,translations`;
+        
+        const { data } = await tmdbClient.get(url);
+        const titles = new Set();
+
+        // 1. Titolo Italiano Ufficiale (dalle traduzioni)
+        const itTrans = data.translations?.translations?.find(t => t.iso_3166_1 === 'IT');
+        if (itTrans && itTrans.data?.title) titles.add(itTrans.data.title);
+        if (itTrans && itTrans.data?.name) titles.add(itTrans.data.name);
+
+        // 2. Titoli Alternativi (Cerca specifici per IT o US)
+        const alts = data.alternative_titles?.titles || data.alternative_titles?.results || [];
+        alts.forEach(t => {
+            if (t.iso_3166_1 === 'IT' || t.iso_3166_1 === 'US') {
+                titles.add(t.title);
+            }
+        });
+
+        // 3. Titolo Originale
+        if (data.original_title) titles.add(data.original_title);
+        if (data.original_name) titles.add(data.original_name);
+
+        return Array.from(titles);
+    } catch (e) {
+        console.error(`[TMDB Titles] Errore fetch per ${tmdbId}: ${e.message}`);
+        return [];
+    }
+}
 
 async function tmdbToImdb(tmdbId, type) {
     const ids = await resolveIds(tmdbId, type);
-    if (ids.imdb) {
-        console.log(`✅ TMDb ${tmdbId} → IMDb ${ids.imdb} [via ${ids.foundVia || 'web'}]`);
-        return ids.imdb;
-    }
-    return null;
+    return ids.imdb || null;
 }
 
 async function imdbToTmdb(imdbId) {
     const ids = await resolveIds(imdbId);
-    if (ids.tmdb) {
-        console.log(`✅ IMDb ${imdbId} → TMDb ${ids.tmdb} [via ${ids.foundVia || 'web'}]`);
-        return { tmdbId: ids.tmdb, type: ids.type };
-    }
-    return { tmdbId: null, type: null };
+    return { tmdbId: ids.tmdb, type: ids.type };
 }
 
 async function getAllIds(id) {
@@ -257,5 +243,6 @@ async function getAllIds(id) {
 module.exports = {
     tmdbToImdb,
     imdbToTmdb,
-    getAllIds
+    getAllIds,
+    getTmdbAltTitles // <--- EXPORT AGGIUNTO
 };
