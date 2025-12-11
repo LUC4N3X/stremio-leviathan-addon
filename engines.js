@@ -83,7 +83,6 @@ async function cfGet(url, config = {}) {
 function clean(title) {
     if (!title) return "";
     const htmlDecode = title
-        // Spostato &amp; alla fine per evitare double-unescaping
         .replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>')
         .replace(/&quot;/g, '"')
@@ -130,7 +129,6 @@ function parseImdbId(imdbId) {
 
 // --- HELPER DI PARSING ---
 
-// Funzioni di utilità per Regex
 const createRegex = (pattern) => new RegExp(`(?<![^\\s\\[(_\\-.,])(${pattern})(?=[\\s\\)\\]_.\\-,]|$)`, 'i');
 const createLanguageRegex = (pattern) => createRegex(`${pattern}(?![ .\\-_]?sub(title)?s?)`);
 
@@ -177,11 +175,9 @@ function parseTorrentTitle(filename) {
         isMulti: PARSE_REGEX.languages['Multi'].test(filename) || PARSE_REGEX.languages['Dual Audio'].test(filename)
     };
 
-    // Estrazione Anno
     const yearMatch = filename.match(/[[(. _-]?((?:19|20)\d{2})[\]).\s_-]/);
     if (yearMatch) result.year = parseInt(yearMatch[1]);
 
-    // Estrazione Stagione/Episodio 
     const seasonEpisodePatterns = [
         /S(\d{1,2})[ .\-_]?E(\d{1,3})/i,
         /(\d{1,2})x(\d{1,3})/i,
@@ -197,31 +193,26 @@ function parseTorrentTitle(filename) {
         }
     }
     
-    // Assegna valori singoli per compatibilità
     result.season = result.seasons[0] || null;
     result.episode = result.episodes[0] || null;
 
     return result;
 }
 
-// Helper aggiornato per il controllo formato
 function isCorrectFormat(name, reqSeason, reqEpisode) {
     if (!reqSeason && !reqEpisode) return true;
     const info = parseTorrentTitle(name);
     
-    // Logica Pack Stagione (es. "Stagione 1" senza episodi specifici = pack)
     const isPack = /PACK|COMPLET|TUTTE|STAGIONE\s\d+(?!.*E\d)/i.test(name);
     
     if (reqSeason && info.season !== null && info.season !== reqSeason) return false;
     
     if (reqEpisode) {
-        if (isPack) return true; // Accetta pack completi se cerco un episodio
+        if (isPack) return true; 
         if (info.episode !== null && info.episode !== reqEpisode) return false;
     }
     return true;
 }
-
-// --- FINE NUOVI HELPER DI PARSING ---
 
 function parseSize(sizeStr) {
     if (!sizeStr) return 0;
@@ -250,13 +241,11 @@ async function searchCorsaro(title, year, type, reqSeason, reqEpisode) {
         const $ = cheerio.load(data);
         let items = [];
 
-        // Parsing basato sulla tabella (più preciso e veloce)
-        // Struttura tipica: Cat | Titolo | Seed | Leech | Size | Date | Uploader
         $('table tr').each((i, row) => {
             if (items.length >= 25) return;
 
             const tds = $(row).find('td');
-            if (tds.length < 5) return; // Salta intestazioni o righe vuote
+            if (tds.length < 5) return; 
 
             const titleLink = $(row).find('a[href*="/torrent/"], a[href*="details.php"]').first();
             if (!titleLink.length) return;
@@ -264,16 +253,12 @@ async function searchCorsaro(title, year, type, reqSeason, reqEpisode) {
             const text = titleLink.text().trim();
             const href = titleLink.attr('href');
 
-            // Filtri pre-parsing
             if (!isItalianResult(text) || !checkYear(text, year, type) || !isCorrectFormat(text, reqSeason, reqEpisode)) return;
 
-            // Estrazione Dati Tabella
-            // Seeders: spesso colonna 2 o 3, colore verde
             let seeders = 0;
             const seedText = $(row).find('font[color="#008000"], .green').text().trim() || tds.eq(2).text().trim();
             if (/^\d+$/.test(seedText)) seeders = parseInt(seedText);
 
-            // Size: spesso colonna 4
             let sizeStr = "??";
             const sizeText = tds.eq(4).text().trim();
             if (sizeText.match(/\d/)) sizeStr = sizeText;
@@ -294,7 +279,6 @@ async function searchCorsaro(title, year, type, reqSeason, reqEpisode) {
         const limit = pLimit(5);
         const promises = items.map(item => limit(async () => {
             try {
-                // Fetch dettaglio SOLO per il magnet, usiamo i dati tabella per il resto
                 const detailPage = await cfGet(item.url, { timeout: 3000 });
                 const magnetMatch = detailPage.data.match(/magnet:\?xt=urn:btih:([a-zA-Z0-9]{40})/i);
                 
@@ -398,42 +382,6 @@ async function searchTPB(title, year, type, reqSeason, reqEpisode) {
     } catch { return []; }
 }
 
-async function searchSolidTorrents(title, year, type, reqSeason, reqEpisode) {
-    try {
-        const domain = "https://solidtorrents.eu";
-        let query = clean(title);
-        if (!query.toUpperCase().includes("ITA")) query += " ITA";
-        const url = `${domain}/search?q=${encodeURIComponent(query)}&sort=seeders`;
-        const { data } = await cfGet(url, { timeout: CONFIG.TIMEOUT });
-        if (!data) return [];
-        const $ = cheerio.load(data);
-        const results = [];
-        $('a[href^="magnet:?"]').each((i, el) => {
-            const magnet = $(el).attr('href');
-            const row = $(el).closest('div.border-b, div.shadow-sm, div.rounded-lg');
-            const container = row.length ? row : $(el).parents().eq(3);
-            let name = container.find('h5').text().trim();
-            if (!name) name = container.find('a').not('[href^="magnet:"]').not('[class*="btn"]').first().text().trim();
-            if (!name) return;
-            const rawText = container.text().replace(/\s+/g, ' ');
-            let seeders = 0;
-            const seedMatch = rawText.match(/(\d+)\s*(seminatrici|seeders|seeds)/i);
-            if (seedMatch) seeders = parseInt(seedMatch[1]);
-            else {
-                const greenText = container.find('.text-green-500, .text-green-600').text();
-                if (greenText) seeders = parseInt(greenText.replace(/[^0-9]/g, '')) || 0;
-            }
-            let sizeStr = "??";
-            const sizeMatch = rawText.match(/(\d+([.,]\d+)?\s*(GB|MB|KB))/i);
-            if (sizeMatch) sizeStr = sizeMatch[0];
-            if (isItalianResult(name)) {
-                results.push({ title: name, magnet: magnet, size: sizeStr, sizeBytes: parseSize(sizeStr), seeders: seeders, source: "SolidTorrents" });
-            }
-        });
-        return results;
-    } catch (e) { return []; }
-}
-
 async function searchTorrentGalaxy(title, year, type, reqSeason, reqEpisode) {
     try {
         const url = `https://torrentgalaxy.to/torrents.php?search=${encodeURIComponent(clean(title) + " ITA")}&sort=seeders&order=desc`;
@@ -454,23 +402,116 @@ async function searchTorrentGalaxy(title, year, type, reqSeason, reqEpisode) {
     } catch { return []; }
 }
 
+// 🔥 NUOVA LOGICA UNIVERSALE BITSEARCH (Con Fix Italiano e Parsing "Detective")
 async function searchBitSearch(title, year, type, reqSeason, reqEpisode) {
     try {
-        const url = `https://bitsearch.to/search?q=${encodeURIComponent(clean(title) + " ITA")}`;
+        // Logica Smart Query (evita doppio ITA)
+        let query = clean(title);
+        if (!query.toUpperCase().includes("ITA")) {
+            query += " ITA";
+        }
+        
+        const url = `https://bitsearch.to/search?q=${encodeURIComponent(query)}`;
+        console.log(`[BitSearch] 🔎 Cerco: "${query}" su ${url}`);
+
         const { data } = await cfGet(url, { timeout: CONFIG.TIMEOUT });
-        const $ = cheerio.load(data || "");
+        
+        // 1. Check se il server ha ricevuto dati o se è stato bloccato
+        if (!data) {
+            console.log(`[BitSearch] ❌ Nessun dato ricevuto.`);
+            return [];
+        }
+        if (data.includes("No results found") || data.includes("Nessun risultato trovato")) {
+            console.log(`[BitSearch] ⚠️ Il sito dice: "Nessun risultato trovato".`);
+            return [];
+        }
+
+        const $ = cheerio.load(data);
         const results = [];
-        $("li.search-result").each((i, el) => {
-            const name = $(el).find("h5 a").text().trim();
-            const magnet = $(el).find("a.dl-magnet").attr("href");
-            const seeders = parseInt($(el).find(".stats div").first().text().replace(/,/g, "")) || 0;
-            const sizeStr = $(el).find(".stats div").eq(1).text();
-            if (name && magnet && isItalianResult(name) && checkYear(name, year, type) && isCorrectFormat(name, reqSeason, reqEpisode)) {
-                results.push({ title: name, magnet, seeders, size: sizeStr, sizeBytes: parseSize(sizeStr), source: "BitSearch" });
+        
+        // 2. STRATEGIA "CERCA TUTTO": Trova tutti i magnet, poi risali al contenitore
+        const rawMagnets = $('a[href^="magnet:"]');
+        console.log(`[BitSearch] 🧲 Trovati ${rawMagnets.length} magnet link grezzi.`);
+
+        rawMagnets.each((i, el) => {
+            try {
+                const magnet = $(el).attr('href');
+                
+                // Risaliamo al contenitore (Card, Riga o generico)
+                let container = $(el).closest('li');
+                if (container.length === 0) container = $(el).closest('.search-result');
+                if (container.length === 0) container = $(el).closest('.card');
+                if (container.length === 0) container = $(el).closest('.row');
+                // Fallback estremo: genitore del genitore
+                if (container.length === 0) container = $(el).parent().parent();
+
+                // 3. ESTRAZIONE TITOLO (A cascata)
+                let name = container.find('h5 a').text().trim();
+                if (!name) name = container.find('h5').text().trim();
+                if (!name) name = container.find('a.title').text().trim();
+                
+                // Fallback: cerca un link che NON sia il magnet
+                if (!name) {
+                    container.find('a').each((j, link) => {
+                        const href = $(link).attr('href') || "";
+                        const text = $(link).text().trim();
+                        if (!href.startsWith("magnet:") && text.length > 5) {
+                            name = text;
+                            return false; 
+                        }
+                    });
+                }
+
+                if (!name) return;
+
+                // 4. ESTRAZIONE STATS (Fix per Italiano "seminatrici")
+                let seeders = 0;
+                let sizeStr = "??";
+                
+                // Prendi tutto il testo e puliscilo
+                const statsText = container.text().replace(/\s+/g, ' ');
+                
+                // Regex che supporta Inglese e Italiano (visto negli screenshot)
+                const seedMatch = statsText.match(/(\d+)\s*(seed|seminatrici|leech|sanguisughe)/i);
+                if (seedMatch) {
+                    seeders = parseInt(seedMatch[1]);
+                } else {
+                    // Fallback: cerca numeri nei div stats
+                    const statNum = container.find('.stats div').first().text().replace(/[^0-9]/g, '');
+                    if (statNum) seeders = parseInt(statNum);
+                }
+
+                const sizeMatch = statsText.match(/(\d+(\.\d+)?\s*(GB|MB))/i);
+                if (sizeMatch) sizeStr = sizeMatch[0];
+
+                // 5. FILTRI
+                const isIta = isItalianResult(name);
+                const isYear = checkYear(name, year, type);
+                const isFormat = isCorrectFormat(name, reqSeason, reqEpisode);
+
+                if (isIta && isYear && isFormat) {
+                    console.log(`[BitSearch] ✅ Trovato: ${name} | S: ${seeders} | ${sizeStr}`);
+                    results.push({ 
+                        title: name, 
+                        magnet, 
+                        seeders, 
+                        size: sizeStr, 
+                        sizeBytes: parseSize(sizeStr), 
+                        source: "BitSearch" 
+                    });
+                }
+
+            } catch (err) {
+               // Silent fail per riga singola
             }
         });
+        
         return results;
-    } catch { return []; }
+
+    } catch (e) { 
+        console.log(`[BitSearch] 💥 Errore Critico: ${e.message}`);
+        return []; 
+    }
 }
 
 async function searchLime(title, year, type, reqSeason, reqEpisode) {
@@ -536,7 +577,6 @@ async function searchGlo(title, year, type, reqSeason, reqEpisode) {
     } catch { return []; }
 }
 
-// ---  TORRENTBAY (FIXED SELECTOR) ---
 async function searchTorrentBay(title, year, type, reqSeason, reqEpisode) {
     try {
         const domain = "https://rarbg.torrentbay.st";
@@ -545,14 +585,12 @@ async function searchTorrentBay(title, year, type, reqSeason, reqEpisode) {
 
         console.log(`[TorrentBay] 🔎 Cerco: "${query}" su ${domain}`);
         
-        
         const url = `${domain}/get-posts/keywords:${encodeURIComponent(query)}/`;
         
         const { data } = await cfGet(url, { timeout: CONFIG.TIMEOUT });
 
         if (!data) return [];
         
-        // Controllo anti-bot base
         if (data.includes("Verify you are human") || data.includes("Cloudflare")) {
             console.log(`[TorrentBay] ⚠️ Blocco Cloudflare rilevato.`);
             return [];
@@ -561,67 +599,55 @@ async function searchTorrentBay(title, year, type, reqSeason, reqEpisode) {
         const $ = cheerio.load(data);
         const candidates = [];
 
-        // Analisi della tabella
         $('table tr').each((i, row) => {
-            // Salta le righe di intestazione 
             if ($(row).find('th').length > 0) return;
 
             const tds = $(row).find('td');
-            
-            // Dallo screenshot le colonne sono 8: 
-            // 0:Icona, 1:Titolo, 2:Cat, 3:Data, 4:Tempo, 5:Size, 6:S, 7:L
             if (tds.length < 7) return; 
 
-            // --- ESTRAZIONE TITOLO (COLONNA 1) ---
-           
             const titleLink = tds.eq(1).find('a').first();
             const name = titleLink.text().trim();
             let relativeHref = titleLink.attr('href');
 
             if (!name || !relativeHref) return;
 
-            // Fix link relativo se necessario
             if (!relativeHref.startsWith('http')) {
                 if (!relativeHref.startsWith('/')) relativeHref = '/' + relativeHref;
                 relativeHref = domain + relativeHref;
             }
 
-            // --- ESTRAZIONE DATI ---
             const sizeStr = tds.eq(5).text().trim();
-            const seedersStr = tds.eq(6).text().trim(); // Colonna S.
+            const seedersStr = tds.eq(6).text().trim(); 
             const seeders = parseInt(seedersStr) || 0;
 
-            // --- FILTRI ---
-            // Logghiamo cosa stiamo analizzando per debug
             const isIta = isItalianResult(name);
             const isCorrectYear = checkYear(name, year, type);
             const isFormatOk = isCorrectFormat(name, reqSeason, reqEpisode);
 
             if (isIta && isCorrectYear && isFormatOk) {
-                console.log(`[TorrentBay] ✅ Trovato: ${name} | S: ${seeders}`);
+                console.log(`[TorrentBay] ✅ Trovato candidato: ${name} | S: ${seeders}`);
                 candidates.push({
                     name: name,
                     link: relativeHref,
                     seeders: seeders,
                     sizeStr: sizeStr
                 });
-            } else {
-                // Decommenta se vuoi vedere cosa scarta
-                // console.log(`[TorrentBay] 🗑️ Scartato: ${name} (Ita:${isIta} Anno:${isCorrectYear})`);
             }
         });
 
         console.log(`[TorrentBay] Candidati validi: ${candidates.length}`);
 
-        // Recupero magnet
         const limit = pLimit(5);
         const promises = candidates.slice(0, 10).map(cand => limit(async () => {
             try {
-                const { data: detailData } = await cfGet(cand.link, { timeout: 3500 });
+                const { data: detailData } = await cfGet(cand.link, { 
+                    timeout: 4500, 
+                    headers: { 'Referer': url } 
+                });
                 const $$ = cheerio.load(detailData);
                 
-                // Cerca magnet link
-                const magnet = $$('a[href^="magnet:"]').first().attr('href');
+                let magnet = $$('a[href^="magnet:"]').first().attr('href');
+                if (!magnet) magnet = $$('td:contains("Magnet")').next().find('a').attr('href');
                 
                 if (magnet) {
                     return {
@@ -632,33 +658,37 @@ async function searchTorrentBay(title, year, type, reqSeason, reqEpisode) {
                         seeders: cand.seeders,
                         source: "RARBG"
                     };
+                } else {
+                    console.log(`[TorrentBay] ❌ Magnet NON trovato per: ${cand.name}`);
+                    return null;
                 }
-            } catch (e) { return null; }
+            } catch (e) { 
+                console.log(`[TorrentBay] 💥 Errore fetch dettaglio: ${cand.name} - ${e.message}`);
+                return null; 
+            }
         }));
 
-        return (await Promise.all(promises)).filter(Boolean);
+        const results = (await Promise.all(promises)).filter(Boolean);
+        return results;
 
     } catch (e) {
-        console.log(`[TorrentBay] Errore: ${e.message}`);
+        console.log(`[TorrentBay] Errore critico: ${e.message}`);
         return [];
     }
 }
 
-
-
 // DEFINIZIONE MOTORI ATTIVI
 CONFIG.ENGINES = [
-    searchCorsaro,
-    searchTPB,
-    searchSolidTorrents, 
-    searchBitSearch,
-    searchTorrentGalaxy,
-    searchNyaa,
+    searchCorsaro,       // 1. Il re dei torrent italiani
+    searchKnaben,        // 2. Richiesto dall'utente
+    searchUindex,        // 3. Richiesto dall'utente
+    searchBitSearch,     // 4. Ora robusto e posizionato qui
+    searchTorrentBay,
     searchLime,
-    searchGlo,
-    searchKnaben,
-    searchUindex,
-    searchTorrentBay // <-- AGGIUNTO QUI
+    searchTPB,
+    searchNyaa,
+    searchTorrentGalaxy,,
+    searchGlo
 ];
 
 // --- MAIN AGGREGATOR ---
