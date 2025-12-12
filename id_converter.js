@@ -194,6 +194,11 @@ async function resolveIds(id, typeHint = null) {
 
 async function getTmdbAltTitles(tmdbId, type) {
     if (!tmdbId || !CONFIG.TMDB_KEY) return [];
+    // Sanitize tmdbId to avoid SSRF: must be only digits (TMDb uses only numeric IDs)
+    if (!/^\d+$/.test(tmdbId)) {
+        console.warn(`[TMDB Titles] Invalid tmdbId provided: ${tmdbId}`);
+        return [];
+    }
     try {
         const endpoint = type === 'series' || type === 'tv' ? 'tv' : 'movie';
         // Richiediamo Traduzioni e Titoli Alternativi in un colpo solo
