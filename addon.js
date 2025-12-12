@@ -12,7 +12,6 @@ const { smartMatch } = require("./smart_parser");
 const { rankAndFilterResults } = require("./ranking");
 
 // --- IMPORTIAMO CONVERTER E DEBRID ---
-// 🔥 NOTA: Importiamo anche getTmdbAltTitles e imdbToTmdb
 const { tmdbToImdb, imdbToTmdb, getTmdbAltTitles } = require("./id_converter");
 const kitsuHandler = require("./kitsu_handler");
 const RD = require("./debrid/realdebrid");
@@ -24,11 +23,36 @@ const { getManifest } = require("./manifest");
 // --- CONFIGURAZIONE ---
 const CONFIG = {
   CINEMETA_URL: "https://v3-cinemeta.strem.io",
-  REAL_SIZE_FILTER: 80 * 1024 * 1024, 
+  REAL_SIZE_FILTER: 80 * 1024 * 1024, // Filtra file troppo piccoli (sample)
   TIMEOUT_TMDB: 2000,
   SCRAPER_TIMEOUT: 6000, 
   MAX_RESULTS: 40, 
 };
+
+// --- STATIC REGEX PATTERNS (Performance Boost) ---
+// Pre-compiliamo le regex per non ricrearle ad ogni ciclo
+const REGEX_YEAR = /(19|20)\d{2}/;
+const REGEX_QUALITY = {
+    "4K": /2160p|4k|uhd/i,
+    "1080p": /1080p/i,
+    "720p": /720p/i,
+    "SD": /480p|\bsd\b/i
+};
+const REGEX_AUDIO = {
+    channels: /\b(7\.1|5\.1|2\.1|2\.0)\b/,
+    atmos: /atmos|truehd/i,
+    dts: /\bdts\b|\bdts-?hd\b/i,
+    dolby: /\bac-?3\b|\bddp\b|\beac-?3\b/i,
+    aac: /\baac\b/i
+};
+const REGEX_ITA = [
+    /\bITA\b/i, /\bITALIAN\b/i, /\bITALY\b/i,
+    /MULTI.*ITA/i, /DUAL.*ITA/i, /AUDIO.*ITA/i, /AC3.*ITA/i, /AAC.*ITA/i,
+    /SUB.*ITA/i, /SUBS.*ITA/i, /SOTTOTITOLI.*ITA/i,
+    /H\.?264.*ITA/i, /H\.?265.*ITA/i, /X264.*ITA/i, /HEVC.*ITA/i,
+    /STAGIONE/i, /EPISODIO/i, /MUX/i, /iDN_CreW/i, /WMS/i, /TRIDIM/i, /SPEEDVIDEO/i, /CORSARO/i
+];
+const REGEX_CLEANER = /\b(ita|eng|sub|h264|h265|x264|x265|hevc|1080p|720p|4k|2160p|bluray|web-?dl|rip|ac3|aac|dts|multi|truehd|remux|complete|pack|amzn|nf|dsnp)\b.*/yi;
 
 // --- CACHE SYSTEM ---
 const CACHE_TTL = 15 * 60 * 1000; 
@@ -88,20 +112,13 @@ function parseSize(sizeStr) {
 
 function isSafeForItalian(item) {
   if (!item || !item.title) return false;
-  const t = item.title.toUpperCase();
-  const itaPatterns = [
-    /\bITA\b/, /\bITALIAN\b/, /\bITALY\b/,
-    /MULTI.*ITA/, /DUAL.*ITA/, /AUDIO.*ITA/, /AC3.*ITA/, /AAC.*ITA/,
-    /SUB.*ITA/, /SUBS.*ITA/, /SOTTOTITOLI.*ITA/,
-    /H\.?264.*ITA/, /H\.?265.*ITA/, /X264.*ITA/, /HEVC.*ITA/,
-    /STAGIONE/, /EPISODIO/, /MUX/, /iDN_CreW/, /WMS/, /TRIDIM/, /SPEEDVIDEO/, /CORSARO/
-  ];
-  return itaPatterns.some(p => p.test(t));
+  // Check rapido usando regex pre-compilate
+  return REGEX_ITA.some(p => p.test(item.title));
 }
 
 function cleanFilename(filename) {
   if (!filename) return "";
-  const yearMatch = filename.match(/(19|20)\d{2}/);
+  const yearMatch = filename.match(REGEX_YEAR);
   let cleanTitle = filename;
   let year = "";
   if (yearMatch) {
@@ -109,8 +126,7 @@ function cleanFilename(filename) {
     cleanTitle = filename.substring(0, yearMatch.index);
   }
   cleanTitle = cleanTitle.replace(/[._]/g, " ");
-  const uiJunk = /\b(ita|eng|sub|h264|h265|x264|x265|hevc|1080p|720p|4k|2160p|bluray|web-?dl|rip|ac3|aac|dts|multi|truehd|remux|complete|pack)\b.*/yi;
-  cleanTitle = cleanTitle.replace(uiJunk, "");
+  cleanTitle = cleanTitle.replace(REGEX_CLEANER, "");
   return `${cleanTitle.trim()}${year}`;
 }
 
@@ -120,58 +136,94 @@ function getEpisodeTag(filename) {
     if (matchEp) return `🍿 S${matchEp[1]}E${matchEp[2]}`;
     const matchX = f.match(/(\d+)x(\d+)/i);
     if (matchX) return `🍿 S${matchX[1].padStart(2, '0')}E${matchX[2].padStart(2, '0')}`;
-    if (/s(\d+)\b|stagione (\d+)|season (\d+)/i.test(f)) {
-        const s = f.match(/s(\d+)|stagione (\d+)|season (\d+)/i);
-        const num = s[1] || s[2] || s[3];
+    // Fallback per stagione intera
+    const sMatch = f.match(/s(\d+)\b|stagione (\d+)|season (\d+)/i);
+    if (sMatch) {
+        const num = sMatch[1] || sMatch[2] || sMatch[3];
         return `📦 STAGIONE ${num}`;
     }
     return "";
 }
 
+// 🔥 NUOVA FUNZIONE: Estrazione Audio Avanzata
+function extractAudioInfo(title) {
+    const t = String(title).toLowerCase();
+    let audioTags = [];
+    
+    // Rileva Canali
+    const channelMatch = t.match(REGEX_AUDIO.channels);
+    const channels = channelMatch ? channelMatch[1] : null;
+
+    // Rileva Codec
+    if (REGEX_AUDIO.atmos.test(t)) audioTags.push("💣 Atmos");
+    else if (REGEX_AUDIO.dts.test(t)) audioTags.push("🔊 DTS");
+    else if (REGEX_AUDIO.dolby.test(t)) audioTags.push("🔊 Dolby");
+    else if (REGEX_AUDIO.aac.test(t)) audioTags.push("🔈 AAC");
+
+    // Unisce info
+    let finalAudio = audioTags.length > 0 ? audioTags[0] : "";
+    if (channels) finalAudio += ` ${channels}`;
+    
+    return finalAudio || "🔈 Stereo";
+}
+
 function extractStreamInfo(title, source) {
   const t = String(title).toLowerCase();
+  
+  // Quality
   let q = "HD"; let qIcon = "📺";
-  if (/2160p|4k|uhd/.test(t)) { q = "4K"; qIcon = "✨"; }
-  else if (/1080p/.test(t)) { q = "1080p"; qIcon = "🌕"; }
-  else if (/720p/.test(t)) { q = "720p"; qIcon = "🌗"; }
-  else if (/480p|\bsd\b/.test(t)) { q = "SD"; qIcon = "🌑"; }
+  if (REGEX_QUALITY["4K"].test(t)) { q = "4K"; qIcon = "✨"; }
+  else if (REGEX_QUALITY["1080p"].test(t)) { q = "1080p"; qIcon = "🌕"; }
+  else if (REGEX_QUALITY["720p"].test(t)) { q = "720p"; qIcon = "🌗"; }
+  else if (REGEX_QUALITY["SD"].test(t)) { q = "SD"; qIcon = "🌑"; }
 
-  const videoTags = []; const audioTags = [];
+  // Video Tags
+  const videoTags = [];
   if (/hdr/.test(t)) videoTags.push("HDR");
   if (/dolby|vision|\bdv\b/.test(t)) videoTags.push("DV");
   if (/imax/.test(t)) videoTags.push("IMAX");
+  if (/x265|h265|hevc/.test(t)) videoTags.push("HEVC");
   
+  // Lang
   let lang = "🇬🇧 ENG"; 
   if (source === "Corsaro" || isSafeForItalian({ title })) {
       lang = "🇮🇹 ITA";
       if (/multi|mui/i.test(t)) lang = "🇮🇹 MULTI";
   } 
   
+  // Audio Extraction
+  const audioInfo = extractAudioInfo(title);
+
   let detailsParts = [];
-  if (videoTags.length) detailsParts.push(`✨ ${videoTags.join(" ")}`);
+  if (videoTags.length) detailsParts.push(`🖥️ ${videoTags.join(" ")}`);
   
-  return { quality: q, qIcon, info: detailsParts.join(" • "), lang };
+  return { quality: q, qIcon, info: detailsParts.join(" | "), lang, audioInfo };
 }
 
 function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag = "RD") {
-    const { quality, qIcon, info, lang } = extractStreamInfo(fileTitle, source);
-    const sizeStr = size ? `📦 ${formatBytes(size)}` : "📦 ❓"; 
+    const { quality, qIcon, info, lang, audioInfo } = extractStreamInfo(fileTitle, source);
+    const sizeStr = size ? `💿 ${formatBytes(size)}` : "💿 ❓"; 
     const seedersStr = seeders ? `👤 ${seeders}` : "";
 
+    // Nome breve per la lista laterale
     const name = `[${serviceTag} ${qIcon} ${quality}] ${source}`;
     
+    // Pulizia titolo
     let cleanName = cleanFilename(fileTitle)
         .replace(/s\d+e\d+/i, "")
         .replace(/s\d+/i, "")
         .trim();
     const epTag = getEpisodeTag(fileTitle);
     
+    // Costruzione descrizione multiriga "God Tier"
+    // Riga 1: Titolo pulito + Episodio + Qualità
+    // Riga 2: Audio + Video tags
+    // Riga 3: Dimensione + Seeders + Lingua
     const detailLines = [
         `🎬 ${cleanName}${epTag ? ` ${epTag}` : ""} • ${quality}`,
-        `${sizeStr}${seedersStr ? ` • ${seedersStr}` : ""}`,
-        `🔍 ${source} • 🗣️ ${lang.replace('🌐', '').replace('🇮🇹', 'IT').replace('🇬🇧', 'GB').trim()}`
+        `${audioInfo}${info ? ` • ${info}` : ""}`,
+        `${sizeStr}${seedersStr ? ` • ${seedersStr}` : ""} • ${lang}`
     ];
-    if (info) detailLines.push(`🎞️ ${info}`);
 
     return { name, title: detailLines.join('\n') };
 }
@@ -257,30 +309,24 @@ async function generateStream(type, id, config, userConfStr) {
   const meta = await getMetadata(finalId, type); 
   if (!meta) return { streams: [] };
   
-  // --- 🔥 NUOVO: LOGICA DINAMICA TITOLI (GOD TIER) 🔥 ---
+  // --- 🔥 LOGICA DINAMICA TITOLI ---
   let dynamicTitles = [];
   try {
       let tmdbIdForSearch = null;
-      // Recupera ID TMDB se abbiamo un IMDB ID
       if (meta.imdb_id.startsWith("tt")) {
           const converted = await imdbToTmdb(meta.imdb_id);
           tmdbIdForSearch = converted.tmdbId;
       } else {
-          tmdbIdForSearch = meta.imdb_id; // Probabilmente è già numerico
+          tmdbIdForSearch = meta.imdb_id;
       }
-
       if (tmdbIdForSearch) {
-          // Chiama TMDB per titoli alternativi (es. "Il Rito Finale" per "The Conjuring")
           dynamicTitles = await getTmdbAltTitles(tmdbIdForSearch, type);
       }
   } catch (e) {
       console.log("Errore recupero titoli dinamici:", e.message);
   }
 
-  // Genera Query passando anche gli alias dinamici
   const queries = generateSmartQueries(meta, dynamicTitles);
-  // ------------------------------------------------------
-
   const onlyIta = config.filters?.onlyIta !== false; 
   console.log(`\n🧠 [AI-CORE] Cerco "${meta.title}" (${meta.year}): ${queries.length} varianti.`);
 
@@ -302,7 +348,7 @@ async function generateStream(type, id, config, userConfStr) {
   // 3. FILTERING
   resultsRaw = resultsRaw.filter(item => {
     if (!item?.magnet) return false;
-    const fileYearMatch = item.title.match(/\b(19|20)\d{2}\b/);
+    const fileYearMatch = item.title.match(REGEX_YEAR);
     if (fileYearMatch) {
         if (Math.abs(parseInt(fileYearMatch[0]) - parseInt(meta.year)) > 1) return false;
     }
