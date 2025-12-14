@@ -40,11 +40,17 @@ const REGEX_QUALITY = {
 };
 const REGEX_AUDIO = {
     channels: /\b(7\.1|5\.1|2\.1|2\.0)\b/,
-    atmos: /atmos|truehd/i,
-    dts: /\bdts\b|\bdts-?hd\b/i,
-    dolby: /\bac-?3\b|\bddp\b|\beac-?3\b/i,
-    aac: /\baac\b/i
+    atmos: /atmos/i, // Atmos puro
+    dtsx: /dts[:\s-]?x/i, // DTS:X
+    truehd: /truehd/i, // TrueHD (senza Atmos)
+    dtshd: /\bdts-?hd\b|\bma\b/i, // DTS-HD MA
+    dts: /\bdts\b/i,
+    ddp: /\bddp\b|\beac-?3\b|\bdolby\s?digital\s?plus\b/i, // Dolby Digital Plus
+    dolby: /\bac-?3\b|\bdd\b|\bdolby\b/i, // Dolby Standard
+    aac: /\baac\b/i,
+    flac: /\bflac\b/i // Alta fedeltà
 };
+
 const REGEX_ITA = [
     /\bITA\b/i, /\bITALIAN\b/i, /\bITALY\b/i,
     /MULTI.*ITA/i, /DUAL.*ITA/i, /AUDIO.*ITA/i, /AC3.*ITA/i, /AAC.*ITA/i,
@@ -142,18 +148,53 @@ function getEpisodeTag(filename) {
 
 function extractAudioInfo(title) {
     const t = String(title).toLowerCase();
-    let audioTags = [];
+
+    // 1. Rilevamento Canali
     const channelMatch = t.match(REGEX_AUDIO.channels);
-    const channels = channelMatch ? channelMatch[1] : null;
+    let channels = channelMatch ? channelMatch[1] : "";
 
-    if (REGEX_AUDIO.atmos.test(t)) audioTags.push("💣 Atmos");
-    else if (REGEX_AUDIO.dts.test(t)) audioTags.push("🔊 DTS");
-    else if (REGEX_AUDIO.dolby.test(t)) audioTags.push("🔊 Dolby");
-    else if (REGEX_AUDIO.aac.test(t)) audioTags.push("🔈 AAC");
+    // Trasforma "2.0" in stringa vuota 
+    
+    if (channels === "2.0") channels = ""; 
 
-    let finalAudio = audioTags.length > 0 ? audioTags[0] : "";
-    if (channels) finalAudio += ` ${channels}`;
-    return finalAudio || "🔈 Stereo";
+    // 2. Rilevamento Codec in ordine di "Potenza" (Priority Check)
+    let audioTag = "";
+
+    if (REGEX_AUDIO.atmos.test(t)) {
+        audioTag = "💣 Atmos"; // Top Tier
+    } else if (REGEX_AUDIO.dtsx.test(t)) {
+        audioTag = "💣 DTS:X"; // Top Tier
+    } else if (REGEX_AUDIO.truehd.test(t)) {
+        audioTag = "🔊 TrueHD"; // Lossless
+    } else if (REGEX_AUDIO.dtshd.test(t)) {
+        audioTag = "🔊 DTS-HD"; // Lossless
+    } else if (REGEX_AUDIO.ddp.test(t)) {
+        audioTag = "🔊 Dolby+"; // Better than AC3
+    } else if (REGEX_AUDIO.dts.test(t)) {
+        audioTag = "🔊 DTS";
+    } else if (REGEX_AUDIO.flac.test(t)) {
+        audioTag = "🎼 FLAC"; // Audiophile
+    } else if (REGEX_AUDIO.dolby.test(t)) {
+        audioTag = "🔈 Dolby"; // Standard
+    } else if (REGEX_AUDIO.aac.test(t)) {
+        audioTag = "🔈 AAC";
+    } else if (/\bmp3\b/i.test(t)) {
+        audioTag = "🔈 MP3";
+    }
+
+    // 3. Composizione Finale
+    // Se non trova codec ma ci sono canali > 2, assume Surround
+    if (!audioTag && (channels === "5.1" || channels === "7.1")) {
+        audioTag = "🔊 Surround";
+    }
+
+    // Se non trova nulla o solo 2.0
+    if (!audioTag) {
+        return "🔈 Stereo";
+    }
+
+    // Unisce Codec + Canali (es: "💣 Atmos 7.1")
+    return channels ? `${audioTag} ${channels}` : audioTag;
 }
 
 function extractStreamInfo(title, source) {
@@ -209,7 +250,8 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     const sourceLine = `⚡ [${serviceTag}] ${displaySource}`;
 
     // --- 4. HEADER (BADGE "LEVIATHAN") ---
-    
+    // Qui avviene la magia: Nome Addon + Qualità
+    // Usa 🦑 (Calamaro) o 🐲 (Drago) o 🔱 (Tridente) a tua scelta
     const name = `🦑 LEVIATHAN\n${qIcon} ${quality}`; 
 
     // --- 5. PULIZIA TITOLO ---
