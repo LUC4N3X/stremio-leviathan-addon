@@ -52,13 +52,31 @@ const REGEX_AUDIO = {
 };
 
 const REGEX_ITA = [
-    /\bITA\b/i, /\bITALIAN\b/i, /\bITALY\b/i,
-    /MULTI.*ITA/i, /DUAL.*ITA/i, /AUDIO.*ITA/i, /AC3.*ITA/i, /AAC.*ITA/i,
-    /SUB.*ITA/i, /SUBS.*ITA/i, /SOTTOTITOLI.*ITA/i,
-    /H\.?264.*ITA/i, /H\.?265.*ITA/i, /X264.*ITA/i, /HEVC.*ITA/i,
-    /STAGIONE/i, /EPISODIO/i, /MUX/i, /iDN_CreW/i, /WMS/i, /TRIDIM/i, /SPEEDVIDEO/i, /CORSARO/i
+    // 1. Termini Generici e Audio Esplicito
+    /\b(ITA|ITALIAN|ITALY)\b/i,
+    /\b(AUDIO|LINGUA)\s*[:\-]?\s*(ITA|IT)\b/i, // Es: "Audio: ITA"
+    
+    // 2. Formati Audio accoppiati a ITA (Più robusto)
+    /\b(AC-?3|AAC|DDP?|DTS|PCM|TRUEHD|ATMOS|MP3|WMA|FLAC).*(ITA|IT)\b/i,
+    /\b(DD|DDP|AAC|DTS)\s*5\.1\s*(ITA|IT)\b/i, // Es: "DD5.1 ITA"
+    
+    // 3. Multi/Dual Audio (Spesso include ITA)
+    /\b(MULTI|DUAL|TRIPLE).*(ITA|IT)\b/i,
+    
+    // 4. Sottotitoli (Se vuoi includere chi ha solo i sub, tieni questa, altrimenti rimuovi)
+    /\b(SUB|SUBS|SOTTOTITOLI).*(ITA|IT)\b/i,
+    
+    // 5. Codec Video accoppiati a ITA
+    /\b(H\.?264|H\.?265|X264|X265|HEVC|AVC|DIVX|XVID).*(ITA|IT)\b/i,
+    
+    // 6. Crew e Release Group Italiani (ELENCO AGGIORNATO)
+    // Aggiunti: EAGLE, TRL, MEA, LUX, DNA, LEST, GHIZZO, USAbit, etc.
+    /\b(iDN_CreW|CORSARO|MUX|WMS|TRIDIM|SPEEDVIDEO|EAGLE|TRL|MEA|LUX|DNA|LEST|GHIZZO|USAbit|Bric|Dtone|Gaiage|BlackBit|Pantry|Vics|Papeete)\b/i,
+    
+    // 7. Termini Serie TV Italiani
+    /\b(STAGIONE|EPISODIO|SERIE COMPLETA|STAGIONE COMPLETA)\b/i
 ];
-const REGEX_CLEANER = /\b(ita|eng|sub|h264|h265|x264|x265|hevc|1080p|720p|4k|2160p|bluray|web-?dl|rip|ac3|aac|dts|multi|truehd|remux|complete|pack|amzn|nf|dsnp)\b.*/yi;
+const REGEX_CLEANER = /\b(ita|eng|ger|fre|spa|latino|rus|sub|h264|h265|x264|x265|hevc|avc|vc1|1080p|1080i|720p|480p|4k|2160p|uhd|sdr|hdr|hdr10|dv|dolby|vision|bluray|bd|bdrip|brrip|web-?dl|webrip|hdtv|rip|remux|mux|ac-?3|aac|dts|ddp|flac|truehd|atmos|multi|dual|complete|pack|amzn|nf|dsnp|hmax|atvp|apple|hulu|peacock|rakuten|iyp|dvd|dvdrip|unrated|extended|director|cut)\b.*/yi;
 
 // --- CACHE SYSTEM (AGGIORNATO CON LRU-CACHE) ---
 const STREAM_CACHE = new LRUCache({
