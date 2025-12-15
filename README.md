@@ -222,38 +222,39 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 
 <br>
 
-<table>
-  <tr>
-    <td align="center" width="600px">
-      <br>
-      <img src="https://img.shields.io/badge/SYSTEM_STATUS-OPERATIONAL-success?style=flat-square&logo=githubactions&logoColor=white" />
-      <img src="https://img.shields.io/badge/MAINTENANCE-COMMUNITY_POWERED-blue?style=flat-square&logo=open-source-initiative&logoColor=white" />
-      <br><br>
-      <samp>
-        Forgiato nel codice. Mantenuto vivo dalla community.
-      </samp>
-      <br><br>
-      <a href="https://www.paypal.me/luc4nex">
-        <img src="https://img.shields.io/badge/⚠️_REFILL_ENERGY-OFFRI_UN_CAFFÈ-F5A623?style=for-the-badge&logo=paypal&logoColor=black&labelColor=222" alt="Donate" />
-      </a>
-      <br><br>
-      <sub style="color: gray">
-        Garantisci la continuità operativa e l'evoluzione del protocollo.
-      </sub>
-      <br><br>
-      <hr>
-      <br>
-      <span>
-        Architetto del sistema: 
-        <a href="https://github.com/LUC4N3X"><b>LUC4N3X</b></a>
-      </span>
-      <br>
-      <sub>Leviathan Project © 2025</sub>
-      <br><br>
-    </td>
-  </tr>
-</table>
+<img src="https://img.shields.io/badge/SYSTEM_STATUS-OPERATIONAL-success?style=flat-square&logo=githubactions&logoColor=white" />
+<img src="https://img.shields.io/badge/MAINTENANCE-COMMUNITY_POWERED-blue?style=flat-square&logo=open-source-initiative&logoColor=white" />
+
+<br><br>
+
+<samp>
+  Forgiato nel codice. Mantenuto vivo dalla community.
+</samp>
+
+<br><br>
+
+<a href="https://www.paypal.me/luc4nex" target="_blank">
+  <img src="https://img.shields.io/badge/⚠️_REFILL_ENERGY-OFFRI_UN_CAFFÈ-F5A623?style=for-the-badge&logo=paypal&logoColor=black&labelColor=222" alt="Donate" />
+</a>
+
+<br><br>
+
+<sub>
+  Garantisci la continuità operativa e l'evoluzione del protocollo.
+</sub>
+
+<br><br>
+
+---
+
+**Architetto del sistema:**  
+<a href="https://github.com/LUC4N3X"><b>LUC4N3X</b></a>
+
 <br>
+
+<sub>Leviathan Project © 2025</sub>
+
+<br><br>
 
 <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=22&pause=1000&color=00E0FF&center=true&vCenter=true&width=550&lines=Rimani+legale.;Rimani+lucido.;Lunga+vita+al+codice." alt="Typing SVG" />
 
