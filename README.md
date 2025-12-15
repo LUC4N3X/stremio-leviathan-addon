@@ -223,41 +223,53 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 
 
 <div align="center">
-
   <br>
+  
+  <hr style="width: 50%; border: 0; height: 1px; background: linear-gradient(90deg, transparent, #F5A623, transparent); margin-bottom: 25px; opacity: 0.5;">
 
-  <span style="font-family: monospace; color: #94a3b8; font-size: 0.9rem;">
-    Forgiato nel codice & alimentato a
-  </span>
+  <div style="margin-bottom: 15px;">
+    <span style="font-family: monospace; color: #cbd5e1; font-size: 0.85rem; letter-spacing: 2px;">
+      ⚠️ SYSTEM FUEL LOW: RICARICA NECESSARIA
+    </span>
+  </div>
 
-  <br>
-  <br>
-
-  <a href="https://www.paypal.me/luc4nex" target="_blank">
-    <img src="https://img.shields.io/badge/DEV_FUEL-CAFFEINE_INJECTION-F5A623?style=for-the-badge&logo=buymeacoffee&logoColor=black&labelColor=white" 
-         style="filter: drop-shadow(0 0 10px rgba(245, 166, 35, 0.6));" 
-         alt="Offri un caffè" />
+  <a href="https://www.paypal.me/luc4nex" target="_blank" style="text-decoration: none;">
+    <div style="
+      background: linear-gradient(135deg, #F5A623 0%, #d97706 100%);
+      border: 2px solid #fff;
+      border-radius: 8px;
+      padding: 12px 35px;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 0 20px rgba(245, 166, 35, 0.4);
+      transition: all 0.3s ease;
+    ">
+      <img src="https://api.iconify.design/line-md:coffee-loop.svg?color=white" width="28" height="28" />
+      
+      <div style="text-align: left;">
+        <span style="display: block; color: #fff; font-weight: 800; font-size: 1.1rem; line-height: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">
+          OFFRIMI UN CAFFÈ
+        </span>
+        <span style="display: block; color: rgba(255,255,255,0.8); font-size: 0.7rem; font-weight: 600; letter-spacing: 1px; margin-top: 2px;">
+          TRAMITE PAYPAL
+        </span>
+      </div>
+    </div>
   </a>
 
   <br>
   <br>
 
-  <span style="color: #cbd5e1; font-size: 0.8rem;">
-    Architetto del sistema: <a href="https://github.com/LUC4N3X" style="color: #00eaff; text-decoration: none; font-weight: bold;">LUC4N3X</a>
+  <span style="color: #64748b; font-size: 0.75rem;">
+    Ogni donazione garantisce server attivi e codice pulito.<br>
+    Forgiato da <a href="https://github.com/LUC4N3X" style="color: #F5A623; text-decoration: none; font-weight: bold;">LUC4N3X</a>
   </span>
+
+  <br>
+  <br>
   
-  <br>
-  <sub>Leviathan Project © 2025 — Tutti i diritti riservati</sub>
-
-  <br>
-  <br>
-
   <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=22&pause=1000&color=00E0FF&center=true&vCenter=true&width=550&lines=Rimani+legale.;Rimani+lucido.;Lunga+vita+al+codice." alt="Typing SVG" />
 
 </div>
 
-Leviathan Project © 2025<br>
-Potenza. Controllo. Codice.
-</sub>
-
-</div>
