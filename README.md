@@ -222,6 +222,7 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 
 
 
+
 <div align="center">
 
   <br>
@@ -268,11 +269,3 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
   />
 
 </div>
-
-  <br>
-  <br>
-  
-  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=22&pause=1000&color=00E0FF&center=true&vCenter=true&width=550&lines=Rimani+legale.;Rimani+lucido.;Lunga+vita+al+codice." alt="Typing SVG" />
-
-</div>
-
