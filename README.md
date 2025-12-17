@@ -64,6 +64,8 @@ Il core, sviluppato in **Node.js**, orchestra scansioni parallele sui principali
 ### 🔥 Release 2.0 Highlights
 
 * 🚀 **Core Refactoring:** Motore riscritto per massimizzare stabilità e concorrenza.
+* 🌪️ **VIX Hybrid Module:** Integrazione diretta con **StreamingCommunity** per flussi istantanei (No-P2P).
+* 👻 **Ghost Proxying:** Supporto nativo a **MediaFlow** per l'uso sicuro di Account Debrid condivisi.
 * 🏎️ **Fast Lane Mode:** Gestione intelligente dei timeout per API ad alta velocità.
 * 🇮🇹 **Strict ITA Validation:** Filtri regex chirurgici per l'eliminazione dei falsi positivi.
 * 🛡️ **Cloudscraper Integration:** Ottimizzazione avanzata per il superamento dei controlli Cloudflare.
@@ -98,6 +100,18 @@ Non si limita a trovare il link. Lo potenzia.
 * **Smart Parsing:** Normalizzazione regex per Stagioni/Episodi (`S01E01`, `1x01`) indipendentemente dal formato sorgente.
 * **Magnet Boosting:** Inietta nel payload una lista curata di **Tracker UDP Tier-1** *(OpenTrackr, Quad, Lubitor)* per massimizzare la velocità di aggancio dei peer e ridurre il tempo di pre-buffering.
 
+### 5. 🌪️ VIX Hybrid Protocol (StreamingCommunity)
+Leviathan evolve oltre il Torrent. Il modulo **VIX** interroga direttamente l'infrastruttura di StreamingCommunity.
+* **Direct HLS Extraction:** Aggancia i flussi video m3u8 direttamente dalla sorgente web.
+* **Zero-Wait:** Nessun buffering iniziale, nessun bisogno di seeders. Il contenuto parte istantaneamente.
+* **Fallback Intelligente:** Se il torrent non ha seed, il sistema commuta automaticamente sul flusso web.
+
+### 6. 👻 Debrid Ghost Shell (MediaFlow Proxy)
+Progettato per l'elusione dei blocchi IP e la gestione di account Multi-Utente.
+* **IP Masking:** Tutto il traffico verso Real-Debrid viene tunnelizzato tramite **MediaFlow Proxy**.
+* **Shared Account Support:** Permette l'utilizzo dello stesso account Debrid su più IP contemporaneamente senza rischiare il ban, poiché il provider vede solo l'IP del Proxy.
+* **Anti-Throttling:** Bypassa i blocchi imposti dagli ISP sui domini dei servizi Debrid.
+
 ---
 
 <div align="center">
@@ -123,6 +137,7 @@ Non si limita a trovare il link. Lo potenzia.
 
 | **TARGET ENGINE** | **REGION** | **LATENCY** | **MODE** | **STATUS** |
 | :--- | :---: | :---: | :---: | :---: |
+| **StreamingCommunity** | 🇮🇹 ITA | ![](https://img.shields.io/badge/⏱️_INSTANT-ULTRA-FF0000?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🌪️_HLS-Stream-red?style=flat-square&labelColor=black) | 🟢 |
 | **Il Corsaro Nero** | 🇮🇹 ITA | ![](https://img.shields.io/badge/⏱️_3000ms-HQ-00eaff?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/⚡_Fast-Lane-00eaff?style=flat-square&labelColor=black) | 🟢 |
 | **Knaben** | 🌍 GLB | ![](https://img.shields.io/badge/⏱️_3000ms-HQ-00eaff?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🔌_API-JSON-blueviolet?style=flat-square&labelColor=black) | 🟢 |
 | **The Pirate Bay** | 🌍 GLB | ![](https://img.shields.io/badge/⏱️_3000ms-HQ-00eaff?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🔌_API-JSON-blueviolet?style=flat-square&labelColor=black) | 🟢 |
