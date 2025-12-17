@@ -13,6 +13,7 @@ const { smartMatch } = require("./smart_parser");
 const { rankAndFilterResults } = require("./ranking");
 
 // --- IMPORTIAMO CONVERTER E DEBRID ---
+// Nota: Ora queste funzioni accettano userKey come ultimo parametro
 const { tmdbToImdb, imdbToTmdb, getTmdbAltTitles } = require("./id_converter");
 const kitsuHandler = require("./kitsu_handler");
 const RD = require("./debrid/realdebrid");
@@ -240,7 +241,6 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
 }
 
 // 2. NUOVO FORMATTER PER WEB (VIX/SC)
-// Usa lo stesso stile ma con icone appropriate per il web
 function formatVixStream(meta, vixData) {
     const isFHD = vixData.isFHD;
     const quality = isFHD ? "1080p" : "720p";
@@ -294,27 +294,6 @@ async function getMetadata(id, type) {
   } catch (err) { return null; }
 }
 
-// --- HELPER MEDIAFLOW ---
-function wrapMediaFlow(targetUrl, config) {
-    if (!config || !config.mediaflow || !config.mediaflow.url) return targetUrl;
-    
-    try {
-        const proxyUrl = new URL(`${config.mediaflow.url}/proxy/stream`);
-        proxyUrl.searchParams.append("d", targetUrl); 
-        
-        if (config.mediaflow.pass) {
-            proxyUrl.searchParams.append("api_password", config.mediaflow.pass);
-        }
-        
-        // Header specifici per sembrare un browser legittimo agli occhi di RD/AD
-        proxyUrl.searchParams.append("h_user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
-        
-        return proxyUrl.toString();
-    } catch(e) {
-        return targetUrl;
-    }
-}
-
 async function resolveDebridLink(config, item, showFake) {
     try {
         const service = config.service || 'rd';
@@ -331,20 +310,8 @@ async function resolveDebridLink(config, item, showFake) {
         const serviceTag = service.toUpperCase();
         const { name, title } = formatStreamTitleCinePro(streamData.filename || item.title, item.source, streamData.size || item.size, item.seeders, serviceTag);
         
-        // --- LOGICA MEDIAFLOW OPZIONALE ---
-        let finalUrl = streamData.url;
-        let isProxied = false;
-
-        // Verifica se l'utente ha attivato il proxy per Debrid
-        if (config.mediaflow && config.mediaflow.url && config.mediaflow.proxyDebrid) {
-            finalUrl = wrapMediaFlow(streamData.url, config);
-            isProxied = true;
-        }
-
         return { 
-            name, 
-            title: title + (isProxied ? "\n🛡️ Proxied via MediaFlow" : ""), 
-            url: finalUrl, 
+            name, title, url: streamData.url, 
             behaviorHints: { notWebReady: false, bingieGroup: `corsaro-${service}` } 
         };
     } catch (e) {
@@ -357,11 +324,15 @@ async function resolveDebridLink(config, item, showFake) {
 async function generateStream(type, id, config, userConfStr) {
   if (!config.key && !config.rd) return { streams: [{ name: "⚠️ CONFIG", title: "Inserisci API Key nel configuratore" }] };
   
+  // 🔑 ESTRAZIONE CHIAVE UTENTE (MODIFICA RICHIESTA)
+  const userTmdbKey = config.tmdb; 
+
   let finalId = id; 
   if (id.startsWith("tmdb:")) {
       try {
           const parts = id.split(":");
-          const imdbId = await tmdbToImdb(parts[1], type);
+          // Passiamo la userTmdbKey al converter
+          const imdbId = await tmdbToImdb(parts[1], type, userTmdbKey);
           if (imdbId) {
               if (type === "series" && parts.length >= 4) finalId = `${imdbId}:${parts[2]}:${parts[3]}`; 
               else finalId = imdbId; 
@@ -387,13 +358,15 @@ async function generateStream(type, id, config, userConfStr) {
   try {
       let tmdbIdForSearch = null;
       if (meta.imdb_id.startsWith("tt")) {
-          const converted = await imdbToTmdb(meta.imdb_id);
+          // Passiamo userTmdbKey
+          const converted = await imdbToTmdb(meta.imdb_id, userTmdbKey);
           tmdbIdForSearch = converted.tmdbId;
       } else {
           tmdbIdForSearch = meta.imdb_id;
       }
       if (tmdbIdForSearch) {
-          dynamicTitles = await getTmdbAltTitles(tmdbIdForSearch, type);
+          //  userTmdbKey anche qui per i titoli
+          dynamicTitles = await getTmdbAltTitles(tmdbIdForSearch, type, userTmdbKey);
       }
   } catch (e) {
       console.log("Errore recupero titoli dinamici:", e.message);
