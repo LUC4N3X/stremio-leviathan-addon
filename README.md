@@ -46,7 +46,7 @@
   </p>
 
 <div align="center">
-  <a href="https://leaviathan-leviathan.hf.space" target="_blank">
+  <a href="https://leviathanaddon.dpdns.org" target="_blank">
     <img src="public/button.svg" width="350" alt="Installa Leviathan">
   </a>
 
