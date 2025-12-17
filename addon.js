@@ -3,6 +3,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const path = require("path");
 const axios = require("axios");
+const crypto = require("crypto"); // <--- NUOVO IMPORT
 const Bottleneck = require("bottleneck");
 const rateLimit = require("express-rate-limit");
 const { LRUCache } = require("lru-cache"); 
@@ -13,7 +14,6 @@ const { smartMatch } = require("./smart_parser");
 const { rankAndFilterResults } = require("./ranking");
 
 // --- IMPORTIAMO CONVERTER E DEBRID ---
-// Nota: Ora queste funzioni accettano userKey come ultimo parametro
 const { tmdbToImdb, imdbToTmdb, getTmdbAltTitles } = require("./id_converter");
 const kitsuHandler = require("./kitsu_handler");
 const RD = require("./debrid/realdebrid");
@@ -240,7 +240,7 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     return { name, title: lines.join("\n") };
 }
 
-// 2. NUOVO FORMATTER PER WEB (VIX/SC)
+// 2.  FORMATTER PER WEB (VIX/SC)
 function formatVixStream(meta, vixData) {
     const isFHD = vixData.isFHD;
     const quality = isFHD ? "1080p" : "720p";
@@ -320,11 +320,15 @@ async function resolveDebridLink(config, item, showFake) {
     }
 }
 
+// === HELPER HASH CONFIG (MD5) ===
+const hashConfig = (conf) => crypto.createHash("md5").update(conf).digest("hex");
+
+
 // === MAIN GENERATOR FUNCTION ===
 async function generateStream(type, id, config, userConfStr) {
   if (!config.key && !config.rd) return { streams: [{ name: "⚠️ CONFIG", title: "Inserisci API Key nel configuratore" }] };
   
-  // 🔑 ESTRAZIONE CHIAVE UTENTE (MODIFICA RICHIESTA)
+  // 🔑 ESTRAZIONE CHIAVE UTENTE
   const userTmdbKey = config.tmdb; 
 
   let finalId = id; 
@@ -476,7 +480,9 @@ app.get("/:conf/catalog/:type/:id/:extra?.json", async (req, res) => { res.setHe
 app.get("/:conf/stream/:type/:id.json", async (req, res) => { 
     res.setHeader("Access-Control-Allow-Origin", "*");
     const { conf, type, id } = req.params;
-    const cacheKey = `${conf}:${type}:${id}`;
+    
+    // --- IMPLEMENTAZIONE MD5 CACHE KEY ---
+    const cacheKey = `${hashConfig(conf)}:${type}:${id}`;
 
     if (STREAM_CACHE.has(cacheKey)) {
         console.log(`⚡ [CACHE HIT] Servo "${id}" dalla memoria.`);
