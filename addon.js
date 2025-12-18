@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -19,14 +20,13 @@ const kitsuHandler = require("./kitsu_handler");
 const RD = require("./debrid/realdebrid");
 const AD = require("./debrid/alldebrid");
 const TB = require("./debrid/torbox");
-const dbHelper = require("./db-helper"); // <--- NUOVO: DB HELPER
-
-// --- IMPORTIAMO NUOVI HANDLER (SOLO VIX) ---
+const dbHelper = require("./db-helper"); 
 const { searchVix } = require("./vix_handler");
-
 const { getManifest } = require("./manifest");
 
-// --- CONFIGURAZIONE ---
+// Inizializza DB
+dbHelper.initDatabase();
+
 const CONFIG = {
   CINEMETA_URL: "https://v3-cinemeta.strem.io",
   REAL_SIZE_FILTER: 80 * 1024 * 1024,
@@ -83,9 +83,6 @@ const LIMITERS = {
 
 const SCRAPER_MODULES = [ require("./engines") ];
 const FALLBACK_SCRAPERS = [ require("./external") ];
-
-// Inizializza DB (legge DATABASE_URL dal file .env o environment del server)
-dbHelper.initDatabase();
 
 const app = express();
 app.set('trust proxy', 1);
@@ -161,7 +158,6 @@ function extractAudioInfo(title) {
     const channelMatch = t.match(REGEX_AUDIO.channels);
     let channels = channelMatch ? channelMatch[1] : "";
     if (channels === "2.0") channels = ""; 
-
     let audioTag = "";
     if (REGEX_AUDIO.atmos.test(t)) audioTag = "💣 Atmos";
     else if (REGEX_AUDIO.dtsx.test(t)) audioTag = "💣 DTS:X";
@@ -173,7 +169,6 @@ function extractAudioInfo(title) {
     else if (REGEX_AUDIO.dolby.test(t)) audioTag = "🔈 Dolby";
     else if (REGEX_AUDIO.aac.test(t)) audioTag = "🔈 AAC";
     else if (/\bmp3\b/i.test(t)) audioTag = "🔈 MP3";
-
     if (!audioTag && (channels === "5.1" || channels === "7.1")) audioTag = "🔊 Surround";
     if (!audioTag) return "🔈 Stereo";
     return channels ? `${audioTag} ${channels}` : audioTag;
@@ -181,56 +176,44 @@ function extractAudioInfo(title) {
 
 function extractStreamInfo(title, source) {
   const t = String(title).toLowerCase();
-  
   let q = "HD"; let qIcon = "📺";
   if (REGEX_QUALITY["4K"].test(t)) { q = "4K"; qIcon = "✨"; }
   else if (REGEX_QUALITY["1080p"].test(t)) { q = "1080p"; qIcon = "🌕"; }
   else if (REGEX_QUALITY["720p"].test(t)) { q = "720p"; qIcon = "🌗"; }
   else if (REGEX_QUALITY["SD"].test(t)) { q = "SD"; qIcon = "🌑"; }
-
   const videoTags = [];
   if (/hdr/.test(t)) videoTags.push("HDR");
   if (/dolby|vision|\bdv\b/.test(t)) videoTags.push("DV");
   if (/imax/.test(t)) videoTags.push("IMAX");
   if (/x265|h265|hevc/.test(t)) videoTags.push("HEVC");
-  
   let lang = "🇬🇧 ENG"; 
   if (source === "Corsaro" || isSafeForItalian({ title })) {
       lang = "🇮🇹 ITA";
       if (/multi|mui/i.test(t)) lang = "🇮🇹 MULTI";
   } 
-  
   const audioInfo = extractAudioInfo(title);
   let detailsParts = [];
   if (videoTags.length) detailsParts.push(`🖥️ ${videoTags.join(" ")}`);
-  
   return { quality: q, qIcon, info: detailsParts.join(" | "), lang, audioInfo };
 }
 
-// 1. FORMATTER PER TORRENT (DEBRID)
 function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag = "RD") {
     const { quality, qIcon, info, lang, audioInfo } = extractStreamInfo(fileTitle, source);
-
     const sizeStr = size ? `🧲 ${formatBytes(size)}` : "🧲 ?";
     const seedersStr = seeders != null ? `👤 ${seeders}` : "";
-
     let langStr = "🌐 ?";
     if (/ita|it\b|italiano/i.test(lang || "")) langStr = "🗣️ ITA";
     else if (/multi/i.test(lang || "")) langStr = "🗣️ MULTI";
     else if (lang) langStr = `🗣️ ${lang.toUpperCase()}`;
-
     let displaySource = source;
     if (/corsaro/i.test(displaySource)) displaySource = "ilCorSaRoNeRo";
     const sourceLine = `⚡ [${serviceTag}] ${displaySource}`;
     const name = `🦑 LEVIATHAN\n${qIcon} ${quality}`; 
-
     const cleanName = cleanFilename(fileTitle)
         .replace(/(s\d{1,2}e\d{1,2}|\d{1,2}x\d{1,2}|s\d{1,2})/ig, "")
         .replace(/\s{2,}/g, " ")
         .trim();
-
     const epTag = getEpisodeTag(fileTitle);
-
     const lines = [];
     lines.push(`🎬 ${cleanName}${epTag ? ` ${epTag}` : ""}`);
     const audioLine = [langStr, audioInfo].filter(Boolean).join(" • ");
@@ -240,36 +223,24 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     const techLine = [sizeStr, seedersStr].filter(Boolean).join(" • ");
     if (techLine) lines.push(techLine);
     if (sourceLine) lines.push(sourceLine);
-
     return { name, title: lines.join("\n") };
 }
 
-// 2.  FORMATTER PER WEB (VIX/SC)
 function formatVixStream(meta, vixData) {
     const isFHD = vixData.isFHD;
     const quality = isFHD ? "1080p" : "720p";
     const qIcon = isFHD ? "🌕" : "🌗";
-
     const lines = [];
-    // RIGA 1: Titolo
     lines.push(`🎬 ${meta.title}`);
-    // RIGA 2: Lingua e Audio (Default SC)
     lines.push(`🇮🇹 ITA • 🔊 AAC`);
-    // RIGA 3: Info Video (HLS)
     lines.push(`🎞️ HLS • Bitrate Variabile`);
-    // RIGA 4: Info Tecnica Web
     lines.push(`☁️ Web Stream • ⚡ Instant`);
-    // RIGA 5: Source
     lines.push(`🍝 ${vixData.source}`);
-
     return {
         name: `🌪️ VIX\n${qIcon} ${quality}`,
         title: lines.join("\n"),
         url: vixData.url,
-        behaviorHints: {
-            notWebReady: false,
-            bingieGroup: "vix-stream"
-        }
+        behaviorHints: { notWebReady: false, bingieGroup: "vix-stream" }
     };
 }
 
@@ -277,8 +248,14 @@ async function getMetadata(id, type) {
   try {
     const allowedTypes = ["movie", "series"];
     if (!allowedTypes.includes(type)) return null;
-    let tmdbId = id, s = 1, e = 1;
-    if (type === "series" && id.includes(":")) [tmdbId, s, e] = id.split(":");
+    
+    // FIX FILM: Inizializziamo a 0 per i film!
+    let tmdbId = id, s = 0, e = 0;
+    
+    if (type === "series" && id.includes(":")) {
+        // Solo se è serie sovrascriviamo con i numeri reali
+        [tmdbId, s, e] = id.split(":");
+    }
     
     const rawId = tmdbId.split(":")[0];
     const cleanId = rawId.match(/^(tt\d+|\d+)$/i)?.[0] || "";
@@ -298,48 +275,46 @@ async function getMetadata(id, type) {
   } catch (err) { return null; }
 }
 
-async function resolveDebridLink(config, item, showFake) {
+async function resolveDebridLink(config, item, showFake, reqHost) {
     try {
         const service = config.service || 'rd';
         const apiKey = config.key || config.rd;
         if (!apiKey) return null;
 
+        if (service === 'tb') {
+            if (item._tbCached) {
+                const serviceTag = "TB";
+                const { name, title } = formatStreamTitleCinePro(item.title, item.source, item._size, item.seeders, serviceTag);
+                const proxyUrl = `${reqHost}/${config.rawConf}/play_tb/${item.hash}?s=${item.season || 0}&e=${item.episode || 0}`;
+                return { name, title, url: proxyUrl, behaviorHints: { notWebReady: false, bingieGroup: `corsaro-tb` } };
+            } else { return null; }
+        }
+
         let streamData = null;
         if (service === 'rd') streamData = await RD.getStreamLink(apiKey, item.magnet, item.season, item.episode);
         else if (service === 'ad') streamData = await AD.getStreamLink(apiKey, item.magnet, item.season, item.episode);
-        else if (service === 'tb') streamData = await TB.getStreamLink(apiKey, item.magnet, item.season, item.episode);
 
         if (!streamData || (streamData.type === "ready" && streamData.size < CONFIG.REAL_SIZE_FILTER)) return null;
 
         const serviceTag = service.toUpperCase();
         const { name, title } = formatStreamTitleCinePro(streamData.filename || item.title, item.source, streamData.size || item.size, item.seeders, serviceTag);
-        
-        return { 
-            name, title, url: streamData.url, 
-            behaviorHints: { notWebReady: false, bingieGroup: `corsaro-${service}` } 
-        };
+        return { name, title, url: streamData.url, behaviorHints: { notWebReady: false, bingieGroup: `corsaro-${service}` } };
     } catch (e) {
         if (showFake) return { name: `[P2P ⚠️]`, title: `${item.title}\n⚠️ Cache Assente`, url: item.magnet, behaviorHints: { notWebReady: true } };
         return null;
     }
 }
 
-// === HELPER HASH CONFIG (MD5) ===
 const hashConfig = (conf) => crypto.createHash("md5").update(conf).digest("hex");
 
-
-// === MAIN GENERATOR FUNCTION ===
-async function generateStream(type, id, config, userConfStr) {
+async function generateStream(type, id, config, userConfStr, reqHost) {
   if (!config.key && !config.rd) return { streams: [{ name: "⚠️ CONFIG", title: "Inserisci API Key nel configuratore" }] };
   
-  // 🔑 ESTRAZIONE CHIAVE UTENTE
   const userTmdbKey = config.tmdb; 
-
   let finalId = id; 
   if (id.startsWith("tmdb:")) {
       try {
           const parts = id.split(":");
-          // Passiamo la userTmdbKey al converter
           const imdbId = await tmdbToImdb(parts[1], type, userTmdbKey);
           if (imdbId) {
               if (type === "series" && parts.length >= 4) finalId = `${imdbId}:${parts[2]}:${parts[3]}`; 
@@ -347,7 +322,6 @@ async function generateStream(type, id, config, userConfStr) {
           }
       } catch (err) {}
   }
-
   if (id.startsWith("kitsu:")) {
       try {
           const parts = id.split(":");
@@ -362,92 +336,54 @@ async function generateStream(type, id, config, userConfStr) {
   const meta = await getMetadata(finalId, type); 
   if (!meta) return { streams: [] };
 
-  // --- 0. RICERCA DATABASE (GOD TIER) ---
-  console.log(`\n🔍 [DB] Cerco nel database di IlCorsaroViola: ${meta.imdb_id}`);
+  console.log(`\n🔍 [DB] Cerco nel database: ${meta.imdb_id}`);
   let dbResults = [];
   try {
-      if (type === 'movie') {
-          dbResults = await dbHelper.searchMovie(meta.imdb_id);
-      } else if (type === 'series') {
-          dbResults = await dbHelper.searchSeries(meta.imdb_id, meta.season, meta.episode);
-      }
+      if (type === 'movie') dbResults = await dbHelper.searchMovie(meta.imdb_id);
+      else if (type === 'series') dbResults = await dbHelper.searchSeries(meta.imdb_id, meta.season, meta.episode);
       console.log(`✅ [DB] Trovati ${dbResults.length} risultati.`);
-  } catch (err) {
-      console.error("❌ Errore ricerca DB:", err.message);
-  }
+  } catch (err) { console.error("❌ Errore ricerca DB:", err.message); }
   
   let dynamicTitles = [];
   try {
       let tmdbIdForSearch = null;
       if (meta.imdb_id.startsWith("tt")) {
-          // Passiamo userTmdbKey
           const converted = await imdbToTmdb(meta.imdb_id, userTmdbKey);
           tmdbIdForSearch = converted.tmdbId;
-      } else {
-          tmdbIdForSearch = meta.imdb_id;
-      }
-      if (tmdbIdForSearch) {
-          //  userTmdbKey anche qui per i titoli
-          dynamicTitles = await getTmdbAltTitles(tmdbIdForSearch, type, userTmdbKey);
-      }
-  } catch (e) {
-      console.log("Errore recupero titoli dinamici:", e.message);
-  }
+      } else tmdbIdForSearch = meta.imdb_id;
+      if (tmdbIdForSearch) dynamicTitles = await getTmdbAltTitles(tmdbIdForSearch, type, userTmdbKey);
+  } catch (e) {}
 
   const queries = generateSmartQueries(meta, dynamicTitles);
   const onlyIta = config.filters?.onlyIta !== false; 
-  console.log(`\n🧠 [AI-CORE] Cerco "${meta.title}" (${meta.year}): ${queries.length} varianti.`);
+  console.log(`\n🧠 [AI-CORE] Cerco "${meta.title}": ${queries.length} varianti.`);
 
-  // --- 1. AVVIA VIX SCRAPER (PARALLELO) ---
   const vixPromise = searchVix(meta, config);
-
-  // --- 2. TORRENT SCRAPERS (DEBRID) ---
   let promises = [];
-  queries.forEach(q => {
-    SCRAPER_MODULES.forEach(scraper => {
-      if (scraper.searchMagnet) {
-        promises.push(
-          LIMITERS.scraper.schedule(() => 
-            withTimeout(scraper.searchMagnet(q, meta.year, type, finalId), CONFIG.SCRAPER_TIMEOUT).catch(err => [])
-          )
-        );
-      }
-    });
-  });
+  queries.forEach(q => { SCRAPER_MODULES.forEach(scraper => { if (scraper.searchMagnet) { promises.push(LIMITERS.scraper.schedule(() => withTimeout(scraper.searchMagnet(q, meta.year, type, finalId), CONFIG.SCRAPER_TIMEOUT).catch(err => []))); } }); });
 
   let resultsRaw = (await Promise.all(promises)).flat();
-  
-  // UNIAMO I RISULTATI DB A QUELLI DEGLI SCRAPER
   resultsRaw = [...dbResults, ...resultsRaw]; 
 
-  // Filtri Torrent Base
   resultsRaw = resultsRaw.filter(item => {
     if (!item?.magnet) return false;
     const fileYearMatch = item.title.match(REGEX_YEAR);
-    if (fileYearMatch) {
-        if (Math.abs(parseInt(fileYearMatch[0]) - parseInt(meta.year)) > 1) return false;
-    }
+    if (fileYearMatch && Math.abs(parseInt(fileYearMatch[0]) - parseInt(meta.year)) > 1) return false;
     const isSemanticallySafe = smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode);
     if (!isSemanticallySafe) return false;
     if (onlyIta && !isSafeForItalian(item)) return false;
     return true;
   });
 
-  // Fallback
   if (resultsRaw.length <= 5) {
-    const extPromises = FALLBACK_SCRAPERS.map(fb => 
-        LIMITERS.scraper.schedule(() => withTimeout(fb.searchMagnet(queries[0], meta.year, type, finalId), CONFIG.SCRAPER_TIMEOUT).catch(() => []))
-    );
-    try {
+      const extPromises = FALLBACK_SCRAPERS.map(fb => LIMITERS.scraper.schedule(() => withTimeout(fb.searchMagnet(queries[0], meta.year, type, finalId), CONFIG.SCRAPER_TIMEOUT).catch(() => [])));
+      try {
         const extResultsRaw = (await Promise.all(extPromises)).flat();
         if (Array.isArray(extResultsRaw)) {
-            const filteredExt = extResultsRaw.filter(item => 
-                smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode) &&
-                (!onlyIta || isSafeForItalian(item))
-            );
+            const filteredExt = extResultsRaw.filter(item => smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode) && (!onlyIta || isSafeForItalian(item)));
             resultsRaw = [...resultsRaw, ...filteredExt];
         }
-    } catch (e) {}
+      } catch (e) {}
   }
 
   const seen = new Set(); 
@@ -460,37 +396,62 @@ async function generateStream(type, id, config, userConfStr) {
         if (seen.has(hash)) continue;
         seen.add(hash);
         item._size = parseSize(item.size || item.sizeBytes);
+        item.hash = hash; 
         cleanResults.push(item);
     } catch (err) { continue; }
   }
   
-  // Risoluzione Debrid (Torrents)
+  const ranked = rankAndFilterResults(cleanResults, meta, config).slice(0, CONFIG.MAX_RESULTS);
+
+  if (config.service === 'tb' && ranked.length > 0) {
+      const hashes = ranked.map(r => r.hash);
+      console.log(`🔎 [TorBox] Controllo cache per ${hashes.length} elementi...`);
+      const cachedHashes = await TB.checkCached(config.key || config.rd, hashes);
+      const cachedSet = new Set(cachedHashes.map(h => h.toUpperCase()));
+      ranked.forEach(item => { if (cachedSet.has(item.hash.toUpperCase())) item._tbCached = true; });
+      console.log(`✅ [TorBox] ${cachedSet.size} elementi in cache.`);
+  }
+
   let debridStreams = [];
-  if (cleanResults.length > 0) {
-      const ranked = rankAndFilterResults(cleanResults, meta, config).slice(0, CONFIG.MAX_RESULTS);
+  if (ranked.length > 0) {
       const rdPromises = ranked.map(item => {
           item.season = meta.season;
           item.episode = meta.episode;
-          return LIMITERS.rd.schedule(() => resolveDebridLink(config, item, config.filters?.showFake));
+          config.rawConf = userConfStr; 
+          return LIMITERS.rd.schedule(() => resolveDebridLink(config, item, config.filters?.showFake, reqHost));
       });
       debridStreams = (await Promise.all(rdPromises)).filter(Boolean);
   }
 
-  // --- 3. ATTENDI E FORMATTA RISULTATI WEB ---
-  const rawVix = await vixPromise; // Dati grezzi da vix_handler
-  
-  // Applica il formatter definito in questo file
+  const rawVix = await vixPromise; 
   const formattedVix = rawVix.map(v => formatVixStream(meta, v));
-
-  // UNIONE: VIX (Primo) + DEBRID
   const finalStreams = [...formattedVix, ...debridStreams];
-
   if (finalStreams.length === 0) return { streams: [{ name: "⛔", title: "Nessun risultato trovato" }] };
-
   return { streams: finalStreams }; 
 }
 
-// --- ROUTES ---
+app.get("/:conf/play_tb/:hash", async (req, res) => {
+    const { conf, hash } = req.params;
+    const { s, e } = req.query;
+    console.log(`\n▶️ [TorBox Play] Hash: ${hash} S${s}E${e}`);
+    try {
+        const config = getConfig(conf);
+        if (!config.key && !config.rd) throw new Error("API Key Mancante");
+        const magnet = `magnet:?xt=urn:btih:${hash}`;
+        const apiKey = config.key || config.rd;
+        const streamData = await TB.getStreamLink(apiKey, magnet, s, e, hash);
+        if (streamData && streamData.url) {
+             console.log(`🚀 [TorBox] REDIRECT: ${streamData.url}`);
+             res.redirect(streamData.url);
+        } else {
+             res.status(404).send("Errore TorBox: Limite raggiunto o File non trovato.");
+        }
+    } catch (err) {
+        console.error(`💥 [TorBox] Critical:`, err.message);
+        res.status(500).send("Errore Server: " + err.message);
+    }
+});
+
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 app.get("/:conf/configure", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 app.get("/configure", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
@@ -501,20 +462,12 @@ app.get("/:conf/catalog/:type/:id/:extra?.json", async (req, res) => { res.setHe
 app.get("/:conf/stream/:type/:id.json", async (req, res) => { 
     res.setHeader("Access-Control-Allow-Origin", "*");
     const { conf, type, id } = req.params;
-    
-    // --- IMPLEMENTAZIONE MD5 CACHE KEY ---
     const cacheKey = `${hashConfig(conf)}:${type}:${id}`;
-
-    if (STREAM_CACHE.has(cacheKey)) {
-        console.log(`⚡ [CACHE HIT] Servo "${id}" dalla memoria.`);
-        return res.json(STREAM_CACHE.get(cacheKey));
-    }
-
-    const result = await generateStream(type, id.replace(".json", ""), getConfig(conf), conf);
-
-    if (result && result.streams && result.streams.length > 0 && result.streams[0].name !== "⛔") {
-        STREAM_CACHE.set(cacheKey, result);
-    }
+    if (STREAM_CACHE.has(cacheKey)) { console.log(`⚡ [CACHE HIT] Servo "${id}" dalla memoria.`); return res.json(STREAM_CACHE.get(cacheKey)); }
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    const host = `${protocol}://${req.get('host')}`;
+    const result = await generateStream(type, id.replace(".json", ""), getConfig(conf), conf, host);
+    if (result && result.streams && result.streams.length > 0 && result.streams[0].name !== "⛔") STREAM_CACHE.set(cacheKey, result);
     res.json(result); 
 });
 
