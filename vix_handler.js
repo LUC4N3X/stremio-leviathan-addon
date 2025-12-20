@@ -1,5 +1,5 @@
-const { requestHtml } = require("./engines");
-const { imdbToTmdb } = require("./id_converter"); 
+const { requestHtml } = require("../engines"); 
+const { imdbToTmdb } = require("../id_converter");
 
 const VIX_BASE = "https://vixsrc.to"; 
 const ADDON_BASE = "https://leviathanaddon.dpdns.org"; //
