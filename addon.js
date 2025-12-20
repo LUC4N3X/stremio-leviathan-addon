@@ -7,7 +7,10 @@ const axios = require("axios");
 const crypto = require("crypto"); 
 const Bottleneck = require("bottleneck");
 const rateLimit = require("express-rate-limit");
-const { LRUCache } = require("lru-cache"); 
+
+// --- MODULO CACHE REDIS (GOD TIER) ---
+const Cache = require("./cache"); 
+
 const { handleVixSynthetic } = require("./vix/vix_proxy");
 // --- IMPORTIAMO MODULI SMART ---
 const { generateSmartQueries } = require("./ai_query");
@@ -24,7 +27,7 @@ const dbHelper = require("./db-helper");
 const { searchVix } = require("./vix/vix_handler");
 const { getManifest } = require("./manifest");
 
-// Inizializza DB
+// Inizializza DB Locale (Se presente)
 dbHelper.initDatabase();
 
 const CONFIG = {
@@ -69,13 +72,6 @@ const REGEX_ITA = [
 ];
 const REGEX_CLEANER = /\b(ita|eng|ger|fre|spa|latino|rus|sub|h264|h265|x264|x265|hevc|avc|vc1|1080p|1080i|720p|480p|4k|2160p|uhd|sdr|hdr|hdr10|dv|dolby|vision|bluray|bd|bdrip|brrip|web-?dl|webrip|hdtv|rip|remux|mux|ac-?3|aac|dts|ddp|flac|truehd|atmos|multi|dual|complete|pack|amzn|nf|dsnp|hmax|atvp|apple|hulu|peacock|rakuten|iyp|dvd|dvdrip|unrated|extended|director|cut)\b.*/yi;
 
-const STREAM_CACHE = new LRUCache({
-    max: 1000,
-    ttl: 15 * 60 * 1000,
-    allowStale: false,
-    updateAgeOnGet: true
-});
-
 const LIMITERS = {
   scraper: new Bottleneck({ maxConcurrent: 40, minTime: 10 }), 
   rd: new Bottleneck({ maxConcurrent: 25, minTime: 40 }), 
@@ -98,6 +94,7 @@ const limiter = rateLimit({
 app.use(limiter);
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors());
+app.use(express.json()); // Necessario per Admin API
 app.use(express.static(path.join(__dirname, "public")));
 
 // --- FORMATTERS ---
@@ -239,7 +236,6 @@ function formatVixStream(meta, vixData) {
     lines.push(`🍝 StreamingCommunity`); 
     
     return {
-        
         name: `🌪️ StreamingCommunity\n${qIcon} ${quality}`, 
         title: lines.join("\n"),
         url: vixData.url,
@@ -251,21 +247,12 @@ async function getMetadata(id, type) {
   try {
     const allowedTypes = ["movie", "series"];
     if (!allowedTypes.includes(type)) return null;
-    
-    // FIX FILM: Inizializziamo a 0 per i film!
     let tmdbId = id, s = 0, e = 0;
-    
-    if (type === "series" && id.includes(":")) {
-        // Solo se è serie sovrascriviamo con i numeri reali
-        [tmdbId, s, e] = id.split(":");
-    }
-    
+    if (type === "series" && id.includes(":")) [tmdbId, s, e] = id.split(":");
     const rawId = tmdbId.split(":")[0];
     const cleanId = rawId.match(/^(tt\d+|\d+)$/i)?.[0] || "";
     if (!cleanId) return null;
-
     const { data: cData } = await axios.get(`${CONFIG.CINEMETA_URL}/meta/${type}/${cleanId}.json`, { timeout: CONFIG.TIMEOUT_TMDB }).catch(() => ({ data: {} }));
-    
     return cData?.meta ? {
       title: cData.meta.name,
       originalTitle: cData.meta.name, 
@@ -339,104 +326,111 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   const meta = await getMetadata(finalId, type); 
   if (!meta) return { streams: [] };
 
-  console.log(`\n🔍 [DB] Cerco nel database: ${meta.imdb_id}`);
-  let dbResults = [];
-  try {
-      if (type === 'movie') dbResults = await dbHelper.searchMovie(meta.imdb_id);
-      else if (type === 'series') dbResults = await dbHelper.searchSeries(meta.imdb_id, meta.season, meta.episode);
-      
-      // --- LIMITER DB: Max 6 risultati ---
-      if (dbResults && dbResults.length > 0) {
-          // Ordiniamo per seeders per assicurarci di tagliare via i peggiori se > 6
-          dbResults.sort((a, b) => (b.seeders || 0) - (a.seeders || 0));
-          
-          if (dbResults.length > 6) {
-              dbResults = dbResults.slice(0, 6);
-          }
-      }
-      // ------------------------------------
-
-      console.log(`✅ [DB] Trovati ${dbResults.length} risultati (Limitati max 6).`);
-  } catch (err) { console.error("❌ Errore ricerca DB:", err.message); }
+  // --- LOGICA REDIS (GOD TIER) ---
+  let cleanResults = await Cache.getCachedMagnets(type, finalId);
   
-  let dynamicTitles = [];
-  try {
-      let tmdbIdForSearch = null;
-      if (meta.imdb_id.startsWith("tt")) {
-          const converted = await imdbToTmdb(meta.imdb_id, userTmdbKey);
-          tmdbIdForSearch = converted.tmdbId;
-      } else tmdbIdForSearch = meta.imdb_id;
-      if (tmdbIdForSearch) dynamicTitles = await getTmdbAltTitles(tmdbIdForSearch, type, userTmdbKey);
-  } catch (e) {}
+  if (cleanResults) {
+      console.log(`⚡ [REDIS HIT] Cache Globale: ${meta.title} (${cleanResults.length} magnets)`);
+  } else {
+      console.log(`🐢 [REDIS MISS] Avvio Scraping per: ${meta.title}`);
 
-  const allowEng = config.filters?.allowEng === true; 
-  const queries = generateSmartQueries(meta, dynamicTitles, allowEng); // PASSAGGIO FLAG
-  
-  console.log(`\n🧠 [AI-CORE] Cerco "${meta.title}": ${queries.length} varianti.`);
-
-  const vixPromise = searchVix(meta, config);
-  let promises = [];
-  queries.forEach(q => { 
-      SCRAPER_MODULES.forEach(scraper => { 
-          if (scraper.searchMagnet) { 
-              // PASSA LE OPZIONI DI RICERCA AI MOTORI
-              const searchOptions = { allowEng };
-              promises.push(LIMITERS.scraper.schedule(() => withTimeout(scraper.searchMagnet(q, meta.year, type, finalId, searchOptions), CONFIG.SCRAPER_TIMEOUT).catch(err => []))); 
-          } 
-      }); 
-  });
-
-  let resultsRaw = (await Promise.all(promises)).flat();
-  resultsRaw = [...dbResults, ...resultsRaw]; 
-
-  resultsRaw = resultsRaw.filter(item => {
-    if (!item?.magnet) return false;
-    const fileYearMatch = item.title.match(REGEX_YEAR);
-    if (fileYearMatch && Math.abs(parseInt(fileYearMatch[0]) - parseInt(meta.year)) > 1) return false;
-    const isSemanticallySafe = smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode);
-    if (!isSemanticallySafe) return false;
-    
-    // LOGICA FILTRO LINGUA:
-    if (!allowEng && !isSafeForItalian(item)) return false;
-    
-    return true;
-  });
-
-  if (resultsRaw.length <= 5) {
-      const extPromises = FALLBACK_SCRAPERS.map(fb => LIMITERS.scraper.schedule(() => withTimeout(fb.searchMagnet(queries[0], meta.year, type, finalId), CONFIG.SCRAPER_TIMEOUT).catch(() => [])));
+      // --- START SCRAPING LOGIC ---
+      console.log(`\n🔍 [DB] Cerco nel database: ${meta.imdb_id}`);
+      let dbResults = [];
       try {
-        const extResultsRaw = (await Promise.all(extPromises)).flat();
-        if (Array.isArray(extResultsRaw)) {
-            const filteredExt = extResultsRaw.filter(item => smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode) && (!allowEng ? isSafeForItalian(item) : true));
-            resultsRaw = [...resultsRaw, ...filteredExt];
-        }
+          if (type === 'movie') dbResults = await dbHelper.searchMovie(meta.imdb_id);
+          else if (type === 'series') dbResults = await dbHelper.searchSeries(meta.imdb_id, meta.season, meta.episode);
+          
+          // --- LIMITER DB: RIMOSSO (Tutti i risultati) ---
+          if (dbResults && dbResults.length > 0) {
+              // Ordiniamo per seeders (i migliori in alto)
+              dbResults.sort((a, b) => (b.seeders || 0) - (a.seeders || 0));
+              
+              // CODICE RIMOSSO:
+              // if (dbResults.length > 6) {
+              //    dbResults = dbResults.slice(0, 6);
+              // }
+          }
+          // ----------------------------------------------
+
+      } catch (err) { console.error("❌ Errore ricerca DB:", err.message); }
+      
+      let dynamicTitles = [];
+      try {
+          let tmdbIdForSearch = meta.imdb_id.startsWith("tt") ? (await imdbToTmdb(meta.imdb_id, userTmdbKey)).tmdbId : meta.imdb_id;
+          if (tmdbIdForSearch) dynamicTitles = await getTmdbAltTitles(tmdbIdForSearch, type, userTmdbKey);
       } catch (e) {}
+
+      const allowEng = config.filters?.allowEng === true; 
+      const queries = generateSmartQueries(meta, dynamicTitles, allowEng);
+      
+      console.log(`\n🧠 [AI-CORE] Cerco "${meta.title}": ${queries.length} varianti.`);
+
+      let promises = [];
+      queries.forEach(q => { 
+          SCRAPER_MODULES.forEach(scraper => { 
+              if (scraper.searchMagnet) { 
+                  const searchOptions = { allowEng };
+                  promises.push(LIMITERS.scraper.schedule(() => withTimeout(scraper.searchMagnet(q, meta.year, type, finalId, searchOptions), CONFIG.SCRAPER_TIMEOUT).catch(err => []))); 
+              } 
+          }); 
+      });
+
+      let resultsRaw = (await Promise.all(promises)).flat();
+      resultsRaw = [...dbResults, ...resultsRaw]; 
+
+      resultsRaw = resultsRaw.filter(item => {
+        if (!item?.magnet) return false;
+        const fileYearMatch = item.title.match(REGEX_YEAR);
+        if (fileYearMatch && Math.abs(parseInt(fileYearMatch[0]) - parseInt(meta.year)) > 1) return false;
+        const isSemanticallySafe = smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode);
+        if (!isSemanticallySafe) return false;
+        if (!allowEng && !isSafeForItalian(item)) return false;
+        return true;
+      });
+
+      if (resultsRaw.length <= 5) {
+          const extPromises = FALLBACK_SCRAPERS.map(fb => LIMITERS.scraper.schedule(() => withTimeout(fb.searchMagnet(queries[0], meta.year, type, finalId), CONFIG.SCRAPER_TIMEOUT).catch(() => [])));
+          try {
+            const extResultsRaw = (await Promise.all(extPromises)).flat();
+            if (Array.isArray(extResultsRaw)) {
+                const filteredExt = extResultsRaw.filter(item => smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode) && (!allowEng ? isSafeForItalian(item) : true));
+                resultsRaw = [...resultsRaw, ...filteredExt];
+            }
+          } catch (e) {}
+      }
+
+      const seen = new Set(); 
+      cleanResults = [];
+      for (const item of resultsRaw) {
+        if (!item || !item.magnet) continue;
+        try {
+            const hashMatch = item.magnet.match(/btih:([a-f0-9]{40})/i);
+            const hash = hashMatch ? hashMatch[1].toUpperCase() : item.magnet;
+            if (seen.has(hash)) continue;
+            seen.add(hash);
+            item._size = parseSize(item.size || item.sizeBytes);
+            item.hash = hash; 
+            cleanResults.push(item);
+        } catch (err) { continue; }
+      }
+      // --- END SCRAPING LOGIC ---
+
+      // SALVA IN REDIS
+      if (cleanResults && cleanResults.length > 0) {
+          Cache.cacheMagnets(type, finalId, cleanResults);
+      }
   }
 
-  const seen = new Set(); 
-  let cleanResults = [];
-  for (const item of resultsRaw) {
-    if (!item || !item.magnet) continue;
-    try {
-        const hashMatch = item.magnet.match(/btih:([a-f0-9]{40})/i);
-        const hash = hashMatch ? hashMatch[1].toUpperCase() : item.magnet;
-        if (seen.has(hash)) continue;
-        seen.add(hash);
-        item._size = parseSize(item.size || item.sizeBytes);
-        item.hash = hash; 
-        cleanResults.push(item);
-    } catch (err) { continue; }
-  }
-  
   const ranked = rankAndFilterResults(cleanResults, meta, config).slice(0, CONFIG.MAX_RESULTS);
 
+  // TORBOX CHECK
   if (config.service === 'tb' && ranked.length > 0) {
       const hashes = ranked.map(r => r.hash);
       console.log(`🔎 [TorBox] Controllo cache per ${hashes.length} elementi...`);
       const cachedHashes = await TB.checkCached(config.key || config.rd, hashes);
       const cachedSet = new Set(cachedHashes.map(h => h.toUpperCase()));
       ranked.forEach(item => { if (cachedSet.has(item.hash.toUpperCase())) item._tbCached = true; });
-      console.log(`✅ [TorBox] ${cachedSet.size} elementi in cache.`);
   }
 
   let debridStreams = [];
@@ -450,8 +444,11 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       debridStreams = (await Promise.all(rdPromises)).filter(Boolean);
   }
 
+  // VIX (StreamingCommunity) - Non cachato in Redis Magnet ma in Stream Cache
+  const vixPromise = searchVix(meta, config);
   const rawVix = await vixPromise; 
   const formattedVix = rawVix.map(v => formatVixStream(meta, v));
+  
   const finalStreams = [...formattedVix, ...debridStreams];
   if (finalStreams.length === 0) return { streams: [{ name: "⛔", title: "Nessun risultato trovato" }] };
   return { streams: finalStreams }; 
@@ -468,33 +465,68 @@ app.get("/:conf/play_tb/:hash", async (req, res) => {
         const apiKey = config.key || config.rd;
         const streamData = await TB.getStreamLink(apiKey, magnet, s, e, hash);
         if (streamData && streamData.url) {
-             console.log(`🚀 [TorBox] REDIRECT: ${streamData.url}`);
              res.redirect(streamData.url);
         } else {
              res.status(404).send("Errore TorBox: Limite raggiunto o File non trovato.");
         }
     } catch (err) {
-        console.error(`💥 [TorBox] Critical:`, err.message);
         res.status(500).send("Errore Server: " + err.message);
     }
 });
 
+// --- ADMIN API ---
+const authMiddleware = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const validPass = process.env.ADMIN_PASS || "GodTierAccess2024"; 
+    if (authHeader === validPass) next();
+    else res.status(403).json({ error: "Password errata" });
+};
+
+app.get("/admin/keys", authMiddleware, async (req, res) => {
+    try { res.json(await Cache.listKeys()); } 
+    catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.delete("/admin/key", authMiddleware, async (req, res) => {
+    try { await Cache.deleteKey(req.body.key); res.json({ success: true }); } 
+    catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.post("/admin/flush", authMiddleware, async (req, res) => {
+    try { await Cache.flushAll(); res.json({ success: true }); } 
+    catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// --- MAIN ROUTES ---
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 app.get("/:conf/configure", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 app.get("/configure", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 app.get("/manifest.json", (req, res) => { res.setHeader("Access-Control-Allow-Origin", "*"); res.json(getManifest()); });
 app.get("/:conf/manifest.json", (req, res) => { res.setHeader("Access-Control-Allow-Origin", "*"); res.json(getManifest()); });
 app.get("/:conf/catalog/:type/:id/:extra?.json", async (req, res) => { res.setHeader("Access-Control-Allow-Origin", "*"); res.json({metas:[]}); });
-app.get("/vixsynthetic.m3u8", handleVixSynthetic); // Registra la rotta
+app.get("/vixsynthetic.m3u8", handleVixSynthetic);
+
 app.get("/:conf/stream/:type/:id.json", async (req, res) => { 
     res.setHeader("Access-Control-Allow-Origin", "*");
     const { conf, type, id } = req.params;
-    const cacheKey = `${hashConfig(conf)}:${type}:${id}`;
-    if (STREAM_CACHE.has(cacheKey)) { console.log(`⚡ [CACHE HIT] Servo "${id}" dalla memoria.`); return res.json(STREAM_CACHE.get(cacheKey)); }
+    const cleanId = id.replace(".json", "");
+    const confHash = crypto.createHash("md5").update(conf).digest("hex");
+
+    // 1. CHECK CACHE UTENTE (REDIS)
+    const cachedStream = await Cache.getCachedStream(confHash, type, cleanId);
+    if (cachedStream) {
+        console.log(`🚀 [REDIS HIT] Stream Istantaneo per ${cleanId}`);
+        return res.json(cachedStream);
+    }
+
     const protocol = req.headers['x-forwarded-proto'] || req.protocol;
     const host = `${protocol}://${req.get('host')}`;
-    const result = await generateStream(type, id.replace(".json", ""), getConfig(conf), conf, host);
-    if (result && result.streams && result.streams.length > 0 && result.streams[0].name !== "⛔") STREAM_CACHE.set(cacheKey, result);
+    
+    // 2. GENERAZIONE STREAM
+    const result = await generateStream(type, cleanId, getConfig(conf), conf, host);
+    
+    // 3. SALVATAGGIO CACHE
+    if (result && result.streams && result.streams.length > 0) {
+        Cache.cacheStream(confHash, type, cleanId, result);
+    }
     res.json(result); 
 });
 
