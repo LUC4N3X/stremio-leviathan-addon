@@ -235,7 +235,7 @@ function formatVixStream(meta, vixData) {
     lines.push(`🇮🇹 ITA • 🔊 AAC`);
     lines.push(`🎞️ HLS • Bitrate Variabile`);
     lines.push(`☁️ Web Stream • ⚡ Instant`);
-    // Sostituito il nome del provider nella riga della sorgente
+    
     lines.push(`🍝 StreamingCommunity`); 
     
     return {
@@ -357,13 +357,22 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       if (tmdbIdForSearch) dynamicTitles = await getTmdbAltTitles(tmdbIdForSearch, type, userTmdbKey);
   } catch (e) {}
 
-  const queries = generateSmartQueries(meta, dynamicTitles);
-  const onlyIta = config.filters?.onlyIta !== false; 
+  const allowEng = config.filters?.allowEng === true; 
+  const queries = generateSmartQueries(meta, dynamicTitles, allowEng); // PASSAGGIO FLAG
+  
   console.log(`\n🧠 [AI-CORE] Cerco "${meta.title}": ${queries.length} varianti.`);
 
   const vixPromise = searchVix(meta, config);
   let promises = [];
-  queries.forEach(q => { SCRAPER_MODULES.forEach(scraper => { if (scraper.searchMagnet) { promises.push(LIMITERS.scraper.schedule(() => withTimeout(scraper.searchMagnet(q, meta.year, type, finalId), CONFIG.SCRAPER_TIMEOUT).catch(err => []))); } }); });
+  queries.forEach(q => { 
+      SCRAPER_MODULES.forEach(scraper => { 
+          if (scraper.searchMagnet) { 
+              // PASSA LE OPZIONI DI RICERCA AI MOTORI
+              const searchOptions = { allowEng };
+              promises.push(LIMITERS.scraper.schedule(() => withTimeout(scraper.searchMagnet(q, meta.year, type, finalId, searchOptions), CONFIG.SCRAPER_TIMEOUT).catch(err => []))); 
+          } 
+      }); 
+  });
 
   let resultsRaw = (await Promise.all(promises)).flat();
   resultsRaw = [...dbResults, ...resultsRaw]; 
@@ -374,7 +383,11 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
     if (fileYearMatch && Math.abs(parseInt(fileYearMatch[0]) - parseInt(meta.year)) > 1) return false;
     const isSemanticallySafe = smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode);
     if (!isSemanticallySafe) return false;
-    if (onlyIta && !isSafeForItalian(item)) return false;
+    
+    // LOGICA FILTRO LINGUA:
+    
+    if (!allowEng && !isSafeForItalian(item)) return false;
+    
     return true;
   });
 
@@ -383,7 +396,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       try {
         const extResultsRaw = (await Promise.all(extPromises)).flat();
         if (Array.isArray(extResultsRaw)) {
-            const filteredExt = extResultsRaw.filter(item => smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode) && (!onlyIta || isSafeForItalian(item)));
+            const filteredExt = extResultsRaw.filter(item => smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode) && (!allowEng ? isSafeForItalian(item) : true));
             resultsRaw = [...resultsRaw, ...filteredExt];
         }
       } catch (e) {}
