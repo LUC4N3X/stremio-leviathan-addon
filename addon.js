@@ -344,7 +344,19 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   try {
       if (type === 'movie') dbResults = await dbHelper.searchMovie(meta.imdb_id);
       else if (type === 'series') dbResults = await dbHelper.searchSeries(meta.imdb_id, meta.season, meta.episode);
-      console.log(`✅ [DB] Trovati ${dbResults.length} risultati.`);
+      
+      // --- LIMITER DB: Max 6 risultati ---
+      if (dbResults && dbResults.length > 0) {
+          // Ordiniamo per seeders per assicurarci di tagliare via i peggiori se > 6
+          dbResults.sort((a, b) => (b.seeders || 0) - (a.seeders || 0));
+          
+          if (dbResults.length > 6) {
+              dbResults = dbResults.slice(0, 6);
+          }
+      }
+      // ------------------------------------
+
+      console.log(`✅ [DB] Trovati ${dbResults.length} risultati (Limitati max 6).`);
   } catch (err) { console.error("❌ Errore ricerca DB:", err.message); }
   
   let dynamicTitles = [];
@@ -385,7 +397,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
     if (!isSemanticallySafe) return false;
     
     // LOGICA FILTRO LINGUA:
-    
     if (!allowEng && !isSafeForItalian(item)) return false;
     
     return true;
