@@ -1,7 +1,7 @@
 {
   "name": "Leviathan",
-  "version": "31.4.0",
-  "description": "Leviathan Edition - AI Core + NLP Parser + Debrid + LRU Cache",
+  "version": "32.0.0",
+  "description": "Leviathan Edition - AI Core + NLP Parser + Debrid + Redis Cache",
   "main": "addon.js",
   "scripts": {
     "start": "node addon.js",
@@ -21,6 +21,7 @@
     "fs-extra": "^11.2.0",
     "fuzzyset": "^1.0.7",
     "helmet": "^7.1.0",
+    "ioredis": "^5.4.1",
     "lru-cache": "^10.2.2",
     "p-limit": "^3.1.0",
     "pg": "^8.11.5",
