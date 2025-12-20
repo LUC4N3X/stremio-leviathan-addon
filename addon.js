@@ -235,9 +235,12 @@ function formatVixStream(meta, vixData) {
     lines.push(`🇮🇹 ITA • 🔊 AAC`);
     lines.push(`🎞️ HLS • Bitrate Variabile`);
     lines.push(`☁️ Web Stream • ⚡ Instant`);
-    lines.push(`🍝 ${vixData.source}`);
+    // Sostituito il nome del provider nella riga della sorgente
+    lines.push(`🍝 StreamingCommunity`); 
+    
     return {
-        name: `🌪️ VIX\n${qIcon} ${quality}`,
+        
+        name: `🌪️ StreamingCommunity\n${qIcon} ${quality}`, 
         title: lines.join("\n"),
         url: vixData.url,
         behaviorHints: { notWebReady: false, bingieGroup: "vix-stream" }
