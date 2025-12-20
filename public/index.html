@@ -510,13 +510,13 @@
             
             <div class="options-grid">
                 <div class="option-card">
-                    <span class="opt-label" style="color:#ccc; font-weight:500;">Solo Audio ITA
+                    <span class="opt-label" style="color:#ccc; font-weight:500;">Includi Audio ENG
                         <div class="tooltip-wrapper">
                             <span class="tooltip-icon">?</span>
-                            <div class="tooltip-content">Nasconde file senza traccia audio ITA nei metadati.</div>
+                            <div class="tooltip-content">Oltre ai risultati ITA, cerca anche file in lingua originale/inglese.</div>
                         </div>
                     </span>
-                    <label class="switch"><input type="checkbox" id="onlyIta"><span class="slider"></span></label>
+                    <label class="switch"><input type="checkbox" id="allowEng"><span class="slider"></span></label>
                 </div>
                 <div class="option-card">
                     <span class="opt-label" style="color:#ccc; font-weight:500;">Rimuovi 4K</span>
@@ -643,7 +643,7 @@
                         document.getElementById('proxyDebrid').checked = config.mediaflow.proxyDebrid || false;
                     }
                     if (config.filters) {
-                        document.getElementById('onlyIta').checked = config.filters.onlyIta || false;
+                        document.getElementById('allowEng').checked = config.filters.allowEng || false;
                         document.getElementById('no4k').checked = config.filters.no4k || false;
                         document.getElementById('noCam').checked = config.filters.noCam || false;
                         document.getElementById('showFake').checked = config.filters.showFake || false;
@@ -692,7 +692,7 @@
                     proxyDebrid: document.getElementById('proxyDebrid').checked
                 },
                 filters: {
-                    onlyIta: document.getElementById('onlyIta').checked,
+                    allowEng: document.getElementById('allowEng').checked,
                     no4k: document.getElementById('no4k').checked,
                     noCam: document.getElementById('noCam').checked,
                     showFake: document.getElementById('showFake').checked,
@@ -717,7 +717,7 @@
             const list = document.getElementById('modalSummary');
             list.innerHTML = `
                 <li>Servizio Debrid <span>${c.service.toUpperCase()}</span></li>
-                <li>Solo ITA <span>${c.filters.onlyIta ? 'ATTIVO' : 'NO'}</span></li>
+                <li>Includi ENG <span>${c.filters.allowEng ? 'ATTIVO' : 'NO'}</span></li>
                 <li>StreamingCommunity <span>${c.filters.enableVix ? 'ATTIVO' : 'NO'}</span></li>
                 <li>Proxy Ghost <span>${c.mediaflow.proxyDebrid ? 'ATTIVO' : 'NO'}</span></li>
             `;
