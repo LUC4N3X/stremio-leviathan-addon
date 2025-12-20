@@ -1,5 +1,7 @@
 // db-helper.js - GESTORE DATABASE
 const { Pool } = require('pg');
+// 1. IMPORTA LA CONFIGURAZIONE DAI MOTORI (per avere i tracker aggiornati)
+const { CONFIG } = require("./engines"); 
 
 let pool = null;
 
@@ -38,7 +40,6 @@ const dbHelper = {
                 LIMIT 50
             `;
             const res = await pool.query(query, [imdbId, JSON.stringify([imdbId])]);
-            // MODIFICA QUI: "ilCorSaRoNeRo" invece di "DB-Movie"
             return res.rows.map(row => formatRow(row, "ilCorSaRoNeRo"));
         } catch (e) {
             console.error("Errore DB Movie:", e.message);
@@ -46,7 +47,7 @@ const dbHelper = {
         }
     },
 
-    // Cerca Episodi Serie (Specifici file o Pack)
+    // Cerca Episodi Serie
     searchSeries: async (imdbId, season, episode) => {
         if (!pool) return [];
         try {
@@ -71,7 +72,6 @@ const dbHelper = {
             `;
             const resPacks = await pool.query(queryPacks, [imdbId]);
 
-            // MODIFICA QUI: Uso sempre "ilCorSaRoNeRo" per uniformità
             const files = resFiles.rows.map(row => formatRow(row, "ilCorSaRoNeRo"));
             const packs = resPacks.rows.map(row => formatRow(row, "ilCorSaRoNeRo [Pack]"));
             
@@ -83,17 +83,28 @@ const dbHelper = {
     }
 };
 
-// Formattatore standard
+// 2. FUNZIONE AGGIORNATA CON TURBO TRACKER
 function formatRow(row, sourceTag) {
+    // Creiamo il magnet base
+    let magnet = `magnet:?xt=urn:btih:${row.info_hash}`;
+
+    // Iniettiamo i tracker da CONFIG (se disponibili)
+    // Questo è il trucco che usa engines.js per velocizzare l'avvio
+    if (CONFIG && CONFIG.TRACKERS && Array.isArray(CONFIG.TRACKERS)) {
+        CONFIG.TRACKERS.forEach(tr => {
+            magnet += `&tr=${encodeURIComponent(tr)}`;
+        });
+    }
+
     return {
         title: row.title, 
-        magnet: `magnet:?xt=urn:btih:${row.info_hash}`,
+        magnet: magnet, // Ora il magnet include i tracker!
         size: parseInt(row.size) || 0,
         seeders: row.seeders || 0,
-        // Qui aggiunge il fulmine se è in cache: "ilCorSaRoNeRo ⚡"
         source: `${sourceTag}${row.cached_rd ? " ⚡" : ""}`, 
         isCached: row.cached_rd 
     };
 }
 
 module.exports = dbHelper;
+
