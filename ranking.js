@@ -1,53 +1,58 @@
 /**
  * ranking.js
- * Corsaro Brain — Ranking Ultra-Intelligente (Optimized for ITA & Debrid)
+ * Corsaro Brain — Ranking Ultra-Intelligente (Optimized for Quality First)
  */
 
 const DEFAULT_CONFIG = {
   weights: {
     // 🔥 PRIORITÀ ASSOLUTA ALLA LINGUA
-    languageITA: 10000,      // Aumentato drasticamente (era 5000)
-    languageMULTI: 4000,
+    // I valori sono altissimi per garantire che l'ITA vinca sempre
+    languageITA: 50000,      
+    languageMULTI: 25000,
     
-    // Qualità
-    quality4K: 1500,
-    quality1080p: 1000,
-    quality720p: 500,
-    hevcBonus: 800,          // Nuovo: premia x265/HEVC (qualità/peso migliore)
+    // 🔥 TIER QUALITÀ (GERARCHIA RIGIDA)
+    // Lo scarto di 5000 punti tra una risoluzione e l'altra è incolmabile dai seeders
+    quality4K: 15000,
+    quality1080p: 10000,
+    quality720p: 5000,
+    
+    // Bonus Qualità Aggiuntivi
+    hevcBonus: 1500,          // Premia x265/HEVC (miglior rapporto qualità/peso)
+    hdrBonus: 1000,           // Premia HDR/Dolby Vision
     
     // Episodi e Pack
-    exactEpisodeBoost: 6000, // Se trovo S01E05 esatto
-    seasonPackBonus: 3000,   // 🔥 NUOVO: Se trovo "Stagione 1" intera (ottimo per Debrid)
+    exactEpisodeBoost: 20000, // Fondamentale per trovare l'episodio giusto
+    seasonPackBonus: 10000,   // Bonus per i pack di stagione
     
     // Penalità
-    camPenalty: -20000,      // CAM/TS devono sparire in fondo
+    camPenalty: -100000,      // CAM/TS vengono affossati
     sizeMismatchPenalty: -5000,
     
-    // Trust e Seeders
+    // 🔥 SEEDERS DEPOTENZIATI (SOLO SPAREGGIO)
     sourceCorsaroBonus: 2000,
-    seedersFactor: 2.0,      // Seeders contano un po' di più
-    seedersTrustBoost: 500,
+    seedersFactor: 0.1,       // Fattore ridotto drasticamente (era 2.0)
+    seedersTrustBoost: 100,
     
-    // Età (Ridotto impatto negativo per salvare roba vecchia ITA)
-    ageDecayPerDay: -0.5,    // Era -2. Ora penalizza molto meno i torrent vecchi
+    // Età (Impatto minimo)
+    ageDecayPerDay: -0.1,    
     
     // Varie
-    hashKnownBonus: 3000,
-    groupReputationFactor: 1.0,
+    hashKnownBonus: 2000,
+    groupReputationFactor: 0.5,
   },
   heuristics: {
     camRegex: /\b(cam|ts|telecine|telesync|camrip|cam\.|hdcam|hdtc)\b/i,
-    // Pack regex migliorata
+    
     packRegex: /\b(pack|complete|tutta|tutte|full ?season|season ?pack|stagione ?(completa)?)\b/i,
     
-    // 🔥 COPY-PASTE DELLA REGEX POTENTE DI ENGINES.JS
+    // Regex potente per rilevare l'italiano
     itaPatterns: [
       /\b(ITA(LIANO)?|MULTI|DUAL|MD|SUB\.?ITA|SUB-?ITA|ITALUB|FORCED|AC3\.?ITA|DTS\.?ITA|AUDIO\.?ITA|ITA\.?AC3|ITA\.?HD|BDMUX|DVDRIP\.?ITA|CiNEFiLE|NovaRip|MeM|robbyrs|iDN_CreW|SPEEDVIDEO|WMS|TRIDIM)\b/i
     ],
     
     multiPatterns: [/\b(MULTI|MULTILANG|MULTILANGUAGE|ITA.ENG|ITA-ENG)\b/i],
     sizeToleranceRatio: 0.25,
-    minimalSizeBytes: 150 * 1024 * 1024 // 150MB minimo (filtra sample e fake)
+    minimalSizeBytes: 150 * 1024 * 1024 // 150MB minimo
   },
   trust: {
     sourceTrust: {
@@ -105,7 +110,6 @@ function isPack(title, config) {
 
 function languageScoreFromTitle(title, config) {
   if (!title) return 0;
-  // Controllo regex unificata potente
   for (const p of config.heuristics.itaPatterns) {
     if (p.test(title)) return config.weights.languageITA;
   }
@@ -115,17 +119,21 @@ function languageScoreFromTitle(title, config) {
   return 0;
 }
 
+// 🔥 CALCOLO QUALITÀ AGGIORNATO (Supporto HDR/DV)
 function qualityScoreFromTitle(title, config) {
   const t = (title || "").toLowerCase();
   let score = 0;
   
-  // Risoluzione
+  // 1. Risoluzione (Base del Tier)
   if (/(2160p|4k|uhd)/i.test(t)) score += config.weights.quality4K;
   else if (/1080p/i.test(t)) score += config.weights.quality1080p;
   else if (/720p/i.test(t)) score += config.weights.quality720p;
 
-  // Codec Bonus (HEVC è meglio per lo streaming)
+  // 2. Codec (Bonus)
   if (/(x265|h265|hevc)/i.test(t)) score += config.weights.hevcBonus;
+
+  // 3. HDR / Dolby Vision (Nuovo Bonus)
+  if (/(hdr|dolby|vision|\bdv\b)/i.test(t)) score += config.weights.hdrBonus;
 
   return score;
 }
@@ -133,30 +141,21 @@ function qualityScoreFromTitle(title, config) {
 function sizeConsistencyPenalty(item, meta, config) {
   const sizeBytes = parseSizeToBytes(item.size || item.sizeBytes || 0);
   if (!sizeBytes) return 0;
-  
-  // Se è troppo piccolo è fake o sample
   if (sizeBytes < config.heuristics.minimalSizeBytes) return config.weights.sizeMismatchPenalty;
-  
   return 0;
 }
 
+// 🔥 CALCOLO SEEDERS AGGIORNATO (Depotenziato)
 function seedersScore(item, config) {
   const s = normalizeNumber(item.seeders);
-  const p = normalizeNumber(item.peers);
-  let base = 0;
+  if (s <= 0) return 0;
   
-  // Logarithmic boost: 100 seeders non valgono 10 volte 10 seeders
-  if (s > 0) {
-    base = Math.log10(s + 1) * config.weights.seedersFactor * 100;
-  }
+  // Logica appiattita: i seeders sono solo uno spareggio (max ~200-300 punti).
+  // Non possono mai colmare il divario di 5000 punti tra le risoluzioni.
+  let base = Math.log10(s + 1) * config.weights.seedersFactor * 100;
   
-  // Trust boost se ratio è sano
-  if (s > 50 && (p / (s + 1) < 2.0)) { // Ratio leecher/seeder non sospetto
-    base += config.weights.seedersTrustBoost;
-  }
-  
-  // Fake seeders detection (es. 5000 seeders e 0 leecher su file sconosciuti)
-  if (s > 5000 && p < 5) base -= 2000;
+  // Piccolo boost se ci sono molti seeders (segno di salute), ma sempre contenuto
+  if (s > 50) base += config.weights.seedersTrustBoost;
   
   return Math.round(base);
 }
@@ -168,21 +167,16 @@ function ageScore(item, config) {
   if (!published) return 0;
   
   const days = Math.max(0, Math.floor((now - published) / (1000 * 60 * 60 * 24)));
-  // Penalità ridotta per l'età
   return Math.round(config.weights.ageDecayPerDay * days);
 }
 
-// 🔥 LOGICA CHIAVE PER SERIE TV 🔥
 function exactEpisodeBoost(item, meta, config) {
   if (!meta || !meta.isSeries) return 0;
   
   const s = meta.season;
   const e = meta.episode;
-  const sStr = String(s).padStart(2, "0");
-  const eStr = String(e).padStart(2, "0");
   const title = (item.title || "").toUpperCase();
 
-  // 1. Match Esatto (S01E05)
   const exactEpRegex = new RegExp(`S0?${s}[^0-9]*E0?${e}\\b`, "i");
   const xEpRegex = new RegExp(`\\b${s}x0?${e}\\b`, "i");
   
@@ -190,10 +184,7 @@ function exactEpisodeBoost(item, meta, config) {
       return config.weights.exactEpisodeBoost;
   }
 
-  // 2. Match Pack Stagione (S01 Pack / Stagione 1 Completa)
-  // Per Debrid questo è un bonus, non una penalità!
   if (isPack(title, config)) {
-      // Verifica se il pack contiene la stagione che cerchiamo
       const seasonPackRegex = new RegExp(`(S0?${s}|Stagione\\s?0?${s}|Season\\s?0?${s})\\b`, "i");
       if (seasonPackRegex.test(title)) {
           return config.weights.seasonPackBonus;
@@ -211,7 +202,6 @@ function camAndQualityPenalty(item, config) {
 
 function sourceTrustBonus(item, config) {
   const s = (item.source || "").toString();
-  // Cerca parziale (es. "Corsaro" dentro "CorsaroNero")
   const key = Object.keys(config.trust.sourceTrust).find(k => s.includes(k));
   if (key) {
       return Math.round(config.trust.sourceTrust[key] * config.weights.sourceCorsaroBonus);
@@ -219,18 +209,11 @@ function sourceTrustBonus(item, config) {
   return 0;
 }
 
-function groupReputationScore(item, config) {
-  const grp = (item.group || "").toString();
-  if (!grp) return 0;
-  const rep = config.trust.groupReputation[grp] || 0;
-  return Math.round(rep * config.weights.groupReputationFactor * 1000);
-}
-
 function computeScore(item, meta, config, knownHashesSet) {
   let score = 0;
   const reasons = [];
 
-  // 1. Lingua (Peso Massimo)
+  // 1. Lingua (Peso Massimo - Intoccabile)
   const langScore = languageScoreFromTitle(item.title, config);
   if (langScore) { score += langScore; reasons.push(`lang:${langScore}`); }
 
@@ -238,23 +221,22 @@ function computeScore(item, meta, config, knownHashesSet) {
   const epBoost = exactEpisodeBoost(item, meta, config);
   if (epBoost) { score += epBoost; reasons.push(`ep/pack:${epBoost}`); }
 
-  // 3. Qualità
+  // 3. Qualità (Determinante per l'ordinamento visivo)
   const qScore = qualityScoreFromTitle(item.title, config);
   if (qScore) { score += qScore; reasons.push(`quality:${qScore}`); }
 
-  // 4. Seeders (Importante ma meno della lingua)
+  // 4. Seeders (Solo Spareggio)
   const sScore = seedersScore(item, config);
   score += sScore; reasons.push(`seeders:${sScore}`);
 
-  // 5. Fonte
+  // 5. Fonte & Trust
   const src = sourceTrustBonus(item, config);
   if (src) { score += src; reasons.push(`sourceTrust:${src}`); }
 
-  // 6. Età (Decay leggero)
+  // 6. Penalità e Correzioni
   const aScore = ageScore(item, config);
   if (aScore) { score += aScore; reasons.push(`age:${aScore}`); }
 
-  // 7. Penalità CAM/Size
   const cam = camAndQualityPenalty(item, config);
   if (cam) { score += cam; reasons.push(`camPenalty:${cam}`); }
 
@@ -268,7 +250,6 @@ function computeScore(item, meta, config, knownHashesSet) {
       reasons.push(`knownHash`);
   }
 
-  // Bonus lunghezza titolo (titoli descrittivi spesso migliori)
   score += Math.min(100, (item.title || "").length);
 
   return { score, reasons };
@@ -283,9 +264,7 @@ function rankAndFilterResults(results = [], meta = {}, optConfig = {}, knownHash
     if (!it) return false;
     if (!it.magnet && !it.url) return false;
     
-    // Filtro dimensione minima (evita fake da 1KB)
     const size = parseSizeToBytes(it.size || it.sizeBytes || 0);
-    // Tolleranza: se non c'è size (0), lo teniamo e ci fidiamo degli altri parametri
     if (size > 0 && size < config.heuristics.minimalSizeBytes) return false;
     
     return true;
