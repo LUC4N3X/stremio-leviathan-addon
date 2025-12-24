@@ -20,6 +20,7 @@
     "express-rate-limit": "^7.2.0",
     "fs-extra": "^11.2.0",
     "fuzzyset": "^1.0.7",
+    "he": "^1.2.0",
     "helmet": "^7.1.0",
     "ioredis": "^5.4.1",
     "lru-cache": "^10.2.2",
