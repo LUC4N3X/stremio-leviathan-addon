@@ -248,10 +248,10 @@ function extractAudioInfo(title) {
 function extractStreamInfo(title, source) {
   const t = String(title).toLowerCase();
   let q = "HD"; let qIcon = "📺";
-  if (REGEX_QUALITY["4K"].test(t)) { q = "4K"; qIcon = "✨"; }
-  else if (REGEX_QUALITY["1080p"].test(t)) { q = "1080p"; qIcon = "🌕"; }
-  else if (REGEX_QUALITY["720p"].test(t)) { q = "720p"; qIcon = "🌗"; }
-  else if (REGEX_QUALITY["SD"].test(t)) { q = "SD"; qIcon = "🌑"; }
+  if (REGEX_QUALITY["4K"].test(t)) { q = "4K"; qIcon = "🔥"; }
+  else if (REGEX_QUALITY["1080p"].test(t)) { q = "1080p"; qIcon = "✨"; }
+  else if (REGEX_QUALITY["720p"].test(t)) { q = "720p"; qIcon = "🎞️"; }
+  else if (REGEX_QUALITY["SD"].test(t)) { q = "SD"; qIcon = "🐢"; }
   const videoTags = [];
   if (/hdr/.test(t)) videoTags.push("HDR");
   if (/dolby|vision|\bdv\b/.test(t)) videoTags.push("DV");
