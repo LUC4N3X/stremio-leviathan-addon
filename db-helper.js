@@ -1,19 +1,20 @@
-// db-helper.js - GOD TIER EDITION (CLEAN & OPTIMIZED)
+// db-helper.js - GOD TIER EDITION (CLEAN, OPTIMIZED & ROBUST)
 const { Pool } = require('pg');
 
-// Tracker List Statica (Più sicura che importarla da file esterni che potrebbero fallire)
+// Tracker List Statica 
 const DEFAULT_TRACKERS = [
-     "udp://tracker.opentrackr.org:1337/announce",
-        "udp://open.demonoid.ch:6969/announce",
-        "udp://open.demonii.com:1337/announce",
-        "udp://open.stealth.si:80/announce",
-        "udp://tracker.torrent.eu.org:451/announce",
-        "udp://tracker.therarbg.to:6969/announce",
-        "udp://tracker.doko.moe:6969/announce",
-        "udp://opentracker.i2p.rocks:6969/announce"
+    "udp://tracker.opentrackr.org:1337/announce",
+    "udp://open.demonoid.ch:6969/announce",
+    "udp://open.demonii.com:1337/announce",
+    "udp://open.stealth.si:80/announce",
+    "udp://tracker.torrent.eu.org:451/announce",
+    "udp://tracker.therarbg.to:6969/announce",
+    "udp://tracker.doko.moe:6969/announce",
+    "udp://opentracker.i2p.rocks:6969/announce"
 ];
 
 // --- 1. CONFIGURAZIONE POOL ---
+// Variabile globale per il pool, con lazy initialization.
 let pool = null;
 
 function initDatabase(config = {}) {
@@ -22,10 +23,10 @@ function initDatabase(config = {}) {
   const poolConfig = process.env.DATABASE_URL 
     ? { connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }
     : {
-        host: config.host || process.env.DB_HOST,
-        port: config.port || process.env.DB_PORT,
-        database: config.database || process.env.DB_NAME,
-        user: config.user || process.env.DB_USER,
+        host: config.host || process.env.DB_HOST || 'localhost',
+        port: config.port || process.env.DB_PORT || 5432,
+        database: config.database || process.env.DB_NAME || 'leviathan',
+        user: config.user || process.env.DB_USER || 'postgres',
         password: config.password || process.env.DB_PASSWORD,
         ssl: { rejectUnauthorized: false }
       };
@@ -43,6 +44,7 @@ function initDatabase(config = {}) {
 }
 
 // --- 2. UTILITY PER FORMATTAZIONE ---
+// Funzione per iniettare tracker in un magnet link, evitando duplicati.
 function injectTrackers(magnet) {
     if (!magnet) return "";
     let cleanMagnet = magnet.trim();
@@ -56,6 +58,7 @@ function injectTrackers(magnet) {
     return cleanMagnet;
 }
 
+// Funzione per formattare una riga del DB in un oggetto standard per l'addon.
 function formatRow(row, sourceTag = "LeviathanDB") {
     // IMPORTANTE: Se è un file singolo mappato, usiamo "file_title". 
     // Se è un torrent generico (pack), usiamo "title".
@@ -77,7 +80,7 @@ function formatRow(row, sourceTag = "LeviathanDB") {
 }
 
 // --- 3. CORE FUNCTIONS ---
-
+// Ricerca generica per IMDB ID, con opzionale filtro per tipo (movie/series).
 async function searchByImdbId(imdbId, type = null) {
   if (!pool) return [];
   try {
@@ -100,6 +103,7 @@ async function searchByImdbId(imdbId, type = null) {
   }
 }
 
+// Ricerca file specifici per episodio (mappati esattamente).
 async function searchEpisodeFiles(imdbId, season, episode) {
   if (!pool) return [];
   try {
@@ -122,12 +126,11 @@ async function searchEpisodeFiles(imdbId, season, episode) {
   }
 }
 
+// Ricerca pack stagionali (ottimizzata per evitare stagioni errate dove possibile).
 async function searchPacksByImdbId(imdbId, season) {
     if (!pool) return [];
     try {
-        // OPTIMIZATION: Se cerchiamo la stagione 1, cerchiamo di evitare i risultati 
-        // che nel titolo hanno ESPLICITAMENTE "Season 2", "S02" etc, se possibile.
-        // Ma per sicurezza scarichiamo i pack e lasciamo filtrare al parser JS.
+        
         const query = `
             SELECT t.info_hash, t.title, t.size, t.seeders, t.cached_rd
             FROM torrents t
@@ -136,18 +139,24 @@ async function searchPacksByImdbId(imdbId, season) {
         `;
         const result = await pool.query(query, [imdbId, JSON.stringify([imdbId])]);
         return result.rows;
-    } catch (e) { return []; }
+    } catch (e) { 
+        console.error(`❌ DB Error searchPacksByImdbId:`, e.message);
+        return []; 
+    }
 }
 
 // --- 4. FUNZIONI DI SCRITTURA ---
-
+// Inserimento di un nuovo torrent con transazione per atomicità.
 async function insertTorrent(torrent) {
   if (!pool) return false;
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
     const check = await client.query('SELECT 1 FROM torrents WHERE info_hash = $1', [torrent.infoHash]);
-    if (check.rowCount > 0) { await client.query('ROLLBACK'); return false; }
+    if (check.rowCount > 0) { 
+        await client.query('ROLLBACK'); 
+        return false; 
+    }
 
     await client.query(
       `INSERT INTO torrents (info_hash, provider, title, size, type, seeders, imdb_id, tmdb_id, upload_date)
@@ -165,6 +174,7 @@ async function insertTorrent(torrent) {
   }
 }
 
+// Aggiornamento batch dello status cache RD.
 async function updateRdCacheStatus(cacheResults) {
     if (!pool || !cacheResults.length) return 0;
     try {
@@ -176,13 +186,26 @@ async function updateRdCacheStatus(cacheResults) {
             updated += r.rowCount;
         }
         return updated;
-    } catch (e) { return 0; }
+    } catch (e) { 
+        console.error(`❌ DB Error updateRdCacheStatus:`, e.message);
+        return 0; 
+    }
 }
 
-// --- 5. ADATTATORE PER ADDON.JS ---
+// --- 5. HEALTH CHECK ---
+// Funzione per verificare la connessione al DB (usata in healthcheck).
+async function healthCheck() {
+    if (!pool) throw new Error('Pool not initialized');
+    const result = await pool.query('SELECT NOW()');
+    if (result.rows.length !== 1) throw new Error('DB health check failed');
+    return true;
+}
 
+// --- 6. ADATTATORE PER ADDON.JS ---
+// Oggetto esportato con metodi pubblici.
 const dbHelper = {
     initDatabase,
+    healthCheck,
     
     searchMovie: async (imdbId) => {
         const rows = await searchByImdbId(imdbId, 'movie');
