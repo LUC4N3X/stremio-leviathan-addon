@@ -239,7 +239,7 @@ function extractStreamInfo(title, source) {
   if (/imax/.test(t)) videoTags.push("IMAX");
   if (/x265|h265|hevc/.test(t)) videoTags.push("HEVC");
   let lang = "🇬🇧 ENG"; 
-  if (source === "Corsaro" || isSafeForItalian({ title })) {
+  if (/corsaro/i.test(source) || isSafeForItalian({ title })) {
       lang = "🇮🇹 ITA";
       if (/multi|mui/i.test(t)) lang = "🇮🇹 MULTI";
   } 
