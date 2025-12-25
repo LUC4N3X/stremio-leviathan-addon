@@ -68,7 +68,7 @@ const CONFIG = {
   INDEXER_URL: process.env.INDEXER_URL || "http://185.229.239.195:8080", 
   CINEMETA_URL: "https://v3-cinemeta.strem.io",
   REAL_SIZE_FILTER: 80 * 1024 * 1024,
-  MAX_RESULTS: 100, 
+  MAX_RESULTS: 60, 
   TIMEOUTS: {
     TMDB: 2000,
     SCRAPER: 6000, 
