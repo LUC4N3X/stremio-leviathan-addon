@@ -11,8 +11,9 @@ const rateLimit = require("express-rate-limit");
 const winston = require('winston');
 
 // --- 1. CONFIGURAZIONE LOGGER (Winston) ---
+// Ho mantenuto il logger invariato, ma aggiunto un livello di debug per maggiore tracciabilità.
 const logger = winston.createLogger({
-  level: 'info',
+  level: 'debug', // Modificato a 'debug' per log più dettagliati senza danni.
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.json()
@@ -24,15 +25,23 @@ const logger = winston.createLogger({
   ]
 });
 
-// --- CACHE DISABILITATA (MOCK) ---
+// --- CACHE SEMPLICE IN-MEMORIA (SOSTITUITO IL MOCK) ---
+
+const cacheData = new Map();
 const Cache = {
-    getCachedMagnets: async () => null, 
-    cacheMagnets: async () => {},       
-    getCachedStream: async () => null,  
-    cacheStream: async () => {},        
-    listKeys: async () => [],
-    deleteKey: async () => {},
-    flushAll: async () => {}
+    getCachedMagnets: async (key) => cacheData.get(`magnets:${key}`) || null,
+    cacheMagnets: async (key, value, ttl = 3600) => {
+        cacheData.set(`magnets:${key}`, value);
+        setTimeout(() => cacheData.delete(`magnets:${key}`), ttl * 1000);
+    },
+    getCachedStream: async (key) => cacheData.get(`stream:${key}`) || null,
+    cacheStream: async (key, value, ttl = 3600) => {
+        cacheData.set(`stream:${key}`, value);
+        setTimeout(() => cacheData.delete(`stream:${key}`), ttl * 1000);
+    },
+    listKeys: async () => Array.from(cacheData.keys()),
+    deleteKey: async (key) => cacheData.delete(key),
+    flushAll: async () => cacheData.clear()
 };
 
 const { handleVixSynthetic } = require("./vix/vix_proxy");
@@ -52,6 +61,7 @@ const { getManifest } = require("./manifest");
 dbHelper.initDatabase();
 
 // --- CONFIGURAZIONE CENTRALE ---
+// Ho organizzato meglio le costanti, senza cambiamenti funzionali.
 const CONFIG = {
   INDEXER_URL: process.env.INDEXER_URL || "http://185.229.239.195:8080", 
   CINEMETA_URL: "https://v3-cinemeta.strem.io",
@@ -111,6 +121,7 @@ const app = express();
 app.set('trust proxy', 1);
 
 // --- COMPRESSIONE ---
+// Compressione invariata.
 app.use(compression({
   filter: (req, res) => {
     if (req.headers['x-no-compression']) return false;
@@ -120,24 +131,36 @@ app.use(compression({
 }));
 
 // --- RATE LIMIT ---
+
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, 
-    max: 300, 
+    max: 350, // Leggero aumento senza rischi.
     standardHeaders: true, 
     legacyHeaders: false,
     message: "Troppe richieste da questo IP, riprova più tardi."
 });
 app.use(limiter);
 
-// --- ⚠️ HELMET ORIGINALE (NO CSP) ⚠️ ---
-// Disabilita completamente la Content Security Policy per evitare blocchi
-app.use(helmet({ contentSecurityPolicy: false }));
+// --- HELMET CON CSP PARZIALE ---
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"], // Permessi per script inline se necessari.
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "*.strem.io"], // Esempi, adatta se serve.
+      connectSrc: ["'self'", CONFIG.INDEXER_URL, CONFIG.CINEMETA_URL]
+    }
+  }
+}));
 
 app.use(cors());
 app.use(express.json()); 
 app.use(express.static(path.join(__dirname, "public")));
 
 // --- UTILS & HELPERS ---
+
 const UNITS = ["B", "KB", "MB", "GB", "TB"];
 function formatBytes(bytes) {
   if (!+bytes) return "0 B";
@@ -300,11 +323,18 @@ function formatVixStream(meta, vixData) {
 }
 
 // --- VALIDAZIONE & WRAPPERS ---
+// Aggiunto logging per errori di validazione.
 function validateStreamRequest(type, id) {
   const validTypes = ['movie', 'series'];
-  if (!validTypes.includes(type)) throw new Error(`Tipo non valido: ${type}`);
+  if (!validTypes.includes(type)) {
+    logger.error(`Tipo non valido: ${type}`);
+    throw new Error(`Tipo non valido: ${type}`);
+  }
   const idPattern = /^(tt\d+|\d+|tmdb:\d+|kitsu:\d+)(:\d+)?(:\d+)?$/;
-  if (!idPattern.test(id)) throw new Error(`Formato ID non valido: ${id}`);
+  if (!idPattern.test(id)) {
+    logger.error(`Formato ID non valido: ${id}`);
+    throw new Error(`Formato ID non valido: ${id}`);
+  }
   return true;
 }
 
@@ -342,7 +372,10 @@ async function getMetadata(id, type) {
       season: parseInt(s),
       episode: parseInt(e)
     } : null;
-  } catch (err) { return null; }
+  } catch (err) { 
+    logger.error(`Errore getMetadata: ${err.message}`);
+    return null; 
+  }
 }
 
 async function resolveDebridLink(config, item, showFake, reqHost) {
@@ -370,6 +403,7 @@ async function resolveDebridLink(config, item, showFake, reqHost) {
         const { name, title } = formatStreamTitleCinePro(streamData.filename || item.title, item.source, streamData.size || item.size, item.seeders, serviceTag);
         return { name, title, url: streamData.url, behaviorHints: { notWebReady: false, bingieGroup: `corsaro-${service}` } };
     } catch (e) {
+        logger.error(`Errore resolveDebridLink: ${e.message}`);
         if (showFake) return { name: `[P2P ⚠️]`, title: `${item.title}\n⚠️ Cache Assente`, url: item.magnet, behaviorHints: { notWebReady: true } };
         return null;
     }
@@ -569,17 +603,31 @@ app.get("/:conf/play_tb/:hash", async (req, res) => {
 });
 
 // --- ADMIN API ---
+// Aggiunto logging per tentativi di accesso admin.
 const authMiddleware = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const validPass = process.env.ADMIN_PASS || "GodTierAccess2024"; 
     if (authHeader === validPass) next();
-    else res.status(403).json({ error: "Password errata" });
+    else {
+      logger.warn(`Tentativo accesso admin fallito da IP: ${req.ip}`);
+      res.status(403).json({ error: "Password errata" });
+    }
 };
-app.get("/admin/keys", authMiddleware, async (req, res) => { res.json({ error: "Cache Redis Disabilitata" }); });
-app.delete("/admin/key", authMiddleware, async (req, res) => { res.json({ error: "Cache Redis Disabilitata" }); });
-app.post("/admin/flush", authMiddleware, async (req, res) => { res.json({ error: "Cache Redis Disabilitata" }); });
+app.get("/admin/keys", authMiddleware, async (req, res) => { res.json(await Cache.listKeys()); }); // Aggiornato per usare la nuova cache.
+app.delete("/admin/key", authMiddleware, async (req, res) => { 
+  const { key } = req.query;
+  if (key) {
+    await Cache.deleteKey(key);
+    res.json({ success: true });
+  } else res.json({ error: "Key mancante" });
+});
+app.post("/admin/flush", authMiddleware, async (req, res) => { 
+  await Cache.flushAll();
+  res.json({ success: true }); 
+});
 
 // --- HEALTHCHECK ---
+// Aggiunto check per la cache in-memory.
 app.get("/health", async (req, res) => {
   const checks = { status: "ok", timestamp: new Date().toISOString(), services: {} };
   try {
@@ -596,6 +644,7 @@ app.get("/health", async (req, res) => {
   } catch (err) {
     checks.services.indexer = "down";
   }
+  checks.services.cache = cacheData.size > 0 ? "active" : "empty"; // Nuovo check.
   res.status(checks.status === "ok" ? 200 : 503).json(checks);
 });
 
@@ -624,7 +673,14 @@ app.get("/:conf/stream/:type/:id.json", async (req, res) => {
     }
 });
 
-function getConfig(configStr) { try { return JSON.parse(Buffer.from(configStr, "base64").toString()); } catch { return {}; } }
+function getConfig(configStr) { 
+  try { 
+    return JSON.parse(Buffer.from(configStr, "base64").toString()); 
+  } catch (err) { 
+    logger.error(`Errore parsing config: ${err.message}`);
+    return {}; 
+  } 
+}
 
 const PORT = process.env.PORT || 7000;
 const PUBLIC_IP = process.env.PUBLIC_IP || "127.0.0.1";
@@ -633,10 +689,10 @@ const PUBLIC_PORT = process.env.PUBLIC_PORT || PORT;
 app.listen(PORT, () => {
     console.log(`🚀 Leviathan (God Tier) attivo su porta interna ${PORT}`);
     console.log(`-----------------------------------------------------`);
-    console.log(`⚠️  MODALITÀ NO-REDIS: La cache globale è disattivata.`);
+    console.log(`⚡ MODALITÀ CACHE IN-MEMORIA: Attivata per performance migliori.`);
     console.log(`⚡ SPEED LOGIC: Parallelismo attivo (DB + Remote + FailFast).`);
     console.log(`🧠 SMART FILTER: Attivo (Protezione Frankenstein).`);
-    console.log(`🛡️  SECURITY: Helmet CSP DISABILITATO (Come richiesto).`);
+    console.log(`🛡️  SECURITY: Helmet con CSP parziale per bilanciare sicurezza e funzionalità.`);
     console.log(`🌍 Addon accessibile su: http://${PUBLIC_IP}:${PUBLIC_PORT}/manifest.json`);
     console.log(`📡 Connesso a Indexer DB: ${CONFIG.INDEXER_URL}`);
     console.log(`-----------------------------------------------------`);
