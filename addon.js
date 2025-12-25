@@ -11,7 +11,6 @@ const rateLimit = require("express-rate-limit");
 const winston = require('winston');
 
 // --- 1. CONFIGURAZIONE LOGGER (Winston) ---
-// Ho mantenuto il logger invariato, ma aggiunto un livello di debug per maggiore tracciabilità.
 const logger = winston.createLogger({
   level: 'debug', // Modificato a 'debug' per log più dettagliati senza danni.
   format: winston.format.combine(
@@ -61,7 +60,6 @@ const { getManifest } = require("./manifest");
 dbHelper.initDatabase();
 
 // --- CONFIGURAZIONE CENTRALE ---
-// Ho organizzato meglio le costanti, senza cambiamenti funzionali.
 const CONFIG = {
   INDEXER_URL: process.env.INDEXER_URL || "http://185.229.239.195:8080", 
   CINEMETA_URL: "https://v3-cinemeta.strem.io",
@@ -121,7 +119,6 @@ const app = express();
 app.set('trust proxy', 1);
 
 // --- COMPRESSIONE ---
-// Compressione invariata.
 app.use(compression({
   filter: (req, res) => {
     if (req.headers['x-no-compression']) return false;
@@ -131,7 +128,6 @@ app.use(compression({
 }));
 
 // --- RATE LIMIT ---
-
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, 
     max: 350, // Leggero aumento senza rischi.
@@ -149,7 +145,7 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'"], // Permessi per script inline se necessari.
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "*.strem.io"], // Esempi, adatta se serve.
+      imgSrc: ["'self'", "data:", "*.strem.io"], // Esempi
       connectSrc: ["'self'", CONFIG.INDEXER_URL, CONFIG.CINEMETA_URL]
     }
   }
@@ -160,7 +156,6 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 // --- UTILS & HELPERS ---
-
 const UNITS = ["B", "KB", "MB", "GB", "TB"];
 function formatBytes(bytes) {
   if (!+bytes) return "0 B";
@@ -323,7 +318,6 @@ function formatVixStream(meta, vixData) {
 }
 
 // --- VALIDAZIONE & WRAPPERS ---
-// Aggiunto logging per errori di validazione.
 function validateStreamRequest(type, id) {
   const validTypes = ['movie', 'series'];
   if (!validTypes.includes(type)) {
@@ -603,7 +597,6 @@ app.get("/:conf/play_tb/:hash", async (req, res) => {
 });
 
 // --- ADMIN API ---
-// Aggiunto logging per tentativi di accesso admin.
 const authMiddleware = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const validPass = process.env.ADMIN_PASS || "GodTierAccess2024"; 
@@ -627,7 +620,6 @@ app.post("/admin/flush", authMiddleware, async (req, res) => {
 });
 
 // --- HEALTHCHECK ---
-// Aggiunto check per la cache in-memory.
 app.get("/health", async (req, res) => {
   const checks = { status: "ok", timestamp: new Date().toISOString(), services: {} };
   try {
