@@ -4,7 +4,7 @@ function getManifest() {
         version: "1.3.0",
         name: "Leviathan",
         description: "Motore streaming avanzato con ricerca intelligente, priorità contenuti ITA e link sempre aggiornati",
-        logo: "https://img.icons8.com/ios-filled/500/00f2ea/dragon.png",
+        logo: "https://i.ibb.co/jvTQLbjb/Gemini-Generated-Image-51j2ce51j2ce51j2-1.png",
         resources: ["catalog", "stream"],
         types: ["movie", "series"],
         catalogs: [],
