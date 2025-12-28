@@ -11,10 +11,9 @@ const rateLimit = require("express-rate-limit");
 const winston = require('winston');
 const NodeCache = require("node-cache");
 
-// --- MODULI PROPRIETARI LEVIATHAN ---
+// --- IMPORT ESTERNI ---
+// Assicurati che external-addons.js sia nella stessa cartella e usi module.exports
 const { fetchExternalAddonsFlat } = require("./external-addons");
-// IMPORTIAMO IL NUOVO MODULO PACK RESOLVER
-const leviathanResolver = require("./leviathan-pack-resolver");
 
 // --- 1. CONFIGURAZIONE LOGGER (Winston) ---
 const logger = winston.createLogger({
@@ -81,7 +80,7 @@ const CONFIG = {
     REMOTE_INDEXER: 2500,
     DB_QUERY: 5000,
     DEBRID: 5000,
-    EXTERNAL: 4000
+    EXTERNAL: 4000 // Timeout per addon esterni
   }
 };
 
@@ -168,6 +167,7 @@ function parseSize(sizeStr) {
   return val * (mult[unit] || 1);
 }
 
+// FIX: Deduplicazione intelligente per SEASON PACKS
 function deduplicateResults(results) {
   const hashMap = new Map();
   for (const item of results) {
@@ -176,8 +176,11 @@ function deduplicateResults(results) {
     if (!hashMatch) continue;
     
     const hash = hashMatch[1].toUpperCase();
+    // LOGICA PACK: La chiave unica è Hash + Index del file.
+    // Se non c'è index, usa 'base'.
     const uniqueKey = `${hash}:${item.fileIdx !== undefined ? item.fileIdx : 'base'}`;
 
+    // Manteniamo il risultato se è nuovo o se ha più seeders
     if (!hashMap.has(uniqueKey) || (item.seeders || 0) > (hashMap.get(uniqueKey).seeders || 0)) {
       item.hash = hash;
       item._size = parseSize(item.size || item.sizeBytes);
@@ -276,6 +279,7 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     let displaySource = source;
     if (/corsaro/i.test(displaySource)) displaySource = "ilCorSaRoNeRo";
     
+    // Il source ora è pulito (es. "TorrentGalaxy"), quindi non apparirà [EXT]
     const sourceLine = `⚡ [${serviceTag}] ${displaySource}`;
     const name = `🦑 LEVIATHAN\n${qIcon} ${quality}`; 
     const cleanName = cleanFilename(fileTitle)
@@ -314,6 +318,7 @@ function formatVixStream(meta, vixData) {
     };
 }
 
+// FIX: Modificata per accettare 'ai-recs'
 function validateStreamRequest(type, id) {
   const validTypes = ['movie', 'series'];
   if (!validTypes.includes(type)) {
@@ -321,7 +326,9 @@ function validateStreamRequest(type, id) {
     throw new Error(`Tipo non valido: ${type}`);
   }
   
+  // Rimuovi il prefisso ai-recs per il controllo di validità
   const cleanIdToCheck = id.replace('ai-recs:', '');
+
   const idPattern = /^(tt\d+|\d+|tmdb:\d+|kitsu:\d+)(:\d+)?(:\d+)?$/;
   
   if (!idPattern.test(cleanIdToCheck) && !idPattern.test(id)) {
@@ -387,28 +394,10 @@ async function resolveDebridLink(config, item, showFake, reqHost) {
         }
 
         let streamData = null;
-        let fileIdxToUse = item.fileIdx;
-
-        // --- INTEGRAZIONE PACK RESOLVER PROPRIETARIO ---
-        if (fileIdxToUse === undefined && service === 'rd') {
-            const packResult = await leviathanResolver.resolveSeriesPackFile(
-                item.hash,           
-                { rd_key: apiKey },  
-                item.imdb_id,        
-                item.season,         
-                item.episode,        
-                dbHelper             
-            );
-
-            if (packResult) {
-                fileIdxToUse = packResult.fileIndex;
-                logger.info(`📦 Leviathan Resolver: ${item.title} -> FileIdx: ${fileIdxToUse}`);
-            }
-        }
-        // ----------------------------------
-
-        if (service === 'rd') streamData = await RD.getStreamLink(apiKey, item.magnet, item.season, item.episode, fileIdxToUse);
-        else if (service === 'ad') streamData = await AD.getStreamLink(apiKey, item.magnet, item.season, item.episode, fileIdxToUse);
+        
+        // FIX: Passiamo item.fileIdx alle funzioni di sblocco per supportare i Pack
+        if (service === 'rd') streamData = await RD.getStreamLink(apiKey, item.magnet, item.season, item.episode, item.fileIdx);
+        else if (service === 'ad') streamData = await AD.getStreamLink(apiKey, item.magnet, item.season, item.episode, item.fileIdx);
 
         if (!streamData || (streamData.type === "ready" && streamData.size < CONFIG.REAL_SIZE_FILTER)) return null;
 
@@ -446,6 +435,7 @@ async function queryRemoteIndexer(tmdbId, type, season = null, episode = null) {
                 sizeBytes: parseInt(t.size),
                 seeders: t.seeders,
                 source: providerName,
+                // FIX: Catturiamo l'indice del file se il DB lo fornisce (Supporto Pack Nativo)
                 fileIdx: t.file_index !== undefined ? parseInt(t.file_index) : undefined 
             };
         });
@@ -455,7 +445,7 @@ async function queryRemoteIndexer(tmdbId, type, season = null, episode = null) {
     }
 }
 
-// --- GENERATE STREAM ---
+// --- GENERATE STREAM CON CACHE INTEGRATA ---
 async function generateStream(type, id, config, userConfStr, reqHost) {
   if (!config.key && !config.rd) return { streams: [{ name: "⚠️ CONFIG", title: "Inserisci API Key nel configuratore" }] };
   
@@ -468,6 +458,8 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   }
 
   const userTmdbKey = config.tmdb; 
+  
+  // FIX: Rimuovi prefisso 'ai-recs:' se presente per ottenere l'ID pulito
   let finalId = id.replace('ai-recs:', '');
   
   if (finalId.startsWith("tmdb:")) {
@@ -497,6 +489,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   logger.info(`🚀 [SPEED] Start PARALLEL search: ${meta.title}`);
   const tmdbIdLookup = meta.tmdb_id || (await imdbToTmdb(meta.imdb_id, userTmdbKey))?.tmdbId;
 
+  // 1. Cerca in DB Remote e Locale (in parallelo)
   const remotePromise = withTimeout(
       queryRemoteIndexer(tmdbIdLookup, type, meta.season, meta.episode),
       CONFIG.TIMEOUTS.REMOTE_INDEXER,
@@ -526,6 +519,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   if (dbResults.length > 6) dbResults = dbResults.slice(0, 10);
   let currentResults = [...remoteResults, ...dbResults];
 
+  // --- LOGICA EXTERNAL ADDONS (Se risultati <= 4) ---
   if (currentResults.length <= 4) {
       logger.info(`⚠️ Risultati scarsi (${currentResults.length} <= 4), attivo ADDON ESTERNI...`);
       try {
@@ -534,13 +528,15 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
                   return items.map(i => ({
                       title: i.title || i.filename,
                       magnet: i.magnetLink,
-                      size: i.size,         
-                      sizeBytes: i.mainFileSize,
+                      size: i.size,         // string
+                      sizeBytes: i.mainFileSize, // number
                       seeders: i.seeders,
+                      // MODIFICA: Source pulita! Se c'è il provider (es. TorrentGalaxy), usa quello. 
+                      // Altrimenti usa il nome dell'addon (es. Torrentio). Niente [EXT].
                       source: i.externalProvider || i.source.replace(/\[EXT\]\s*/, ''), 
                       hash: i.infoHash,
-                      fileIdx: i.fileIdx,
-                      isExternal: true 
+                      fileIdx: i.fileIdx, // Importante per i Pack
+                      isExternal: true // FLAG IMPORTANTE: Per bypassare smartMatch
                   }));
               }),
               CONFIG.TIMEOUTS.EXTERNAL,
@@ -558,7 +554,9 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       }
   }
 
+  // --- LOGICA SCRAPER (Fallback finale se ancora pochi risultati) ---
   let scrapedResults = [];
+  // Se anche dopo gli external addons siamo sotto a 6, o se gli external hanno fallito, prova lo scraper
   if (currentResults.length < 6) { 
       logger.info(`⚠️ Low results (${currentResults.length}), triggering SCRAPING...`);
       let dynamicTitles = [];
@@ -594,10 +592,10 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   }
 
   let resultsRaw = [...currentResults, ...scrapedResults];
-  resultsRaw.forEach(r => r.imdb_id = meta.imdb_id);
-
   resultsRaw = resultsRaw.filter(item => {
     if (!item?.magnet) return false;
+    
+    // --- MODIFICA FILTRO: Se è esterno, passa SEMPRE (Bypass SmartMatch) ---
     if (item.isExternal) return true; 
 
     const fileYearMatch = item.title.match(REGEX_YEAR);
@@ -621,7 +619,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       const rdPromises = ranked.map(item => {
           item.season = meta.season;
           item.episode = meta.episode;
-          if (!item.imdb_id) item.imdb_id = meta.imdb_id;
           config.rawConf = userConfStr; 
           return LIMITERS.rd.schedule(() => resolveDebridLink(config, item, config.filters?.showFake, reqHost));
       });
@@ -644,7 +641,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   return resultObj; 
 }
 
-// --- ROTTE DI CORTESIA ---
+// --- ROTTE DI CORTESIA (FIX 404) ---
 app.get("/api/stats", (req, res) => res.json({ status: "ok" }));
 app.get("/favicon.ico", (req, res) => res.status(204).end());
 
@@ -760,6 +757,5 @@ app.listen(PORT, () => {
     console.log(`🌍 Addon accessibile su: http://${PUBLIC_IP}:${PUBLIC_PORT}/manifest.json`);
     console.log(`📡 Connesso a Indexer DB: ${CONFIG.INDEXER_URL}`);
     console.log(`🔗 EXTERNAL ADDONS: Integrati (Trigger <= 4 results)`);
-    console.log(`📦 PACK RESOLVER: Proprietario (Leviathan Engine v1)`);
     console.log(`-----------------------------------------------------`);
 });
