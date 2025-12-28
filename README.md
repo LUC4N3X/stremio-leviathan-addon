@@ -289,7 +289,7 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 - <a href="https://github.com/qwertyuiop8899" target="_blank"><b>qwertyuiop8899</b></a>  
   <sub>
     Supporto costante, debug strategico e logica chiave del  
-    <b>pack-files-handler.cjs</b>
+    <b>external-addons.js</b>
   </sub>
 
 - <a href="https://github.com/diogomiguel93" target="_blank"><b>diogomiguel93</b></a>  
