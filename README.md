@@ -296,7 +296,7 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
         <b>qwertyuiop8899</b>
       </a>
       <br>
-      <sub>Debugging Strategico &<br>Logica Core</sub>
+      <sub>Supporto costante, debug strategico e logica chiave del <br>external-addons.js</sub>
     </td>
     <td align="center" width="200px">
       <a href="https://github.com/diogomiguel93">
@@ -305,7 +305,7 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
         <b>diogomiguel93</b>
       </a>
       <br>
-      <sub>Integrazione &<br>Torrentio Base</sub>
+      <sub>Base e ispirazione per l’integrazione dell’addon <br>Torrentio(ITA)</sub>
     </td>
   </tr>
 </table>
