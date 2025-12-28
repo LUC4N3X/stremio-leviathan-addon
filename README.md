@@ -286,13 +286,13 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 
 <br><br>
 
-- <a href="https://github.com/qwertyuiop8899" target="_blank"><b>qwerty</b></a>  
+- <a href="https://github.com/qwertyuiop8899" target="_blank"><b>qwertyuiop8899</b></a>  
   <sub>
     Supporto costante, debug strategico e logica chiave del  
     <b>pack-files-handler.cjs</b>
   </sub>
 
-- <a href="https://github.com/diogomiguel93" target="_blank"><b>diogoo</b></a>  
+- <a href="https://github.com/diogomiguel93" target="_blank"><b>diogomiguel93</b></a>  
   <sub>
     Base e ispirazione per l’integrazione dell’addon  
     <b>Torrentio (ITA)</b>
@@ -301,7 +301,7 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 <br><br>
 
 <sub>
-  Il codice evolve più velocemente quando non è scritto da una sola persona.
+  Il codice vive dove le menti si incontrano.
 </sub>
 
 ---
