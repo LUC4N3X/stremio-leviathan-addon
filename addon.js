@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
-// const helmet = require("helmet"); // DISABILITATO TEMPORANEAMENTE
 const compression = require('compression');
 const path = require("path");
 const axios = require("axios");
@@ -9,7 +8,7 @@ const crypto = require("crypto");
 const Bottleneck = require("bottleneck");
 const rateLimit = require("express-rate-limit");
 const winston = require('winston');
-const NodeCache = require("node-cache"); // NUOVA LIBRERIA
+const NodeCache = require("node-cache");
 
 // --- 1. CONFIGURAZIONE LOGGER (Winston) ---
 const logger = winston.createLogger({
@@ -25,32 +24,18 @@ const logger = winston.createLogger({
   ]
 });
 
-// --- CACHE OTTIMIZZATA (NODE-CACHE) ---
-// stdTTL: Default 30 minuti (1800s)
-// checkperiod: Controlla chiavi scadute ogni 120s
-// maxKeys: Limite di sicurezza per evitare crash della RAM
+// --- CACHE OTTIMIZZATA ---
 const myCache = new NodeCache({ stdTTL: 1800, checkperiod: 120, maxKeys: 5000 });
 
 const Cache = {
-    // Wrapper per magneti
-    getCachedMagnets: async (key) => {
-        return myCache.get(`magnets:${key}`) || null;
-    },
-    cacheMagnets: async (key, value, ttl = 3600) => {
-        myCache.set(`magnets:${key}`, value, ttl);
-    },
-
-    // Wrapper per risultati stream finali
+    getCachedMagnets: async (key) => myCache.get(`magnets:${key}`) || null,
+    cacheMagnets: async (key, value, ttl = 3600) => myCache.set(`magnets:${key}`, value, ttl),
     getCachedStream: async (key) => {
         const data = myCache.get(`stream:${key}`);
         if (data) logger.info(`⚡ CACHE HIT: ${key}`);
         return data || null;
     },
-    cacheStream: async (key, value, ttl = 1800) => { 
-        // node-cache gestisce il TTL automaticamente, niente più setTimeout manuali
-        myCache.set(`stream:${key}`, value, ttl);
-    },
-
+    cacheStream: async (key, value, ttl = 1800) => myCache.set(`stream:${key}`, value, ttl),
     listKeys: async () => myCache.keys(),
     deleteKey: async (key) => myCache.del(key),
     flushAll: async () => myCache.flushAll()
@@ -80,8 +65,8 @@ const CONFIG = {
   MAX_RESULTS: 60, 
   TIMEOUTS: {
     TMDB: 2000,
-    SCRAPER: 6000, 
-    REMOTE_INDEXER: 2500,
+    SCRAPER: 15000, // Tempo aumentato per permettere agli scraper di finire
+    REMOTE_INDEXER: 3000,
     DB_QUERY: 5000,
     DEBRID: 5000
   }
@@ -125,8 +110,13 @@ const LIMITERS = {
   rd: new Bottleneck({ maxConcurrent: 25, minTime: 40 }), 
 };
 
-const SCRAPER_MODULES = [ require("./engines") ];
-const FALLBACK_SCRAPERS = [ require("./external") ];
+// --- FIX IMPORT ENGINES (CARICAMENTO SICURO) ---
+let loadedEngines = require("./engines");
+// Se engines.js esporta un oggetto singolo invece di array, lo convertiamo
+if (!Array.isArray(loadedEngines)) {
+    loadedEngines = [loadedEngines];
+}
+const SCRAPER_MODULES = loadedEngines;
 
 const app = express();
 app.set('trust proxy', 1);
@@ -147,9 +137,6 @@ const limiter = rateLimit({
     message: "Troppe richieste da questo IP, riprova più tardi."
 });
 app.use(limiter);
-
-// app.use(helmet({ ... })); // Rimosso per evitare errori CSP/Blocchi script esterni
-
 app.use(cors());
 app.use(express.json()); 
 app.use(express.static(path.join(__dirname, "public")));
@@ -180,6 +167,9 @@ function deduplicateResults(results) {
     const hashMatch = item.magnet.match(/btih:([a-f0-9]{40})/i);
     if (!hashMatch) continue;
     const hash = hashMatch[1].toUpperCase();
+    
+    // LOGICA MERGE: Se l'hash esiste già, teniamo quello con più seeders
+    // Questo NON elimina i risultati diversi, unisce solo quelli identici.
     if (!hashMap.has(hash) || (item.seeders || 0) > (hashMap.get(hash).seeders || 0)) {
       item.hash = hash;
       item._size = parseSize(item.size || item.sizeBytes);
@@ -268,6 +258,8 @@ function extractStreamInfo(title, source) {
 
 function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag = "RD") {
     const { quality, qIcon, info, lang, audioInfo } = extractStreamInfo(fileTitle, source);
+    const isPack = fileTitle.includes("📦");
+
     const sizeStr = size ? `🧲 ${formatBytes(size)}` : "🧲 ?";
     const seedersStr = seeders != null ? `👤 ${seeders}` : "";
     let langStr = "🌐 ?";
@@ -279,14 +271,22 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     if (/corsaro/i.test(displaySource)) displaySource = "ilCorSaRoNeRo";
     
     const sourceLine = `⚡ [${serviceTag}] ${displaySource}`;
-    const name = `🦑 LEVIATHAN\n${qIcon} ${quality}`; 
+    const name = `🦑 LEVIATHAN\n${qIcon} ${quality}${isPack ? ' 📦' : ''}`; 
     const cleanName = cleanFilename(fileTitle)
         .replace(/(s\d{1,2}e\d{1,2}|\d{1,2}x\d{1,2}|s\d{1,2})/ig, "")
         .replace(/\s{2,}/g, " ")
         .trim();
     const epTag = getEpisodeTag(fileTitle);
     const lines = [];
-    lines.push(`🎬 ${cleanName}${epTag ? ` ${epTag}` : ""}`);
+
+    if (isPack) {
+        lines.push(`📦 PACK COMPLETO`);
+        lines.push(`🎬 ${fileTitle.replace("📦 ", "").replace(/\[.*?\]/, "").trim()}`); 
+        lines.push(`⚠️ Scegli il file nel player`);
+    } else {
+        lines.push(`🎬 ${cleanName}${epTag ? ` ${epTag}` : ""}`);
+    }
+
     const audioLine = [langStr, audioInfo].filter(Boolean).join(" • ");
     if (audioLine) lines.push(audioLine);
     const cleanInfo = info ? info.replace("🖥️ ", "") : "";
@@ -433,20 +433,15 @@ async function queryRemoteIndexer(tmdbId, type, season = null, episode = null) {
     }
 }
 
-// --- GENERATE STREAM CON CACHE INTEGRATA ---
+// --- GENERATE STREAM CON LOGICA MERGE (UNION) ---
 async function generateStream(type, id, config, userConfStr, reqHost) {
   if (!config.key && !config.rd) return { streams: [{ name: "⚠️ CONFIG", title: "Inserisci API Key nel configuratore" }] };
   
-  // 1. GENERA CHIAVE DI CACHE UNICA (ID + HASH CONFIGURAZIONE UTENTE)
-  // Usiamo l'hash della config perché utenti diversi hanno API key diverse, quindi link Debrid diversi.
   const configHash = crypto.createHash('md5').update(userConfStr || 'no-conf').digest('hex');
   const cacheKey = `${type}:${id}:${configHash}`;
   
-  // 2. CONTROLLA SE ESISTE IN CACHE
   const cachedResult = await Cache.getCachedStream(cacheKey);
-  if (cachedResult) {
-      return cachedResult; // RITORNA SUBITO, NESSUN CALCOLO!
-  }
+  if (cachedResult) return cachedResult; 
 
   const userTmdbKey = config.tmdb; 
   let finalId = id; 
@@ -504,12 +499,30 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   if (remoteResults.length > 0) logger.info(`✅ [REMOTE] ${remoteResults.length} items`);
   if (dbResults.length > 0) logger.info(`✅ [LOCAL DB] ${dbResults.length} items`);
 
-  if (dbResults.length > 6) dbResults = dbResults.slice(0, 10);
+  // Logica Pack: se ci sono pack, ne mostriamo qualcuno in più
+  const packCount = dbResults.filter(r => r.isPack).length;
+  if (dbResults.length > 6) dbResults = dbResults.slice(0, 10 + packCount);
+  
+  // Uniamo DB + Remote (questi sono i "currentResults")
   let currentResults = [...remoteResults, ...dbResults];
 
+  // Contiamo quanti risultati BUONI abbiamo davvero
+  const validCurrentCount = currentResults.filter(item => {
+      if (!item.magnet) return false;
+      if (item.isPack) return true;
+      const fileYearMatch = item.title.match(REGEX_YEAR);
+      if (fileYearMatch && Math.abs(parseInt(fileYearMatch[0]) - parseInt(meta.year)) > 1) return false;
+      if (!smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode)) return false;
+      return true;
+  }).length;
+
+  logger.info(`🔍 Valid Clean Results: ${validCurrentCount} / Raw: ${currentResults.length}`);
+
   let scrapedResults = [];
-  if (currentResults.length < 6) { 
-      logger.info(`⚠️ Low results (${currentResults.length}), triggering SCRAPING...`);
+  
+  // --- SCRAPING TRIGGER (Se <= 3 risultati puliti) ---
+  if (validCurrentCount <= 3) { 
+      logger.info(`⚠️ Low Valid Results (${validCurrentCount} <= 3), triggering SCRAPING...`);
       let dynamicTitles = [];
       try {
           if (tmdbIdLookup) dynamicTitles = await getTmdbAltTitles(tmdbIdLookup, type, userTmdbKey);
@@ -520,8 +533,9 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       let promises = [];
       queries.forEach(q => { 
           SCRAPER_MODULES.forEach(scraper => { 
-              if (scraper.searchMagnet) { 
+              if (scraper && scraper.searchMagnet) { 
                   const searchOptions = { allowEng };
+                  logger.debug(`🔎 [${scraper.name || 'Unknown'}] Searching: ${q}`);
                   promises.push(
                       LIMITERS.scraper.schedule(() => 
                           withTimeout(
@@ -538,19 +552,26 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           }); 
       });
       scrapedResults = (await Promise.all(promises)).flat();
+      logger.info(`✅ [SCRAPER] Found ${scrapedResults.length} new results.`);
   } else {
-      logger.info(`⚡ SKIP SCRAPER: Have ${currentResults.length} valid results.`);
+      logger.info(`⚡ SKIP SCRAPER: We have ${validCurrentCount} CLEAN results (Threshold > 3).`);
   }
 
+  // --- UNIONE TOTALE (MERGE) ---
+  // Qui uniamo tutto: DB + Remote + Scraped (nessuno viene sostituito, vengono sommati)
   let resultsRaw = [...currentResults, ...scrapedResults];
+  
+  // Filtri finali (per rimuovere spazzatura/fake)
   resultsRaw = resultsRaw.filter(item => {
     if (!item?.magnet) return false;
+    if (item.isPack) return true; // I pack passano sempre
     const fileYearMatch = item.title.match(REGEX_YEAR);
     if (fileYearMatch && Math.abs(parseInt(fileYearMatch[0]) - parseInt(meta.year)) > 1) return false;
     if (!smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode)) return false;
     return true;
   });
 
+  // Deduplica (unisce solo se MAGNET identico)
   let cleanResults = deduplicateResults(resultsRaw);
   const ranked = rankAndFilterResults(cleanResults, meta, config).slice(0, CONFIG.MAX_RESULTS);
 
@@ -577,12 +598,9 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   const formattedVix = rawVix.map(v => formatVixStream(meta, v));
   
   const finalStreams = [...formattedVix, ...debridStreams];
-  
   const resultObj = { streams: finalStreams.length > 0 ? finalStreams : [{ name: "⛔", title: "Nessun risultato trovato" }] };
 
-  // 3. SALVA IN CACHE SE ABBIAMO RISULTATI
   if (finalStreams.length > 0) {
-      // Salviamo per 30 minuti (1800s). Evitiamo cache eterna per link Debrid che potrebbero scadere.
       await Cache.cacheStream(cacheKey, resultObj, 1800);
       logger.info(`💾 SAVED TO CACHE: ${cacheKey}`);
   }
@@ -590,7 +608,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   return resultObj; 
 }
 
-// --- ROTTE DI CORTESIA (FIX 404) ---
+// --- ROTTE DI CORTESIA ---
 app.get("/api/stats", (req, res) => res.json({ status: "ok" }));
 app.get("/favicon.ico", (req, res) => res.status(204).end());
 
@@ -655,7 +673,6 @@ app.get("/health", async (req, res) => {
   } catch (err) {
     checks.services.indexer = "down";
   }
-  // Controllo cache aggiornato per node-cache
   checks.services.cache = myCache.keys().length > 0 ? "active" : "empty"; 
   res.status(checks.status === "ok" ? 200 : 503).json(checks);
 });
@@ -702,9 +719,9 @@ app.listen(PORT, () => {
     console.log(`🚀 Leviathan (God Tier) attivo su porta interna ${PORT}`);
     console.log(`-----------------------------------------------------`);
     console.log(`⚡ MODALITÀ CACHE: Node-Cache (Safe & Fast). TTL 30min.`);
-    console.log(`⚡ SPEED LOGIC: Parallelismo attivo (DB + Remote + FailFast).`);
-    console.log(`🧠 SMART FILTER: Attivo (Protezione Frankenstein).`);
-    console.log(`🛡️  SECURITY: Helmet CSP DISATTIVATO (Nessun blocco).`);
+    console.log(`📦 PACK EXTRACTION: Attivo (Complete Series + Ranges).`);
+    console.log(`🧠 SMART FILTER: Attivo.`);
+    console.log(`🧹 LAZY SCRAPER: Trigger se Clean Results <= 3 (UNION MODE: DB + Scraper).`);
     console.log(`🌍 Addon accessibile su: http://${PUBLIC_IP}:${PUBLIC_PORT}/manifest.json`);
     console.log(`📡 Connesso a Indexer DB: ${CONFIG.INDEXER_URL}`);
     console.log(`-----------------------------------------------------`);
