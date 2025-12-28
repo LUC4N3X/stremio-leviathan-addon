@@ -141,7 +141,7 @@ function getStealthHeaders(url) {
             'User-Agent': profile.userAgent,
             'Referer': urlObj.origin + '/',
             'Origin': urlObj.origin,
-            ...profile.headers
+            ...profile.headers // ✅ CORRETTO: Rimossi gli apici
         }
     };
 }
@@ -253,47 +253,6 @@ async function searchKnaben(title, year, type, reqSeason, reqEpisode, options = 
     } catch { return []; }
 }
 
-async function searchTorrentio(title, year, type, reqSeason, reqEpisode, options = {}) {
-    try {
-        const imdbId = options.imdbId ? options.imdbId.split(':')[0] : null;
-        if (!imdbId) return [];
-
-        // Configurazione Providers
-        const config = "providers=yts,eztv,rarbg,1337x,thepiratebay,kickasstorrents,torrentgalaxy,magnet4you|language=italian";
-        
-        let url;
-        if (type === 'movie') url = `https://torrentio.strem.fun/${config}/stream/movie/${imdbId}.json`;
-        else {
-             if (!reqSeason) return [];
-             const ep = reqEpisode || 1; 
-             url = `https://torrentio.strem.fun/${config}/stream/series/${imdbId}:${reqSeason}:${ep}.json`;
-        }
-
-        console.log(`[Torrentio API] 🇮🇹 Fallback attivo: ${title}`);
-        const { data } = await axios.get(url, { timeout: 3000 });
-        
-        if (!data?.streams) return [];
-
-        return data.streams.map(s => {
-            const lines = s.title.split('\n');
-            const realTitle = lines[0] || title;
-            const details = lines[1] || "";
-            const sizeMatch = details.match(/💾\s*([\d\.]+\s*[GMK]B)/i);
-            const seedMatch = details.match(/👤\s*(\d+)/);
-            
-            return {
-                title: realTitle,
-                magnet: s.infoHash ? `magnet:?xt=urn:btih:${s.infoHash}&dn=${encodeURIComponent(realTitle)}` : "",
-                size: sizeMatch ? sizeMatch[1] : "??",
-                sizeBytes: sizeMatch ? parseSize(sizeMatch[1]) : 0,
-                seeders: seedMatch ? parseInt(seedMatch[1]) : 0,
-                source: "Torrentio"
-            };
-        }).filter(item => item.magnet); // Rimuove item senza magnet
-
-    } catch { return []; }
-}
-
 async function searchTPB(title, year, type, reqSeason, reqEpisode, options = {}) {
     try {
         let q = clean(title);
@@ -318,14 +277,13 @@ async function searchTPB(title, year, type, reqSeason, reqEpisode, options = {})
     } catch { return []; }
 }
 
-// --- ALTRI MOTORI (Struttura semplificata) ---
+// --- ALTRI MOTORI ---
 async function searchUindex(title, year, type, reqSeason, reqEpisode, options = {}) {
-    // Implementazione standard UIndex
     try {
         let q = clean(title) + (options.allowEng ? "" : " ITA");
         const { data } = await requestHtml(`https://uindex.org/search.php?search=${encodeURIComponent(q)}&c=0`, { timeout: 4000 });
         if (!data) return [];
-        // (Logica parsing identica al tuo file precedente per brevità, è corretta)
+        
         const rows = data.split(/<tr[^>]*>/gi).filter(row => row.includes('magnet:'));
         return rows.map(row => {
             const magnet = row.match(/href=["'](magnet:[^"']+)["']/i)?.[1].replace(/&amp;/g, '&');
@@ -348,7 +306,6 @@ const ACTIVE_ENGINES = [
     searchKnaben,
     searchTPB,
     searchUindex,
-    // Puoi aggiungere searchNyaa, searchLime, etc. qui se vuoi
 ];
 
 async function searchMagnet(title, year, type, imdbId, options = {}) {
@@ -377,21 +334,6 @@ async function searchMagnet(title, year, type, imdbId, options = {}) {
             uniqueResults.push(r);
         }
     });
-
-    // 3. 🚨 LOGICA FALLBACK: Se abbiamo pochi risultati, chiamiamo Torrentio
-    if (uniqueResults.length <= 3) {
-        console.log(`[Aggregator] Solo ${uniqueResults.length} risultati. Chiamo Torrentio...`);
-        try {
-            const torrentioRes = await searchTorrentio(title, year, type, reqSeason, reqEpisode, searchOpts);
-            torrentioRes.forEach(r => {
-                const h = r.magnet.match(/btih:([a-f0-9]{40})/i)?.[1].toLowerCase();
-                if (h && !seenHashes.has(h)) {
-                    seenHashes.add(h);
-                    uniqueResults.push(r);
-                }
-            });
-        } catch(e) { console.error("Torrentio Error:", e.message); }
-    }
 
     // 4. Ordinamento e Trackers
     return uniqueResults
