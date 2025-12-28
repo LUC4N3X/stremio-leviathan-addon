@@ -276,6 +276,8 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 </div>
 
 ---
+---
+
 ### 🧠 Crediti & Ringraziamenti
 
 <sub>
@@ -284,13 +286,13 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 
 <br><br>
 
-- **@prisonmike**  
+- <a href="https://github.com/qwertyuiop8899" target="_blank"><b>qwerty</b></a>  
   <sub>
     Supporto costante, debug strategico e logica chiave del  
     <b>pack-files-handler.cjs</b>
   </sub>
 
-- **@diogoo**  
+- <a href="https://github.com/diogomiguel93" target="_blank"><b>diogoo</b></a>  
   <sub>
     Base e ispirazione per l’integrazione dell’addon  
     <b>Torrentio (ITA)</b>
@@ -301,4 +303,6 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 <sub>
   Il codice evolve più velocemente quando non è scritto da una sola persona.
 </sub>
+
+---
 
