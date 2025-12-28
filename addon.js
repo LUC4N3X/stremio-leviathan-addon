@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
+// const helmet = require("helmet"); // DISABILITATO TEMPORANEAMENTE
 const compression = require('compression');
 const path = require("path");
 const axios = require("axios");
@@ -9,6 +10,9 @@ const Bottleneck = require("bottleneck");
 const rateLimit = require("express-rate-limit");
 const winston = require('winston');
 const NodeCache = require("node-cache");
+
+// --- IMPORT ESTERNI ---
+const { fetchExternalAddonsFlat } = require("./external-addons");
 
 // --- 1. CONFIGURAZIONE LOGGER (Winston) ---
 const logger = winston.createLogger({
@@ -24,18 +28,24 @@ const logger = winston.createLogger({
   ]
 });
 
-// --- CACHE OTTIMIZZATA ---
+// --- CACHE OTTIMIZZATA (NODE-CACHE) ---
 const myCache = new NodeCache({ stdTTL: 1800, checkperiod: 120, maxKeys: 5000 });
 
 const Cache = {
-    getCachedMagnets: async (key) => myCache.get(`magnets:${key}`) || null,
-    cacheMagnets: async (key, value, ttl = 3600) => myCache.set(`magnets:${key}`, value, ttl),
+    getCachedMagnets: async (key) => {
+        return myCache.get(`magnets:${key}`) || null;
+    },
+    cacheMagnets: async (key, value, ttl = 3600) => {
+        myCache.set(`magnets:${key}`, value, ttl);
+    },
     getCachedStream: async (key) => {
         const data = myCache.get(`stream:${key}`);
         if (data) logger.info(`⚡ CACHE HIT: ${key}`);
         return data || null;
     },
-    cacheStream: async (key, value, ttl = 1800) => myCache.set(`stream:${key}`, value, ttl),
+    cacheStream: async (key, value, ttl = 1800) => { 
+        myCache.set(`stream:${key}`, value, ttl);
+    },
     listKeys: async () => myCache.keys(),
     deleteKey: async (key) => myCache.del(key),
     flushAll: async () => myCache.flushAll()
@@ -65,10 +75,11 @@ const CONFIG = {
   MAX_RESULTS: 60, 
   TIMEOUTS: {
     TMDB: 2000,
-    SCRAPER: 15000, // Tempo aumentato per permettere agli scraper di finire
-    REMOTE_INDEXER: 3000,
+    SCRAPER: 6000, 
+    REMOTE_INDEXER: 2500,
     DB_QUERY: 5000,
-    DEBRID: 5000
+    DEBRID: 5000,
+    EXTERNAL: 4000 // Timeout per addon esterni
   }
 };
 
@@ -110,13 +121,7 @@ const LIMITERS = {
   rd: new Bottleneck({ maxConcurrent: 25, minTime: 40 }), 
 };
 
-// --- FIX IMPORT ENGINES (CARICAMENTO SICURO) ---
-let loadedEngines = require("./engines");
-// Se engines.js esporta un oggetto singolo invece di array, lo convertiamo
-if (!Array.isArray(loadedEngines)) {
-    loadedEngines = [loadedEngines];
-}
-const SCRAPER_MODULES = loadedEngines;
+const SCRAPER_MODULES = [ require("./engines") ];
 
 const app = express();
 app.set('trust proxy', 1);
@@ -137,6 +142,7 @@ const limiter = rateLimit({
     message: "Troppe richieste da questo IP, riprova più tardi."
 });
 app.use(limiter);
+
 app.use(cors());
 app.use(express.json()); 
 app.use(express.static(path.join(__dirname, "public")));
@@ -167,9 +173,6 @@ function deduplicateResults(results) {
     const hashMatch = item.magnet.match(/btih:([a-f0-9]{40})/i);
     if (!hashMatch) continue;
     const hash = hashMatch[1].toUpperCase();
-    
-    // LOGICA MERGE: Se l'hash esiste già, teniamo quello con più seeders
-    // Questo NON elimina i risultati diversi, unisce solo quelli identici.
     if (!hashMap.has(hash) || (item.seeders || 0) > (hashMap.get(hash).seeders || 0)) {
       item.hash = hash;
       item._size = parseSize(item.size || item.sizeBytes);
@@ -258,8 +261,6 @@ function extractStreamInfo(title, source) {
 
 function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag = "RD") {
     const { quality, qIcon, info, lang, audioInfo } = extractStreamInfo(fileTitle, source);
-    const isPack = fileTitle.includes("📦");
-
     const sizeStr = size ? `🧲 ${formatBytes(size)}` : "🧲 ?";
     const seedersStr = seeders != null ? `👤 ${seeders}` : "";
     let langStr = "🌐 ?";
@@ -270,23 +271,16 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     let displaySource = source;
     if (/corsaro/i.test(displaySource)) displaySource = "ilCorSaRoNeRo";
     
+    // Il source ora è pulito (es. "TorrentGalaxy"), quindi non apparirà [EXT]
     const sourceLine = `⚡ [${serviceTag}] ${displaySource}`;
-    const name = `🦑 LEVIATHAN\n${qIcon} ${quality}${isPack ? ' 📦' : ''}`; 
+    const name = `🦑 LEVIATHAN\n${qIcon} ${quality}`; 
     const cleanName = cleanFilename(fileTitle)
         .replace(/(s\d{1,2}e\d{1,2}|\d{1,2}x\d{1,2}|s\d{1,2})/ig, "")
         .replace(/\s{2,}/g, " ")
         .trim();
     const epTag = getEpisodeTag(fileTitle);
     const lines = [];
-
-    if (isPack) {
-        lines.push(`📦 PACK COMPLETO`);
-        lines.push(`🎬 ${fileTitle.replace("📦 ", "").replace(/\[.*?\]/, "").trim()}`); 
-        lines.push(`⚠️ Scegli il file nel player`);
-    } else {
-        lines.push(`🎬 ${cleanName}${epTag ? ` ${epTag}` : ""}`);
-    }
-
+    lines.push(`🎬 ${cleanName}${epTag ? ` ${epTag}` : ""}`);
     const audioLine = [langStr, audioInfo].filter(Boolean).join(" • ");
     if (audioLine) lines.push(audioLine);
     const cleanInfo = info ? info.replace("🖥️ ", "") : "";
@@ -322,8 +316,13 @@ function validateStreamRequest(type, id) {
     logger.error(`Tipo non valido: ${type}`);
     throw new Error(`Tipo non valido: ${type}`);
   }
+  
+  // Rimuovi il prefisso ai-recs per il controllo di validità
+  const cleanIdToCheck = id.replace('ai-recs:', '');
+
   const idPattern = /^(tt\d+|\d+|tmdb:\d+|kitsu:\d+)(:\d+)?(:\d+)?$/;
-  if (!idPattern.test(id)) {
+  
+  if (!idPattern.test(cleanIdToCheck) && !idPattern.test(id)) {
     logger.error(`Formato ID non valido: ${id}`);
     throw new Error(`Formato ID non valido: ${id}`);
   }
@@ -433,7 +432,7 @@ async function queryRemoteIndexer(tmdbId, type, season = null, episode = null) {
     }
 }
 
-// --- GENERATE STREAM CON LOGICA MERGE (UNION) ---
+// --- GENERATE STREAM CON CACHE INTEGRATA ---
 async function generateStream(type, id, config, userConfStr, reqHost) {
   if (!config.key && !config.rd) return { streams: [{ name: "⚠️ CONFIG", title: "Inserisci API Key nel configuratore" }] };
   
@@ -441,14 +440,18 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   const cacheKey = `${type}:${id}:${configHash}`;
   
   const cachedResult = await Cache.getCachedStream(cacheKey);
-  if (cachedResult) return cachedResult; 
+  if (cachedResult) {
+      return cachedResult; 
+  }
 
   const userTmdbKey = config.tmdb; 
-  let finalId = id; 
   
-  if (id.startsWith("tmdb:")) {
+  // FIX: Rimuovi prefisso 'ai-recs:' se presente per ottenere l'ID pulito
+  let finalId = id.replace('ai-recs:', '');
+  
+  if (finalId.startsWith("tmdb:")) {
       try {
-          const parts = id.split(":");
+          const parts = finalId.split(":");
           const imdbId = await tmdbToImdb(parts[1], type, userTmdbKey);
           if (imdbId) {
               if (type === "series" && parts.length >= 4) finalId = `${imdbId}:${parts[2]}:${parts[3]}`; 
@@ -456,9 +459,9 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           }
       } catch (err) {}
   }
-  if (id.startsWith("kitsu:")) {
+  if (finalId.startsWith("kitsu:")) {
       try {
-          const parts = id.split(":");
+          const parts = finalId.split(":");
           const kData = await kitsuHandler(parts[1]);
           if (kData && kData.imdbID) {
               const s = kData.season || 1; 
@@ -473,6 +476,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   logger.info(`🚀 [SPEED] Start PARALLEL search: ${meta.title}`);
   const tmdbIdLookup = meta.tmdb_id || (await imdbToTmdb(meta.imdb_id, userTmdbKey))?.tmdbId;
 
+  // 1. Cerca in DB Remote e Locale (in parallelo)
   const remotePromise = withTimeout(
       queryRemoteIndexer(tmdbIdLookup, type, meta.season, meta.episode),
       CONFIG.TIMEOUTS.REMOTE_INDEXER,
@@ -499,30 +503,48 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   if (remoteResults.length > 0) logger.info(`✅ [REMOTE] ${remoteResults.length} items`);
   if (dbResults.length > 0) logger.info(`✅ [LOCAL DB] ${dbResults.length} items`);
 
-  // Logica Pack: se ci sono pack, ne mostriamo qualcuno in più
-  const packCount = dbResults.filter(r => r.isPack).length;
-  if (dbResults.length > 6) dbResults = dbResults.slice(0, 10 + packCount);
-  
-  // Uniamo DB + Remote (questi sono i "currentResults")
+  if (dbResults.length > 6) dbResults = dbResults.slice(0, 10);
   let currentResults = [...remoteResults, ...dbResults];
 
-  // Contiamo quanti risultati BUONI abbiamo davvero
-  const validCurrentCount = currentResults.filter(item => {
-      if (!item.magnet) return false;
-      if (item.isPack) return true;
-      const fileYearMatch = item.title.match(REGEX_YEAR);
-      if (fileYearMatch && Math.abs(parseInt(fileYearMatch[0]) - parseInt(meta.year)) > 1) return false;
-      if (!smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode)) return false;
-      return true;
-  }).length;
+  // --- LOGICA EXTERNAL ADDONS (Se risultati <= 4) ---
+  if (currentResults.length <= 4) {
+      logger.info(`⚠️ Risultati scarsi (${currentResults.length} <= 4), attivo ADDON ESTERNI...`);
+      try {
+          const externalResults = await withTimeout(
+              fetchExternalAddonsFlat(type, finalId).then(items => {
+                  return items.map(i => ({
+                      title: i.title || i.filename,
+                      magnet: i.magnetLink,
+                      size: i.size,         // string
+                      sizeBytes: i.mainFileSize, // number
+                      seeders: i.seeders,
+                      // MODIFICA: Source pulita! Se c'è il provider (es. TorrentGalaxy), usa quello. 
+                      // Altrimenti usa il nome dell'addon (es. Torrentio). Niente [EXT].
+                      source: i.externalProvider || i.source.replace(/\[EXT\]\s*/, ''), 
+                      hash: i.infoHash,
+                      isExternal: true // FLAG IMPORTANTE: Per bypassare smartMatch
+                  }));
+              }),
+              CONFIG.TIMEOUTS.EXTERNAL,
+              'External Addons'
+          );
+          
+          if (externalResults && externalResults.length > 0) {
+              logger.info(`✅ [EXTERNAL] Trovati ${externalResults.length} nuovi risultati`);
+              currentResults.push(...externalResults);
+          } else {
+              logger.info(`❌ [EXTERNAL] Nessun risultato extra trovato.`);
+          }
+      } catch (err) {
+          logger.warn('External Addons fallito/timeout', { error: err.message });
+      }
+  }
 
-  logger.info(`🔍 Valid Clean Results: ${validCurrentCount} / Raw: ${currentResults.length}`);
-
+  // --- LOGICA SCRAPER (Fallback finale se ancora pochi risultati) ---
   let scrapedResults = [];
-  
-  // --- SCRAPING TRIGGER (Se <= 3 risultati puliti) ---
-  if (validCurrentCount <= 3) { 
-      logger.info(`⚠️ Low Valid Results (${validCurrentCount} <= 3), triggering SCRAPING...`);
+  // Se anche dopo gli external addons siamo sotto a 6, o se gli external hanno fallito, prova lo scraper
+  if (currentResults.length < 6) { 
+      logger.info(`⚠️ Low results (${currentResults.length}), triggering SCRAPING...`);
       let dynamicTitles = [];
       try {
           if (tmdbIdLookup) dynamicTitles = await getTmdbAltTitles(tmdbIdLookup, type, userTmdbKey);
@@ -533,9 +555,8 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       let promises = [];
       queries.forEach(q => { 
           SCRAPER_MODULES.forEach(scraper => { 
-              if (scraper && scraper.searchMagnet) { 
+              if (scraper.searchMagnet) { 
                   const searchOptions = { allowEng };
-                  logger.debug(`🔎 [${scraper.name || 'Unknown'}] Searching: ${q}`);
                   promises.push(
                       LIMITERS.scraper.schedule(() => 
                           withTimeout(
@@ -552,26 +573,23 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           }); 
       });
       scrapedResults = (await Promise.all(promises)).flat();
-      logger.info(`✅ [SCRAPER] Found ${scrapedResults.length} new results.`);
   } else {
-      logger.info(`⚡ SKIP SCRAPER: We have ${validCurrentCount} CLEAN results (Threshold > 3).`);
+      logger.info(`⚡ SKIP SCRAPER: Have ${currentResults.length} valid results.`);
   }
 
-  // --- UNIONE TOTALE (MERGE) ---
-  // Qui uniamo tutto: DB + Remote + Scraped (nessuno viene sostituito, vengono sommati)
   let resultsRaw = [...currentResults, ...scrapedResults];
-  
-  // Filtri finali (per rimuovere spazzatura/fake)
   resultsRaw = resultsRaw.filter(item => {
     if (!item?.magnet) return false;
-    if (item.isPack) return true; // I pack passano sempre
+    
+    // --- MODIFICA FILTRO: Se è esterno, passa SEMPRE ---
+    if (item.isExternal) return true; 
+
     const fileYearMatch = item.title.match(REGEX_YEAR);
     if (fileYearMatch && Math.abs(parseInt(fileYearMatch[0]) - parseInt(meta.year)) > 1) return false;
     if (!smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode)) return false;
     return true;
   });
 
-  // Deduplica (unisce solo se MAGNET identico)
   let cleanResults = deduplicateResults(resultsRaw);
   const ranked = rankAndFilterResults(cleanResults, meta, config).slice(0, CONFIG.MAX_RESULTS);
 
@@ -598,6 +616,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   const formattedVix = rawVix.map(v => formatVixStream(meta, v));
   
   const finalStreams = [...formattedVix, ...debridStreams];
+  
   const resultObj = { streams: finalStreams.length > 0 ? finalStreams : [{ name: "⛔", title: "Nessun risultato trovato" }] };
 
   if (finalStreams.length > 0) {
@@ -608,7 +627,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   return resultObj; 
 }
 
-// --- ROTTE DI CORTESIA ---
+// --- ROTTE DI CORTESIA (FIX 404) ---
 app.get("/api/stats", (req, res) => res.json({ status: "ok" }));
 app.get("/favicon.ico", (req, res) => res.status(204).end());
 
@@ -719,10 +738,10 @@ app.listen(PORT, () => {
     console.log(`🚀 Leviathan (God Tier) attivo su porta interna ${PORT}`);
     console.log(`-----------------------------------------------------`);
     console.log(`⚡ MODALITÀ CACHE: Node-Cache (Safe & Fast). TTL 30min.`);
-    console.log(`📦 PACK EXTRACTION: Attivo (Complete Series + Ranges).`);
-    console.log(`🧠 SMART FILTER: Attivo.`);
-    console.log(`🧹 LAZY SCRAPER: Trigger se Clean Results <= 3 (UNION MODE: DB + Scraper).`);
+    console.log(`⚡ SPEED LOGIC: Parallelismo attivo (DB + Remote + FailFast).`);
+    console.log(`🧠 SMART FILTER: Attivo (Protezione Frankenstein).`);
     console.log(`🌍 Addon accessibile su: http://${PUBLIC_IP}:${PUBLIC_PORT}/manifest.json`);
     console.log(`📡 Connesso a Indexer DB: ${CONFIG.INDEXER_URL}`);
+    console.log(`🔗 EXTERNAL ADDONS: Integrati (Trigger <= 4 results)`);
     console.log(`-----------------------------------------------------`);
 });
