@@ -13,6 +13,8 @@ const NodeCache = require("node-cache");
 
 // --- IMPORT ESTERNI ---
 const { fetchExternalAddonsFlat } = require("./external-addons");
+// --- [LEVIATHAN] IMPORT RESOLVER ---
+const PackResolver = require("./leviathan-pack-resolver");
 
 // --- 1. CONFIGURAZIONE LOGGER (Winston) ---
 const logger = winston.createLogger({
@@ -79,7 +81,8 @@ const CONFIG = {
     REMOTE_INDEXER: 2500,
     DB_QUERY: 5000,
     DEBRID: 5000,
-    EXTERNAL: 4000 // Timeout per addon esterni
+    PACK_RESOLVER: 8000, 
+    EXTERNAL: 4000 
   }
 };
 
@@ -166,7 +169,6 @@ function parseSize(sizeStr) {
   return val * (mult[unit] || 1);
 }
 
-// FIX: Deduplicazione intelligente per SEASON PACKS
 function deduplicateResults(results) {
   const hashMap = new Map();
   for (const item of results) {
@@ -370,12 +372,73 @@ async function getMetadata(id, type) {
   }
 }
 
-async function resolveDebridLink(config, item, showFake, reqHost) {
+// --- FUNZIONE SALVAGENTE PER SERIE TV ---
+// Ripristina il comportamento "classico" per le serie se smartMatch è troppo severo
+function simpleSeriesFallback(meta, filename) {
+    if (!meta.isSeries || !filename) return false;
+    
+    // 1. Normalizza
+    const cleanMeta = meta.title.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const cleanFile = filename.toLowerCase().replace(/[^a-z0-9]/g, "");
+    
+    // 2. Il titolo deve esserci (anche parziale)
+    if (!cleanFile.includes(cleanMeta)) return false;
+
+    // 3. Regex standard SxxExx (molto robusta)
+    // Cerca S05E01, 5x01, Season 5 Episode 1, etc.
+    const s = meta.season;
+    const e = meta.episode;
+    
+    // Regex dinamica per S{s}E{e}
+    // Copre: S05E05, S5E5, 5x5, 05x05
+    const re = new RegExp(`(?:s|season|^|\\b|x)0?${s}(?:[ ._x-]*)(?:e|episode|x)?0?${e}(?!\\d)`, 'i');
+    
+    return re.test(filename);
+}
+
+// --- [LEVIATHAN] UPDATED RESOLVE DEBRID LINK ---
+async function resolveDebridLink(config, item, showFake, reqHost, meta = null, dbHelper = null) {
     try {
         const service = config.service || 'rd';
         const apiKey = config.key || config.rd;
         if (!apiKey) return null;
 
+        // --- PROTEZIONE FILM ---
+        // Se non è esplicitamente una serie, saltiamo TUTTA la logica dei pack.
+        const isSeries = meta && meta.isSeries;
+
+        if (isSeries && PackResolver.isSeasonPack(item.title) && item.fileIdx === undefined) {
+             try {
+                const resolverConfig = { 
+                    rd_key: service === 'rd' ? apiKey : null,
+                    torbox_key: service === 'tb' ? apiKey : null 
+                };
+                
+                const resolved = await withTimeout(
+                    PackResolver.resolveSeriesPackFile(
+                        item.hash, 
+                        resolverConfig, 
+                        meta.imdb_id, 
+                        meta.season, 
+                        meta.episode, 
+                        dbHelper
+                    ), 
+                    CONFIG.TIMEOUTS.PACK_RESOLVER,
+                    'Pack Resolution'
+                );
+
+                if (resolved) {
+                    item.fileIdx = resolved.fileIndex;
+                    item.title = resolved.fileName;
+                    item._size = resolved.fileSize;
+                    item.source += " [PACK]";
+                }
+             } catch (err) {
+                 logger.warn(`Pack Resolver skipped/failed: ${err.message}`);
+             }
+        }
+
+        // 2. TorBox Handling
         if (service === 'tb') {
             if (item._tbCached) {
                 const serviceTag = "TB";
@@ -385,6 +448,7 @@ async function resolveDebridLink(config, item, showFake, reqHost) {
             } else { return null; }
         }
 
+        // 3. Real Debrid / All Debrid Generation
         let streamData = null;
         if (service === 'rd') streamData = await RD.getStreamLink(apiKey, item.magnet, item.season, item.episode, item.fileIdx);
         else if (service === 'ad') streamData = await AD.getStreamLink(apiKey, item.magnet, item.season, item.episode, item.fileIdx);
@@ -597,10 +661,24 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
     // --- BYPASS SMARTMATCH PER EXTERNAL ---
     if (item.isExternal) return true; 
 
-    const fileYearMatch = item.title.match(REGEX_YEAR);
-    if (fileYearMatch && Math.abs(parseInt(fileYearMatch[0]) - parseInt(meta.year)) > 1) return false;
-    if (!smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode)) return false;
-    return true;
+    // --- [LEVIATHAN FIX] FILTRO ANNO SOLO PER FILM ---
+    // Non filtriamo l'anno per le serie TV per evitare di perdere stagioni recenti.
+    if (!meta.isSeries) {
+        const fileYearMatch = item.title.match(REGEX_YEAR);
+        if (fileYearMatch && Math.abs(parseInt(fileYearMatch[0]) - parseInt(meta.year)) > 1) return false;
+    }
+
+    // --- [LEVIATHAN FIX] LOGICA IBRIDA ---
+    // 1. Prova il controllo severo (ottimo per film e serie "pulite")
+    if (smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode)) return true;
+
+    // 2. Se fallisce ed è una serie, prova il SALVAGENTE (Fix Lucifer)
+    // Accetta se c'è il titolo + SxxExx corretto, ignorando altre paranoie.
+    if (meta.isSeries && simpleSeriesFallback(meta, item.title)) {
+        return true; 
+    }
+
+    return false;
   });
 
   let cleanResults = deduplicateResults(resultsRaw);
@@ -619,7 +697,8 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           item.season = meta.season;
           item.episode = meta.episode;
           config.rawConf = userConfStr; 
-          return LIMITERS.rd.schedule(() => resolveDebridLink(config, item, config.filters?.showFake, reqHost));
+          // --- [LEVIATHAN] PASS META & DB HELPER ---
+          return LIMITERS.rd.schedule(() => resolveDebridLink(config, item, config.filters?.showFake, reqHost, meta, dbHelper));
       });
       debridStreams = (await Promise.all(rdPromises)).filter(Boolean);
   }
@@ -752,7 +831,8 @@ app.listen(PORT, () => {
     console.log(`-----------------------------------------------------`);
     console.log(`⚡ MODALITÀ CACHE: Node-Cache (Safe & Fast). TTL 30min.`);
     console.log(`⚡ SPEED LOGIC: TOTALE PARALLELO (DB + Remote + External).`);
-    console.log(`🧠 SMART FILTER: Attivo (Protezione Frankenstein).`);
+    console.log(`🧠 SMART FILTER: Ibrido (Paranoid + Salvagente Serie TV).`);
+    console.log(`🦑 PACK RESOLVER: Attivo (FILM SAFE MODE ON).`);
     console.log(`🌍 Addon accessibile su: http://${PUBLIC_IP}:${PUBLIC_PORT}/manifest.json`);
     console.log(`📡 Connesso a Indexer DB: ${CONFIG.INDEXER_URL}`);
     console.log(`🔗 EXTERNAL ADDONS: Integrati (Parallel). SCRAPER (Fallback < 3)`);
