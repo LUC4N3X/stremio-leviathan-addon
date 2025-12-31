@@ -15,6 +15,8 @@ const NodeCache = require("node-cache");
 const { fetchExternalAddonsFlat } = require("./external-addons");
 // --- [LEVIATHAN] IMPORT RESOLVER ---
 const PackResolver = require("./leviathan-pack-resolver");
+// --- [LEVIATHAN] IMPORT AIO MODE (NEW) ---
+const AIO = require("./aio");
 
 // --- 1. CONFIGURAZIONE LOGGER (Winston) ---
 const logger = winston.createLogger({
@@ -684,27 +686,11 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   let cleanResults = deduplicateResults(resultsRaw);
   const ranked = rankAndFilterResults(cleanResults, meta, config).slice(0, CONFIG.MAX_RESULTS);
 
-  // --- [FIX TORBOX SIZE] ---
   if (config.service === 'tb' && ranked.length > 0) {
       const hashes = ranked.map(r => r.hash);
-      // TB.checkCached ora ritorna una Mappa { hash: metadata|true }
-      const cachedMap = await TB.checkCached(config.key || config.rd, hashes);
-      
-      ranked.forEach(item => { 
-          const key = item.hash.toLowerCase();
-          const cachedVal = cachedMap[key];
-          
-          if (cachedVal) {
-              item._tbCached = true;
-              
-              // Se la dimensione manca o è 0, proviamo a prenderla dalla cache
-              if (!item._size || item._size === 0) {
-                   if (typeof cachedVal === 'object' && cachedVal.size) {
-                       item._size = cachedVal.size; // Aggiorna dimensione da TorBox
-                   }
-              }
-          } 
-      });
+      const cachedHashes = await TB.checkCached(config.key || config.rd, hashes);
+      const cachedSet = new Set(cachedHashes.map(h => h.toUpperCase()));
+      ranked.forEach(item => { if (cachedSet.has(item.hash.toUpperCase())) item._tbCached = true; });
   }
 
   let debridStreams = [];
@@ -713,8 +699,15 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           item.season = meta.season;
           item.episode = meta.episode;
           config.rawConf = userConfStr; 
-          // --- [LEVIATHAN] PASS META & DB HELPER ---
-          return LIMITERS.rd.schedule(() => resolveDebridLink(config, item, config.filters?.showFake, reqHost, meta, dbHelper));
+          
+          // --- LOGICA DI SCELTA RISOLUTORE (CLASSICO vs AIO) ---
+          const useAio = config.filters?.aioMode === true;
+          
+          if (useAio) {
+             return LIMITERS.rd.schedule(() => AIO.resolveDebridLink(config, item, config.filters?.showFake, reqHost, meta, dbHelper));
+          } else {
+             return LIMITERS.rd.schedule(() => resolveDebridLink(config, item, config.filters?.showFake, reqHost, meta, dbHelper));
+          }
       });
       debridStreams = (await Promise.all(rdPromises)).filter(Boolean);
   }
@@ -852,5 +845,6 @@ app.listen(PORT, () => {
     console.log(`🌍 Addon accessibile su: http://${PUBLIC_IP}:${PUBLIC_PORT}/manifest.json`);
     console.log(`📡 Connesso a Indexer DB: ${CONFIG.INDEXER_URL}`);
     console.log(`🔗 EXTERNAL ADDONS: Integrati (Parallel). SCRAPER (Fallback < 3)`);
+    console.log(`🤖 AIOStreams Mode: ACTIVATABLE from UI`);
     console.log(`-----------------------------------------------------`);
 });
