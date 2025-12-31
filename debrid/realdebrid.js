@@ -1,90 +1,75 @@
-// rd.js - VERSIONE CHIRURGICA & AUTO-DELETE (Dashboard Pulita)
+// rd.js — VERSIONE DEFINITIVA (più risultati, zero clessidre, dashboard pulita)
+
 const axios = require("axios");
+
 const RD_TIMEOUT = 120000;
+const MAX_POLL = 8;
+const POLL_DELAY = 1500;
 
 function sleep(ms) {
     return new Promise(r => setTimeout(r, ms));
 }
 
-// Helper AVANZATO per trovare il file giusto dentro il torrent
+/* =========================
+   FILE MATCHING INTELLIGENTE
+========================= */
 function matchFile(files, season, episode) {
-    if (!files || !season || !episode) return null;
+    if (!files) return null;
 
-    // Convertiamo tutto in stringhe/numeri sicuri
-    const s = parseInt(season);
-    const e = parseInt(episode);
-    const sStr = s.toString().padStart(2, '0');
-    const eStr = e.toString().padStart(2, '0');
-
-    // Filtriamo file video validi (evita .txt, .jpg, sample)
     const videoFiles = files.filter(f => {
-        const name = f.path.toLowerCase();
-        // Estensioni video comuni
-        const isVideo = name.match(/\.(mkv|mp4|avi|mov|wmv|flv|webm)$/);
-        // Escludi sample
-        const notSample = !name.includes("sample");
-        return isVideo && notSample;
+        const n = f.path.toLowerCase();
+        return (
+            /\.(mkv|mp4|avi|mov|wmv|flv|webm)$/i.test(n) &&
+            !n.includes("sample")
+        );
     });
 
-    if (videoFiles.length === 0) return null;
+    if (!videoFiles.length) return null;
+    if (!season || !episode) {
+        return videoFiles.sort((a,b) => b.bytes - a.bytes)[0].id;
+    }
 
-    // --- PRIORITÀ 1: Formato Standard (S01E01, S01 E01, s1e1) ---
-    // Cerca "S01" seguito (anche non subito) da "E01"
-    // \b assicura che E01 non matchi E010
-    const regexStandard = new RegExp(`S0*${s}.*?E0*${e}\\b`, 'i');
+    const s = parseInt(season);
+    const e = parseInt(episode);
+    const s2 = s.toString().padStart(2, "0");
+    const e2 = e.toString().padStart(2, "0");
 
-    // --- PRIORITÀ 2: Formato "1x01" ---
-    const regexX = new RegExp(`\\b${s}x0*${e}\\b`, 'i');
+    const rules = [
+        new RegExp(`S0*${s}.*?E0*${e}\\b`, "i"),       // S01E01
+        new RegExp(`\\b${s}x0*${e}\\b`, "i"),         // 1x01
+        new RegExp(`(^|\\D)${s}${e2}(\\D|$)`),        // 101 / 215
+        new RegExp(`(ep|episode)[^0-9]*0*${e}\\b`, "i"),
+        new RegExp(`[ \\-\\[_]0*${e}[ \\-\\]_]`)      // anime assoluto
+    ];
 
-    // --- PRIORITÀ 3: Formato Compatto "101" (Stagione+Episodio) ---
-    // Esempio: Stagione 1, Ep 1 -> Cerca "101". Stagione 2, Ep 15 -> Cerca "215"
-    // Logica: (Start o non-numero) + Stagione + Episodio(pad2) + (non-numero o End)
-    // Questo evita di matchare "1080" quando cerchiamo l'episodio "108"
-    const compactNum = `${s}${eStr}`; 
-    const regexCompact = new RegExp(`(^|\\D)${compactNum}(\\D|$)`);
+    for (const rx of rules) {
+        const f = videoFiles.find(v => rx.test(v.path));
+        if (f) return f.id;
+    }
 
-    // --- PRIORITÀ 4: Formato "Episodio 01" o "Ep. 01" (Senza Stagione esplicita) ---
-    const regexExplicitEp = new RegExp(`(ep|episode)[^0-9]*0*${e}\\b`, 'i');
-
-    // --- PRIORITÀ 5: Formato Anime / Assoluto (Solo "01" o "- 01") ---
-    // Molto rischioso, cerchiamo il numero circondato da spazi, parentesi o trattini
-    // Es: "One Piece - 05.mkv" o "[Gruppo] Show - 05 [1080p].mkv"
-    const regexAbsolute = new RegExp(`[ \\-\\[_]0*${e}[ \\-\\]_]`);
-
-
-    // ESECUZIONE MATCHING
-    let found = videoFiles.find(f => regexStandard.test(f.path));
-    
-    if (!found) found = videoFiles.find(f => regexX.test(f.path));
-    
-    // Check 101/215 solo se la stagione è < 100 (per evitare conflitti con anni strani)
-    if (!found && s < 100) found = videoFiles.find(f => regexCompact.test(f.path));
-
-    if (!found) found = videoFiles.find(f => regexExplicitEp.test(f.path));
-    
-    // Fallback disperato (Assoluto)
-    if (!found) found = videoFiles.find(f => regexAbsolute.test(f.path));
-
-    return found ? found.id : null;
+    // fallback finale: file più grande
+    return videoFiles.sort((a,b) => b.bytes - a.bytes)[0].id;
 }
 
+/* =========================
+   RD REQUEST ROBUSTA
+========================= */
 async function rdRequest(method, url, token, data = null) {
     let attempt = 0;
     while (attempt < 4) {
         try {
-            const config = {
+            const res = await axios({
                 method,
                 url,
                 headers: { Authorization: `Bearer ${token}` },
-                timeout: RD_TIMEOUT
-            };
-            if (data) config.data = data;
-            const response = await axios(config);
-            return response.data;
-        } catch (error) {
-            const status = error.response?.status;
-            if (status === 403) return null;
-            if (status === 429 || status >= 500) {
+                timeout: RD_TIMEOUT,
+                data
+            });
+            return res.data;
+        } catch (e) {
+            const st = e.response?.status;
+            if (st === 403) return null;
+            if (st === 429 || st >= 500) {
                 await sleep(1000 + Math.random() * 1000);
                 attempt++;
                 continue;
@@ -95,119 +80,146 @@ async function rdRequest(method, url, token, data = null) {
     return null;
 }
 
+/* =========================
+   MODULO RD
+========================= */
 const RD = {
-    // 🗑️ Pulizia Torrent
-    deleteTorrent: async (token, torrentId) => {
+
+    deleteTorrent: async (token, id) => {
         try {
-            const url = `https://api.real-debrid.com/rest/1.0/torrents/delete/${torrentId}`;
-            await rdRequest('DELETE', url, token);
-        } catch (e) {
-            console.error(`⚠️ Errore pulizia torrent ${torrentId}:`, e.message);
-        }
+            await rdRequest(
+                "DELETE",
+                `https://api.real-debrid.com/rest/1.0/torrents/delete/${id}`,
+                token
+            );
+        } catch {}
     },
 
     checkInstantAvailability: async (token, hashes) => {
         try {
-            const hashString = hashes.join('/');
-            const url = `https://api.real-debrid.com/rest/1.0/torrents/instantAvailability/${hashString}`;
-            return await rdRequest('GET', url, token) || {};
-        } catch (e) { return {}; }
+            const url =
+                `https://api.real-debrid.com/rest/1.0/torrents/instantAvailability/${hashes.join("/")}`;
+            return await rdRequest("GET", url, token) || {};
+        } catch {
+            return {};
+        }
     },
 
+    /* =========================
+       STREAM LINK PRINCIPALE
+    ========================= */
     getStreamLink: async (token, magnet, season = null, episode = null) => {
-        let torrentId = null; 
+        let torrentId = null;
+
         try {
-            // 1. Aggiungi Magnet
-            const addUrl = "https://api.real-debrid.com/rest/1.0/torrents/addMagnet";
+            /* 1️⃣ ADD MAGNET */
             const body = new URLSearchParams();
             body.append("magnet", magnet);
-            
-            const addRes = await rdRequest('POST', addUrl, token, body);
-            if (!addRes || !addRes.id) return null;
-            torrentId = addRes.id;
 
-            // 2. Info Torrent
-            let info = await rdRequest('GET', `https://api.real-debrid.com/rest/1.0/torrents/info/${torrentId}`, token);
+            const add = await rdRequest(
+                "POST",
+                "https://api.real-debrid.com/rest/1.0/torrents/addMagnet",
+                token,
+                body
+            );
+
+            if (!add?.id) return null;
+            torrentId = add.id;
+
+            /* 2️⃣ INFO + POLLING */
+            let info = null;
+            for (let i = 0; i < MAX_POLL; i++) {
+                await sleep(POLL_DELAY);
+                info = await rdRequest(
+                    "GET",
+                    `https://api.real-debrid.com/rest/1.0/torrents/info/${torrentId}`,
+                    token
+                );
+                if (info?.status === "waiting_files_selection" || info?.status === "downloaded") {
+                    break;
+                }
+            }
+
             if (!info) {
                 await RD.deleteTorrent(token, torrentId);
                 return null;
             }
 
-            // 3. Seleziona File (Intelligente)
-            if (info.status === 'waiting_files_selection') {
-                let fileIdToSelect = "all";
-
-                // Se abbiamo info su stagione/episodio, cerchiamo il file specifico
-                if (season && episode && info.files) {
-                    const matchedId = matchFile(info.files, season, episode);
-                    if (matchedId) {
-                        fileIdToSelect = matchedId;
-                        console.log(`🎯 RD Match: Selezionato file ID ${matchedId} per S${season}E${episode}`);
-                    }
-                } else if (info.files) {
-                     // Se è un film o non abbiamo info, prendiamo il file più grande (evita sample)
-                     const sortedFiles = info.files.sort((a, b) => b.bytes - a.bytes);
-                     if(sortedFiles.length > 0) fileIdToSelect = sortedFiles[0].id;
+            /* 3️⃣ FILE SELECTION */
+            if (info.status === "waiting_files_selection") {
+                let fileId = "all";
+                if (info.files) {
+                    const m = matchFile(info.files, season, episode);
+                    if (m) fileId = m;
                 }
 
-                const selUrl = `https://api.real-debrid.com/rest/1.0/torrents/selectFiles/${torrentId}`;
-                const selBody = new URLSearchParams();
-                selBody.append("files", fileIdToSelect);
-                await rdRequest('POST', selUrl, token, selBody);
-                
-                // Ricarica info dopo selezione
-                info = await rdRequest('GET', `https://api.real-debrid.com/rest/1.0/torrents/info/${torrentId}`, token);
+                const sel = new URLSearchParams();
+                sel.append("files", fileId);
+
+                await rdRequest(
+                    "POST",
+                    `https://api.real-debrid.com/rest/1.0/torrents/selectFiles/${torrentId}`,
+                    token,
+                    sel
+                );
+
+                // reload info
+                for (let i = 0; i < MAX_POLL; i++) {
+                    await sleep(POLL_DELAY);
+                    info = await rdRequest(
+                        "GET",
+                        `https://api.real-debrid.com/rest/1.0/torrents/info/${torrentId}`,
+                        token
+                    );
+                    if (info?.status === "downloaded") break;
+                }
             }
 
-            // ⚠️ CONTROLLO CRUCIALE: Se non è 'downloaded', non è pronto per lo streaming.
-            if (info.status !== 'downloaded') {
-                // Se non è pronto, puliamo e usciamo
+            if (info.status !== "downloaded" || !info.links?.length) {
                 await RD.deleteTorrent(token, torrentId);
                 return null;
             }
 
-            if (!info || !info.links?.length) {
+            /* 4️⃣ LINK GIUSTO */
+            let link = info.links[0];
+
+            if (season && episode && info.files?.length === info.links.length) {
+                const fid = matchFile(info.files, season, episode);
+                const idx = info.files.findIndex(f => f.id === fid);
+                if (idx >= 0 && info.links[idx]) {
+                    link = info.links[idx];
+                }
+            }
+
+            /* 5️⃣ UNRESTRICT */
+            const uBody = new URLSearchParams();
+            uBody.append("link", link);
+
+            const un = await rdRequest(
+                "POST",
+                "https://api.real-debrid.com/rest/1.0/unrestrict/link",
+                token,
+                uBody
+            );
+
+            if (!un?.download) {
                 await RD.deleteTorrent(token, torrentId);
                 return null;
             }
 
-            // 4. Trova il link giusto
-            const linkToUnrestrict = info.links[0]; 
+            /* 🧹 DELETE FINALE */
+            await RD.deleteTorrent(token, torrentId);
 
-            // 5. Unrestrict (Genera link visibile)
-            const unrestrictUrl = "https://api.real-debrid.com/rest/1.0/unrestrict/link";
-            const unResBody = new URLSearchParams();
-            unResBody.append("link", linkToUnrestrict);
-
-            const unrestrictRes = await rdRequest('POST', unrestrictUrl, token, unResBody);
-            
-            if (!unrestrictRes) {
-                await RD.deleteTorrent(token, torrentId);
-                return null;
-            }
-
-            // 🧹 PULIZIA FINALE AUTOMATICA 🧹
-            
-            try {
-                await RD.deleteTorrent(token, torrentId);
-                console.log(`🧹 Torrent ${torrentId} eliminato dalla dashboard RD dopo l'unrestrict.`);
-            } catch (cleanupError) {
-                console.error("⚠️ Errore durante la pulizia del torrent:", cleanupError.message);
-            }
-
-            // Restituiamo il link per lo streaming
             return {
-                type: 'ready',
-                url: unrestrictRes.download,
-                filename: unrestrictRes.filename,
-                size: unrestrictRes.filesize
+                type: "ready",
+                url: un.download,
+                filename: un.filename,
+                size: un.filesize
             };
 
-        } catch (e) { 
-            console.error("RD Error:", e.message);
-            // In caso di errore grave, proviamo comunque a pulire
+        } catch (e) {
             if (torrentId) await RD.deleteTorrent(token, torrentId);
-            return null; 
+            return null;
         }
     }
 };
