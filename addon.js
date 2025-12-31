@@ -684,11 +684,27 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   let cleanResults = deduplicateResults(resultsRaw);
   const ranked = rankAndFilterResults(cleanResults, meta, config).slice(0, CONFIG.MAX_RESULTS);
 
+  // --- [FIX TORBOX SIZE] ---
   if (config.service === 'tb' && ranked.length > 0) {
       const hashes = ranked.map(r => r.hash);
-      const cachedHashes = await TB.checkCached(config.key || config.rd, hashes);
-      const cachedSet = new Set(cachedHashes.map(h => h.toUpperCase()));
-      ranked.forEach(item => { if (cachedSet.has(item.hash.toUpperCase())) item._tbCached = true; });
+      // TB.checkCached ora ritorna una Mappa { hash: metadata|true }
+      const cachedMap = await TB.checkCached(config.key || config.rd, hashes);
+      
+      ranked.forEach(item => { 
+          const key = item.hash.toLowerCase();
+          const cachedVal = cachedMap[key];
+          
+          if (cachedVal) {
+              item._tbCached = true;
+              
+              // Se la dimensione manca o è 0, proviamo a prenderla dalla cache
+              if (!item._size || item._size === 0) {
+                   if (typeof cachedVal === 'object' && cachedVal.size) {
+                       item._size = cachedVal.size; // Aggiorna dimensione da TorBox
+                   }
+              }
+          } 
+      });
   }
 
   let debridStreams = [];
