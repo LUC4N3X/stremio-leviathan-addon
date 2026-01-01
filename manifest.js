@@ -1,7 +1,7 @@
 function getManifest() {
     return {
         id: "org.corsaro.brain.v31.3",
-        version: "1.3.0",
+        version: "2.0.0",
         name: "Leviathan",
         description: "Motore streaming avanzato con ricerca intelligente, priorità contenuti ITA e link sempre aggiornati",
         logo: "https://i.ibb.co/jvTQLbjb/Gemini-Generated-Image-51j2ce51j2ce51j2-1.png",
