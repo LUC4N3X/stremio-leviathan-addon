@@ -1,9 +1,9 @@
 function getManifest() {
     return {
-        id: "org.corsaro.brain.v31.3",
+        id: "org.corsaro.brain.v2",
         version: "2.0.0",
         name: "Leviathan",
-        description: "Motore streaming avanzato con ricerca intelligente, priorità contenuti ITA e link sempre aggiornati",
+        description: "Motore di ricerca parallelo ad alte prestazioni, ottimizzato per i contenuti italiani. Include integrazione StreamingCommunity e supporto nativo Debrid per garantire streaming 4K/HDR fluido e senza buffering.",
         logo: "https://i.ibb.co/jvTQLbjb/Gemini-Generated-Image-51j2ce51j2ce51j2-1.png",
         resources: ["catalog", "stream"],
         types: ["movie", "series"],
@@ -12,7 +12,6 @@ function getManifest() {
             configurable: true, 
             configurationRequired: false 
         },
-
         
         stremioAddonsConfig: {
             issuer: "https://stremio-addons.net",
