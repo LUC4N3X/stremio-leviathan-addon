@@ -12,7 +12,7 @@ const EXTERNAL_ADDONS = {
         timeout: 4500
     },
     comet: {
-        baseUrl: '',
+        baseUrl: 'https://comet.elfhosted.com', // URL Comet suggerito
         name: 'Comet',
         emoji: '🅒',
         timeout: 4500
@@ -69,10 +69,6 @@ function extractSize(text) {
     return { formatted: `${value} ${unit}`, bytes };
 }
 
-/**
- * [NUOVO] Estrazione "Forza Bruta" del Provider
- * Cerca prima i pattern noti di Torrentio, poi scansiona parole chiave.
- */
 function extractOriginalProvider(text) {
     if (!text) return null;
     
@@ -87,7 +83,6 @@ function extractOriginalProvider(text) {
     if (cometMatch) return cometMatch[1].trim();
 
     // 2. DIZIONARIO PROVIDER (Case Insensitive)
-    // Se non trova l'emoji, cerca queste parole nel testo.
     const knownProviders = [
         "ilCorSaRoNeRo", "Corsaro",
         "1337x", "1337X",
@@ -115,10 +110,7 @@ function extractOriginalProvider(text) {
 
     const lowerText = text.toLowerCase();
     for (const provider of knownProviders) {
-        // Cerca la parola chiave delimitata (evita falsi positivi parziali)
-        // O semplicemente se è contenuta (più aggressivo)
         if (lowerText.includes(provider.toLowerCase())) {
-            // Restituisce il nome formattato dalla lista, non quello trovato raw
             return provider;
         }
     }
@@ -195,8 +187,6 @@ function normalizeExternalStream(stream, addonKey) {
     const quality = extractQuality(stream.name || filename || fullTextSearch);
     const sizeInfo = extractSize(fullTextSearch);
     const seeders = extractSeeders(fullTextSearch);
-    
-    // Estrae il provider originale usando la logica potenziata
     const originalProvider = extractOriginalProvider(fullTextSearch);
 
     let sizeBytes = sizeInfo.bytes;
@@ -207,9 +197,16 @@ function normalizeExternalStream(stream, addonKey) {
         sizeBytes = stream.video_size;
     }
 
+    // 🔥 FIX PACK RESOLVER: Se fileIdx non c'è, mettiamo undefined (NON 0).
+    // Questo permette a Leviathan di capire che è un pack da esplorare.
+    let fileIndex = undefined;
+    if (stream.fileIdx !== undefined && stream.fileIdx !== null) {
+        fileIndex = stream.fileIdx;
+    }
+
     return {
         infoHash: infoHash,
-        fileIdx: stream.fileIdx ?? 0,
+        fileIdx: fileIndex, 
         title: filename,
         filename: filename,
         websiteTitle: filename,
@@ -218,9 +215,8 @@ function normalizeExternalStream(stream, addonKey) {
         mainFileSize: sizeBytes,
         seeders: seeders || stream.peers || 0,
         leechers: 0,
-        // Qui salviamo il provider estratto (es. "1337x")
         externalProvider: originalProvider, 
-        source: addon.name, // Fallback temporaneo
+        source: addon.name,
         sourceEmoji: addon.emoji,
         magnetLink: buildMagnetLink(infoHash, stream.sources),
         pubDate: new Date().toISOString()
