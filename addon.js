@@ -202,37 +202,36 @@ function parseSize(sizeStr) {
 }
 
 // ------------------------------------------------------------------
-// 🔥🔥🔥 FIX DEDUPLICAZIONE E LETTURA SIZE 🔥🔥🔥
+// 🔥🔥🔥 FIX DEDUPLICAZIONE TOTALE (ANTI-DUPLICATI) 🔥🔥🔥
 // ------------------------------------------------------------------
 function deduplicateResults(results) {
   const hashMap = new Map();
+  
   for (const item of results) {
     if (!item?.magnet) continue;
     
-    // 1. Estrazione aggressiva (Priorità: infoHash > hash esistente > magnet)
+    // 1. Estrazione e Normalizzazione Hash
     const rawHash = item.infoHash || item.hash || extractInfoHash(item.magnet);
-    
-    // 2. Normalizzazione
     const finalHash = rawHash ? rawHash.toUpperCase() : null;
 
-    // 3. Validazione RIGIDA (Solo 40 caratteri HEX)
-    if (!finalHash || finalHash.length !== 40) {
-        continue;
-    }
+    // 2. Validazione
+    if (!finalHash || finalHash.length !== 40) continue;
 
-    // 4. Sovrascrittura: Imponiamo l'hash pulito all'oggetto
+    // 3. Normalizzazione oggetto
     item.hash = finalHash;
     item.infoHash = finalHash;
-    
-    // Chiave univoca
-    const uniqueKey = `${finalHash}:${item.fileIdx !== undefined ? item.fileIdx : 'base'}`;
 
-    if (!hashMap.has(uniqueKey) || (item.seeders || 0) > (hashMap.get(uniqueKey).seeders || 0)) {
-      // Priorità a sizeBytes se esiste, altrimenti parsa la stringa
+    // 4. LOGICA UNICA: Usiamo SOLO l'hash come chiave
+    // Se l'hash esiste già, confrontiamo i seeders per tenere il risultato migliore
+    const existing = hashMap.get(finalHash);
+    
+    if (!existing || (item.seeders || 0) > (existing.seeders || 0)) {
+      // Calcoliamo la dimensione se non presente
       item._size = parseSize(item.sizeBytes || item.size);
-      hashMap.set(uniqueKey, item);
+      hashMap.set(finalHash, item);
     }
   }
+  
   return Array.from(hashMap.values());
 }
 // ------------------------------------------------------------------
