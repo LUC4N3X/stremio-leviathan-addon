@@ -1,11 +1,10 @@
-// db-helper.js - GOD TIER EDITION (JOIN FIX + DYNAMIC TRACKERS)
+// db-helper.js - GOD TIER EDITION (FIX COLONNE DB)
 const { Pool } = require('pg');
 const axios = require('axios');
 
 // --- 1. GESTIONE TRACKER DINAMICI ---
 const TRACKERS_URL = 'https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_best.txt';
 
-// Lista di fallback iniziale
 let ACTIVE_TRACKERS = [
     "udp://tracker.opentrackr.org:1337/announce",
     "udp://open.demonoid.ch:6969/announce",
@@ -15,10 +14,8 @@ let ACTIVE_TRACKERS = [
     "udp://opentracker.i2p.rocks:6969/announce"
 ];
 
-// Funzione per aggiornare i tracker live
 async function updateTrackers() {
     try {
-        console.log("🔄 Aggiornamento Trackers da GitHub...");
         const response = await axios.get(TRACKERS_URL, { timeout: 5000 });
         const list = response.data.trim().split('\n\n').filter(Boolean);
         if (list.length > 0) {
@@ -30,17 +27,14 @@ async function updateTrackers() {
     }
 }
 
-// Avvia update subito e poi ogni 6 ore
+// Avvia update e poi ogni 6 ore
 updateTrackers();
 setInterval(updateTrackers, 6 * 60 * 60 * 1000);
 
 // --- 2. CONFIGURAZIONE DATABASE ---
 let pool = null;
 
-// Filtri Regex per contenuto Italiano
-// Cerchiamo l'ITA sia nel nome del file (f.title) che del torrent (t.title)
 const SQL_ITA_FILTER = `AND (t.title ~* '\\y(ita|italian|italy|multi|dual|corsaro)\\y' OR f.title ~* '\\y(ita|italian|italy|multi|dual|corsaro)\\y')`;
-// Per i pack controlliamo il titolo del torrent padre
 const SQL_ITA_FILTER_PACK = `AND (t.title ~* '\\y(ita|italian|italy|multi|dual|corsaro)\\y')`;
 
 function initDatabase(config = {}) {
@@ -73,11 +67,61 @@ function initDatabase(config = {}) {
   return pool;
 }
 
-// --- 3. UTILITY FORMATTAZIONE ---
+// --- 3. UTILITY & PROVIDER EXTRACTION ---
+
+// Lista Provider Noti (Case Insensitive)
+const KNOWN_PROVIDERS = [
+    "ilCorSaRoNeRo", "Corsaro",
+    "1337x", "1337X",
+    "TorrentGalaxy", "TGX", "GalaxyRG",
+    "RARBG", "Rarbg",
+    "EZTV", "Eztv",
+    "YTS", "YIFY",
+    "MagnetDL",
+    "TorLock",
+    "PirateBay", "TPB", "ThePirateBay",
+    "Nyaa",
+    "RuTracker",
+    "SolidTorrents",
+    "KickAss", "KAT",
+    "LimeTorrents",
+    "Zooqle",
+    "GloDLS",
+    "TorrentDownload",
+    "YourBittorrent",
+    "BitSearch",
+    "Knaben",
+    "iDope",
+    "TorrentFunk"
+];
+
+function extractOriginalProvider(text) {
+    if (!text) return null;
+    
+    // 1. Pattern classici Torrentio/Stremio (Emoji)
+    const torrentioMatch = text.match(/🔍\s*([^\n]+)/);
+    if (torrentioMatch) return torrentioMatch[1].trim();
+
+    const mfMatch = text.match(/🔗\s*([^\n]+)/);
+    if (mfMatch) return mfMatch[1].trim();
+
+    const cometMatch = text.match(/🔎\s*([^\n]+)/);
+    if (cometMatch) return cometMatch[1].trim();
+
+    // 2. DIZIONARIO PROVIDER (Case Insensitive)
+    const lowerText = text.toLowerCase();
+    for (const provider of KNOWN_PROVIDERS) {
+        if (lowerText.includes(provider.toLowerCase())) {
+            return provider;
+        }
+    }
+
+    return null;
+}
+
 function injectTrackers(magnet) {
     if (!magnet) return "";
     let cleanMagnet = magnet.trim();
-    // Usa la lista dinamica ACTIVE_TRACKERS
     ACTIVE_TRACKERS.forEach(tr => {
         if (!cleanMagnet.includes(encodeURIComponent(tr))) {
             cleanMagnet += `&tr=${encodeURIComponent(tr)}`;
@@ -91,7 +135,6 @@ function formatRow(row) {
     const baseMagnet = `magnet:?xt=urn:btih:${row.info_hash}`;
     const fullMagnet = injectTrackers(baseMagnet);
     
-    // Usa il provider dal DB o fallback a P2P
     const sourceName = row.provider || "P2P"; 
     
     return {
@@ -100,21 +143,18 @@ function formatRow(row) {
         info_hash: row.info_hash,
         size: parseInt(row.file_size || row.size) || 0,
         seeders: row.seeders || 0,
-        source: `${sourceName}${row.cached_rd ? " ⚡" : ""}`, // Provider + Cache status
+        source: `${sourceName}${row.cached_rd ? " ⚡" : ""}`,
         isCached: row.cached_rd
     };
 }
 
-// Filtro intelligente per capire se il pack contiene la stagione richiesta
 function isPackRelevant(title, targetSeason) {
     if (!title) return false;
     const cleanTitle = title.toLowerCase();
     const s = parseInt(targetSeason);
     
-    // 1. Serie Complete / Antologie
     if (/\b(complete|total|collection|anthology|tutte le stagioni|serie completa)\b/i.test(cleanTitle)) return true;
     
-    // 2. Range di Stagioni (es. S01-S05)
     const rangeMatch = cleanTitle.match(/s(\d{1,2})\s*-\s*s?(\d{1,2})/i);
     if (rangeMatch) {
         const start = parseInt(rangeMatch[1]);
@@ -122,7 +162,6 @@ function isPackRelevant(title, targetSeason) {
         return s >= start && s <= end;
     }
     
-    // 3. Stagione Singola (es. Season 1)
     const seasonMatch = cleanTitle.match(/\b(s|season|stagione)\s?0?(\d{1,2})\b/i);
     if (seasonMatch) {
         return parseInt(seasonMatch[2]) === s;
@@ -130,12 +169,11 @@ function isPackRelevant(title, targetSeason) {
     return false;
 }
 
-// --- 4. FUNZIONI DI RICERCA (JOIN FIX) ---
+// --- 4. FUNZIONI DI RICERCA ---
 
 async function searchMovie(imdbId) {
   if (!pool) return [];
   try {
-    // JOIN tra Files e Torrents per trovare i film tramite ID
     const query = `
       SELECT t.info_hash, t.provider, t.title, t.size, t.seeders, t.cached_rd
       FROM files f
@@ -156,7 +194,6 @@ async function searchMovie(imdbId) {
 async function searchEpisodeFiles(imdbId, season, episode) {
   if (!pool) return [];
   try {
-    // Cerca file specifici (SxxExx)
     const query = `
       SELECT f.title as file_title, f.size as file_size, t.info_hash, t.provider, t.title as torrent_title, t.seeders, t.cached_rd
       FROM files f
@@ -177,14 +214,11 @@ async function searchEpisodeFiles(imdbId, season, episode) {
 async function searchPacksByImdbId(imdbId, season) {
     if (!pool) return [];
     try {
-        // QUERY MAGICA PER I PACK:
-        // Usa DISTINCT ON per prendere un solo risultato per hash (evita 20 righe per la stessa stagione)
         const query = `
             SELECT DISTINCT ON (t.info_hash) t.info_hash, t.provider, t.title, t.size, t.seeders, t.cached_rd
             FROM files f
             JOIN torrents t ON f.info_hash = t.info_hash
             WHERE f.imdb_id = $1 
-            -- Accettiamo file con la stagione giusta O null (serie complete spesso hanno null nei file)
             AND (f.imdb_season = $2 OR f.imdb_season IS NULL) 
             ${SQL_ITA_FILTER_PACK}
             ORDER BY t.info_hash, t.seeders DESC 
@@ -192,15 +226,11 @@ async function searchPacksByImdbId(imdbId, season) {
         `;
         
         const result = await pool.query(query, [imdbId, season]);
-        
-        // Applichiamo il filtro Smart Pack (isPackRelevant)
         const validPacks = result.rows.filter(row => isPackRelevant(row.title, season));
         
         return validPacks.slice(0, 15).map(r => {
              const formatted = formatRow(r);
-             // Aggiungiamo il prefisso visuale
              formatted.title = `📦 [PACK] ${formatted.title}`;
-             // FLAG ESSENZIALE per addon.js
              formatted.isPack = true; 
              return formatted;
         }); 
@@ -211,12 +241,84 @@ async function searchPacksByImdbId(imdbId, season) {
     }
 }
 
-// --- 5. FUNZIONI DI SCRITTURA E CACHE ---
+// --- 5. FUNZIONI DI SCRITTURA (FIX COLONNE) ---
 
-async function insertTorrent(torrent) {
-    // Funzione placeholder: In questo setup il DB è popolato esternamente (es. Prowlarr/Radarr)
-    // Se serve scrivere, va adattata alla struttura files/torrents separati
-    return false; 
+async function insertTorrent(meta, torrent) {
+    if (!pool) return false;
+    
+    // Validazione base
+    if (!torrent.info_hash) return false;
+
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        // 1. Pulizia Dati
+        const cleanHash = torrent.info_hash.toLowerCase();
+        const seeders = torrent.seeders || 0; 
+        const size = torrent.size || 0;
+
+        // 2. ESTRAZIONE PROVIDER
+        let providerName = torrent.provider;
+        
+        // Se il provider è generico o vuoto, cerchiamo nel titolo
+        const extracted = extractOriginalProvider(torrent.title);
+        
+        if (extracted) {
+            providerName = extracted;
+        } else if (!providerName || providerName === 'Torrentio' || providerName === 'P2P') {
+            providerName = 'External';
+        }
+
+        // 3. Inserimento/Aggiornamento Torrent
+        // 🔥 RIMOSSO created_at perché non esiste nella tabella
+        const queryTorrent = `
+            INSERT INTO torrents (info_hash, provider, title, size, seeders)
+            VALUES ($1, $2, $3, $4, $5)
+            ON CONFLICT (info_hash) 
+            DO UPDATE SET 
+                seeders = GREATEST(torrents.seeders, EXCLUDED.seeders),
+                title = EXCLUDED.title, 
+                provider = EXCLUDED.provider,
+                last_cached_check = NOW(); -- Questo aggiorna il timestamp se il torrent esiste già
+        `;
+        
+        await client.query(queryTorrent, [
+            cleanHash,
+            providerName, 
+            torrent.title,
+            size,
+            seeders
+        ]);
+
+        // 4. Collegamento File -> IMDb
+        const queryFile = `
+            INSERT INTO files (info_hash, imdb_id, imdb_season, imdb_episode, title)
+            VALUES ($1, $2, $3, $4, $5)
+            ON CONFLICT DO NOTHING;
+        `;
+
+        const s = (meta.type === 'movie') ? null : meta.season;
+        const e = (meta.type === 'movie') ? null : meta.episode;
+
+        await client.query(queryFile, [
+            cleanHash,
+            meta.imdb_id,
+            s,
+            e,
+            torrent.title
+        ]);
+
+        await client.query('COMMIT');
+        return true;
+
+    } catch (e) {
+        await client.query('ROLLBACK');
+        console.error(`❌ DB Save Error: ${e.message}`);
+        return false;
+    } finally {
+        client.release();
+    }
 }
 
 async function updateRdCacheStatus(cacheResults) {
@@ -259,23 +361,14 @@ async function healthCheck() {
 const dbHelper = {
     initDatabase,
     healthCheck,
-    
-    searchMovie, // Usa la nuova JOIN
-    
+    searchMovie, 
     searchSeries: async (imdbId, season, episode) => {
-        // Eseguiamo in parallelo ricerca Episodi e ricerca Pack
         const [files, packs] = await Promise.all([
             searchEpisodeFiles(imdbId, season, episode),
             searchPacksByImdbId(imdbId, season)
         ]);
-
-        if (files.length > 0 || packs.length > 0) {
-            console.log(`🗄️ [DB HIT] ID:${imdbId} S:${season} E:${episode} -> Found ${files.length} files, ${packs.length} packs.`);
-        }
-
         return [...files, ...packs];
     },
-
     insertTorrent,
     updateRdCacheStatus
 };
