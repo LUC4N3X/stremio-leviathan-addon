@@ -22,15 +22,6 @@
     ⚡ The Abyss Awakens ⚡
   </p>
 
-  <!-- Separator / neon vibe -->
-  <p style="margin-top:20px; font-size:1.1rem; color:#00eaff; opacity:0.7; letter-spacing:4px;">
-    🌊💀🌀⚡🌀💀🌊
-  </p>
-
-
-
-
-
 
   <div style="font-size: 1.1rem; color: #94a3b8; margin-top: 10px; font-weight: 400; letter-spacing: 1px;">
     ADVANCED TORRENT AGGREGATION PROTOCOL
