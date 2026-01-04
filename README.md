@@ -1,15 +1,18 @@
 <div align="center">
 
+  <!-- Logo -->
   <img src="https://i.ibb.co/jvTQLbjb/Gemini-Generated-Image-51j2ce51j2ce51j2-1.png" 
        width="200" style="border-radius: 20px; margin-bottom: 10px;" />
 
   <br />
 
-  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=70&duration=1&pause=0&color=00EAFF&center=true&vCenter=true&width=500&height=100&lines=LEVIATHAN" alt="LEVIATHAN" />
+  <!-- Titolo fermo -->
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=70&color=00EAFF&center=true&vCenter=true&width=500&height=100&lines=LEVIATHAN&duration=0" alt="LEVIATHAN" />
 
   <br />
 
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=20&pause=1000&color=00EAFF&center=true&vCenter=true&width=435&lines=L'abisso+si+risveglia" alt="Tagline" />
+  <!-- Tagline ferma -->
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=20&color=00EAFF&center=true&vCenter=true&width=435&lines=L'abisso+si+risveglia&duration=0" alt="Tagline" />
 
 </div>
 
