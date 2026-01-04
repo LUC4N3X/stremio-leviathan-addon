@@ -6,16 +6,11 @@
 
   <br />
 
-  <!-- Titolo fermo -->
-  <img src="https://via.placeholder.com/500x100/000000/00EAFF?text=LEVIATHAN" alt="LEVIATHAN" />
-
-  <br />
-
-  <!-- Tagline ferma -->
-  <img src="https://via.placeholder.com/435x50/000000/00EAFF?text=L'abisso+si+risveglia" alt="Tagline" />
+  <!-- Titolo + Tagline ferma (immagine statica) -->
+  <img src="https://github.com/LUC4N3X/files/raw/main/A_digital_graphic_design_features_the_word_%22LEVIAT.png" 
+       alt="LEVIATHAN + Tagline" width="500" />
 
 </div>
->
 
 
 
