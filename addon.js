@@ -845,10 +845,25 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   const allowEng = config.filters?.allowEng === true;
   
   let resultsRaw = [...currentResults, ...scrapedResults];
-  resultsRaw = resultsRaw.filter(item => {
+
+resultsRaw = resultsRaw.filter(item => {
     if (!item?.magnet) return false;
 
-    // 1. FILTRO LINGUA SUPREMO
+    // Definisco source e title per il filtro successivo
+    const source = (item.source || "").toLowerCase();
+    const title = item.title;
+
+    // 1. 🔥 FILTRO ANTI-1337X / YTS (REGOLA SUPREMA) 🔥
+    // Se la fonte è 1337x, TorrentGalaxy (TGx) o YTS e NON c'è scritto ITA o IT, scarta SUBITO.
+    if (source.includes("1337") || source.includes("tgx") || source.includes("torrentgalaxy") || source.includes("yts")) {
+        // Cerca la parola esatta ITA, ITALIAN o IT
+        const hasStrictIta = /\b(ita|italian|it)\b/i.test(title);
+        
+        // Se è una di queste fonti ma NON ha il tag italiano, VIA.
+        if (!hasStrictIta) return false; 
+    }
+
+    // 1. FILTRO LINGUA SUPREMO (ORIGINALE)
     const isItalian = isSafeForItalian(item) || /corsaro/i.test(item.source);
     if (!allowEng && !isItalian) return false;
 
@@ -874,7 +889,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
     }
 
     return false;
-  });
+});
 
   // ✅ FIXED: Deduplica con supporto Base32 e propagazione Hash
   let cleanResults = deduplicateResults(resultsRaw);
