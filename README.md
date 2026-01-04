@@ -1,14 +1,11 @@
 <div align="center">
 
-  <!-- Logo -->
   <img src="https://i.ibb.co/jvTQLbjb/Gemini-Generated-Image-51j2ce51j2ce51j2-1.png" 
-       width="200" style="border-radius: 20px; margin-bottom: 10px;" />
+       style="width: 200px; height: auto; border-radius: 20px; filter: drop-shadow(0 0 15px rgba(0, 234, 255, 0.6)); margin-bottom: 15px;" />
 
-  <br />
-
-  <!-- Titolo + Tagline ferma (immagine statica) -->
-  <img src="https://github.com/LUC4N3X/files/raw/main/A_digital_graphic_design_features_the_word_%22LEVIAT.png" 
-       alt="LEVIATHAN + Tagline" width="500" />
+  <h1 style="font-size: 5rem; font-weight: 800; margin: 0; line-height: 1; letter-spacing: -2px; color: #fff; font-family: sans-serif;">
+    LEVIATHAN
+  </h1>
 
 </div>
 
