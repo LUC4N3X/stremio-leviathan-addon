@@ -202,7 +202,7 @@ function parseSize(sizeStr) {
 }
 
 // ------------------------------------------------------------------
-// 🔥🔥🔥 FIX DEDUPLICAZIONE TOTALE (ANTI-DUPLICATI) 🔥🔥🔥
+//  FIX DEDUPLICAZIONE TOTALE (ANTI-DUPLICATI) 
 // ------------------------------------------------------------------
 function deduplicateResults(results) {
   const hashMap = new Map();
@@ -221,8 +221,7 @@ function deduplicateResults(results) {
     item.hash = finalHash;
     item.infoHash = finalHash;
 
-    // 4. LOGICA UNICA: Usiamo SOLO l'hash come chiave
-    // Se l'hash esiste già, confrontiamo i seeders per tenere il risultato migliore
+    
     const existing = hashMap.get(finalHash);
     
     if (!existing || (item.seeders || 0) > (existing.seeders || 0)) {
@@ -368,7 +367,7 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
             quality: uniqueLine
         });
 
-        // 🔥🔥🔥 MODIFICA CRUCIALE PER AIOSTREAMS: NOME FILE REALE 🔥🔥🔥
+        //  MODIFICA CRUCIALE PER AIOSTREAMS: NOME FILE REALE 
         const title = aioFormatter.formatStreamTitle({
             title: fileTitle,       // ✅ USA IL NOME FILE ORIGINALE
             infoHash: infoHash,     // Passiamo l'hash nascosto
@@ -891,7 +890,7 @@ resultsRaw = resultsRaw.filter(item => {
     return false;
 });
 
-  // ✅ FIXED: Deduplica con supporto Base32 e propagazione Hash
+  //  FIXED: Deduplica con supporto Base32 e propagazione Hash
   let cleanResults = deduplicateResults(resultsRaw);
   
   // 🔥🔥🔥 [NEW] AUTO-LEARNING: SALVATAGGIO ASINCRONO NEL DB 🔥🔥🔥
@@ -941,7 +940,7 @@ resultsRaw = resultsRaw.filter(item => {
 app.get("/api/stats", (req, res) => res.json({ status: "ok" }));
 app.get("/favicon.ico", (req, res) => res.status(204).end());
 
-// 🔥🔥🔥 FIX ROUTE TORBOX: Supporto parametro 'f' (File Index) 🔥🔥🔥
+//  FIX ROUTE TORBOX: Supporto parametro 'f' (File Index) 
 app.get("/:conf/play_tb/:hash", async (req, res) => {
     const { conf, hash } = req.params;
     const { s, e, f } = req.query; // Recupero anche 'f'
