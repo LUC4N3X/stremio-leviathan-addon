@@ -1,10 +1,13 @@
 <div align="center">
 
-  <img src="https://api.iconify.design/game-icons:sea-dragon.svg?color=%2300eaff&width=200" style="filter: drop-shadow(0 0 10px rgba(0, 234, 255, 0.4)); margin-bottom: 15px;" />
+  <img src="https://i.ibb.co/jvTQLbjb/Gemini-Generated-Image-51j2ce51j2ce51j2-1.png" 
+       style="width: 200px; height: auto; border-radius: 20px; filter: drop-shadow(0 0 15px rgba(0, 234, 255, 0.6)); margin-bottom: 15px;" />
 
-  <h1 style="font-size: 5rem; font-weight: 800; margin: 0; line-height: 1; letter-spacing: -2px; color: #fff;">
+  <h1 style="font-size: 5rem; font-weight: 800; margin: 0; line-height: 1; letter-spacing: -2px; color: #fff; font-family: sans-serif;">
     LEVIATHAN
   </h1>
+
+
 
   <div style="font-size: 1.1rem; color: #94a3b8; margin-top: 10px; font-weight: 400; letter-spacing: 1px;">
     ADVANCED TORRENT AGGREGATION PROTOCOL
