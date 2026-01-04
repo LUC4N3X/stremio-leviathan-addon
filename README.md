@@ -8,19 +8,22 @@
   <!-- Titolo -->
   <h1 style="background: linear-gradient(180deg, #fff 30%, #00eaff 100%);
              -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-             font-size: 6rem; font-weight: 900; margin: 0; line-height: 0.85;
+             font-size: 6rem; font-weight: 900; margin: 0; line-height: 1;
              letter-spacing: -5px; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
              text-transform: uppercase;
              filter: drop-shadow(0 8px 20px rgba(0, 234, 255, 0.5));">
     𝗟𝗘𝗩𝗜𝗔𝗧𝗛𝗔𝗡
   </h1>
 
-  <!-- Slogan subito sotto -->
+  <!-- Slogan senza separatore -->
   <p style="color: #00eaff; font-family: monospace; letter-spacing: 2px; 
-            margin-top: -5px; font-size: 1.2rem; opacity: 0.85; text-transform: uppercase;
+            margin: 0; font-size: 1.5rem; line-height: 1; text-transform: uppercase;
             text-shadow: 0 0 10px rgba(0, 234, 255, 0.5);">
     ⚡ L'abisso si risveglia ⚡
   </p>
+
+
+
 
   <div style="font-size: 1.1rem; color: #94a3b8; margin-top: 10px; font-weight: 400; letter-spacing: 1px;">
     ADVANCED TORRENT AGGREGATION PROTOCOL
