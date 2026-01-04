@@ -10,7 +10,7 @@
              letter-spacing: -4px; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
              text-transform: uppercase;
              filter: drop-shadow(0px 5px 15px rgba(0, 234, 255, 0.3));">
-# 𝗟𝗘𝗩𝗜𝗔𝗧𝗛𝗔𝗡
+#𝗟𝗘𝗩𝗜𝗔𝗧𝗛𝗔𝗡
   </h1>
 
   <p style="color: #00eaff; font-family: monospace; letter-spacing: 8px;
