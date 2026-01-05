@@ -1,19 +1,172 @@
-<svg width="400" height="60" viewBox="0 0 400 60" xmlns="http://www.w3.org/2000/svg">
+<svg width="500" height="80" viewBox="0 0 500 80" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="mirrorGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#00ffff" stop-opacity="0.1"/>
-      <stop offset="50%" stop-color="#0070f3" stop-opacity="0.3"/>
-      <stop offset="100%" stop-color="#00ffff" stop-opacity="0.1"/>
+    <!-- Gradienti stile Leviathan -->
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00d4ff"/>
+      <stop offset="50%" stop-color="#0066ff"/>
+      <stop offset="100%" stop-color="#001a4d"/>
     </linearGradient>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
-      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    
+    <radialGradient id="glowGrad" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#00ffff" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#0088ff" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#003366" stop-opacity="0"/>
+    </radialGradient>
+    
+    <linearGradient id="dragonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00ffff"/>
+      <stop offset="50%" stop-color="#0099ff"/>
+      <stop offset="100%" stop-color="#003d7a"/>
+    </linearGradient>
+    
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="50%" stop-color="#00ffff"/>
+      <stop offset="100%" stop-color="#ffffff"/>
+    </linearGradient>
+    
+    <!-- Filtri Leviathan -->
+    <filter id="outerGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0
+                                                       0 0.8 0.8 0 1
+                                                       0 0.8 0.8 0 1
+                                                       0 0 0 1 0"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
     </filter>
+    
+    <filter id="innerGlow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feComposite in="blur" in2="SourceGraphic" operator="atop"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <filter id="textGlow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0
+                                                       0 1 1 0 1
+                                                       0 1 1 0 1
+                                                       0 0 0 2 0"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Pattern tecnologico -->
+    <pattern id="techPattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M0,20 L20,0 M20,40 L40,20" stroke="#00ffff" stroke-width="0.5" opacity="0.2"/>
+    </pattern>
   </defs>
-
-  <rect x="5" y="5" width="390" height="50" rx="25" ry="25" fill="url(#mirrorGrad)" stroke="#00ffff" stroke-width="2" filter="url(#glow)"/>
-
-  <text x="200" y="37" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#ffffff" letter-spacing="1px" filter="url(#glow)">
-    🚀 SERVER MIRROR (Hugging Face)
-  </text>
+  
+  <!-- Bagliore esterno animato -->
+  <ellipse cx="250" cy="40" rx="220" ry="35" fill="url(#glowGrad)" opacity="0.4">
+    <animate attributeName="rx" values="220;240;220" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="ry" values="35;42;35" dur="4s" repeatCount="indefinite"/>
+  </ellipse>
+  
+  <!-- Badge principale -->
+  <g transform="translate(10,10)" filter="url(#outerGlow)">
+    <!-- Corpo del badge -->
+    <rect x="0" y="0" width="480" height="60" rx="30" fill="url(#bodyGrad)"/>
+    <rect x="0" y="0" width="480" height="60" rx="30" fill="url(#techPattern)"/>
+    
+    <!-- Bordi multipli -->
+    <rect x="2" y="2" width="476" height="56" rx="28" fill="none" stroke="#00ffff" stroke-width="2" opacity="0.6"/>
+    <rect x="5" y="5" width="470" height="50" rx="25" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.3"/>
+    
+    <!-- Elementi decorativi angolari (stile Leviathan) -->
+    <path d="M 30,8 L 45,8 L 45,12 M 30,8 L 30,12" stroke="#00ffff" stroke-width="2.5" fill="none"/>
+    <path d="M 450,8 L 435,8 L 435,12 M 450,8 L 450,12" stroke="#00ffff" stroke-width="2.5" fill="none"/>
+    <path d="M 30,52 L 45,52 L 45,48 M 30,52 L 30,48" stroke="#00ffff" stroke-width="2.5" fill="none"/>
+    <path d="M 450,52 L 435,52 L 435,48 M 450,52 L 450,48" stroke="#00ffff" stroke-width="2.5" fill="none"/>
+    
+    <!-- Drago stilizzato piccolo a sinistra -->
+    <g transform="translate(65, 18) scale(0.35)" filter="url(#innerGlow)">
+      <!-- Corpo del drago -->
+      <path d="M 20,45 Q 15,30 25,15 Q 35,5 50,10 Q 65,5 75,15 L 85,25 L 95,20 Q 105,15 115,25 L 110,40 L 100,45 Q 95,55 85,55 L 75,60 Q 65,65 55,60 L 45,55 Q 35,60 25,55 Z" 
+            fill="url(#dragonGrad)" stroke="#00ffff" stroke-width="2"/>
+      
+      <!-- Ali -->
+      <path d="M 50,20 L 35,5 L 30,15 L 40,25 Z" fill="#0099ff" stroke="#00ffff" stroke-width="1.5" opacity="0.8"/>
+      <path d="M 75,20 L 90,5 L 95,15 L 85,25 Z" fill="#0099ff" stroke="#00ffff" stroke-width="1.5" opacity="0.8"/>
+      
+      <!-- Occhi luminosi -->
+      <circle cx="45" cy="30" r="4" fill="#00ffff">
+        <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="70" cy="30" r="4" fill="#00ffff">
+        <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      
+      <!-- Dettagli tech -->
+      <path d="M 55,35 L 60,40 L 55,45" stroke="#00ffff" stroke-width="2" fill="none"/>
+      
+      <!-- Energia centrale -->
+      <circle cx="57" cy="40" r="6" fill="#00ffff" opacity="0.6">
+        <animate attributeName="r" values="6;9;6" dur="1.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.6;0.2;0.6" dur="1.5s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+    
+    <!-- Icona Hugging Face stilizzata a destra -->
+    <g transform="translate(425, 20)" filter="url(#innerGlow)">
+      <!-- Corpo emoji giallo -->
+      <circle cx="12" cy="12" r="11" fill="#FFD21E" stroke="#00ffff" stroke-width="1.5"/>
+      <circle cx="12" cy="12" r="9" fill="#FFC107"/>
+      
+      <!-- Occhi sorridenti -->
+      <path d="M 7,10 Q 7,8 9,8 Q 11,8 11,10" fill="none" stroke="#000000" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M 13,10 Q 13,8 15,8 Q 17,8 17,10" fill="none" stroke="#000000" stroke-width="1.8" stroke-linecap="round"/>
+      
+      <!-- Sorriso -->
+      <path d="M 7,14 Q 12,18 17,14" fill="none" stroke="#000000" stroke-width="1.8" stroke-linecap="round"/>
+      
+      <!-- Energia pulsante attorno -->
+      <circle cx="12" cy="12" r="13" fill="none" stroke="#00ffff" stroke-width="1" opacity="0.3">
+        <animate attributeName="r" values="13;16;13" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.3;0;0.3" dur="2s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+    
+    <!-- Testo principale con stile Leviathan -->
+    <g filter="url(#textGlow)">
+      <text x="240" y="42" font-family="'Arial Black', Arial, sans-serif" 
+            font-size="24" font-weight="900" text-anchor="middle" 
+            fill="url(#textGrad)" letter-spacing="3">
+        SERVER MIRROR
+        <animate attributeName="opacity" values="1;0.85;1" dur="3s" repeatCount="indefinite"/>
+      </text>
+    </g>
+    
+    <!-- Sottotitolo Hugging Face -->
+    <text x="240" y="20" font-family="Arial, sans-serif" 
+          font-size="10" font-weight="bold" text-anchor="middle" 
+          fill="#00ffff" letter-spacing="2" opacity="0.8">
+      HUGGING FACE
+    </text>
+    
+    <!-- Linee decorative sotto -->
+    <line x1="140" y1="48" x2="340" y2="48" stroke="#00ffff" stroke-width="1" opacity="0.3"/>
+  </g>
+  
+  <!-- Linea inferiore animata (stile Leviathan) -->
+  <g>
+    <line x1="80" y1="75" x2="420" y2="75" stroke="#00ffff" stroke-width="2" opacity="0.5">
+      <animate attributeName="x1" values="80;100;80" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="x2" values="420;400;420" dur="3s" repeatCount="indefinite"/>
+    </line>
+    <circle cx="80" cy="75" r="3" fill="#00ffff">
+      <animate attributeName="cx" values="80;100;80" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="420" cy="75" r="3" fill="#00ffff">
+      <animate attributeName="cx" values="420;400;420" dur="3s" repeatCount="indefinite"/>
+    </circle>
+  </g>
 </svg>
