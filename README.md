@@ -264,11 +264,11 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 
   <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=20&pause=1000&color=00E0FF&center=true&vCenter=true&width=500&lines=Forgiato+nel+CODICE.;Rimani+legale.+Rimani+lucido.;Lunga+vita+al+progetto." alt="Typing SVG" />
 
-  <br>
+  <br><br>
 
 
----
-🧬 PROJECT CORE & NEURAL NETWORK
+
+<h3>🧬 PROJECT CORE & NEURAL NETWORK</h3>
   
   <table style="border: none;">
     <tr>
