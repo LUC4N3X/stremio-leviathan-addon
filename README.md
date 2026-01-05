@@ -56,11 +56,13 @@
 
 <div align="center">
   <a href="https://leviathanaddon.dpdns.org" target="_blank">
-    <img src="public/button.svg?v=3" width="380" alt="Leviathan Core System">
+    <img src="public/button.svg?v=5" width="400" alt="Main System">
   </a>
+  
   <br>
+
   <a href="https://leaviathan-leviathan.hf.space" target="_blank">
-    <small><i>Alternative Mirror Instance (Hugging Face)</i></small>
+    <img src="public/mirror.svg?v=1" width="280" alt="Backup Mirror">
   </a>
 </div>
 
