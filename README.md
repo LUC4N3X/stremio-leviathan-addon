@@ -62,11 +62,22 @@
   <br>
 
 <div align="center">
-  <a href="https://leaviathan-leviathan.hf.space">
-    <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" width="35" style="vertical-align: middle;">
-    <b style="font-size: 20px; vertical-align: middle; color: #FFD21E; margin-left: 5px;">Istanza Backup</b>
+  <a href="https://leaviathan-leviathan.hf.space" style="text-decoration:none;">
+    <table>
+      <tr>
+        <td align="center" style="border: none;">
+          <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" width="40">
+        </td>
+        <td align="left" style="border: none;">
+          <span style="font-size: 18px; font-weight: bold; color: white;">Hugging Face</span><br>
+          <span style="font-size: 14px; color: #FFD21E;">Service Mirror 🚀</span>
+        </td>
+      </tr>
+    </table>
   </a>
 </div>
+  
+  
   <br>
 
   <hr style="width: 40%; border: 0; height: 1px; background: linear-gradient(90deg, transparent, #00eaff, transparent); margin-top: 15px; opacity: 0.4;">
