@@ -49,7 +49,13 @@
     </g>
   </g>
 
-  <text x="300" y="230" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#00ffff" filter="url(#textGlow)" opacity="0.9" letter-spacing="1px">
-    MAIN NODE ONLINE • HF ALTERNATIVE INSTANCE
-  </text>
+  <g font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" filter="url(#textGlow)">
+    <text x="215" y="230" fill="#00ffff" opacity="0.9">CORE SYSTEM ONLINE</text>
+    
+    <text x="345" y="230" fill="#00ffff" opacity="0.5">|</text>
+    
+    <a href="https://leaviathan-leviathan.hf.space" target="_blank" style="cursor: pointer;">
+      <text x="460" y="230" fill="#ffffff" text-decoration="underline" opacity="1">HF MIRROR</text>
+    </a>
+  </g>
 </svg>
