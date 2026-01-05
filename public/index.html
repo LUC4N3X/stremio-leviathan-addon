@@ -146,41 +146,7 @@
         }
         @keyframes subtitleFade { 0% { opacity: 0.8; } 100% { opacity: 1; } }
        
-        
-		.awakening-text {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 1.3rem;
-    font-weight: 700;
-    letter-spacing: 8px; /* Spaziatura larga stile tech */
-    color: var(--primary);
-    text-shadow: 0 0 15px var(--primary-dim);
-    margin-top: 20px;
-    text-transform: uppercase;
-    animation: deepPulse 4s infinite ease-in-out;
-}
-
-.bolt {
-    color: var(--secondary); /* Fulmini viola come il fondo dell'abisso */
-    text-shadow: 0 0 10px var(--secondary), 0 0 20px var(--secondary);
-    display: inline-block;
-    animation: boltLightning 2s infinite;
-}
-
-/* Animazione del testo che "respira" nell'oceano */
-@keyframes deepPulse {
-    0%, 100% { transform: scale(1); opacity: 0.8; }
-    50% { transform: scale(1.02); opacity: 1; text-shadow: 0 0 20px var(--primary); }
-}
-
-/* Animazione dei fulmini che scaricano energia */
-@keyframes boltLightning {
-    0%, 90%, 100% { opacity: 1; transform: scale(1); filter: brightness(1); }
-    92% { opacity: 0.5; transform: scale(1.2); filter: brightness(2); }
-    94% { opacity: 1; transform: scale(1); }
-    96% { opacity: 0.3; transform: scale(1.1); filter: brightness(2); }
-}
-		
-		/* --- VETRO HI-TECH AVANZATO --- */
+        /* --- VETRO HI-TECH AVANZATO --- */
         .glass-panel {
             background: linear-gradient(160deg, rgba(2, 12, 20, 0.85), rgba(0, 0, 0, 0.95));
             backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
@@ -429,6 +395,24 @@
             .advanced-unit { padding: 25px 20px; }
             .modal-content { padding: 25px; }
         }
+
+        /* --- PERFORMANCE FIX (Anti-Lag Mobile) --- */
+        @media (max-width: 768px) {
+            /* Disabilita il filtro blur pesante */
+            .glass-panel, .logo-container, .modal-backdrop {
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                background: rgba(0, 5, 10, 0.98) !important;
+                box-shadow: 0 0 10px rgba(0, 242, 255, 0.2) !important;
+                border: 1px solid rgba(0, 242, 255, 0.3) !important;
+            }
+            /* Nasconde animazioni di sfondo pesanti */
+            .light-rays, .wave-container { display: none !important; }
+            /* Rimuove ombre costose dalle particelle */
+            .particle { box-shadow: none !important; background: var(--primary); }
+            /* Forza l'accelerazione hardware sul contenitore */
+            .main-wrapper { transform: translateZ(0); will-change: transform; }
+        }
     </style>
 </head>
 <body>
@@ -442,15 +426,12 @@
     </div>
     <div class="main-wrapper">
         <header>
-            <header>
-    <div class="logo-container">
-        <img src="https://i.ibb.co/jvTQLbjb/Gemini-Generated-Image-51j2ce51j2ce51j2-1.png" alt="Leviathan Logo" class="logo-image">
-    </div>
-    <h1 class="brand-title">LEVIATHAN</h1>
-    <div class="brand-subtitle awakening-text">
-        <span class="bolt">⚡</span> L'ABISSO SI RISVEGLIA <span class="bolt">⚡</span>
-    </div>
-</header>
+            <div class="logo-container">
+                <img src="https://i.ibb.co/jvTQLbjb/Gemini-Generated-Image-51j2ce51j2ce51j2-1.png" alt="Leviathan Logo" class="logo-image">
+            </div>
+            <h1 class="brand-title">LEVIATHAN</h1>
+            <div class="brand-subtitle">PROTOCOLLO ABISSO ATTIVO</div>
+        </header>
         <div class="glass-panel">
             <div class="panel-header">
                 <i class="fas fa-microchip" style="color:var(--primary)"></i>
@@ -654,10 +635,15 @@
         </div>
     </div>
     <script>
-        // --- PARTICLES AVANZATE ---
+        // --- PARTICLES OTTIMIZZATE ---
         function createParticles() {
             const container = document.getElementById('particles');
-            for(let i=0; i<80; i++) { // Più particelle per immersione
+            const isMobile = window.innerWidth < 768; // Rileva se è mobile
+            const count = isMobile ? 20 : 80; // Riduce drasticamente le particelle su mobile
+            
+            container.innerHTML = ''; // Pulisce il contenitore
+            
+            for(let i=0; i < count; i++) {
                 const p = document.createElement('div');
                 p.classList.add('particle');
                 const size = Math.random() * 8 + 3;
@@ -671,7 +657,8 @@
                 container.appendChild(p);
             }
         }
-        // --- LOGIC (STESSA DELLA ORIGINALE) ---
+
+        // --- LOGIC ---
         let currentService = 'rd';
         function toggleMediaFlowGroup() {
             const ghost = document.getElementById('proxyDebrid').checked;
@@ -684,6 +671,9 @@
         function toggleFaq(el) { el.classList.toggle('open'); }
         window.onload = function() {
             createParticles();
+            // Ricrea le particelle se si ridimensiona la finestra per adattarsi
+            window.onresize = createParticles;
+
             try {
                 const pathParts = window.location.pathname.split('/');
                 if (pathParts.length >= 2 && pathParts[1].length > 10) {
