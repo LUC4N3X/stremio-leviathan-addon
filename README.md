@@ -574,33 +574,30 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 👁‍🗨 BENVENUTO NELL'ABISSO.
 ---
 
-
 <div align="center">
 
-<br>
+  <img src="https://img.shields.io/badge/STATUS-OPERATIONAL-2ea44f?style=flat-square&logo=github&logoColor=white">
+  <img src="https://img.shields.io/badge/MODE-COMMUNITY-0366d6?style=flat-square&logo=linux&logoColor=white">
 
-<img src="https://img.shields.io/badge/SYSTEM_STATUS-OPERATIONAL-success?style=flat-square&logo=githubactions&logoColor=white" />
-<img src="https://img.shields.io/badge/MAINTENANCE-COMMUNITY_POWERED-blue?style=flat-square&logo=open-source-initiative&logoColor=white" />
+  <br><br>
 
-<br><br>
+  <h3 style="font-weight: normal;">
+    Forgiato nel <b>CODICE</b>. Mantenuto vivo dalla <b>COMMUNITY</b>.
+  </h3>
 
-<samp>
-  Forgiato nel codice. Mantenuto vivo dalla community.
-</samp>
+  <br>
 
-<br><br>
+  <a href="https://www.paypal.me/luc4nex" target="_blank">
+    <img src="https://img.shields.io/badge/SUPPORT_THE_DEV-OFFRI_UN_CAFFÈ_☕-ffbf00?style=for-the-badge&logo=ko-fi&logoColor=white&labelColor=24292e" alt="Supporta">
+  </a>
 
-<a href="https://www.paypal.me/luc4nex" target="_blank">
-  <img src="https://img.shields.io/badge/⚠️_REFILL_ENERGY-OFFRI_UN_CAFFÈ-F5A623?style=for-the-badge&logo=paypal&logoColor=black&labelColor=222" alt="Donate" />
-</a>
+  <br><br>
 
-<br><br>
+  <sub style="color: grey;">
+    Il tuo contributo garantisce l'evoluzione del protocollo.
+  </sub>
 
-<sub>
-  Garantisci la continuità operativa e l'evoluzione del protocollo.
-</sub>
-
-<br><br>
+</div>
 
 
 
