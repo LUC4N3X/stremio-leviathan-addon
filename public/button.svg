@@ -12,6 +12,11 @@
       <stop offset="100%" stop-color="#003366" stop-opacity="0.9"/>
     </linearGradient>
 
+    <linearGradient id="dragonArmorGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#003366"/>
+        <stop offset="100%" stop-color="#001a33"/>
+    </linearGradient>
+
     <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
       <feGaussianBlur stdDeviation="12" result="blur"/>
       <feMerge>
@@ -28,10 +33,12 @@
       </feMerge>
     </filter>
 
-    <path id="dragonPath" d="M58.5 18.9C38.3 18.9 22 35.2 22 55.4C22 82.9 44.5 88.3 58.5 88.3C79.4 88.3 95 75.9 95 55.4C95 44.8 89.7 35.4 81.5 29.2C83.8 30.8 86.6 31.7 89.5 31.7C92.7 31.7 95.6 30.6 98.1 28.8L108.4 39.1L114.1 33.4L103.8 23.1C105.6 20.6 106.7 17.7 106.7 14.5C106.7 11.6 105.8 8.8 104.2 6.5C97.9 14.7 88.5 20 77.9 20C75.3 20 72.8 19.6 70.4 18.9Z"/>
+    <path id="cyberDragonArmor" d="M 95 15 C 85 20 75 30 70 40 L 60 35 C 50 35 40 40 35 50 L 25 55 L 20 70 L 35 75 L 45 70 L 55 75 C 65 80 75 75 85 65 L 95 70 L 110 60 L 105 50 L 95 55 C 90 45 95 35 105 25 L 115 15 L 95 15 Z M 75 45 C 80 45 85 50 85 55 L 75 60 C 70 60 65 55 65 50 L 75 45 Z" />
+    
+    <path id="cyberDragonEnergy" d="M 70 48 L 80 52 L 72 56 Z M 25 72 L 35 76 L 45 72 L 35 68 Z" />
+
   </defs>
 
-  <!-- BUTTON -->
   <g transform="translate(35,45)" filter="url(#softGlow)">
     <rect x="0" y="0" width="530" height="140" rx="70" fill="url(#bodyGrad)">
       <animateTransform
@@ -46,9 +53,13 @@
           fill="none" stroke="url(#rimGrad)" stroke-width="6"/>
 
     <g transform="translate(30,25)" filter="url(#textGlow)">
-      <use href="#dragonPath" fill="#e6ffff" transform="scale(1.1) translate(0,8)"/>
+      
+      <g transform="scale(1.1) translate(-5, 5)">
+        <use href="#cyberDragonArmor" fill="url(#dragonArmorGrad)" stroke="#00ffff" stroke-width="1.5"/>
+        <use href="#cyberDragonEnergy" fill="#ffffff" stroke="#00ffff" stroke-width="1"/>
+      </g>
 
-      <text x="125" y="48"
+      <text x="145" y="48"
             font-size="44"
             font-family="Arial Black, Arial, sans-serif"
             fill="#ffffff"
@@ -56,7 +67,7 @@
         INSTALLA
       </text>
 
-      <text x="125" y="95"
+      <text x="145" y="95"
             font-size="44"
             font-family="Arial Black, Arial, sans-serif"
             fill="#ffffff"
@@ -66,12 +77,11 @@
     </g>
   </g>
 
-  <!-- Footer -->
   <g font-family="Arial, sans-serif"
-     font-size="17"
-     font-weight="bold"
-     text-anchor="middle"
-     filter="url(#textGlow)">
+      font-size="17"
+      font-weight="bold"
+      text-anchor="middle"
+      filter="url(#textGlow)">
     <text x="300" y="230" fill="#00ffff">
       CORE SYSTEM ONLINE
     </text>
