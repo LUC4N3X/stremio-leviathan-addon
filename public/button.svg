@@ -1,61 +1,104 @@
 <svg width="600" height="250" viewBox="0 0 600 250" xmlns="http://www.w3.org/2000/svg">
+
   <defs>
-    <linearGradient id="mainBodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#00ffff"/>
-      <stop offset="100%" stop-color="#0070f3"/>
+    <!-- Gradient corpo -->
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0ff"/>
+      <stop offset="100%" stop-color="#0066cc"/>
     </linearGradient>
 
+    <!-- Rim neon -->
     <linearGradient id="rimGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
-      <stop offset="40%" stop-color="#00ffff" stop-opacity="0.2"/>
-      <stop offset="60%" stop-color="#0070f3" stop-opacity="0.2"/>
-      <stop offset="100%" stop-color="#0050a0" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#00ffff" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#003366" stop-opacity="0.9"/>
     </linearGradient>
-    
-    <filter id="intenseGlow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="18" result="blur1"/>
-      <feFlood flood-color="#00ffff" result="cyanColor"/>
-      <feComposite in="cyanColor" in2="blur1" operator="in" result="coloredBlur"/>
+
+    <!-- Glow soft -->
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
       <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
 
+    <!-- Glow testo -->
     <filter id="textGlow">
-        <feGaussianBlur stdDeviation="2.5" result="blur"/>
-        <feMerge>
-            <feMergeNode in="blur"/>
-            <feMergeNode in="SourceGraphic"/>
-        </feMerge>
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
     </filter>
 
-    <path id="dragonPath" d="M 58.5 18.9 C 38.3 18.9 22 35.2 22 55.4 C 22 82.9 44.5 88.3 58.5 88.3 C 79.4 88.3 95 75.9 95 55.4 C 95 44.8 89.7 35.4 81.5 29.2 C 83.8 30.8 86.6 31.7 89.5 31.7 C 92.7 31.7 95.6 30.6 98.1 28.8 L 108.4 39.1 L 114.1 33.4 L 103.8 23.1 C 105.6 20.6 106.7 17.7 106.7 14.5 C 106.7 11.6 105.8 8.8 104.2 6.5 C 104.2 6.5 104.1 6.5 104.1 6.5 C 97.9 14.7 88.5 20 77.9 20 C 75.3 20 72.8 19.6 70.4 18.9 C 66.6 18.9 62.6 18.9 58.5 18.9 Z M 58.5 31.7 C 68.8 31.7 79.1 37.4 79.1 52 C 79.1 65.8 70.3 75.4 58.5 75.4 C 46.6 75.4 37.9 65.8 37.9 52 C 37.9 37.4 48.2 31.7 58.5 31.7 Z" />
+    <!-- Pulse animazione -->
+    <animateTransform
+      id="pulse"
+      attributeName="transform"
+      type="scale"
+      from="1"
+      to="1.03"
+      dur="2.5s"
+      repeatCount="indefinite"
+      additive="sum"/>
+
+    <!-- Logo path (riusato) -->
+    <path id="dragonPath" d="M58.5 18.9C38.3 18.9 22 35.2 22 55.4C22 82.9 44.5 88.3 58.5 88.3C79.4 88.3 95 75.9 95 55.4C95 44.8 89.7 35.4 81.5 29.2C83.8 30.8 86.6 31.7 89.5 31.7C92.7 31.7 95.6 30.6 98.1 28.8L108.4 39.1L114.1 33.4L103.8 23.1C105.6 20.6 106.7 17.7 106.7 14.5C106.7 11.6 105.8 8.8 104.2 6.5C97.9 14.7 88.5 20 77.9 20C75.3 20 72.8 19.6 70.4 18.9Z"/>
   </defs>
 
-  <g transform="translate(50, 50)">
-    <rect x="15" y="15" width="500" height="110" rx="55" ry="55" fill="#00ffff" filter="url(#intenseGlow)" opacity="0.7"/>
-    <rect x="0" y="0" width="530" height="140" rx="70" ry="70" fill="url(#mainBodyGrad)"/>
-    <rect x="4" y="4" width="522" height="132" rx="66" ry="66" fill="none" stroke="url(#rimGrad)" stroke-width="8"/>
+  <!-- BUTTON -->
+  <g transform="translate(35,45)" filter="url(#softGlow)">
+    <rect x="0" y="0" width="530" height="140" rx="70" fill="url(#bodyGrad)">
+      <animateTransform
+        attributeName="transform"
+        type="scale"
+        values="1;1.03;1"
+        dur="3s"
+        repeatCount="indefinite"/>
+    </rect>
 
-    <g transform="translate(35, 18)" filter="url(#textGlow)">
-        <use href="#dragonPath" fill="#e0ffff" transform="scale(1.1) translate(0,5)"/>
-        <g font-family="Arial Black, Arial, sans-serif" font-weight="900" fill="white" letter-spacing="1px">
-            <text x="125" y="50" font-size="46">INSTALLA</text>
-            <text x="125" y="98" font-size="46">LEVIATHAN</text>
-        </g>
+    <rect x="5" y="5" width="520" height="130" rx="65"
+          fill="none" stroke="url(#rimGrad)" stroke-width="6"/>
+
+    <!-- Contenuto -->
+    <g transform="translate(30,25)" filter="url(#textGlow)">
+      <use href="#dragonPath" fill="#e6ffff" transform="scale(1.1) translate(0,8)"/>
+
+      <text x="125" y="48"
+            font-size="44"
+            font-family="Arial Black, Arial, sans-serif"
+            fill="#ffffff"
+            letter-spacing="1.5">
+        INSTALLA
+      </text>
+
+      <text x="125" y="95"
+            font-size="44"
+            font-family="Arial Black, Arial, sans-serif"
+            fill="#ffffff"
+            letter-spacing="1.5">
+        LEVIATHAN
+      </text>
     </g>
   </g>
 
-  <g font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" filter="url(#textGlow)">
-    <text x="215" y="230" fill="#00ffff" opacity="0.9">CORE SYSTEM ONLINE</text>
-    
+  <!-- Footer -->
+  <g font-family="Arial, sans-serif"
+     font-size="17"
+     font-weight="bold"
+     text-anchor="middle"
+     filter="url(#textGlow)">
+    <text x="215" y="230" fill="#00ffff">CORE SYSTEM ONLINE</text>
     <text x="345" y="230" fill="#00ffff" opacity="0.5">|</text>
-    
-    <a href="https://leaviathan-leviathan.hf.space" target="_blank" style="cursor: pointer;">
-      <text x="460" y="230" fill="#ffffff" text-decoration="underline" opacity="1">HF MIRROR</text>
+
+    <a href="https://leaviathan-leviathan.hf.space" target="_blank">
+      <text x="460" y="230"
+            fill="#ffffff"
+            text-decoration="underline">
+        HF MIRROR
+      </text>
     </a>
   </g>
+
 </svg>
