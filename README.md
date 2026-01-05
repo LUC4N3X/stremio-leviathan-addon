@@ -56,7 +56,7 @@
 
 <div align="center">
   <a href="https://leviathanaddon.dpdns.org" target="_blank">
-    <img src="public/button2.svg?v=99" width="400" alt="Main System">
+    <img src="public/button3.svg?v=99" width="400" alt="Main System">
   </a>
   
   <br>
