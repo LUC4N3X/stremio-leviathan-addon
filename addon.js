@@ -920,9 +920,10 @@ resultsRaw = resultsRaw.filter(item => {
       debridStreams = (await Promise.all(rdPromises)).filter(Boolean);
   }
 
-  const vixPromise = searchVix(meta, config);
+const vixPromise = searchVix(meta, config);
   const rawVix = await vixPromise;
-  const formattedVix = rawVix.map(v => formatVixStream(meta, v));
+  // const formattedVix = rawVix.map(v => formatVixStream(meta, v)); // RIMUOVI O COMMENTA QUESTA RIGA
+  const formattedVix = rawVix;
   
   const finalStreams = [...formattedVix, ...debridStreams];
   
