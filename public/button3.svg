@@ -1,81 +1,153 @@
-<svg width="600" height="200" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
-
+<svg width="800" height="300" viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#0ff"/>
-      <stop offset="100%" stop-color="#0066cc"/>
+    <!-- Gradienti migliorati -->
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00d4ff"/>
+      <stop offset="50%" stop-color="#0066ff"/>
+      <stop offset="100%" stop-color="#001a4d"/>
     </linearGradient>
-
-    <linearGradient id="rimGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
-      <stop offset="50%" stop-color="#00ffff" stop-opacity="0.3"/>
-      <stop offset="100%" stop-color="#003366" stop-opacity="0.9"/>
+    
+    <radialGradient id="glowGrad" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#00ffff" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#0088ff" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#003366" stop-opacity="0"/>
+    </radialGradient>
+    
+    <linearGradient id="dragonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00ffff"/>
+      <stop offset="50%" stop-color="#0099ff"/>
+      <stop offset="100%" stop-color="#003d7a"/>
     </linearGradient>
-
-    <linearGradient id="dragonArmorGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#003366"/>
-        <stop offset="100%" stop-color="#001a33"/>
+    
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="50%" stop-color="#00ffff"/>
+      <stop offset="100%" stop-color="#ffffff"/>
     </linearGradient>
-
-    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="12" result="blur"/>
+    
+    <!-- Filtri avanzati -->
+    <filter id="outerGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0
+                                                       0 0.8 0.8 0 1
+                                                       0 0.8 0.8 0 1
+                                                       0 0 0 1 0"/>
       <feMerge>
-        <feMergeNode in="blur"/>
+        <feMergeNode/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
-
+    
+    <filter id="innerGlow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="blur" in2="SourceGraphic" operator="atop"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
     <filter id="textGlow">
-      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0
+                                                       0 1 1 0 1
+                                                       0 1 1 0 1
+                                                       0 0 0 2 0"/>
       <feMerge>
-        <feMergeNode in="blur"/>
+        <feMergeNode/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
-
-    <path id="cyberDragonArmor" d="M 95 15 C 85 20 75 30 70 40 L 60 35 C 50 35 40 40 35 50 L 25 55 L 20 70 L 35 75 L 45 70 L 55 75 C 65 80 75 75 85 65 L 95 70 L 110 60 L 105 50 L 95 55 C 90 45 95 35 105 25 L 115 15 L 95 15 Z M 75 45 C 80 45 85 50 85 55 L 75 60 C 70 60 65 55 65 50 L 75 45 Z" />
-    <path id="cyberDragonEnergy" d="M 70 48 L 80 52 L 72 56 Z M 25 72 L 35 76 L 45 72 L 35 68 Z" />
-
+    
+    <!-- Pattern tecnologico -->
+    <pattern id="techPattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M0,20 L20,0 M20,40 L40,20" stroke="#00ffff" stroke-width="0.5" opacity="0.2"/>
+    </pattern>
   </defs>
-
-  <g transform="translate(35,30)" filter="url(#softGlow)">
-    <rect x="0" y="0" width="530" height="140" rx="70" fill="url(#bodyGrad)">
-      <animateTransform
-        attributeName="transform"
-        type="scale"
-        values="1;1.03;1"
-        dur="3s"
-        repeatCount="indefinite"/>
-    </rect>
-
-    <rect x="5" y="5" width="520" height="130" rx="65"
-          fill="none" stroke="url(#rimGrad)" stroke-width="6"/>
-
-    <g transform="translate(30,25)" filter="url(#textGlow)">
+  
+  <!-- Sfondo bagliore -->
+  <ellipse cx="400" cy="150" rx="350" ry="130" fill="url(#glowGrad)" opacity="0.4">
+    <animate attributeName="rx" values="350;370;350" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="ry" values="130;145;130" dur="4s" repeatCount="indefinite"/>
+  </ellipse>
+  
+  <!-- Badge principale -->
+  <g transform="translate(80,60)" filter="url(#outerGlow)">
+    <!-- Corpo del badge con pattern -->
+    <rect x="0" y="0" width="640" height="180" rx="90" fill="url(#bodyGrad)"/>
+    <rect x="0" y="0" width="640" height="180" rx="90" fill="url(#techPattern)"/>
+    
+    <!-- Bordi multipli -->
+    <rect x="5" y="5" width="630" height="170" rx="85" fill="none" stroke="#00ffff" stroke-width="2" opacity="0.6"/>
+    <rect x="10" y="10" width="620" height="160" rx="80" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.3"/>
+    
+    <!-- Elementi decorativi angolari -->
+    <path d="M 90,15 L 120,15 L 120,25 M 90,15 L 90,25" stroke="#00ffff" stroke-width="3" fill="none"/>
+    <path d="M 550,15 L 520,15 L 520,25 M 550,15 L 550,25" stroke="#00ffff" stroke-width="3" fill="none"/>
+    <path d="M 90,165 L 120,165 L 120,155 M 90,165 L 90,155" stroke="#00ffff" stroke-width="3" fill="none"/>
+    <path d="M 550,165 L 520,165 L 520,155 M 550,165 L 550,155" stroke="#00ffff" stroke-width="3" fill="none"/>
+    
+    <!-- Drago cyber stilizzato -->
+    <g transform="translate(35,30)" filter="url(#innerGlow)">
+      <!-- Corpo del drago -->
+      <path d="M 20,45 Q 15,30 25,15 Q 35,5 50,10 Q 65,5 75,15 L 85,25 L 95,20 Q 105,15 115,25 L 110,40 L 100,45 Q 95,55 85,55 L 75,60 Q 65,65 55,60 L 45,55 Q 35,60 25,55 Z" 
+            fill="url(#dragonGrad)" stroke="#00ffff" stroke-width="2"/>
       
-      <g transform="scale(1.1) translate(-5, 5)">
-        <use href="#cyberDragonArmor" fill="url(#dragonArmorGrad)" stroke="#00ffff" stroke-width="1.5"/>
-        <use href="#cyberDragonEnergy" fill="#ffffff" stroke="#00ffff" stroke-width="1"/>
-      </g>
-
-      <text x="145" y="52"
-            font-size="44"
-            font-family="Arial Black, Arial, sans-serif"
-            fill="#ffffff"
-            letter-spacing="1.5">
+      <!-- Ali -->
+      <path d="M 50,20 L 35,5 L 30,15 L 40,25 Z" fill="#0099ff" stroke="#00ffff" stroke-width="1.5" opacity="0.8"/>
+      <path d="M 75,20 L 90,5 L 95,15 L 85,25 Z" fill="#0099ff" stroke="#00ffff" stroke-width="1.5" opacity="0.8"/>
+      
+      <!-- Occhi luminosi -->
+      <circle cx="45" cy="30" r="4" fill="#00ffff">
+        <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="70" cy="30" r="4" fill="#00ffff">
+        <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      
+      <!-- Dettagli tecnologici -->
+      <path d="M 55,35 L 60,40 L 55,45" stroke="#00ffff" stroke-width="2" fill="none"/>
+      <circle cx="40" cy="45" r="3" fill="none" stroke="#00ffff" stroke-width="1"/>
+      <circle cx="75" cy="45" r="3" fill="none" stroke="#00ffff" stroke-width="1"/>
+      
+      <!-- Energia pulsante -->
+      <circle cx="57" cy="40" r="6" fill="#00ffff" opacity="0.6">
+        <animate attributeName="r" values="6;9;6" dur="1.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.6;0.2;0.6" dur="1.5s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+    
+    <!-- Testo principale con effetti -->
+    <g filter="url(#textGlow)">
+      <text x="180" y="85" font-size="58" font-family="'Arial Black', Arial, sans-serif" 
+            fill="url(#textGrad)" letter-spacing="3" font-weight="900">
         INSTALLA
+        <animate attributeName="opacity" values="1;0.85;1" dur="3s" repeatCount="indefinite"/>
       </text>
-
-      <text x="145" y="98"
-            font-size="44"
-            font-family="Arial Black, Arial, sans-serif"
-            fill="#ffffff"
-            letter-spacing="1.5">
+      
+      <text x="180" y="150" font-size="58" font-family="'Arial Black', Arial, sans-serif" 
+            fill="url(#textGrad)" letter-spacing="3" font-weight="900">
         LEVIATHAN
+        <animate attributeName="opacity" values="1;0.85;1" dur="3s" repeatCount="indefinite"/>
       </text>
     </g>
+    
+    <!-- Linee decorative -->
+    <line x1="180" y1="95" x2="580" y2="95" stroke="#00ffff" stroke-width="1" opacity="0.4"/>
+    <line x1="180" y1="160" x2="580" y2="160" stroke="#00ffff" stroke-width="1" opacity="0.4"/>
   </g>
-
-  <line x1="100" y1="185" x2="500" y2="185" stroke="#00ffff" stroke-width="2" filter="url(#textGlow)" opacity="0.7"/>
-
+  
+  <!-- Linea inferiore animata -->
+  <g>
+    <line x1="150" y1="270" x2="650" y2="270" stroke="#00ffff" stroke-width="3" opacity="0.6">
+      <animate attributeName="x1" values="150;180;150" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="x2" values="650;620;650" dur="3s" repeatCount="indefinite"/>
+    </line>
+    <circle cx="150" cy="270" r="4" fill="#00ffff">
+      <animate attributeName="cx" values="150;180;150" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="650" cy="270" r="4" fill="#00ffff">
+      <animate attributeName="cx" values="650;620;650" dur="3s" repeatCount="indefinite"/>
+    </circle>
+  </g>
 </svg>
