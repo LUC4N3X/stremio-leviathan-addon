@@ -925,7 +925,16 @@ const vixPromise = searchVix(meta, config);
   // const formattedVix = rawVix.map(v => formatVixStream(meta, v)); // RIMUOVI O COMMENTA QUESTA RIGA
   const formattedVix = rawVix;
   
-  const finalStreams = [...formattedVix, ...debridStreams];
+  // --- LOGICA DI ORDINAMENTO (VIX PRIORITY) ---
+  let finalStreams = [];
+  // Controlla se l'utente ha attivato "vixLast" nei filtri (dal nuovo switch)
+  if (config.filters && config.filters.vixLast === true) {
+      // Se ATTIVO: Torrent (Debrid) PRIMA, Vix DOPO
+      finalStreams = [...debridStreams, ...formattedVix];
+  } else {
+      // Se DISATTIVO (Default): Vix PRIMA, Torrent (Debrid) DOPO
+      finalStreams = [...formattedVix, ...debridStreams];
+  }
   
   const resultObj = { streams: finalStreams };
 
