@@ -278,6 +278,24 @@
         .mf-active .mf-group { opacity: 1; pointer-events: auto; filter: blur(0); }
         .mf-input { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); padding: 15px; color: #fff; width: 100%; border-radius: 10px; font-family: 'Outfit', sans-serif; transition: 0.3s; }
         .mf-input:focus { border-color: var(--secondary); outline: none; box-shadow: 0 0 15px rgba(112,0,255,0.3); }
+
+        /* --- SUB ROW (Nested Options) --- */
+        .sub-row {
+            display: none; /* Nascosto di default */
+            background: rgba(0,0,0,0.3);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 12px 15px 12px 25px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            animation: fadeInRow 0.3s ease;
+        }
+        @keyframes fadeInRow { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .sub-row .control-title { font-size: 1rem; color: var(--text-dim); }
+        .sub-row .control-desc { font-size: 0.85rem; }
+        .sub-indicator {
+            border-left: 2px solid var(--primary);
+            padding-left: 15px;
+        }
        
         /* --- FILTER GRID --- */
         .section-header {
@@ -514,7 +532,22 @@
                         </span>
                     </div>
                     <label class="switch mf-switch">
-                        <input type="checkbox" id="enableVix">
+                        <input type="checkbox" id="enableVix" onchange="toggleSCOptions()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="control-row sub-row" id="scPriorityRow">
+                    <div class="control-info sub-indicator">
+                        <div class="control-title">
+                            <i class="fas fa-sort-amount-down"></i> Priorità Bassa
+                        </div>
+                        <span class="control-desc">
+                            Se attivo, visualizza i risultati StreamingCommunity <b>in fondo</b> alla lista (dopo i Torrent).
+                        </span>
+                    </div>
+                    <label class="switch mf-switch">
+                        <input type="checkbox" id="vixLast">
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -660,6 +693,8 @@
 
         // --- LOGIC ---
         let currentService = 'rd';
+        
+        // Funzione per mostrare/nascondere opzioni Proxy
         function toggleMediaFlowGroup() {
             const ghost = document.getElementById('proxyDebrid').checked;
             const unit = document.getElementById('advUnit');
@@ -667,6 +702,19 @@
             if (ghost) unit.classList.add('mf-active');
             else unit.classList.remove('mf-active');
         }
+
+        // NUOVA FUNZIONE: Mostra opzioni SC solo se attivato
+        function toggleSCOptions() {
+            const scActive = document.getElementById('enableVix').checked;
+            const priorityRow = document.getElementById('scPriorityRow');
+            if (scActive) {
+                priorityRow.style.display = 'flex';
+            } else {
+                priorityRow.style.display = 'none';
+                // Opzionale: se spegni SC, potresti voler resettare la priorità, ma meglio lasciarla in memoria
+            }
+        }
+
         function clearError(input) { input.classList.remove('input-error'); }
         function toggleFaq(el) { el.classList.toggle('open'); }
         window.onload = function() {
@@ -692,9 +740,14 @@
                         document.getElementById('no4k').checked = config.filters.no4k || false;
                         document.getElementById('noCam').checked = config.filters.noCam || false;
                         document.getElementById('showFake').checked = config.filters.showFake || false;
+                        
+                        // Setta stato SC e Priorità
                         document.getElementById('enableVix').checked = config.filters.enableVix || false;
+                        document.getElementById('vixLast').checked = config.filters.vixLast || false;
                     }
+                    // Trigger per aggiornare la UI in base ai valori caricati
                     toggleMediaFlowGroup();
+                    toggleSCOptions(); 
                 }
             } catch (e) {}
         };
@@ -739,7 +792,8 @@
                     no4k: document.getElementById('no4k').checked,
                     noCam: document.getElementById('noCam').checked,
                     showFake: document.getElementById('showFake').checked,
-                    enableVix: document.getElementById('enableVix').checked
+                    enableVix: document.getElementById('enableVix').checked,
+                    vixLast: document.getElementById('vixLast').checked
                 }
             };
         }
@@ -755,10 +809,16 @@
             if(!validateInputs()) { document.querySelector('.main-wrapper').scrollIntoView({ behavior: 'smooth' }); return; }
             const c = getConfigObject();
             const list = document.getElementById('modalSummary');
+            
+            // Logica visualizzazione riassunto
+            let scText = c.filters.enableVix ? 'ATTIVO' : 'NO';
+            if (c.filters.enableVix && c.filters.vixLast) scText += ' (Priorità Bassa)';
+            else if (c.filters.enableVix) scText += ' (Priorità Alta)';
+
             list.innerHTML = `
                 <li>Servizio Debrid <span>${c.service.toUpperCase()}</span></li>
                 <li>Includi ENG <span>${c.filters.allowEng ? 'ATTIVO' : 'NO'}</span></li>
-                <li>StreamingCommunity <span>${c.filters.enableVix ? 'ATTIVO' : 'NO'}</span></li>
+                <li>StreamingCommunity <span>${scText}</span></li>
                 <li>Modalità AIOStreams <span>${c.aiostreams_mode ? 'ATTIVO' : 'NO'}</span></li>
                 <li>Proxy Ghost <span>${c.mediaflow.proxyDebrid ? 'ATTIVO' : 'NO'}</span></li>
             `;
