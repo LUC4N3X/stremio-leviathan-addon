@@ -70,10 +70,7 @@
   
   <br>
 
-  <hr style="width: 40%; border: 0; height: 1px; background: linear-gradient(90deg, transparent, #00eaff, transparent); margin-top: 15px; opacity: 0.4;">
-</div>
-
-<div style="background: rgba(0,136,204,0.1); border: 1px solid rgba(0,136,204,0.3); border-radius: 8px; padding: 15px; width: 80%; max-width: 600px; margin: 20px auto; text-align:center;">
+ <div style="background: rgba(0,136,204,0.1); border: 1px solid rgba(0,136,204,0.3); border-radius: 8px; padding: 15px; width: 80%; max-width: 600px; margin: 20px auto; text-align:center;">
   <strong style="color: #0088CC; font-size: 1rem;">💬 Contattami direttamente su Telegram</strong>
   <p style="color: #cbd5e1; font-size: 0.9rem; margin: 5px 0;">
     Hai domande o vuoi parlarmi? Questo è il modo più veloce per raggiungermi.
@@ -82,6 +79,10 @@
     <img src="https://img.shields.io/badge/📩_Telegram-Chat_Diretta-0088CC?style=for-the-badge&logo=telegram&logoColor=white" alt="Contattami Telegram">
   </a>
 </div>
+  
+  <hr style="width: 40%; border: 0; height: 1px; background: linear-gradient(90deg, transparent, #00eaff, transparent); margin-top: 15px; opacity: 0.4;">
+</div>
+
 
 
 
