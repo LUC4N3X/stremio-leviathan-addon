@@ -57,15 +57,14 @@
   </p>
 
 
-<div style="background: rgba(0,136,204,0.1); border: 1px solid rgba(0,136,204,0.3); border-radius: 8px; padding: 15px; width: 80%; max-width: 600px; margin: 20px auto; text-align:center;">
-  <strong style="color: #0088CC; font-size: 1rem;">💬 Contattami direttamente su Telegram</strong>
-  <p style="color: #cbd5e1; font-size: 0.9rem; margin: 5px 0;">
-    Hai domande o vuoi parlarmi? Questo è il modo più veloce per raggiungermi.
-  </p>
-  <a href="https://t.me/tuo_username" target="_blank" style="text-decoration:none;">
-    <img src="https://img.shields.io/badge/📩_Telegram-Chat_Diretta-0088CC?style=for-the-badge&logo=telegram&logoColor=white" alt="Contattami Telegram">
+<td align="center" width="200px" style="border: none; vertical-align: top;">
+  <a href="https://t.me/TUO_LINK_GRUPPO">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" width="70" style="filter: drop-shadow(0 0 10px #0088cc);" alt="Telegram"/>
+    <br><b>COMMUNITY</b>
   </a>
-</div>
+  <br><br>
+  <sub style="color: #8b949e;">Deep Web Hub<br>Supporto & Talk</sub>
+</td>
 
 
 <div align="center">
