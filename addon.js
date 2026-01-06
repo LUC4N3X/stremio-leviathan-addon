@@ -309,8 +309,13 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
         if (serviceTag === 'TB') fullService = 'torbox';
         
         let displaySource = source;
-        if (/corsaro/i.test(source)) displaySource = "ilCorSaRoNeRo";
-        else {
+        if (/corsaro/i.test(source)) {
+            displaySource = "ilCorSaRoNeRo";
+        } else if (/knaben/i.test(source)) {
+            displaySource = "Knaben";
+        } else if (/comet/i.test(source)) {
+            displaySource = "StremThru";
+        } else {
              // PULIZIA AGGRESSIVA
              displaySource = source
                 .replace(/TorrentGalaxy|tgx/i, 'TGx')
@@ -349,6 +354,10 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     let displaySource = source;
     if (/corsaro/i.test(displaySource)) {
         displaySource = "ilCorSaRoNeRo";
+    } else if (/knaben/i.test(displaySource)) {
+        displaySource = "Knaben";
+    } else if (/comet/i.test(displaySource)) {
+        displaySource = "StremThru";
     } else {
         // 🔥 FIX FALLBACK AGGRESSIVO 🔥
         displaySource = displaySource
@@ -426,27 +435,107 @@ async function withTimeout(promise, ms, operation = 'Operation') {
   }
 }
 
-async function getMetadata(id, type) {
+// --- HELPER TMDB METADATA (NOVITÀ) ---
+async function fetchTmdbMeta(tmdbId, type, userApiKey) {
+    if (!tmdbId) return null;
+    
+    // 🔥 LOGICA CHIAVE UTENTE VS DEFAULT
+    // Se l'utente ha inserito una chiave valida (>1 char), usa quella.
+    // Altrimenti usa la chiave di fallback (la tua).
+    const apiKey = (userApiKey && userApiKey.length > 1) 
+        ? userApiKey 
+        : "4b9dfb8b1c9f1720b5cd1d7efea1d845";
+
+    const endpoint = type === 'series' || type === 'tv' ? 'tv' : 'movie';
+    // Importante: language=it-IT per avere titoli italiani
+    const url = `https://api.themoviedb.org/3/${endpoint}/${tmdbId}?api_key=${apiKey}&language=it-IT`;
+    
+    try {
+        const { data } = await axios.get(url, { timeout: CONFIG.TIMEOUTS.TMDB });
+        return data;
+    } catch (e) {
+        logger.warn(`TMDB Meta Fetch Error for ${tmdbId}: ${e.message}`);
+        return null;
+    }
+}
+
+// --- METADATA RETRIEVER CON PRIORITÀ TMDB ---
+async function getMetadata(id, type, config = {}) {
   try {
     const allowedTypes = ["movie", "series"];
     if (!allowedTypes.includes(type)) return null;
-    let tmdbId = id, s = 0, e = 0;
-    if (type === "series" && id.includes(":")) [tmdbId, s, e] = id.split(":");
-    const rawId = tmdbId.split(":")[0];
-    const cleanId = rawId.match(/^(tt\d+|\d+)$/i)?.[0] || "";
+
+    let imdbId = id; 
+    let season = 0; 
+    let episode = 0;
+
+    // Parsing ID (gestione tt12345:1:1)
+    if (type === "series" && id.includes(":")) {
+        const parts = id.split(":");
+        imdbId = parts[0];
+        season = parseInt(parts[1]);
+        episode = parseInt(parts[2]);
+    }
+    
+    // Pulizia ID base
+    const cleanId = imdbId.match(/^(tt\d+|\d+)$/i)?.[0] || imdbId;
     if (!cleanId) return null;
+
+    // --- 1. TENTATIVO PRINCIPALE: TMDB (Via ID Converter) ---
+    try {
+        const userTmdbKey = config.tmdb; // Prende la key dalla config utente
+        
+        // Convertiamo l'ID (IMDb -> TMDB) usando il tuo converter esistente
+        // Passiamo la key utente anche al converter
+        const { tmdbId } = await imdbToTmdb(cleanId, userTmdbKey);
+
+        if (tmdbId) {
+            // Recuperiamo i dettagli in ITALIANO usando la funzione helper
+            // che gestisce la priorità della chiave
+            const tmdbData = await fetchTmdbMeta(tmdbId, type, userTmdbKey);
+            
+            if (tmdbData) {
+                const title = tmdbData.title || tmdbData.name;
+                const originalTitle = tmdbData.original_title || tmdbData.original_name;
+                
+                // Estrazione Anno
+                const releaseDate = tmdbData.release_date || tmdbData.first_air_date;
+                const year = releaseDate ? releaseDate.split("-")[0] : "";
+
+                logger.info(`✅ [META] Usato TMDB (UserKey: ${!!userTmdbKey}): ${title} (${year}) [ID: ${tmdbId}]`);
+
+                return {
+                    title: title,
+                    originalTitle: originalTitle,
+                    year: year,
+                    imdb_id: cleanId,
+                    tmdb_id: tmdbId, // Salviamo anche il TMDB ID
+                    isSeries: type === "series",
+                    season: season,
+                    episode: episode
+                };
+            }
+        }
+    } catch (err) {
+        logger.warn(`⚠️ Errore Metadata TMDB, fallback a Cinemeta: ${err.message}`);
+    }
+
+    // --- 2. FALLBACK: CINEMETA (Originale) ---
+    logger.info(`ℹ️ [META] Fallback a Cinemeta per ${cleanId}`);
     const { data: cData } = await axios.get(`${CONFIG.CINEMETA_URL}/meta/${type}/${cleanId}.json`, { timeout: CONFIG.TIMEOUTS.TMDB }).catch(() => ({ data: {} }));
+    
     return cData?.meta ? {
       title: cData.meta.name,
       originalTitle: cData.meta.name,
       year: cData.meta.year?.split("–")[0],
       imdb_id: cleanId,
       isSeries: type === "series",
-      season: parseInt(s),
-      episode: parseInt(e)
+      season: season,
+      episode: episode
     } : null;
+
   } catch (err) {
-    logger.error(`Errore getMetadata: ${err.message}`);
+    logger.error(`Errore getMetadata Critical: ${err.message}`);
     return null;
   }
 }
@@ -644,7 +733,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   const cachedResult = await Cache.getCachedStream(cacheKey);
   if (cachedResult) return cachedResult;
 
-  const userTmdbKey = config.tmdb;
+  const userTmdbKey = config.tmdb; // 🔥 CHIAVE UTENTE (se presente)
   let finalId = id.replace('ai-recs:', '');
   
   if (finalId.startsWith("tmdb:")) {
@@ -668,10 +757,14 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       } catch (err) {}
   }
 
-  const meta = await getMetadata(finalId, type);
+  // 🔥 MODIFICA: Passiamo config per permettere l'uso della API Key utente in getMetadata (per TMDB)
+  const meta = await getMetadata(finalId, type, config);
   if (!meta) return { streams: [] };
 
   logger.info(`🚀 [SPEED] Start REMOTE search: ${meta.title}`);
+  
+  // Usiamo direttamente il tmdb_id se l'abbiamo già recuperato in getMetadata
+  // Passiamo userTmdbKey anche qui per eventuali fallback
   const tmdbIdLookup = meta.tmdb_id || (await imdbToTmdb(meta.imdb_id, userTmdbKey))?.tmdbId;
 
   // --- SOLO REMOTO + ESTERNI (DB LOCALE RIMOSSO DALLA LETTURA) ---
@@ -704,6 +797,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       logger.info(`⚠️ Low TOTAL results (${currentResults.length} < 3), triggering SCRAPING...`);
       let dynamicTitles = [];
       try {
+          // Se abbiamo già usato TMDB in getMetadata, potremmo avere un titolo italiano migliore qui
           if (tmdbIdLookup) dynamicTitles = await getTmdbAltTitles(tmdbIdLookup, type, userTmdbKey);
       } catch (e) {}
       const allowEng = config.filters?.allowEng === true;
@@ -774,12 +868,9 @@ resultsRaw = resultsRaw.filter(item => {
         }
 
         // B. LOGICA "ANTI-PREFIX" (Il cuore della soluzione Frankenstein)
-        // Se il file contiene ESATTAMENTE tutto il titolo meta (es: "Young Frankenstein" contiene "Frankenstein"),
-        // allora controlliamo se inizia con quello. Se c'è una parola prima ("Young"), lo scartiamo.
-        // Questa logica NON scatta per Harry Potter perché "Harry Potter e i doni" NON contiene "Harry Potter and the deathly".
         if (normFile.includes(normMeta)) {
              if (!normFile.startsWith(normMeta)) {
-                 return false; // Blocca "Young Frankenstein", "The Bride of Frankenstein", ecc.
+                 return false; 
              }
         }
     }
@@ -949,8 +1040,9 @@ app.listen(PORT, () => {
     console.log(`-----------------------------------------------------`);
     console.log(`⚡ MODE: REMOTE READER + LOCAL WRITER`);
     console.log(`📡 LETTURA: Indexer Remoto (${CONFIG.INDEXER_URL})`);
+    console.log(`🎬 METADATA: TMDB Primary (User Key Priority)`);
     console.log(`💾 SCRITTURA: DB Locale (Auto-Learning attivo)`);
     console.log(`✅ FIX AGGRESSIVO: "Fallback" cancellato ovunque`);
-    console.log(`🛡️ FIX ANNO: Frankenstein 1974 bloccato per 2025`);
+    console.log(`🛡️ FIX NOMI: Knaben, StremThru (Comet)`);
     console.log(`-----------------------------------------------------`);
 });
