@@ -47,6 +47,7 @@
   </span>
 </div>
 
+<br>
 
   <p>
     <img src="https://img.shields.io/badge/⚡_Adaptive-Latency_Scaling-000?style=for-the-badge&labelColor=00eaff" />
