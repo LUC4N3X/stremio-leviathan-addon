@@ -18,6 +18,7 @@
             --text-main: #e0f7fa;
             --text-dim: #8baac2;
             --error: #ff3366;
+            --warning: #ffcc00;
             --glow-strong: 0 0 20px rgba(0, 242, 255, 0.6);
             --glow-intense: 0 0 40px rgba(0, 242, 255, 0.8), 0 0 60px rgba(0, 242, 255, 0.4);
         }
@@ -140,7 +141,7 @@
         }
         @keyframes textGlow { 0% { filter: drop-shadow(0 0 25px rgba(0, 242, 255, 0.5)); } 100% { filter: drop-shadow(0 0 40px rgba(0, 242, 255, 0.7)); } }
         
-        /* --- NUOVO SOTTOTITOLO FIGO --- */
+        /* --- NUOVO SOTTOTITOLO STATICO (FERMO) --- */
         .brand-subtitle {
             font-family: 'Rajdhani', sans-serif;
             font-size: 1.2rem;
@@ -154,7 +155,7 @@
             align-items: center;
             justify-content: center;
             text-shadow: 0 0 10px rgba(0, 242, 255, 0.4);
-            animation: subtitleFloat 3s ease-in-out infinite alternate;
+            /* ANIMAZIONE RIMOSSA SU RICHIESTA UTENTE */
         }
         /* Linee laterali fighissime */
         .brand-subtitle::before, .brand-subtitle::after {
@@ -169,8 +170,6 @@
         }
         .brand-subtitle::after { transform: rotate(180deg); } /* Specchia la gradient */
 
-        @keyframes subtitleFloat { 0% { transform: translateY(0); opacity: 0.9; } 100% { transform: translateY(-3px); opacity: 1; text-shadow: 0 0 20px var(--primary); } }
-       
         /* --- VETRO HI-TECH AVANZATO --- */
         .glass-panel {
             background: linear-gradient(160deg, rgba(2, 12, 20, 0.85), rgba(0, 0, 0, 0.95));
@@ -269,6 +268,19 @@
        
         .error-msg { position: absolute; bottom: -25px; left: 15px; color: var(--error); font-size: 0.9rem; opacity: 0; font-family: 'Rajdhani', sans-serif; text-transform: uppercase; font-weight: 700; transition: opacity 0.3s; }
         .custom-input.input-error + .error-msg, .custom-input.input-error + .input-action + .error-msg { opacity: 1; }
+
+        /* WARNING MESSAGES SPECIFICI */
+        .ad-warning-msg {
+            color: var(--warning);
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: none; /* Nascosto di default */
+            font-family: 'Rajdhani', sans-serif;
+            text-transform: uppercase;
+            font-weight: 700;
+            padding-left: 15px;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
+        }
        
         /* --- ADVANCED UNIT EVOLUTA --- */
         .advanced-unit {
@@ -507,6 +519,7 @@
                 border: 1px solid rgba(0, 242, 255, 0.2);
             }
             .error-msg { bottom: -22px; text-align: center; width: 100%; left: 0; }
+            .ad-warning-msg { text-align: center; padding-left: 0; }
 
             /* Griglia Filtri (Switches) 2 colonne */
             .options-grid { 
@@ -556,8 +569,8 @@
             <div class="logo-container">
                 <img src="https://i.ibb.co/jvTQLbjb/Gemini-Generated-Image-51j2ce51j2ce51j2-1.png" alt="Leviathan Logo" class="logo-image">
             </div>
-            <h1 class="brand-title class="notranslate" translate="no"">LEVIATHAN</h1>
-            <div class="brand-subtitle class="notranslate" translate="no"">SOVRANO DEGLI ABISSI</div>
+            <h1 class="brand-title notranslate" translate="no">LEVIATHAN</h1>
+            <div class="brand-subtitle notranslate" translate="no">SOVRANO DEGLI ABISSI</div>
         </header>
         <div class="glass-panel">
             <div class="panel-header">
@@ -620,6 +633,7 @@
                     <i class="fas fa-key"></i> PRELEVA KEY
                 </a>
                 <span class="error-msg">⚠️ Chiave mancante</span>
+                <div id="ad-warning" class="ad-warning-msg">⚠️ Funziona solo con Self-Hosting Casalingo</div>
             </div>
             <div class="input-group">
                 <input type="text" id="tmdbKey" class="custom-input" placeholder="CHIAVE TMDB (OPZIONALE)" oninput="clearError(this)">
@@ -874,6 +888,14 @@
            
             document.getElementById('apiLink').href = links[service][0];
             document.getElementById('apiKey').placeholder = links[service][1];
+
+            // LOGICA AVVISO ALLDEBRID
+            const adWarning = document.getElementById('ad-warning');
+            if (service === 'ad') {
+                adWarning.style.display = 'block';
+            } else {
+                adWarning.style.display = 'none';
+            }
         }
         function validateInputs() {
             let isValid = true;
