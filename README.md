@@ -56,6 +56,17 @@
     <img src="https://img.shields.io/badge/🔗_Magnet-Fusion_Engine-000?style=for-the-badge&labelColor=00eaff" />
   </p>
 
+
+<div style="background: rgba(0,136,204,0.1); border: 1px solid rgba(0,136,204,0.3); border-radius: 8px; padding: 15px; width: 80%; max-width: 600px; margin: 20px auto; text-align:center;">
+  <strong style="color: #0088CC; font-size: 1rem;">💬 Unisciti al nostro gruppo Telegram</strong>
+  <p style="color: #cbd5e1; font-size: 0.9rem; margin: 5px 0;">
+    Chiedi supporto, segui aggiornamenti e resta connesso con la community.
+  </p>
+  <a href="https://t.me/tuo_gruppo" target="_blank" style="text-decoration:none;">
+    <img src="https://img.shields.io/badge/Join%20Telegram-Open%20Chat-0088CC?style=for-the-badge&logo=telegram&logoColor=white">
+  </a>
+</div>
+
 <div align="center">
   <a href="https://leviathanaddon.dpdns.org" target="_blank">
     <img src="public/button5.svg" width="350" alt="Installa Leviathan">
