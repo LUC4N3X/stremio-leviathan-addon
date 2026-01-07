@@ -67,7 +67,7 @@ const CONFIG = {
   INDEXER_URL: process.env.INDEXER_URL || "",
   CINEMETA_URL: "https://v3-cinemeta.strem.io",
   REAL_SIZE_FILTER: 80 * 1024 * 1024,
-  MAX_RESULTS: 60,
+  MAX_RESULTS: 70,
   TIMEOUTS: {
     TMDB: 2000,
     SCRAPER: 6000,
@@ -351,20 +351,22 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     else if (/multi/i.test(lang || "")) langStr = "🗣️ MULTI";
     else if (lang) langStr = `🗣️ ${lang.toUpperCase()}`;
     
-    let displaySource = source;
-    if (/corsaro/i.test(displaySource)) {
+let displaySource = source || "P2P";
+
+    if (/1337/i.test(displaySource)) {
+        displaySource = "1337x"; // Forza il nome ed elimina Torrentio
+    } else if (/corsaro/i.test(displaySource)) {
         displaySource = "ilCorSaRoNeRo";
     } else if (/knaben/i.test(displaySource)) {
         displaySource = "Knaben";
-    } else if (/comet/i.test(displaySource)) {
+    } else if (/comet|stremthru/i.test(displaySource)) {
         displaySource = "StremThru";
     } else {
-        // 🔥 FIX FALLBACK AGGRESSIVO 🔥
         displaySource = displaySource
+            .replace(/Torrentio/gi, '') // Rimuove Torrentio se presente altrove
             .replace(/TorrentGalaxy|tgx/i, 'TGx')
-            .replace(/\b1337\b/i, '1337x')
-            .replace(/Fallback/ig, '') // Cancella "Fallback", "fallback", "FALLBACK" ovunque
-            .trim();
+            .replace(/Fallback/ig, '')
+            .trim() || "P2P";
     }
     
     const sourceLine = `⚡ [${serviceTag}] ${displaySource}`;
@@ -723,7 +725,7 @@ async function fetchExternalResults(type, finalId) {
     }
 }
 
-// --- GENERATE STREAM CON LOGICA REMOTA + AUTO-LEARN ---
+// --- GENERATE STREAM CON LOGICA 100% PARALLELA ---
 async function generateStream(type, id, config, userConfStr, reqHost) {
   if (!config.key && !config.rd) return { streams: [{ name: "⚠️ CONFIG", title: "Inserisci API Key nel configuratore" }] };
   
@@ -761,14 +763,11 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   const meta = await getMetadata(finalId, type, config);
   if (!meta) return { streams: [] };
 
-  logger.info(`🚀 [SPEED] Start REMOTE search: ${meta.title}`);
+  logger.info(`🚀 [SPEED] Start PARALLEL search: ${meta.title}`);
   
-  // Usiamo direttamente il tmdb_id se l'abbiamo già recuperato in getMetadata
-  // Passiamo userTmdbKey anche qui per eventuali fallback
   const tmdbIdLookup = meta.tmdb_id || (await imdbToTmdb(meta.imdb_id, userTmdbKey))?.tmdbId;
 
-  // --- SOLO REMOTO + ESTERNI (DB LOCALE RIMOSSO DALLA LETTURA) ---
-  
+  // --- 1. REMOTE INDEXER ---
   const remotePromise = withTimeout(
       queryRemoteIndexer(tmdbIdLookup, type, meta.season, meta.episode),
       CONFIG.TIMEOUTS.REMOTE_INDEXER,
@@ -778,37 +777,26 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       return [];
   });
 
+  // --- 2. EXTERNAL ADDONS ---
   const externalPromise = fetchExternalResults(type, finalId);
 
-  // ESECUZIONE PARALLELA (Senza DB locale)
-  const [remoteResults, externalResults] = await Promise.all([
-      remotePromise, 
-      externalPromise
-  ]);
-
-  if (remoteResults.length > 0) logger.info(`✅ [REMOTE] ${remoteResults.length} items`);
+  // --- 3. SCRAPERS LOCALI (ENGINES) ---
+  // Logica spostata qui per essere eseguita in parallelo e non in fallback
+  let dynamicTitles = [];
+  try {
+      if (tmdbIdLookup) dynamicTitles = await getTmdbAltTitles(tmdbIdLookup, type, userTmdbKey);
+  } catch (e) {}
+  const allowEng = config.filters?.allowEng === true;
+  const queries = generateSmartQueries(meta, dynamicTitles, allowEng);
   
-  // Combina solo Remoto + Esterno
-  let currentResults = [...remoteResults, ...externalResults];
-
-  // --- LOGICA SCRAPER (Fallback SOLO se < 3 risultati) ---
-  let scrapedResults = [];
-  if (currentResults.length < 3) {
-      logger.info(`⚠️ Low TOTAL results (${currentResults.length} < 3), triggering SCRAPING...`);
-      let dynamicTitles = [];
-      try {
-          // Se abbiamo già usato TMDB in getMetadata, potremmo avere un titolo italiano migliore qui
-          if (tmdbIdLookup) dynamicTitles = await getTmdbAltTitles(tmdbIdLookup, type, userTmdbKey);
-      } catch (e) {}
-      const allowEng = config.filters?.allowEng === true;
-      const queries = generateSmartQueries(meta, dynamicTitles, allowEng);
-      
-      let promises = [];
+  let scraperPromise = Promise.resolve([]);
+  if (queries.length > 0) {
+      const allScraperTasks = [];
       queries.forEach(q => {
           SCRAPER_MODULES.forEach(scraper => {
               if (scraper.searchMagnet) {
                   const searchOptions = { allowEng };
-                  promises.push(
+                  allScraperTasks.push(
                       LIMITERS.scraper.schedule(() => 
                           withTimeout(
                               scraper.searchMagnet(q, meta.year, type, finalId, searchOptions),
@@ -823,14 +811,25 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
               }
           });
       });
-      scrapedResults = (await Promise.all(promises)).flat();
+      scraperPromise = Promise.all(allScraperTasks).then(results => results.flat());
   }
 
-  const allowEng = config.filters?.allowEng === true;
-  let resultsRaw = [...currentResults, ...scrapedResults];
+  // ESECUZIONE PARALLELA (Remote + External + Scrapers)
+  const [remoteResults, externalResults, scrapedResults] = await Promise.all([
+      remotePromise, 
+      externalPromise,
+      scraperPromise
+  ]);
 
-// 🔥🔥🔥 FILTRI AGGIORNATI (Anno Strict + Logic Anti-Prefix) 🔥🔥🔥
-resultsRaw = resultsRaw.filter(item => {
+  if (remoteResults.length > 0) logger.info(`✅ [REMOTE] ${remoteResults.length} items`);
+  if (externalResults.length > 0) logger.info(`✅ [EXTERNAL] ${externalResults.length} items`);
+  if (scrapedResults.length > 0) logger.info(`✅ [SCRAPER] ${scrapedResults.length} items`);
+
+  // Combina TUTTO
+  let resultsRaw = [...remoteResults, ...externalResults, ...scrapedResults];
+
+  // 🔥🔥🔥 FILTRI AGGIORNATI (Anno Strict + Logic Anti-Prefix) 🔥🔥🔥
+  resultsRaw = resultsRaw.filter(item => {
     if (!item?.magnet) return false;
     
     const source = (item.source || "").toLowerCase();
