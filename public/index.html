@@ -24,15 +24,14 @@
         }
         /* --- BASE & SCROLLBAR --- */
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-       
+        
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb {
-      background: var(--primary); 
-    
-    border-radius: 4px;
-    box-shadow: var(--glow-strong);
-}
+            background: var(--primary); 
+            border-radius: 4px;
+            box-shadow: var(--glow-strong);
+        }
         ::selection { background: var(--primary); color: #000; }
         body {
             font-family: 'Outfit', sans-serif;
@@ -52,8 +51,7 @@
             background: radial-gradient(circle at 50% 20%, rgba(0, 242, 255, 0.1) 0%, #00050a 50%, #000000 100%);
             z-index: -5;
         }
-       
-        /* Raggi di luce dinamici (Caustiche avanzate) */
+        
         .light-rays {
             position: fixed; top: -100%; left: -100%; width: 300%; height: 300%;
             background: repeating-radial-gradient(circle, transparent, rgba(0, 242, 255, 0.05) 10%, transparent 20%);
@@ -63,8 +61,7 @@
         }
         @keyframes sway { 0% { transform: rotate(0deg) translate(0, 0); } 100% { transform: rotate(10deg) translate(50px, 100px); } }
         @keyframes pulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 0.4; } }
-       
-        /* Onde sul fondo con parallax */
+        
         .wave-container {
             position: fixed; bottom: -50px; left: 0; width: 100%; height: 300px;
             z-index: -3; opacity: 0.4; pointer-events: none;
@@ -80,8 +77,7 @@
         .wave:nth-child(2) { bottom: 20px; opacity: 0.6; animation: waveMove 18s linear infinite reverse; transform: translateZ(-50px); }
         .wave:nth-child(3) { bottom: 40px; opacity: 0.3; animation: waveMove 30s linear infinite; transform: translateZ(-100px); }
         @keyframes waveMove { 0% { transform: translateX(0) rotateX(10deg); } 100% { transform: translateX(-50%) rotateX(10deg); } }
-       
-        /* Particelle avanzate (Bolle con fisica) */
+        
         .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -2; overflow: hidden; }
         .particle {
             position: absolute; background: radial-gradient(circle, var(--primary) 20%, transparent); border-radius: 50%;
@@ -94,13 +90,12 @@
             90% { opacity: 0.7; }
             100% { transform: translateY(-20vh) scale(1.2) rotate(360deg); opacity: 0; }
         }
-       
+        
         /* --- LAYOUT RESPONSIVE --- */
         .main-wrapper { width: 100%; max-width: 900px; padding: 30px; position: relative; z-index: 1; margin: 60px 0; }
-       
-        /* --- HEADER LEVIATHAN EVOLUTO --- */
+        
         header { text-align: center; margin-bottom: 60px; position: relative; }
-       
+        
         .logo-container {
             width: 180px; height: 180px; margin: 0 auto 25px;
             border-radius: 50%;
@@ -121,7 +116,7 @@
         }
         @keyframes sonarPulse { 0% { width: 0; height: 0; opacity: 1; } 100% { width: 300%; height: 300%; opacity: 0; } }
         @keyframes breathe { 0%, 100% { transform: scale(1); box-shadow: var(--glow-intense); } 50% { transform: scale(1.05); box-shadow: var(--glow-strong); } }
-       
+        
         .logo-image {
             width: 85%; height: 85%;
             object-fit: contain;
@@ -131,7 +126,7 @@
         }
         @keyframes icon-rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes pulseGlow { 0% { filter: drop-shadow(0 0 15px var(--primary)) brightness(1.2); } 100% { filter: drop-shadow(0 0 25px var(--primary)) brightness(1.4); } }
-       
+        
         .brand-title {
             font-family: 'Rajdhani', sans-serif; font-size: 6rem; font-weight: 800;
             margin: 0; line-height: 0.85; text-transform: uppercase; letter-spacing: -4px;
@@ -141,8 +136,7 @@
             animation: textGlow 3s infinite alternate;
         }
         @keyframes textGlow { 0% { filter: drop-shadow(0 0 25px rgba(0, 242, 255, 0.5)); } 100% { filter: drop-shadow(0 0 40px rgba(0, 242, 255, 0.7)); } }
-        
-        /* --- NUOVO SOTTOTITOLO STATICO (FERMO) --- */
+         
         .brand-subtitle {
             font-family: 'Rajdhani', sans-serif;
             font-size: 1.2rem;
@@ -156,9 +150,7 @@
             align-items: center;
             justify-content: center;
             text-shadow: 0 0 10px rgba(0, 242, 255, 0.4);
-            /* ANIMAZIONE RIMOSSA SU RICHIESTA UTENTE */
         }
-        /* Linee laterali fighissime */
         .brand-subtitle::before, .brand-subtitle::after {
             content: '';
             display: block;
@@ -169,9 +161,8 @@
             box-shadow: 0 0 10px var(--primary);
             opacity: 0.8;
         }
-        .brand-subtitle::after { transform: rotate(180deg); } /* Specchia la gradient */
+        .brand-subtitle::after { transform: rotate(180deg); }
 
-        /* --- VETRO HI-TECH AVANZATO --- */
         .glass-panel {
             background: linear-gradient(160deg, rgba(2, 12, 20, 0.85), rgba(0, 0, 0, 0.95));
             backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
@@ -199,8 +190,7 @@
             font-family: 'Rajdhani', sans-serif; font-size: 2rem; font-weight: 700; color: #fff;
             text-transform: uppercase; letter-spacing: 3px; text-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
         }
-       
-        /* --- CARDS EVOLUTE --- */
+        
         .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
         .info-card {
             background: rgba(0, 242, 255, 0.05); border: 1px solid rgba(0, 242, 255, 0.15);
@@ -218,8 +208,7 @@
         .info-card:hover .info-icon { transform: rotate(360deg); }
         .info-text h4 { margin: 0 0 8px 0; font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; text-transform: uppercase; }
         .info-text p { margin: 0; font-size: 1rem; color: var(--text-dim); line-height: 1.5; }
-       
-        /* --- TABS AVANZATI --- */
+        
         .service-tabs {
             display: flex; gap: 15px; margin-bottom: 35px; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 20px;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
@@ -244,8 +233,7 @@
         }
         .tab-icon { font-size: 2rem; display: block; transition: transform 0.6s ease, filter 0.4s; filter: drop-shadow(0 0 8px rgba(255,255,255,0.4)); }
         .service-tab:hover .tab-icon { transform: rotate(360deg) scale(1.15); filter: drop-shadow(0 0 12px var(--primary)); }
-       
-        /* --- INPUTS EVOLUTI --- */
+        
         .input-group { position: relative; margin-bottom: 30px; }
         .custom-input {
             width: 100%; background: rgba(0, 5, 10, 0.7); border: 1px solid rgba(255,255,255,0.15);
@@ -257,7 +245,7 @@
             box-shadow: var(--glow-intense), inset 0 0 15px rgba(0, 242, 255, 0.1);
         }
         .custom-input.input-error { border-color: var(--error); box-shadow: 0 0 20px rgba(255, 51, 102, 0.4); }
-       
+        
         .input-action {
             position: absolute; right: 10px; top: 10px; bottom: 10px;
             background: linear-gradient(135deg, rgba(0, 242, 255, 0.15), rgba(112, 0, 255, 0.15)); border: 1px solid rgba(0, 242, 255, 0.4);
@@ -266,24 +254,22 @@
             text-decoration: none; transition: 0.4s ease; cursor: pointer; text-transform: uppercase;
         }
         .input-action:hover { background: var(--primary); color: #000; box-shadow: var(--glow-intense); transform: scale(1.05); }
-       
+        
         .error-msg { position: absolute; bottom: -25px; left: 15px; color: var(--error); font-size: 0.9rem; opacity: 0; font-family: 'Rajdhani', sans-serif; text-transform: uppercase; font-weight: 700; transition: opacity 0.3s; }
         .custom-input.input-error + .error-msg, .custom-input.input-error + .input-action + .error-msg { opacity: 1; }
 
-        /* WARNING MESSAGES SPECIFICI */
         .ad-warning-msg {
             color: var(--warning);
             font-size: 0.9rem;
             margin-top: 10px;
-            display: none; /* Nascosto di default */
+            display: none;
             font-family: 'Rajdhani', sans-serif;
             text-transform: uppercase;
             font-weight: 700;
             padding-left: 15px;
             text-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
         }
-       
-        /* --- ADVANCED UNIT EVOLUTA --- */
+        
         .advanced-unit {
             border: 1px solid rgba(112, 0, 255, 0.4); background: linear-gradient(135deg, rgba(112, 0, 255, 0.08), transparent);
             border-radius: 20px; padding: 30px; margin-top: 50px; position: relative;
@@ -306,21 +292,21 @@
         .control-row:hover { background: rgba(255,255,255,0.03); }
         .control-title { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1.2rem; color: #fff; display: flex; align-items: center; gap: 12px; }
         .control-desc { display: block; font-size: 0.95rem; color: var(--text-dim); margin-top: 8px; font-weight: 300; line-height: 1.5; max-width: 90%; }
-       
+        
         .control-info { 
             flex: 1; 
             padding-right: 20px; 
-            min-width: 0; /* IMPEDISCE OVERFLOW SU MOBILE */
+            min-width: 0;
         }
-       
-        /* --- SWITCHES AVANZATI --- */
+        
+        /* GENERAL SWITCH STYLES (for small switches) */
         .switch { position: relative; width: 60px; height: 30px; flex-shrink: 0; margin-left: 10px;}
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #1a1a1a; transition: .4s; border-radius: 34px; border: 1px solid #333; }
         .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 4px; bottom: 3px; background-color: #888; transition: .4s; border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
         input:checked + .slider { background-color: rgba(0, 242, 255, 0.25); border-color: var(--primary); }
         input:checked + .slider:before { transform: translateX(28px); background-color: var(--primary); box-shadow: var(--glow-strong); }
-       
+        
         .mf-switch input:checked + .slider { border-color: var(--secondary); background-color: rgba(112,0,255,0.25); }
         .mf-switch input:checked + .slider:before { background-color: var(--secondary); box-shadow: 0 0 15px var(--secondary); }
         .mf-group { display: grid; gap: 15px; margin-top: 25px; opacity: 0.3; pointer-events: none; filter: blur(3px); transition: 0.5s ease; }
@@ -328,9 +314,8 @@
         .mf-input { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); padding: 15px; color: #fff; width: 100%; border-radius: 10px; font-family: 'Outfit', sans-serif; transition: 0.3s; }
         .mf-input:focus { border-color: var(--secondary); outline: none; box-shadow: 0 0 15px rgba(112,0,255,0.3); }
 
-        /* --- SUB ROW (Nested Options) --- */
         .sub-row {
-            display: none; /* Nascosto di default */
+            display: none;
             background: rgba(0,0,0,0.3);
             border-bottom: 1px solid rgba(255,255,255,0.05);
             padding: 12px 15px 12px 25px;
@@ -345,8 +330,179 @@
             border-left: 2px solid var(--primary);
             padding-left: 15px;
         }
-       
-        /* --- FILTER GRID --- */
+
+        /* --- LEVIATHAN CORE / DB SECTION --- */
+        .db-section-wrapper {
+            margin: 40px 0;
+            position: relative;
+            z-index: 5;
+        }
+
+        .db-card {
+            background: rgba(0, 10, 20, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .db-bg-anim {
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(from 0deg, transparent 0deg, transparent 60deg, var(--primary) 180deg, transparent 300deg);
+            opacity: 0;
+            transition: opacity 0.5s;
+            animation: rotateBg 4s linear infinite;
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+
+        .db-card::before {
+            content: ''; position: absolute; inset: 1px;
+            background: rgba(2, 8, 12, 0.95);
+            border-radius: 17px;
+            z-index: 1;
+        }
+
+        .db-content {
+            position: relative; z-index: 2;
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 20px;
+        }
+         
+        .db-info {
+            flex: 1;
+            min-width: 0;
+            padding-right: 15px;
+        }
+
+        .db-header {
+            display: flex; align-items: center; gap: 15px;
+            margin-bottom: 8px;
+        }
+
+        .db-icon-main {
+            font-size: 1.8rem;
+            color: var(--text-dim);
+            transition: 0.4s;
+        }
+
+        .db-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #fff;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .db-desc {
+            margin: 0;
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            line-height: 1.4;
+        }
+
+        .db-status {
+            display: inline-block;
+            margin-left: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            color: #888;
+            transition: 0.4s;
+            letter-spacing: 1px;
+        }
+
+        /* --- STATO ATTIVO (QUANDO IL DB E' ON) --- */
+        .db-card.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 40px rgba(0, 242, 255, 0.15), inset 0 0 20px rgba(0, 242, 255, 0.05);
+            transform: scale(1.02);
+        }
+
+        .db-card.active .db-bg-anim { opacity: 0.3; }
+
+        .db-card.active .db-icon-main {
+            color: var(--primary);
+            filter: drop-shadow(0 0 10px var(--primary));
+            transform: scale(1.1);
+            animation: pulse 1.5s infinite;
+        }
+
+        .db-card.active .db-title {
+            background: linear-gradient(90deg, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px var(--primary-dim));
+        }
+
+        .db-card.active .db-status {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 15px var(--primary);
+            content: "ONLINE";
+        }
+
+        /* --- FIXED SWITCH FOR DB CARD (ISOLATED) --- */
+        .db-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            min-width: 60px; /* Force width */
+            height: 34px;
+            flex-shrink: 0; /* Prevent flex crushing */
+            margin-left: 10px;
+        }
+         
+        /* Checkbox hidden */
+        .db-switch input { opacity: 0; width: 0; height: 0; }
+
+        /* The Switch Track */
+        .db-switch .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1); /* Visible track background */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: .4s;
+            border-radius: 34px;
+        }
+         
+        /* The Switch Knob */
+        .db-switch .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px; width: 26px;
+            left: 3px;
+            top: 50%;
+            transform: translateY(-50%); /* Perfect Center */
+            background-color: #b0b0b0;
+            transition: .4s cubic-bezier(0.4, 0.0, 0.2, 1);
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        /* Checked State */
+        .db-switch input:checked + .slider {
+            background-color: rgba(0, 242, 255, 0.2);
+            border-color: var(--primary);
+        }
+
+        .db-switch input:checked + .slider:before {
+            transform: translate(26px, -50%); /* Slide right keeping center */
+            background-color: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        @keyframes rotateBg { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
         .section-header {
             margin: 50px 0 25px; font-family: 'Rajdhani', sans-serif; font-size: 1.4rem; font-weight: 700;
             color: var(--primary); text-transform: uppercase; letter-spacing: 4px; border-left: 4px solid var(--primary); padding-left: 20px;
@@ -359,8 +515,7 @@
             transition: 0.4s ease;
         }
         .option-card:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); transform: translateY(-3px); box-shadow: 0 0 15px rgba(255,255,255,0.1); }
-       
-        /* --- BUTTONS AVANZATI --- */
+        
         .action-area { display: flex; gap: 20px; margin-top: 50px; flex-direction: column; }
         @media(min-width: 600px) { .action-area { flex-direction: row; } }
         .btn-install {
@@ -400,8 +555,7 @@
             font-family: 'Rajdhani', sans-serif; font-weight: 600; transition: 0.4s ease; text-transform: uppercase;
         }
         .btn-donate:hover { background: var(--primary); color: #000; box-shadow: var(--glow-intense); border-color: var(--primary); transform: scale(1.05); }
-       
-        /* --- TOOLTIP AVANZATI --- */
+        
         .tooltip-wrapper { position: relative; display: inline-block; margin-left: 10px; }
         .tooltip-icon {
             color: var(--text-dim); border: 1px solid rgba(255,255,255,0.25); width: 20px; height: 20px;
@@ -416,8 +570,7 @@
             font-size: 0.9rem; box-shadow: var(--glow-strong); pointer-events: none;
         }
         .tooltip-wrapper:hover .tooltip-content { visibility: visible; opacity: 1; bottom: 150%; }
-       
-        /* --- MODALS EVOLUTI --- */
+        
         .modal-backdrop {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95);
             backdrop-filter: blur(15px); z-index: 100; display: none; align-items: center; justify-content: center;
@@ -431,7 +584,7 @@
         }
         .modal-backdrop.show .modal-content { transform: scale(1); }
         .modal-title { font-family: 'Rajdhani', sans-serif; font-size: 2rem; color: var(--primary); margin-bottom: 25px; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 15px; text-shadow: 0 0 15px var(--primary); }
-       
+        
         .faq-item { border-bottom: 1px solid rgba(255,255,255,0.08); padding: 18px 0; transition: background 0.3s; }
         .faq-item:hover { background: rgba(255,255,255,0.03); }
         .faq-q { font-weight: 600; color: #fff; cursor: pointer; display: flex; justify-content: space-between; transition: color 0.3s; }
@@ -447,110 +600,45 @@
         .m-close:hover { background: rgba(255,255,255,0.25); transform: scale(1.05); }
         .m-go { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #000; box-shadow: var(--glow-strong); }
         .m-go:hover { box-shadow: var(--glow-intense); transform: scale(1.05); }
-       
-        /* --- MEDIA QUERY OPTIMIZED "THE BOMB" MOBILE --- */
+        
         @media (max-width: 768px) {
-            /* Header più compatto */
             header { margin-bottom: 30px; margin-top: 20px; }
             .brand-title { font-size: 3.5rem; letter-spacing: -2px; }
-            /* Adattamento sottotitolo mobile */
             .brand-subtitle { font-size: 0.9rem; letter-spacing: 4px; margin-top: 10px; }
             .brand-subtitle::before, .brand-subtitle::after { width: 20px; margin: 0 10px; }
-            
             .logo-container { width: 130px; height: 130px; margin-bottom: 15px; }
-            
-            /* Contenitore principale */
             .main-wrapper { margin: 0; padding: 15px; width: 100%; }
             .glass-panel { padding: 20px 15px; border-radius: 20px; margin-bottom: 25px; }
-
-            /* Griglia Info Sistemi di Bordo (2x2 invece di 1x4) */
-            .info-grid { 
-                grid-template-columns: 1fr 1fr; 
-                gap: 10px; 
-            }
-            .info-card { 
-                flex-direction: column; 
-                align-items: center; 
-                text-align: center; 
-                padding: 15px 10px; 
-                gap: 10px;
-                height: 100%;
-            }
+            .info-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .info-card { flex-direction: column; align-items: center; text-align: center; padding: 15px 10px; gap: 10px; height: 100%; }
             .info-icon { font-size: 1.5rem; margin: 0; }
             .info-text h4 { font-size: 0.9rem; margin-bottom: 0; line-height: 1.2; }
-            .info-text p { display: none; } /* Nasconde descrizione per pulizia su mobile */
-            
-            /* Tabs Servizi: Orizzontali anche su mobile */
-            .service-tabs { 
-                flex-direction: row; 
-                gap: 8px; 
-                padding: 5px; 
-                overflow-x: auto; /* Fallback per schermi minuscoli */
-            }
-            .service-tab { 
-                padding: 12px 5px; 
-                font-size: 0.85rem; 
-                min-width: 0; /* Permette shrinking */
-            }
+            .info-text p { display: none; }
+            .service-tabs { flex-direction: row; gap: 8px; padding: 5px; overflow-x: auto; }
+            .service-tab { padding: 12px 5px; font-size: 0.85rem; min-width: 0; }
             .tab-icon { font-size: 1.4rem; margin-bottom: 5px; }
-
-            /* Input Key */
-            .input-group { 
-                margin-bottom: 35px; 
-                display: flex;
-                flex-direction: column;
-            }
-            .custom-input { 
-                padding: 18px; 
-                font-size: 1rem; 
-                text-align: center;
-                padding-bottom: 50px; /* Spazio per il bottone interno */
-            }
-            .input-action {
-                position: absolute;
-                bottom: 6px; 
-                left: 6px; 
-                right: 6px;
-                top: auto;
-                width: auto;
-                justify-content: center;
-                padding: 10px;
-                font-size: 0.9rem;
-                background: rgba(0, 242, 255, 0.1);
-                border: 1px solid rgba(0, 242, 255, 0.2);
-            }
+            .input-group { margin-bottom: 35px; display: flex; flex-direction: column; }
+            .custom-input { padding: 18px; font-size: 1rem; text-align: center; padding-bottom: 50px; }
+            .input-action { position: absolute; bottom: 6px; left: 6px; right: 6px; top: auto; width: auto; justify-content: center; padding: 10px; font-size: 0.9rem; background: rgba(0, 242, 255, 0.1); border: 1px solid rgba(0, 242, 255, 0.2); }
             .error-msg { bottom: -22px; text-align: center; width: 100%; left: 0; }
             .ad-warning-msg { text-align: center; padding-left: 0; }
-
-            /* Griglia Filtri (Switches) 2 colonne */
-            .options-grid { 
-                grid-template-columns: 1fr 1fr; 
-                gap: 10px; 
-            }
-            .option-card { 
-                flex-direction: column; 
-                justify-content: center; 
-                text-align: center; 
-                gap: 12px; 
-                padding: 15px 5px;
-            }
+            .options-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .option-card { flex-direction: column; justify-content: center; text-align: center; gap: 12px; padding: 15px 5px; }
             .opt-label { font-size: 0.9rem; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-            .tooltip-wrapper { margin: 0; } /* Centra tooltip */
-
-            /* Advanced Unit Fix (StreamingCommunity/Proxy) */
+            .tooltip-wrapper { margin: 0; }
             .advanced-unit { padding: 20px 15px; margin-top: 30px; }
             .unit-label { left: 50%; transform: translateX(-50%); width: max-content; }
-            
             .control-row { padding: 15px 0; }
-            .control-title { font-size: 1rem; gap: 8px; } /* Meno gap tra icona e testo */
-            .control-info { padding-right: 5px; } /* Meno padding destro per dare spazio al testo */
-            
-            /* Performance */
-            .glass-panel, .logo-container, .modal-backdrop {
-                backdrop-filter: none !important;
-                -webkit-backdrop-filter: none !important;
-                background: rgba(0, 5, 10, 0.98) !important;
-            }
+            .control-title { font-size: 1rem; gap: 8px; }
+            .control-info { padding-right: 5px; }
+             
+            /* Mobile DB Section */
+            .db-content { flex-direction: column; text-align: center; }
+            .db-header { justify-content: center; }
+            .db-status { display: block; margin: 10px auto 0; width: fit-content; }
+            .db-info { padding-right: 0; margin-bottom: 15px; } /* Added margin for mobile spacing */
+
+            .glass-panel, .logo-container, .modal-backdrop { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgba(0, 5, 10, 0.98) !important; }
             .light-rays, .wave-container { display: none !important; }
             .particle { box-shadow: none !important; background: var(--primary); }
         }
@@ -645,7 +733,7 @@
             </div>
             <div class="advanced-unit" id="advUnit">
                 <div class="unit-label notranslate" translate="no">MEDIAFLOW PROXY SYSTEM</div>
-               
+                
                 <div class="control-row">
                     <div class="control-info">
                         <div class="control-title notranslate" translate="no">
@@ -675,7 +763,7 @@
                         <span class="slider"></span>
                     </label>
                 </div>
-               
+                
                 <div class="control-row">
                     <div class="control-info">
                         <div class="control-title">
@@ -699,8 +787,31 @@
                     <input type="password" id="mfPass" class="mf-input" style="margin-top: 10px;" placeholder="Password Proxy (Opzionale)">
                 </div>
             </div>
+
+            <div class="db-section-wrapper">
+                <div class="db-card" id="dbCard">
+                    <div class="db-bg-anim"></div>
+                    <div class="db-content">
+                        <div class="db-info">
+                            <div class="db-header">
+                                <i class="fas fa-bolt db-icon-main"></i>
+                                <span class="db-title">DATABASE OVERDRIVE</span>
+                            </div>
+                            <p class="db-desc">
+                                Bypassa gli scraper esterni. Interrogazione diretta al Core.
+                                <span class="db-status" id="dbStatusText">STANDBY</span>
+                            </p>
+                        </div>
+                        <div class="db-action">
+                            <label class="db-switch"> <input type="checkbox" id="dbOnly" onchange="toggleDbCard()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="section-header">FILTRI DI RICERCA</div>
-           
+            
             <div class="options-grid">
                 <div class="option-card">
                     <span class="opt-label" style="color:#ccc; font-weight:500;">Audio ENG
@@ -718,10 +829,6 @@
                 <div class="option-card">
                     <span class="opt-label" style="color:#ccc; font-weight:500;">No Cam/Screener</span>
                     <label class="switch"><input type="checkbox" id="noCam" checked><span class="slider"></span></label>
-                </div>
-                <div class="option-card">
-                    <span class="opt-label" style="color:#ccc; font-weight:500;">Mostra Check Cache</span>
-                    <label class="switch"><input type="checkbox" id="showFake"><span class="slider"></span></label>
                 </div>
                 <div class="option-card">
                     <span class="opt-label" style="color:#ccc; font-weight:500;">Compatibilità AIO
@@ -778,6 +885,10 @@
                     <div class="faq-a">È il motore turbo. Scarica i file per te sui suoi server veloci per permetterti lo streaming istantaneo senza buffering.</div>
                 </div>
                 <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-q">Cos'è la modalità Solo Database? <i class="fas fa-chevron-down"></i></div>
+                    <div class="faq-a">Questa modalità bypassa tutti gli scraper esterni e i motori di ricerca integrati, consultando esclusivamente l'indexer VPS. È la scelta più veloce possibile se cerchi contenuti già presenti nel database di Leviathan.</div>
+                </div>
+                <div class="faq-item" onclick="toggleFaq(this)">
                     <div class="faq-q">Serve il Proxy? <i class="fas fa-chevron-down"></i></div>
                     <div class="faq-a">Non è obbligatorio per l'uso base. Puoi abilitarlo se vuoi usare <span class="notranslate" translate="no">Debrid Proxy Ghost</span> (per nascondere l'IP a Debrid) o se il tuo ISP blocca specifici servizi.</div>
                 </div>
@@ -792,14 +903,11 @@
         </div>
     </div>
     <script>
-        // --- PARTICLES OTTIMIZZATE ---
         function createParticles() {
             const container = document.getElementById('particles');
-            const isMobile = window.innerWidth < 768; // Rileva se è mobile
-            const count = isMobile ? 20 : 80; // Riduce drasticamente le particelle su mobile
-            
-            container.innerHTML = ''; // Pulisce il contenitore
-            
+            const isMobile = window.innerWidth < 768;
+            const count = isMobile ? 20 : 80;
+            container.innerHTML = '';
             for(let i=0; i < count; i++) {
                 const p = document.createElement('div');
                 p.classList.add('particle');
@@ -815,34 +923,41 @@
             }
         }
 
-        // --- LOGIC ---
         let currentService = 'rd';
         
-        // Funzione per mostrare/nascondere opzioni Proxy
         function toggleMediaFlowGroup() {
             const ghost = document.getElementById('proxyDebrid').checked;
             const unit = document.getElementById('advUnit');
-           
             if (ghost) unit.classList.add('mf-active');
             else unit.classList.remove('mf-active');
         }
 
-        // NUOVA FUNZIONE: Mostra opzioni SC solo se attivato
         function toggleSCOptions() {
             const scActive = document.getElementById('enableVix').checked;
             const priorityRow = document.getElementById('scPriorityRow');
-            if (scActive) {
-                priorityRow.style.display = 'flex';
+            priorityRow.style.display = scActive ? 'flex' : 'none';
+        }
+
+        // --- NEW DB CARD FUNCTION ---
+        function toggleDbCard() {
+            const chk = document.getElementById('dbOnly');
+            const card = document.getElementById('dbCard');
+            const statusText = document.getElementById('dbStatusText');
+            
+            if (chk.checked) {
+                card.classList.add('active');
+                statusText.innerText = "ONLINE ⚡";
             } else {
-                priorityRow.style.display = 'none';
+                card.classList.remove('active');
+                statusText.innerText = "STANDBY";
             }
         }
 
         function clearError(input) { input.classList.remove('input-error'); }
         function toggleFaq(el) { el.classList.toggle('open'); }
+
         window.onload = function() {
             createParticles();
-            // Ricrea le particelle se si ridimensiona la finestra per adattarsi
             window.onresize = createParticles;
 
             try {
@@ -862,18 +977,19 @@
                         document.getElementById('allowEng').checked = config.filters.allowEng || false;
                         document.getElementById('no4k').checked = config.filters.no4k || false;
                         document.getElementById('noCam').checked = config.filters.noCam || false;
-                        document.getElementById('showFake').checked = config.filters.showFake || false;
-                        
-                        // Setta stato SC e Priorità
                         document.getElementById('enableVix').checked = config.filters.enableVix || false;
                         document.getElementById('vixLast').checked = config.filters.vixLast || false;
+                        
+                        // Load DB Only state and update visual
+                        document.getElementById('dbOnly').checked = config.filters.dbOnly || false;
+                        toggleDbCard();
                     }
-                    // Trigger per aggiornare la UI in base ai valori caricati
                     toggleMediaFlowGroup();
                     toggleSCOptions(); 
                 }
             } catch (e) {}
         };
+
         function selectService(service, skipReset = false) {
             if(currentService !== service && !skipReset) {
                 document.getElementById('apiKey').value = "";
@@ -882,31 +998,27 @@
             document.querySelectorAll('.service-tab').forEach(el => el.classList.remove('active'));
             const tabs = document.querySelectorAll('.service-tab');
             const links = { 'rd': ['https://real-debrid.com/apitoken', 'INCOLLA KEY REAL-DEBRID'], 'ad': ['https://alldebrid.com/apikeys', 'INCOLLA KEY ALLDEBRID'], 'tb': ['https://torbox.app/settings', 'INCOLLA KEY TORBOX'] };
-           
+            
             if (service === 'rd') tabs[0].classList.add('active');
             if (service === 'ad') tabs[1].classList.add('active');
             if (service === 'tb') tabs[2].classList.add('active');
-           
+            
             document.getElementById('apiLink').href = links[service][0];
             document.getElementById('apiKey').placeholder = links[service][1];
 
-            // LOGICA AVVISO ALLDEBRID
             const adWarning = document.getElementById('ad-warning');
-            if (service === 'ad') {
-                adWarning.style.display = 'block';
-            } else {
-                adWarning.style.display = 'none';
-            }
+            adWarning.style.display = service === 'ad' ? 'block' : 'none';
         }
+
         function validateInputs() {
             let isValid = true;
-           
             ['apiKey'].forEach(id => {
                 const el = document.getElementById(id);
                 if (!el.value.trim()) { el.classList.add('input-error'); isValid = false; }
             });
             return isValid;
         }
+
         function getConfigObject() {
             return {
                 service: currentService,
@@ -922,57 +1034,70 @@
                     allowEng: document.getElementById('allowEng').checked,
                     no4k: document.getElementById('no4k').checked,
                     noCam: document.getElementById('noCam').checked,
-                    showFake: document.getElementById('showFake').checked,
                     enableVix: document.getElementById('enableVix').checked,
-                    vixLast: document.getElementById('vixLast').checked
+                    vixLast: document.getElementById('vixLast').checked,
+                    dbOnly: document.getElementById('dbOnly').checked
                 }
             };
         }
+
         function getBaseManifestUrl() {
             if(!validateInputs()) return null;
             return `${window.location.host}/${btoa(JSON.stringify(getConfigObject()))}/manifest.json`;
         }
+
         function openFaqModal() {
             const m = document.getElementById('faqModal'); m.style.display = 'flex';
             setTimeout(() => m.classList.add('show'), 10);
         }
+
         function confirmInstall() {
             if(!validateInputs()) { document.querySelector('.main-wrapper').scrollIntoView({ behavior: 'smooth' }); return; }
             const c = getConfigObject();
             const list = document.getElementById('modalSummary');
             
-            // Logica visualizzazione riassunto
             let scText = c.filters.enableVix ? 'ATTIVO' : 'NO';
             if (c.filters.enableVix && c.filters.vixLast) scText += ' (Priorità Bassa)';
             else if (c.filters.enableVix) scText += ' (Priorità Alta)';
 
+            // Updated Summary with new DB visual text
             list.innerHTML = `
                 <li>Servizio Debrid <span>${c.service.toUpperCase()}</span></li>
-                <li>Includi ENG <span>${c.filters.allowEng ? 'ATTIVO' : 'NO'}</span></li>
+                <li>Database Core <span>${c.filters.dbOnly ? 'OVERDRIVE ⚡' : 'STANDARD'}</span></li>
+                <li>Includi ENG <span>${c.filters.allowEng ? 'SI' : 'NO'}</span></li>
                 <li>StreamingCommunity <span>${scText}</span></li>
-                <li>Modalità AIOStreams <span>${c.aiostreams_mode ? 'ATTIVO' : 'NO'}</span></li>
                 <li>Proxy Ghost <span>${c.mediaflow.proxyDebrid ? 'ATTIVO' : 'NO'}</span></li>
             `;
             const m = document.getElementById('installModal'); m.style.display = 'flex';
             setTimeout(() => m.classList.add('show'), 10);
         }
+
         function closeModal(id) {
             const m = document.getElementById(id); m.classList.remove('show');
             setTimeout(() => m.style.display = 'none', 300);
         }
+
         window.onclick = function(e) { if (e.target.classList.contains('modal-backdrop')) closeModal(e.target.id); }
+
         function proceedToInstall() {
             const url = getBaseManifestUrl();
             if(url) window.location.href = `stremio://${url}`;
         }
+
         function copyLink() {
             const url = getBaseManifestUrl();
             if(url) {
-                navigator.clipboard.writeText(`${window.location.protocol}//${url}`).then(() => {
-                    const t = document.getElementById('copyText');
-                    const old = t.innerText; t.innerText = "COPIATO!"; t.style.color = "#00f2ff";
-                    setTimeout(() => { t.innerText = old; t.style.color = ""; }, 2000);
-                });
+                const fullUrl = `${window.location.protocol}//${url}`;
+                const dummy = document.createElement("input");
+                document.body.appendChild(dummy);
+                dummy.value = fullUrl;
+                dummy.select();
+                document.execCommand("copy");
+                document.body.removeChild(dummy);
+
+                const t = document.getElementById('copyText');
+                const old = t.innerText; t.innerText = "COPIATO!"; t.style.color = "#00f2ff";
+                setTimeout(() => { t.innerText = old; t.style.color = ""; }, 2000);
             }
         }
     </script>
