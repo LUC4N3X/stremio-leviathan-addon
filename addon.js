@@ -64,7 +64,8 @@ dbHelper.initDatabase();
 
 // --- CONFIGURAZIONE CENTRALE ---
 const CONFIG = {
-  INDEXER_URL: process.env.INDEXER_URL || "",
+  // 🔥 PUNTO CRITICO: Legge l'URL dal file .env come richiesto
+  INDEXER_URL: process.env.INDEXER_URL || "", 
   CINEMETA_URL: "https://v3-cinemeta.strem.io",
   REAL_SIZE_FILTER: 80 * 1024 * 1024,
   MAX_RESULTS: 70,
@@ -272,7 +273,6 @@ function extractStreamInfo(title, source) {
   if (/imax/.test(t)) videoTags.push("IMAX");
   if (/x265|h265|hevc/.test(t)) videoTags.push("HEVC");
   
-  // MODIFICA PER KNABEN: Aggiunto "knaben" al regex
   let lang = "🇬🇧 ENG";
   if (/corsaro|knaben/i.test(source) || isSafeForItalian({ title })) {
       lang = "🇮🇹 ITA";
@@ -319,11 +319,10 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
         } else if (/comet/i.test(source)) {
             displaySource = "StremThru";
         } else {
-             // PULIZIA AGGRESSIVA
              displaySource = source
                 .replace(/TorrentGalaxy|tgx/i, 'TGx')
                 .replace(/\b1337\b/i, '1337x')
-                .replace(/Fallback/ig, '') // AGGRESSIVE REMOVE
+                .replace(/Fallback/ig, '') 
                 .trim();
         }
 
@@ -350,18 +349,16 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     const sizeStr = `🧲 ${sizeString}`;
     const seedersStr = seeders != null ? `👤 ${seeders}` : "";
 
-    // MODIFICA BANDIERINE (MULTI, ITA, ENG)
     let langStr = "🌐 ?";
-    // Controllo Multi per primo (contiene spesso anche ITA)
     if (/multi/i.test(lang || "")) langStr = "🌐 MULTI"; 
     else if (/ita|it\b|italiano/i.test(lang || "")) langStr = "🇮🇹 ITA";
     else if (/eng|en\b|english/i.test(lang || "")) langStr = "🇬🇧 ENG";
     else if (lang) langStr = `🗣️ ${lang.toUpperCase()}`;
     
-let displaySource = source || "P2P";
+    let displaySource = source || "P2P";
 
     if (/1337/i.test(displaySource)) {
-        displaySource = "1337x"; // Forza il nome ed elimina Torrentio
+        displaySource = "1337x"; 
     } else if (/corsaro/i.test(displaySource)) {
         displaySource = "ilCorSaRoNeRo";
     } else if (/knaben/i.test(displaySource)) {
@@ -370,7 +367,7 @@ let displaySource = source || "P2P";
         displaySource = "StremThru";
     } else {
         displaySource = displaySource
-            .replace(/Torrentio/gi, '') // Rimuove Torrentio se presente altrove
+            .replace(/Torrentio/gi, '') 
             .replace(/TorrentGalaxy|tgx/i, 'TGx')
             .replace(/Fallback/ig, '')
             .trim() || "P2P";
@@ -447,18 +444,9 @@ async function withTimeout(promise, ms, operation = 'Operation') {
 // --- HELPER TMDB METADATA (NOVITÀ) ---
 async function fetchTmdbMeta(tmdbId, type, userApiKey) {
     if (!tmdbId) return null;
-    
-    // 🔥 LOGICA CHIAVE UTENTE VS DEFAULT
-    // Se l'utente ha inserito una chiave valida (>1 char), usa quella.
-    // Altrimenti usa la chiave di fallback (la tua).
-    const apiKey = (userApiKey && userApiKey.length > 1) 
-        ? userApiKey 
-        : "4b9dfb8b1c9f1720b5cd1d7efea1d845";
-
+    const apiKey = (userApiKey && userApiKey.length > 1) ? userApiKey : "4b9dfb8b1c9f1720b5cd1d7efea1d845";
     const endpoint = type === 'series' || type === 'tv' ? 'tv' : 'movie';
-    // Importante: language=it-IT per avere titoli italiani
     const url = `https://api.themoviedb.org/3/${endpoint}/${tmdbId}?api_key=${apiKey}&language=it-IT`;
-    
     try {
         const { data } = await axios.get(url, { timeout: CONFIG.TIMEOUTS.TMDB });
         return data;
@@ -478,7 +466,6 @@ async function getMetadata(id, type, config = {}) {
     let season = 0; 
     let episode = 0;
 
-    // Parsing ID (gestione tt12345:1:1)
     if (type === "series" && id.includes(":")) {
         const parts = id.split(":");
         imdbId = parts[0];
@@ -486,28 +473,19 @@ async function getMetadata(id, type, config = {}) {
         episode = parseInt(parts[2]);
     }
     
-    // Pulizia ID base
     const cleanId = imdbId.match(/^(tt\d+|\d+)$/i)?.[0] || imdbId;
     if (!cleanId) return null;
 
-    // --- 1. TENTATIVO PRINCIPALE: TMDB (Via ID Converter) ---
     try {
-        const userTmdbKey = config.tmdb; // Prende la key dalla config utente
-        
-        // Convertiamo l'ID (IMDb -> TMDB) usando il tuo converter esistente
-        // Passiamo la key utente anche al converter
+        const userTmdbKey = config.tmdb; 
         const { tmdbId } = await imdbToTmdb(cleanId, userTmdbKey);
 
         if (tmdbId) {
-            // Recuperiamo i dettagli in ITALIANO usando la funzione helper
-            // che gestisce la priorità della chiave
             const tmdbData = await fetchTmdbMeta(tmdbId, type, userTmdbKey);
             
             if (tmdbData) {
                 const title = tmdbData.title || tmdbData.name;
                 const originalTitle = tmdbData.original_title || tmdbData.original_name;
-                
-                // Estrazione Anno
                 const releaseDate = tmdbData.release_date || tmdbData.first_air_date;
                 const year = releaseDate ? releaseDate.split("-")[0] : "";
 
@@ -518,7 +496,7 @@ async function getMetadata(id, type, config = {}) {
                     originalTitle: originalTitle,
                     year: year,
                     imdb_id: cleanId,
-                    tmdb_id: tmdbId, // Salviamo anche il TMDB ID
+                    tmdb_id: tmdbId, 
                     isSeries: type === "series",
                     season: season,
                     episode: episode
@@ -529,7 +507,6 @@ async function getMetadata(id, type, config = {}) {
         logger.warn(`⚠️ Errore Metadata TMDB, fallback a Cinemeta: ${err.message}`);
     }
 
-    // --- 2. FALLBACK: CINEMETA (Originale) ---
     logger.info(`ℹ️ [META] Fallback a Cinemeta per ${cleanId}`);
     const { data: cData } = await axios.get(`${CONFIG.CINEMETA_URL}/meta/${type}/${cleanId}.json`, { timeout: CONFIG.TIMEOUTS.TMDB }).catch(() => ({ data: {} }));
     
@@ -667,7 +644,7 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta = null, d
 async function queryRemoteIndexer(tmdbId, type, season = null, episode = null) {
     if (!CONFIG.INDEXER_URL) return [];
     try {
-        logger.info(`🌐 [REMOTE] Query VPS A: ${tmdbId} S:${season} E:${episode}`);
+        logger.info(`🌐 [REMOTE] Query VPS: ${CONFIG.INDEXER_URL} | ID: ${tmdbId} S:${season} E:${episode}`);
         let url = `${CONFIG.INDEXER_URL}/api/get/${tmdbId}`;
         if (season) url += `?season=${season}`;
         if (episode) url += `&episode=${episode}`;
@@ -732,7 +709,7 @@ async function fetchExternalResults(type, finalId) {
     }
 }
 
-// --- GENERATE STREAM CON LOGICA 100% PARALLELA ---
+// --- GENERATE STREAM CON LOGICA SOLO DATABASE ---
 async function generateStream(type, id, config, userConfStr, reqHost) {
   if (!config.key && !config.rd) return { streams: [{ name: "⚠️ CONFIG", title: "Inserisci API Key nel configuratore" }] };
   
@@ -742,7 +719,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   const cachedResult = await Cache.getCachedStream(cacheKey);
   if (cachedResult) return cachedResult;
 
-  const userTmdbKey = config.tmdb; // 🔥 CHIAVE UTENTE (se presente)
+  const userTmdbKey = config.tmdb; 
   let finalId = id.replace('ai-recs:', '');
   
   if (finalId.startsWith("tmdb:")) {
@@ -766,15 +743,14 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       } catch (err) {}
   }
 
-  // 🔥 MODIFICA: Passiamo config per permettere l'uso della API Key utente in getMetadata (per TMDB)
   const meta = await getMetadata(finalId, type, config);
   if (!meta) return { streams: [] };
 
-  logger.info(`🚀 [SPEED] Start PARALLEL search: ${meta.title}`);
+  logger.info(`🚀 [SPEED] Start search for: ${meta.title}`);
   
   const tmdbIdLookup = meta.tmdb_id || (await imdbToTmdb(meta.imdb_id, userTmdbKey))?.tmdbId;
 
-  // --- 1. REMOTE INDEXER ---
+  // --- 1. REMOTE INDEXER PROMISE (Sempre usata) ---
   const remotePromise = withTimeout(
       queryRemoteIndexer(tmdbIdLookup, type, meta.season, meta.episode),
       CONFIG.TIMEOUTS.REMOTE_INDEXER,
@@ -784,44 +760,54 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       return [];
   });
 
-  // --- 2. EXTERNAL ADDONS ---
-  const externalPromise = fetchExternalResults(type, finalId);
-
-  // --- 3. SCRAPERS LOCALI (ENGINES) ---
-  // Logica spostata qui per essere eseguita in parallelo e non in fallback
-  let dynamicTitles = [];
-  try {
-      if (tmdbIdLookup) dynamicTitles = await getTmdbAltTitles(tmdbIdLookup, type, userTmdbKey);
-  } catch (e) {}
-  const allowEng = config.filters?.allowEng === true;
-  const queries = generateSmartQueries(meta, dynamicTitles, allowEng);
+  // --- LOGICA "SOLO DATABASE" ---
+  const dbOnlyMode = config.filters?.dbOnly === true; // Flag dal frontend
   
+  let externalPromise = Promise.resolve([]);
   let scraperPromise = Promise.resolve([]);
-  if (queries.length > 0) {
-      const allScraperTasks = [];
-      queries.forEach(q => {
-          SCRAPER_MODULES.forEach(scraper => {
-              if (scraper.searchMagnet) {
-                  const searchOptions = { allowEng };
-                  allScraperTasks.push(
-                      LIMITERS.scraper.schedule(() => 
-                          withTimeout(
-                              scraper.searchMagnet(q, meta.year, type, finalId, searchOptions),
-                              CONFIG.TIMEOUTS.SCRAPER,
-                              `Scraper ${scraper.name || 'Module'}`
-                          ).catch(err => {
-                              logger.warn(`Scraper Timeout/Error: ${err.message}`);
-                              return [];
-                          })
-                      )
-                  );
-              }
+
+  if (dbOnlyMode) {
+      logger.info(`⚡ [MODE] SOLO DATABASE ATTIVO - Interrogo SOLO: ${CONFIG.INDEXER_URL}`);
+      // External e Scraper rimangono Promise vuote
+  } else {
+      // --- 2. EXTERNAL ADDONS ---
+      externalPromise = fetchExternalResults(type, finalId);
+
+      // --- 3. SCRAPERS LOCALI ---
+      let dynamicTitles = [];
+      try {
+          if (tmdbIdLookup) dynamicTitles = await getTmdbAltTitles(tmdbIdLookup, type, userTmdbKey);
+      } catch (e) {}
+
+      const allowEng = config.filters?.allowEng === true;
+      const queries = generateSmartQueries(meta, dynamicTitles, allowEng);
+      
+      if (queries.length > 0) {
+          const allScraperTasks = [];
+          queries.forEach(q => {
+              SCRAPER_MODULES.forEach(scraper => {
+                  if (scraper.searchMagnet) {
+                      const searchOptions = { allowEng };
+                      allScraperTasks.push(
+                          LIMITERS.scraper.schedule(() => 
+                              withTimeout(
+                                  scraper.searchMagnet(q, meta.year, type, finalId, searchOptions),
+                                  CONFIG.TIMEOUTS.SCRAPER,
+                                  `Scraper ${scraper.name || 'Module'}`
+                              ).catch(err => {
+                                  logger.warn(`Scraper Timeout/Error: ${err.message}`);
+                                  return [];
+                              })
+                          )
+                      );
+                  }
+              });
           });
-      });
-      scraperPromise = Promise.all(allScraperTasks).then(results => results.flat());
+          scraperPromise = Promise.all(allScraperTasks).then(results => results.flat());
+      }
   }
 
-  // ESECUZIONE PARALLELA (Remote + External + Scrapers)
+  // ESECUZIONE (Se dbOnly=true, external e scraper risolvono subito vuoti)
   const [remoteResults, externalResults, scrapedResults] = await Promise.all([
       remotePromise, 
       externalPromise,
@@ -829,49 +815,42 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   ]);
 
   if (remoteResults.length > 0) logger.info(`✅ [REMOTE] ${remoteResults.length} items`);
-  if (externalResults.length > 0) logger.info(`✅ [EXTERNAL] ${externalResults.length} items`);
-  if (scrapedResults.length > 0) logger.info(`✅ [SCRAPER] ${scrapedResults.length} items`);
+  if (!dbOnlyMode) {
+      if (externalResults.length > 0) logger.info(`✅ [EXTERNAL] ${externalResults.length} items`);
+      if (scrapedResults.length > 0) logger.info(`✅ [SCRAPER] ${scrapedResults.length} items`);
+  }
 
-  // Combina TUTTO
   let resultsRaw = [...remoteResults, ...externalResults, ...scrapedResults];
 
-  // 🔥🔥🔥 FILTRI AGGIORNATI (Anno Strict + Logic Anti-Prefix) 🔥🔥🔥
+  // FILTRI AGGRESSIVI (Anno Strict + Anti-Prefix)
   resultsRaw = resultsRaw.filter(item => {
     if (!item?.magnet) return false;
     
     const source = (item.source || "").toLowerCase();
     
-    //  NUOVO FILTRO: Escludi StremThru (Comet)
     if (source.includes("comet") || source.includes("stremthru")) {
         return false;
     }
 
     const title = item.title;
     
-    // Pulizia base
     const cleanFile = title.toLowerCase().replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
     const cleanMeta = meta.title.toLowerCase().replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
 
-    // Regex per rimuovere articoli iniziali (The, A, Il, Le...)
     const regexPrefix = /^(?:the|a|an|il|lo|la|i|gli|le|un|uno|una|el|los|las|les)\s+/i;
     const normFile = cleanFile.replace(regexPrefix, "").trim();
     const normMeta = cleanMeta.replace(regexPrefix, "").trim();
 
-    // 1. FILTRO ANTI-1337X / YTS (Solo se ITA)
     if (source.includes("1337") || source.includes("tgx") || source.includes("torrentgalaxy") || source.includes("yts")) {
         const hasStrictIta = /\b(ita|italian|it)\b/i.test(title);
         if (!hasStrictIta) return false; 
     }
 
-    // 2. FILTRO LINGUA
     const isItalian = isSafeForItalian(item) || /corsaro/i.test(item.source);
-    if (!allowEng && !isItalian) return false;
+    if (!config.filters?.allowEng && !isItalian) return false;
 
-    // 3. 🔥 FILTRO ANNO E TITOLO (SOLO PER FILM) 🔥
     if (!meta.isSeries) {
         const metaYear = parseInt(meta.year);
-        
-        // A. CONTROLLO ANNO (Se presente nel file)
         if (!isNaN(metaYear)) {
              const fileYearMatch = item.title.match(REGEX_YEAR);
              if (fileYearMatch) {
@@ -879,8 +858,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
                  if (Math.abs(fileYear - metaYear) > 1) return false; 
              }
         }
-
-        // B. LOGICA "ANTI-PREFIX" (Il cuore della soluzione Frankenstein)
         if (normFile.includes(normMeta)) {
              if (!normFile.startsWith(normMeta)) {
                  return false; 
@@ -888,7 +865,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
         }
     }
 
-    // 4. LOGICA ESTERNA 
     if (item.isExternal) {
         if (!meta.isSeries) {
             if (simpleSeriesFallback(meta, item.title)) return true;
@@ -901,16 +877,17 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
         return false;
     }
 
-    // 5. MATCHING STANDARD
     if (smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode)) return true;
     if (meta.isSeries && simpleSeriesFallback(meta, item.title)) return true;
 
     return false;
 });
+
   let cleanResults = deduplicateResults(resultsRaw);
   
-  // 🔥 AUTO-LEARNING ATTIVO 🔥
-  saveResultsToDbBackground(meta, cleanResults);
+  if (!dbOnlyMode) {
+      saveResultsToDbBackground(meta, cleanResults);
+  }
 
   const ranked = rankAndFilterResults(cleanResults, meta, config).slice(0, CONFIG.MAX_RESULTS);
 
@@ -1052,7 +1029,7 @@ app.listen(PORT, () => {
     console.log(`🚀 Leviathan (God Tier) attivo su porta interna ${PORT}`);
     console.log(`-----------------------------------------------------`);
     console.log(`⚡ MODE: REMOTE READER + LOCAL WRITER`);
-    console.log(`📡 LETTURA: Indexer Remoto (${CONFIG.INDEXER_URL})`);
+    console.log(`📡 INDEXER URL (ENV): ${CONFIG.INDEXER_URL}`);
     console.log(`🎬 METADATA: TMDB Primary (User Key Priority)`);
     console.log(`💾 SCRITTURA: DB Locale (Auto-Learning attivo)`);
     console.log(`✅ FIX AGGRESSIVO: "Fallback" cancellato ovunque`);
