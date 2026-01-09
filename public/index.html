@@ -163,6 +163,33 @@
         }
         .brand-subtitle::after { transform: rotate(180deg); }
 
+        /* --- STILE VERSIONE 2.0.0 (NEW) --- */
+        .version-badge {
+            display: inline-block;
+            margin-top: 18px;
+            padding: 5px 18px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--primary);
+            border-radius: 20px;
+            color: var(--primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 800;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            animation: badgePulse 3s infinite ease-in-out;
+        }
+        .version-badge::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 200%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 242, 255, 0.4), transparent);
+            transform: skewX(-30deg);
+            animation: badgeShine 4s infinite linear;
+        }
+        @keyframes badgePulse { 0%, 100% { box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); border-color: rgba(0, 242, 255, 0.5); } 50% { box-shadow: 0 0 25px rgba(0, 242, 255, 0.6); border-color: var(--primary); } }
+        @keyframes badgeShine { 0% { left: -100%; } 20% { left: 100%; } 100% { left: 100%; } }
+
         .glass-panel {
             background: linear-gradient(160deg, rgba(2, 12, 20, 0.85), rgba(0, 0, 0, 0.95));
             backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
@@ -333,7 +360,7 @@
 
         /* --- LEVIATHAN CORE / DB SECTION --- */
         .db-section-wrapper {
-            margin: 40px 0;
+            margin: 40px 0 20px;
             position: relative;
             z-index: 5;
         }
@@ -501,6 +528,64 @@
             box-shadow: 0 0 10px var(--primary);
         }
 
+        /* --- NEW GATE CARD (QUALITY LIMITER) --- */
+        .gate-card {
+            margin-top: 15px;
+            background: rgba(10, 0, 20, 0.6);
+            border: 1px solid rgba(112, 0, 255, 0.2);
+            border-radius: 12px;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .gate-card::before {
+            content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 4px;
+            background: #444; transition: 0.4s;
+        }
+        .gate-card.active {
+            background: linear-gradient(90deg, rgba(112, 0, 255, 0.1), rgba(0, 0, 0, 0));
+            border-color: var(--secondary);
+            box-shadow: 0 0 20px rgba(112, 0, 255, 0.15);
+        }
+        .gate-card.active::before { background: var(--secondary); box-shadow: 0 0 10px var(--secondary); }
+
+        .gate-left { display: flex; align-items: center; gap: 15px; }
+        .gate-icon { font-size: 1.5rem; color: #666; transition: 0.4s; }
+        .gate-card.active .gate-icon { color: var(--secondary); filter: drop-shadow(0 0 8px var(--secondary)); }
+        
+        .gate-info h4 { margin: 0; font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; text-transform: uppercase; color: #ccc; transition: 0.3s; }
+        .gate-card.active .gate-info h4 { color: #fff; text-shadow: 0 0 10px rgba(112, 0, 255, 0.5); }
+        .gate-info p { margin: 3px 0 0; font-size: 0.8rem; color: #888; }
+
+        .gate-controls { display: flex; align-items: center; gap: 20px; opacity: 0.5; pointer-events: none; transition: 0.4s; filter: grayscale(1); }
+        .gate-card.active .gate-controls { opacity: 1; pointer-events: auto; filter: grayscale(0); }
+
+        .digital-val {
+            font-family: 'Rajdhani', sans-serif; font-weight: 800; font-size: 1.8rem;
+            color: var(--secondary); min-width: 40px; text-align: center;
+            text-shadow: 0 0 15px var(--secondary);
+        }
+
+        .gate-slider {
+            -webkit-appearance: none; width: 120px; height: 6px; background: #333; border-radius: 5px; outline: none;
+        }
+        .gate-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+            background: #888; cursor: pointer; transition: 0.2s;
+        }
+        .gate-card.active .gate-slider { background: linear-gradient(90deg, var(--secondary), #333); }
+        .gate-card.active .gate-slider::-webkit-slider-thumb {
+            background: var(--secondary); box-shadow: 0 0 10px var(--secondary); transform: scale(1.2);
+        }
+
+        /* Gate Switch - Using purple style */
+        .gate-switch input:checked + .slider { background-color: rgba(112, 0, 255, 0.25); border-color: var(--secondary); }
+        .gate-switch input:checked + .slider:before { background-color: var(--secondary); box-shadow: 0 0 15px var(--secondary); }
+
         @keyframes rotateBg { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         .section-header {
@@ -636,7 +721,12 @@
             .db-content { flex-direction: column; text-align: center; }
             .db-header { justify-content: center; }
             .db-status { display: block; margin: 10px auto 0; width: fit-content; }
-            .db-info { padding-right: 0; margin-bottom: 15px; } /* Added margin for mobile spacing */
+            .db-info { padding-right: 0; margin-bottom: 15px; } 
+
+            /* Gate Card Mobile */
+            .gate-card { flex-direction: column; gap: 15px; align-items: stretch; text-align: center; }
+            .gate-left { flex-direction: column; gap: 10px; }
+            .gate-controls { justify-content: center; }
 
             .glass-panel, .logo-container, .modal-backdrop { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgba(0, 5, 10, 0.98) !important; }
             .light-rays, .wave-container { display: none !important; }
@@ -660,6 +750,8 @@
             </div>
             <h1 class="brand-title notranslate" translate="no">LEVIATHAN</h1>
             <div class="brand-subtitle notranslate" translate="no">SOVRANO DEGLI ABISSI</div>
+            <br>
+            <div class="version-badge">CORE v2.0.0</div>
         </header>
         <div class="glass-panel">
             <div class="panel-header">
@@ -809,6 +901,25 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="gate-card" id="gateCard">
+                    <div class="gate-left">
+                        <i class="fas fa-compress-arrows-alt gate-icon"></i>
+                        <div class="gate-info">
+                            <h4>SIGNAL GATE</h4>
+                            <p>Limita risultati per qualità</p>
+                        </div>
+                        <label class="switch gate-switch">
+                            <input type="checkbox" id="gateActive" onchange="toggleGate()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="gate-controls" id="gateControls">
+                        <input type="range" min="1" max="10" value="3" class="gate-slider" id="gateSlider" oninput="updateGateVal(this.value)">
+                        <span class="digital-val" id="gateDisplay">∞</span>
+                    </div>
+                </div>
+
             </div>
             <div class="section-header">FILTRI DI RICERCA</div>
             
@@ -896,6 +1007,10 @@
                     <div class="faq-q"><span class="notranslate" translate="no">StreamingCommunity</span> è incluso? <i class="fas fa-chevron-down"></i></div>
                     <div class="faq-a">Sì, puoi attivarlo dal modulo opzionale. Non richiede più obbligatoriamente il Proxy, ma se hai problemi di blocco geografico potrebbe servirti.</div>
                 </div>
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-q">Cos'è Signal Gate? <i class="fas fa-chevron-down"></i></div>
+                    <div class="faq-a">Il Signal Gate limita il numero di risultati mostrati per ogni risoluzione (es. Max 2 risultati 4K, 2 risultati 1080p). Utile per evitare liste infinite di duplicati e avere una selezione pulita.</div>
+                </div>
             </div>
             <div class="modal-btns" style="margin-top:20px;">
                 <button class="m-btn m-close" onclick="closeModal('faqModal')">CHIUDI DATABASE</button>
@@ -938,7 +1053,6 @@
             priorityRow.style.display = scActive ? 'flex' : 'none';
         }
 
-        // --- NEW DB CARD FUNCTION ---
         function toggleDbCard() {
             const chk = document.getElementById('dbOnly');
             const card = document.getElementById('dbCard');
@@ -951,6 +1065,26 @@
                 card.classList.remove('active');
                 statusText.innerText = "STANDBY";
             }
+        }
+
+        // --- NEW GATE FUNCTIONS ---
+        function toggleGate() {
+            const active = document.getElementById('gateActive').checked;
+            const card = document.getElementById('gateCard');
+            const display = document.getElementById('gateDisplay');
+            const slider = document.getElementById('gateSlider');
+
+            if (active) {
+                card.classList.add('active');
+                display.innerText = slider.value;
+            } else {
+                card.classList.remove('active');
+                display.innerText = "∞";
+            }
+        }
+
+        function updateGateVal(val) {
+            document.getElementById('gateDisplay').innerText = val;
         }
 
         function clearError(input) { input.classList.remove('input-error'); }
@@ -979,9 +1113,15 @@
                         document.getElementById('noCam').checked = config.filters.noCam || false;
                         document.getElementById('enableVix').checked = config.filters.enableVix || false;
                         document.getElementById('vixLast').checked = config.filters.vixLast || false;
-                        
-                        // Load DB Only state and update visual
                         document.getElementById('dbOnly').checked = config.filters.dbOnly || false;
+                        
+                        // Load Gate State
+                        if (config.filters.maxPerQuality && config.filters.maxPerQuality > 0) {
+                            document.getElementById('gateActive').checked = true;
+                            document.getElementById('gateSlider').value = config.filters.maxPerQuality;
+                            toggleGate(); // Update visuals
+                        }
+                        
                         toggleDbCard();
                     }
                     toggleMediaFlowGroup();
@@ -1020,6 +1160,11 @@
         }
 
         function getConfigObject() {
+            // Logic for Gate
+            const gateActive = document.getElementById('gateActive').checked;
+            const gateVal = parseInt(document.getElementById('gateSlider').value);
+            const finalMaxQuality = gateActive ? gateVal : 0;
+
             return {
                 service: currentService,
                 key: document.getElementById('apiKey').value.trim(),
@@ -1036,7 +1181,8 @@
                     noCam: document.getElementById('noCam').checked,
                     enableVix: document.getElementById('enableVix').checked,
                     vixLast: document.getElementById('vixLast').checked,
-                    dbOnly: document.getElementById('dbOnly').checked
+                    dbOnly: document.getElementById('dbOnly').checked,
+                    maxPerQuality: finalMaxQuality // New config
                 }
             };
         }
@@ -1060,10 +1206,13 @@
             if (c.filters.enableVix && c.filters.vixLast) scText += ' (Priorità Bassa)';
             else if (c.filters.enableVix) scText += ' (Priorità Alta)';
 
+            let gateText = c.filters.maxPerQuality > 0 ? `MAX ${c.filters.maxPerQuality} x Q` : 'ILLIMITATO';
+
             // Updated Summary with new DB visual text
             list.innerHTML = `
                 <li>Servizio Debrid <span>${c.service.toUpperCase()}</span></li>
                 <li>Database Core <span>${c.filters.dbOnly ? 'OVERDRIVE ⚡' : 'STANDARD'}</span></li>
+                <li>Signal Gate <span>${gateText}</span></li>
                 <li>Includi ENG <span>${c.filters.allowEng ? 'SI' : 'NO'}</span></li>
                 <li>StreamingCommunity <span>${scText}</span></li>
                 <li>Proxy Ghost <span>${c.mediaflow.proxyDebrid ? 'ATTIVO' : 'NO'}</span></li>
