@@ -206,6 +206,32 @@ function deduplicateResults(results) {
   return Array.from(hashMap.values());
 }
 
+// --- NUOVA FUNZIONE: FILTRO PER QUALITÀ ---
+function filterByQualityLimit(results, limit) {
+    if (!limit || limit === 0 || limit === "0") return results;
+    
+    const limitNum = parseInt(limit);
+    if (isNaN(limitNum)) return results;
+
+    const counts = { "4K": 0, "1080p": 0, "720p": 0, "SD": 0 };
+    const filtered = [];
+
+    for (const item of results) {
+        const t = (item.title || "").toLowerCase();
+        let q = "SD";
+        
+        if (REGEX_QUALITY["4K"].test(t)) q = "4K";
+        else if (REGEX_QUALITY["1080p"].test(t)) q = "1080p";
+        else if (REGEX_QUALITY["720p"].test(t)) q = "720p";
+
+        if (counts[q] < limitNum) {
+            filtered.push(item);
+            counts[q]++;
+        }
+    }
+    return filtered;
+}
+
 function isSafeForItalian(item) {
   if (!item || !item.title) return false;
   return REGEX_ITA.some(p => p.test(item.title));
@@ -889,7 +915,16 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       saveResultsToDbBackground(meta, cleanResults);
   }
 
-  const ranked = rankAndFilterResults(cleanResults, meta, config).slice(0, CONFIG.MAX_RESULTS);
+  // 1. Esegui il ranking normale (ordina per seeders, lingua, ecc.)
+  let rankedList = rankAndFilterResults(cleanResults, meta, config);
+
+  // 2. NUOVO: Applica il limite per qualità se configurato dall'utente
+  if (config.filters && config.filters.maxPerQuality) {
+      rankedList = filterByQualityLimit(rankedList, config.filters.maxPerQuality);
+  }
+
+  // 3. Applica il taglio finale globale (MAX_RESULTS)
+  const ranked = rankedList.slice(0, CONFIG.MAX_RESULTS);
 
   if (config.service === 'tb' && ranked.length > 0) {
       const hashes = ranked.map(r => r.hash);
