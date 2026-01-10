@@ -64,7 +64,7 @@ dbHelper.initDatabase();
 
 // --- CONFIGURAZIONE CENTRALE ---
 const CONFIG = {
-  //  Legge l'URL dal file .env come richiesto
+  //  Legge l'URL dal file .env 
   INDEXER_URL: process.env.INDEXER_URL || "", 
   CINEMETA_URL: "https://v3-cinemeta.strem.io",
   REAL_SIZE_FILTER: 80 * 1024 * 1024,
