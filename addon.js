@@ -659,12 +659,37 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta = null, d
 
         if (!streamData || (streamData.type === "ready" && streamData.size < CONFIG.REAL_SIZE_FILTER)) return null;
 
+        // 🔥🔥🔥 MODIFICA PER SUPPORTARE IL TUO INDEX.HTML (GHOST PROXY) 🔥🔥🔥
+        let finalUrl = streamData.url;
+
+        // Verifica la struttura esatta generata dal tuo index.html
+        if (config.mediaflow && config.mediaflow.proxyDebrid && config.mediaflow.url) {
+            try {
+                const mfpBase = config.mediaflow.url.replace(/\/$/, '');
+                const originalLink = streamData.url;
+                
+                // Costruisce l'URL nel formato MFP: /proxy/stream?d=URL_ENCODED
+                finalUrl = `${mfpBase}/proxy/stream?d=${encodeURIComponent(originalLink)}`;
+
+                if (config.mediaflow.pass) {
+                    finalUrl += `&api_password=${config.mediaflow.pass}`;
+                }
+                
+                logger.info(`🛡️ [MFP] Ghost Mode Attiva per: ${item.hash.substring(0,8)}...`);
+            } catch (err) {
+                logger.error(`❌ Errore MediaFlow: ${err.message}`);
+            }
+        }
+        // 🔥🔥🔥 FINE MODIFICA 🔥🔥🔥
+
         const serviceTag = service.toUpperCase();
         const effectiveTitle = streamData.filename && streamData.filename.length > 3 ? streamData.filename : item.title;
         const { name, title } = formatStreamTitleCinePro(effectiveTitle, item.source, streamData.size || item.size, item.seeders, serviceTag, config, item.hash);
         
         return { 
-            name, title, url: streamData.url, infoHash: item.hash, 
+            name, title, 
+            url: finalUrl, // Restituisce l'URL modificato (se MFP attivo) o l'originale
+            infoHash: item.hash, 
             behaviorHints: { notWebReady: false, bingieGroup: `corsaro-${service}-${item.hash}` } 
         };
     } catch (e) {
