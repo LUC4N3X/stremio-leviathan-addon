@@ -73,10 +73,12 @@ const CONFIG = {
     TMDB: 2000,
     SCRAPER: 6000,
     REMOTE_INDEXER: 3500, 
-    DB_QUERY: 5000,
-    DEBRID: 5000,
-    PACK_RESOLVER: 8000,
-    EXTERNAL: 4000
+    DB_QUERY: 3000,
+    // MODIFICA LEVIATHAN: Timeout aumentato drasticamente per gestire Add+Check
+    DEBRID: 10000, 
+    // MODIFICA LEVIATHAN: Aumentato per sicurezza
+    PACK_RESOLVER: 7000,
+    EXTERNAL: 4500
   }
 };
 
@@ -141,7 +143,8 @@ function extractInfoHash(magnet) {
 
 const LIMITERS = {
   scraper: new Bottleneck({ maxConcurrent: 40, minTime: 10 }),
-  rd: new Bottleneck({ maxConcurrent: 25, minTime: 40 }),
+  // MODIFICA LEVIATHAN: Ridotto maxConcurrent a 8 per evitare errori 429 con RD
+  rd: new Bottleneck({ maxConcurrent: 15, minTime: 200 }),
 };
 
 const SCRAPER_MODULES = [ require("./engines") ];
@@ -346,6 +349,8 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
             displaySource = "StremThru";
         } else {
              displaySource = source
+                .replace(/MediaFusion/gi, '') 
+                .replace(/Torrentio/gi, '')   
                 .replace(/TorrentGalaxy|tgx/i, 'TGx')
                 .replace(/\b1337\b/i, '1337x')
                 .replace(/Fallback/ig, '') 
@@ -393,6 +398,8 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
         displaySource = "StremThru";
     } else {
         displaySource = displaySource
+            .replace(/MediaFusion/gi, '') 
+            .replace(/[-_]/g, ' ')        
             .replace(/Torrentio/gi, '') 
             .replace(/TorrentGalaxy|tgx/i, 'TGx')
             .replace(/Fallback/ig, '')
@@ -642,8 +649,13 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta = null, d
         const cleanMagnet = `magnet:?xt=urn:btih:${item.hash}&dn=${encodeURIComponent(item.title)}`;
         const safeFileIdx = item.fileIdx !== undefined && item.fileIdx !== null ? item.fileIdx : 0;
 
-        if (service === 'rd') streamData = await RD.getStreamLink(apiKey, cleanMagnet, item.season, item.episode, safeFileIdx);
-        else if (service === 'ad') streamData = await AD.getStreamLink(apiKey, cleanMagnet, item.season, item.episode, safeFileIdx);
+        // MODIFICA LEVIATHAN: RD non ha più bisogno di safeFileIdx, fa auto-matching interno
+        if (service === 'rd') {
+            streamData = await RD.getStreamLink(apiKey, cleanMagnet, item.season, item.episode);
+        }
+        else if (service === 'ad') {
+            streamData = await AD.getStreamLink(apiKey, cleanMagnet, item.season, item.episode, safeFileIdx);
+        }
 
         if (!streamData || (streamData.type === "ready" && streamData.size < CONFIG.REAL_SIZE_FILTER)) return null;
 
@@ -1069,5 +1081,6 @@ app.listen(PORT, () => {
     console.log(`💾 SCRITTURA: DB Locale (Auto-Learning attivo)`);
     console.log(`✅ FIX AGGRESSIVO: "Fallback" cancellato ovunque`);
     console.log(`🛡️ FIX NOMI: Knaben, StremThru (Comet)`);
+    console.log(`🦑 LEVIATHAN CORE: Optimized for High Reliability`);
     console.log(`-----------------------------------------------------`);
 });
