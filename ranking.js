@@ -1,10 +1,10 @@
 const DEFAULT_CONFIG = {
   weights: {
-    // 🔥 PRIORITÀ ASSOLUTA ALLA LINGUA
+    //  PRIORITÀ ASSOLUTA ALLA LINGUA
     languageITA: 50000,      
     languageMULTI: 25000,
     
-    // 🔥 TIER QUALITÀ (GERARCHIA RIGIDA)
+    //  TIER QUALITÀ (GERARCHIA RIGIDA)
     quality4K: 15000,
     quality1080p: 10000,
     quality720p: 5000,
@@ -21,7 +21,7 @@ const DEFAULT_CONFIG = {
     camPenalty: -100000,      
     sizeMismatchPenalty: -5000,
     
-    // 🔥 SEEDERS E FONTI
+    //  SEEDERS E FONTI
     sourceCorsaroBonus: 2000, // Bonus extra per le fonti fidate
     seedersFactor: 0.1,       
     seedersTrustBoost: 100,
