@@ -416,12 +416,6 @@
         }
 
         /* --- LEVIATHAN CORE / DB SECTION --- */
-        .db-section-wrapper {
-            margin: 40px 0 20px;
-            position: relative;
-            z-index: 5;
-        }
-
         .db-card {
             background: rgba(0, 10, 20, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -431,6 +425,8 @@
             overflow: hidden;
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            /* Layout nel nuovo flusso */
+            margin-bottom: 20px;
         }
 
         .db-bg-anim {
@@ -587,7 +583,6 @@
 
         /* --- NEW GATE CARD (QUALITY LIMITER) --- */
         .gate-card {
-            margin-top: 15px;
             background: rgba(10, 0, 20, 0.6);
             border: 1px solid rgba(112, 0, 255, 0.2);
             border-radius: 12px;
@@ -598,6 +593,8 @@
             transition: 0.4s ease;
             position: relative;
             overflow: hidden;
+            /* Layout nel nuovo flusso */
+            margin-bottom: 20px;
         }
         .gate-card::before {
             content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 4px;
@@ -650,14 +647,246 @@
             color: var(--primary); text-transform: uppercase; letter-spacing: 4px; border-left: 4px solid var(--primary); padding-left: 20px;
             text-shadow: 0 0 20px var(--primary-dim);
         }
-        .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-        .option-card {
-            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
-            padding: 18px 25px; display: flex; justify-content: space-between; align-items: center;
-            transition: 0.4s ease;
-        }
-        .option-card:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); transform: translateY(-3px); box-shadow: 0 0 15px rgba(255,255,255,0.1); }
         
+        /* --- NUOVO FILTRO QUALITÀ (PROFESSIONALE) --- */
+        .spectrum-container {
+            grid-column: 1 / -1; /* Occupa tutta la larghezza nella griglia */
+            background: rgba(0, 5, 10, 0.6);
+            border: 1px solid rgba(0, 242, 255, 0.15);
+            border-radius: 15px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px; /* Margine per distanziare dagli altri blocchi */
+        }
+        .spectrum-header {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+        }
+        .spectrum-desc {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            text-transform: none; /* Rimuove il maiuscolo forzato */
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+            font-weight: 400;
+            opacity: 0.8;
+        }
+        .spectrum-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        .spec-btn {
+            background: rgba(0, 242, 255, 0.05);
+            border: 1px solid var(--primary);
+            color: #fff;
+            padding: 12px 5px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.1);
+            text-transform: uppercase;
+        }
+        .spec-btn:hover {
+            background: rgba(0, 242, 255, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+        }
+        /* Stato ATTIVO (Default - Qualità Accettata) */
+        .spec-btn.active {
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.1), transparent);
+            border-color: var(--primary);
+            color: var(--primary);
+            text-shadow: 0 0 8px var(--primary);
+        }
+        /* Stato ESCLUSO (Rosso - Qualità Rimuovi) */
+        .spec-btn.excluded {
+            background: rgba(20, 0, 5, 0.6);
+            border-color: var(--error);
+            color: var(--error);
+            opacity: 0.6;
+            box-shadow: none;
+            text-decoration: line-through;
+        }
+        .spec-btn.excluded::after {
+            content: 'OFF';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            font-size: 1.2rem;
+            color: var(--error);
+            border: 2px solid var(--error);
+            padding: 2px 6px;
+            border-radius: 4px;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+        /* Mobile Responsive per la griglia */
+        @media (max-width: 600px) {
+            .spectrum-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* --- MODULI TATTICI (AUDIO & AIO) --- */
+        .aux-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .aux-card {
+            background: linear-gradient(145deg, rgba(5, 15, 25, 0.8), rgba(0, 0, 0, 0.9));
+            border: 1px solid rgba(0, 242, 255, 0.15);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Effetto Hover */
+        .aux-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 25px rgba(0, 242, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Indicatore di stato (Led) */
+        .status-led {
+            width: 8px;
+            height: 8px;
+            background-color: #333;
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+            margin-right: 10px;
+            transition: all 0.4s ease;
+        }
+
+        .aux-card.active .status-led {
+            background-color: var(--primary);
+            box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+        }
+
+        /* Header della card */
+        .aux-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .aux-icon {
+            font-size: 1.4rem;
+            margin-right: 12px;
+            color: var(--text-dim);
+            transition: 0.3s;
+        }
+
+        .aux-card.active .aux-icon {
+            color: var(--primary);
+            filter: drop-shadow(0 0 8px var(--primary));
+        }
+
+        /* Descrizione */
+        .aux-desc {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            line-height: 1.4;
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+
+        /* Interruttore Custom Wide */
+        .cyber-toggle {
+            position: relative;
+            display: block;
+            width: 100%;
+            height: 40px;
+            cursor: pointer;
+        }
+
+        .cyber-toggle input { display: none; }
+
+        .toggle-track {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            transition: 0.4s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+
+        .toggle-knob {
+            position: absolute;
+            top: 3px; bottom: 3px; left: 3px;
+            width: 50%;
+            background: #333;
+            border-radius: 4px;
+            transition: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            z-index: 1;
+        }
+
+        /* Stato Attivo Toggle */
+        .cyber-toggle input:checked + .toggle-track {
+            border-color: var(--primary);
+            background: rgba(0, 242, 255, 0.05);
+        }
+
+        .cyber-toggle input:checked + .toggle-track .toggle-knob {
+            left: calc(50% - 3px);
+            background: var(--primary);
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .label-on, .label-off {
+            z-index: 2;
+            transition: 0.4s;
+            width: 50%;
+            text-align: center;
+        }
+
+        .cyber-toggle input:checked + .toggle-track .label-on { color: #000; text-shadow: none; }
+        .cyber-toggle input:checked + .toggle-track .label-off { color: var(--text-dim); }
+        .cyber-toggle input:not(:checked) + .toggle-track .label-off { color: #fff; }
+
+        /* AIO specifico color viola */
+        .aio-card.active .status-led { background-color: var(--secondary); box-shadow: 0 0 10px var(--secondary); }
+        .aio-card.active .aux-icon { color: var(--secondary); filter: drop-shadow(0 0 8px var(--secondary)); }
+        .aio-card:hover { border-color: var(--secondary); }
+        .aio-toggle input:checked + .toggle-track { border-color: var(--secondary); background: rgba(112, 0, 255, 0.05); }
+        .aio-toggle input:checked + .toggle-track .toggle-knob { background: var(--secondary); box-shadow: 0 0 15px var(--secondary); }
+
         .action-area { display: flex; gap: 20px; margin-top: 50px; flex-direction: column; }
         @media(min-width: 600px) { .action-area { flex-direction: row; } }
         .btn-install {
@@ -946,7 +1175,10 @@
                 </div>
             </div>
 
-            <div class="db-section-wrapper">
+            <div class="section-header">CENTRO DI CONTROLLO RICERCA</div>
+            
+            <div class="filters-container">
+                
                 <div class="db-card" id="dbCard">
                     <div class="db-bg-anim"></div>
                     <div class="db-content">
@@ -970,6 +1202,24 @@
                     </div>
                 </div>
 
+                <div class="spectrum-container">
+                    <div class="spectrum-header" style="align-items: flex-start; flex-direction: column; gap: 5px;">
+                        <span style="display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-filter"></i> FILTRO QUALITÀ VIDEO
+                        </span>
+                        <span class="spectrum-desc">
+                            Clicca sui pulsanti per <strong>escludere</strong> le risoluzioni dalla ricerca.
+                        </span>
+                    </div>
+                    
+                    <div class="spectrum-grid">
+                        <div class="spec-btn active" id="btn_4k" onclick="toggleSpectrum('btn_4k')">4K UHD</div>
+                        <div class="spec-btn active" id="btn_1080" onclick="toggleSpectrum('btn_1080')">1080p</div>
+                        <div class="spec-btn active" id="btn_720" onclick="toggleSpectrum('btn_720')">720p</div>
+                        <div class="spec-btn active" id="btn_sd" onclick="toggleSpectrum('btn_sd')">SD / CAM</div>
+                    </div>
+                </div>
+
                 <div class="gate-card" id="gateCard">
                     <div class="gate-left">
                         <i class="fas fa-compress-arrows-alt gate-icon"></i>
@@ -988,37 +1238,48 @@
                     </div>
                 </div>
 
-            </div>
-            <div class="section-header">FILTRI DI RICERCA</div>
-            
-            <div class="options-grid">
-                <div class="option-card">
-                    <span class="opt-label" style="color:#ccc; font-weight:500;">Audio ENG
-                        <div class="tooltip-wrapper">
-                            <span class="tooltip-icon">?</span>
-                            <div class="tooltip-content">Oltre ai risultati ITA, cerca anche file in lingua originale/inglese.</div>
+                <div class="aux-grid">
+                    
+                    <div class="aux-card" id="card_audio">
+                        <div class="aux-header">
+                            <div class="status-led"></div>
+                            <i class="fas fa-globe-americas aux-icon"></i>
+                            <span>ESTENSIONE LINGUA</span>
                         </div>
-                    </span>
-                    <label class="switch"><input type="checkbox" id="allowEng"><span class="slider"></span></label>
-                </div>
-                <div class="option-card">
-                    <span class="opt-label" style="color:#ccc; font-weight:500;">Rimuovi 4K</span>
-                    <label class="switch"><input type="checkbox" id="no4k"><span class="slider"></span></label>
-                </div>
-                <div class="option-card">
-                    <span class="opt-label" style="color:#ccc; font-weight:500;">No Cam/Screener</span>
-                    <label class="switch"><input type="checkbox" id="noCam" checked><span class="slider"></span></label>
-                </div>
-                <div class="option-card">
-                    <span class="opt-label" style="color:#ccc; font-weight:500;">Compatibilità AIO
-                        <div class="tooltip-wrapper">
-                            <span class="tooltip-icon">?</span>
-                            <div class="tooltip-content">Formato compatto (es: <span class="notranslate" translate="no">Leviathan RD⚡</span>) ottimizzato per AIOStreams.</div>
+                        <div class="aux-desc">
+                            Abilita la ricerca globale. Se attivo, cerca file in <strong>Inglese</strong> oltre a quelli in Italiano. Utile per serie inedite.
                         </div>
-                    </span>
-                    <label class="switch"><input type="checkbox" id="aiostreams_mode"><span class="slider"></span></label>
+                        <label class="cyber-toggle">
+                            <input type="checkbox" id="allowEng" onchange="toggleAuxCard('card_audio')">
+                            <span class="toggle-track">
+                                <span class="toggle-knob"></span>
+                                <span class="label-off">SOLO ITA</span>
+                                <span class="label-on">ITA + ENG</span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="aux-card aio-card" id="card_aio">
+                        <div class="aux-header">
+                            <div class="status-led"></div>
+                            <i class="fas fa-stream aux-icon"></i>
+                            <span>COMPATIBILITÀ AIOSTREAMS</span>
+                        </div>
+                        <div class="aux-desc">
+                            Ottimizza i titoli per <strong>AIOStreams</strong>. Raggruppa i risultati in una lista compatta e pulita per evitare disordine.
+                        </div>
+                        <label class="cyber-toggle aio-toggle">
+                            <input type="checkbox" id="aiostreams_mode" onchange="toggleAuxCard('card_aio')">
+                            <span class="toggle-track">
+                                <span class="toggle-knob"></span>
+                                <span class="label-off">DISABILITA</span>
+                                <span class="label-on">ABILITA</span>
+                            </span>
+                        </label>
+                    </div>
+
                 </div>
-            </div>
+                </div>
             <div class="faq-area">
                 <button class="btn-faq" onclick="openFaqModal()">
                     <i class="fas fa-book-medical"></i> FAQ DATABASE
@@ -1109,6 +1370,30 @@
         let currentService = 'rd';
         let currentSCQuality = 'all'; // Default: Hybrid/All
 
+        // --- FUNC: GESTIONE FILTRO QUALITÀ ---
+        function toggleSpectrum(id) {
+            const el = document.getElementById(id);
+            if (el.classList.contains('excluded')) {
+                el.classList.remove('excluded');
+                el.classList.add('active');
+            } else {
+                el.classList.remove('active');
+                el.classList.add('excluded');
+            }
+        }
+        
+        // Helper per settare lo stato visivo al caricamento
+        function setSpecState(btnId, isExcluded) {
+            const el = document.getElementById(btnId);
+            if(isExcluded) {
+                el.classList.remove('active');
+                el.classList.add('excluded');
+            } else {
+                el.classList.add('active');
+                el.classList.remove('excluded');
+            }
+        }
+
         function toggleMediaFlowGroup() {
             const ghost = document.getElementById('proxyDebrid').checked;
             const unit = document.getElementById('advUnit');
@@ -1167,6 +1452,18 @@
             document.getElementById('gateDisplay').innerText = val;
         }
 
+        // --- GESTIONE MODULI AUSILIARI (AuxCard) ---
+        function toggleAuxCard(cardId) {
+            const card = document.getElementById(cardId);
+            const checkbox = card.querySelector('input[type="checkbox"]');
+            
+            if (checkbox.checked) {
+                card.classList.add('active');
+            } else {
+                card.classList.remove('active');
+            }
+        }
+
         function clearError(input) { input.classList.remove('input-error'); }
         function toggleFaq(el) { el.classList.toggle('open'); }
 
@@ -1189,17 +1486,21 @@
                     }
                     if (config.filters) {
                         document.getElementById('allowEng').checked = config.filters.allowEng || false;
-                        document.getElementById('no4k').checked = config.filters.no4k || false;
-                        document.getElementById('noCam').checked = config.filters.noCam || false;
                         document.getElementById('enableVix').checked = config.filters.enableVix || false;
                         document.getElementById('vixLast').checked = config.filters.vixLast || false;
                         document.getElementById('dbOnly').checked = config.filters.dbOnly || false;
                         
+                        // CARICAMENTO STATO BOTTONI QUALITÀ
+                        setSpecState('btn_4k', config.filters.no4k);
+                        setSpecState('btn_1080', config.filters.no1080);
+                        setSpecState('btn_720', config.filters.no720);
+                        // Il vecchio noCam e noScr si fondono qui
+                        setSpecState('btn_sd', config.filters.noScr || config.filters.noCam);
+
                         // Load SC Quality
                         if(config.filters.scQuality) {
                             setSCQuality(config.filters.scQuality);
                         } else {
-                            // Backwards compatibility or default
                             setSCQuality('all');
                         }
                         
@@ -1210,6 +1511,14 @@
                             toggleGate(); 
                         }
                         
+                        // SETUP VISIVO INIZIALE PER I NUOVI MODULI
+                        if (document.getElementById('allowEng').checked) {
+                            document.getElementById('card_audio').classList.add('active');
+                        }
+                        if (document.getElementById('aiostreams_mode').checked) {
+                            document.getElementById('card_aio').classList.add('active');
+                        }
+
                         toggleDbCard();
                     }
                     toggleMediaFlowGroup();
@@ -1251,12 +1560,6 @@
             const gateActive = document.getElementById('gateActive').checked;
             const gateVal = parseInt(document.getElementById('gateSlider').value);
             const finalMaxQuality = gateActive ? gateVal : 0;
-
-            // Map quality to legacy flags if needed by backend, or just send new prop
-            // Assuming backend will read scQuality string OR scForce1080 flags.
-            // For now, let's keep it simple and send scQuality string.
-            // If you need legacy flags:
-            // const is1080Only = currentSCQuality === '1080';
             
             return {
                 service: currentService,
@@ -1270,11 +1573,18 @@
                 },
                 filters: {
                     allowEng: document.getElementById('allowEng').checked,
-                    no4k: document.getElementById('no4k').checked,
-                    noCam: document.getElementById('noCam').checked,
+                    // QUALITÀ: Se il bottone ha classe 'excluded', il filtro è TRUE (rimuovi)
+                    no4k: document.getElementById('btn_4k').classList.contains('excluded'),
+                    no1080: document.getElementById('btn_1080').classList.contains('excluded'),
+                    no720: document.getElementById('btn_720').classList.contains('excluded'),
+                    noScr: document.getElementById('btn_sd').classList.contains('excluded'), // Mappiamo SD/CAM su noScr
+                    
+                    // Legacy: teniamo noCam allineato con SD per sicurezza
+                    noCam: document.getElementById('btn_sd').classList.contains('excluded'),
+                    
                     enableVix: document.getElementById('enableVix').checked,
                     vixLast: document.getElementById('vixLast').checked,
-                    scQuality: currentSCQuality, // 'all', '1080', '720'
+                    scQuality: currentSCQuality, 
                     dbOnly: document.getElementById('dbOnly').checked,
                     maxPerQuality: finalMaxQuality
                 }
@@ -1305,11 +1615,20 @@
                 if (c.filters.vixLast) scText += ' + Priorità Bassa';
             }
 
+            // Testo per le esclusioni
+            let exclText = [];
+            if(c.filters.no4k) exclText.push("4K");
+            if(c.filters.no1080) exclText.push("1080p");
+            if(c.filters.no720) exclText.push("720p");
+            if(c.filters.noScr) exclText.push("SD/CAM");
+            let spectrumStr = exclText.length > 0 ? `ESCLUSI: ${exclText.join(', ')}` : 'COMPLETO (Tutto Visibile)';
+
             let gateText = c.filters.maxPerQuality > 0 ? `MAX ${c.filters.maxPerQuality} x Q` : 'ILLIMITATO';
 
             list.innerHTML = `
                 <li>Servizio Debrid <span>${c.service.toUpperCase()}</span></li>
                 <li>Database Core <span>${c.filters.dbOnly ? 'OVERDRIVE ⚡' : 'STANDARD'}</span></li>
+                <li>Filtro Qualità <span>${spectrumStr}</span></li>
                 <li>Signal Gate <span>${gateText}</span></li>
                 <li>Includi ENG <span>${c.filters.allowEng ? 'SI' : 'NO'}</span></li>
                 <li>StreamingCommunity <span>${scText}</span></li>
