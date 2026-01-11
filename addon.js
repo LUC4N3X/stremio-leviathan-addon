@@ -206,7 +206,7 @@ function deduplicateResults(results) {
   return Array.from(hashMap.values());
 }
 
-// --- FILTRO PER QUALITÀ ---
+// --- FILTRO PER QUALITÀ (QUANTITÀ) ---
 function filterByQualityLimit(results, limit) {
     if (!limit || limit === 0 || limit === "0") return results;
     
@@ -883,7 +883,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   let resultsRaw = [...remoteResults, ...externalResults, ...scrapedResults];
 
   // FILTRI AGGRESSIVI (Anno Strict + Anti-Prefix)
-// FILTRI AGGRESSIVI (Anno Strict + Anti-Prefix)
   resultsRaw = resultsRaw.filter(item => {
     if (!item?.magnet) return false;
     
@@ -898,9 +897,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
     const isItalian = isSafeForItalian(item) || /corsaro/i.test(item.source);
 
     // --- FIX PER TITOLI INGLESI (TORRENTIO) ---
-    // Se il risultato è esterno (Torrentio) ed è sicuramente ITA, lo accettiamo
-    // indipendentemente dal titolo (es. "His and Hers" vs "La sua verità").
-    // Torrentio cerca per ID, quindi ci fidiamo che il file sia quello giusto.
     if (item.isExternal && isItalian) {
         return true; 
     }
@@ -938,7 +934,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
         }
     }
 
-    // Fallback per risultati esterni che NON sono ITA (es. risultati ENG se abilitati)
+    // Fallback per risultati esterni
     if (item.isExternal) {
         if (!meta.isSeries) {
             if (simpleSeriesFallback(meta, item.title)) return true;
@@ -963,10 +959,41 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       saveResultsToDbBackground(meta, cleanResults);
   }
 
+  // =========================================================================
+  
+  //  NUOVA LOGICA: SPETTRO VISIVO (Exclusion Logic)
+  if (config.filters) {
+      cleanResults = cleanResults.filter(item => {
+          const t = (item.title || "").toLowerCase();
+
+          // Flag no4k (Pulsante 4K escluso)
+          if (config.filters.no4k && REGEX_QUALITY["4K"].test(t)) return false;
+
+          // Flag no1080 (Pulsante 1080p escluso)
+          if (config.filters.no1080 && REGEX_QUALITY["1080p"].test(t)) return false;
+
+          // Flag no720 (Pulsante 720p escluso)
+          if (config.filters.no720 && REGEX_QUALITY["720p"].test(t)) return false;
+
+          // Flag noScr (Pulsante SD escluso)
+          // Rimuove sia qualità SD/480p che CAM/Screener
+          if (config.filters.noScr) {
+               if (REGEX_QUALITY["SD"].test(t)) return false;
+               if (/cam|hdcam|ts|telesync|screener|scr\b/i.test(t)) return false;
+          }
+
+          // Flag Legacy "No Cam" 
+          if (config.filters.noCam && /cam|hdcam|ts|telesync|screener|scr\b/i.test(t)) return false;
+
+          return true;
+      });
+  }
+  // =========================================================================
+
   // 1. Esegui il ranking normale (ordina per seeders, lingua, ecc.)
   let rankedList = rankAndFilterResults(cleanResults, meta, config);
 
-  // 2.  Applica il limite per qualità se configurato dall'utente
+  // 2.  Applica il limite per qualità (Signal Gate) se configurato
   if (config.filters && config.filters.maxPerQuality) {
       rankedList = filterByQualityLimit(rankedList, config.filters.maxPerQuality);
   }
@@ -1115,8 +1142,7 @@ app.listen(PORT, () => {
     console.log(`📡 INDEXER URL (ENV): ${CONFIG.INDEXER_URL}`);
     console.log(`🎬 METADATA: TMDB Primary (User Key Priority)`);
     console.log(`💾 SCRITTURA: DB Locale (Auto-Learning attivo)`);
-    console.log(`✅ FIX AGGRESSIVO: "Fallback" cancellato ovunque`);
-    console.log(`🛡️ FIX NOMI: Knaben, StremThru (Comet)`);
+    console.log(`👁️ SPETTRO VISIVO: Modulo Attivo (Esclusioni 4K/1080/720/SD)`);
     console.log(`🦑 LEVIATHAN CORE: Optimized for High Reliability`);
     console.log(`-----------------------------------------------------`);
 });
