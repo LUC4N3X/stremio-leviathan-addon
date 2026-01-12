@@ -1267,14 +1267,13 @@
                         </div>
 
                         <div class="sc-quality-container" id="scQualityContainer">
-                            <div class="quality-label">Seleziona Qualità Flusso</div>
+                           <div class="quality-label">Seleziona Qualità Flusso</div>
                             <div class="quality-grid">
                                 <div class="q-btn active" id="btnQ_all" onclick="setSCQuality('all')">Hybrid (Tutto)</div>
                                 <div class="q-btn" id="btnQ_1080" onclick="setSCQuality('1080')">Solo 1080p</div>
                                 <div class="q-btn" id="btnQ_720" onclick="setSCQuality('720')">Solo 720p</div>
                             </div>
                         </div>
-
                         <div class="control-row sub-row" id="scPriorityRow">
                             <div class="control-info sub-indicator">
                                 <div class="control-title">
@@ -1289,7 +1288,21 @@
                                 <span class="slider"></span>
                             </label>
                         </div>
-                        
+
+                        <div class="control-row">
+                            <div class="control-info">
+                                <div class="control-title notranslate" translate="no">
+                                    <i class="fas fa-film" style="color: #ff9900"></i> GuardaHD
+                                </div>
+                                <span class="control-desc">
+                                    Modulo extra. Richiede MediaFlow Proxy.
+                                </span>
+                            </div>
+                            <label class="switch mf-switch">
+                                <input type="checkbox" id="enableGhd" onchange="toggleMediaFlowGroup()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
                         <div class="control-row">
                             <div class="control-info">
                                 <div class="control-title">
@@ -1537,10 +1550,14 @@
             }
         }
 
+        // --- MODIFIED: Show MF inputs if GHOST OR GHD is active ---
         function toggleMediaFlowGroup() {
             const ghost = document.getElementById('proxyDebrid').checked;
+            const ghd = document.getElementById('enableGhd').checked; // Check GuardaHD toggle
             const unit = document.getElementById('advUnit');
-            if (ghost) unit.classList.add('mf-active');
+            
+            // If EITHER is checked, reveal the proxy inputs
+            if (ghost || ghd) unit.classList.add('mf-active');
             else unit.classList.remove('mf-active');
         }
 
@@ -1633,6 +1650,9 @@
                         document.getElementById('vixLast').checked = config.filters.vixLast || false;
                         document.getElementById('dbOnly').checked = config.filters.dbOnly || false;
                         
+                        // CARICAMENTO GHD
+                        document.getElementById('enableGhd').checked = config.filters.enableGhd || false;
+
                         // CARICAMENTO STATO BOTTONI QUALITÀ
                         setSpecState('btn_4k', config.filters.no4k);
                         setSpecState('btn_1080', config.filters.no1080);
@@ -1726,6 +1746,9 @@
                     noCam: document.getElementById('btn_sd').classList.contains('excluded'),
                     
                     enableVix: document.getElementById('enableVix').checked,
+                    // AGGIUNTA FLAG GHD
+                    enableGhd: document.getElementById('enableGhd').checked,
+                    
                     vixLast: document.getElementById('vixLast').checked,
                     scQuality: currentSCQuality, 
                     dbOnly: document.getElementById('dbOnly').checked,
@@ -1757,6 +1780,8 @@
                 
                 if (c.filters.vixLast) scText += ' + Priorità Bassa';
             }
+            
+            let ghdText = c.filters.enableGhd ? 'ATTIVO 🦁' : 'NO';
 
             // Testo per le esclusioni
             let exclText = [];
@@ -1775,6 +1800,7 @@
                 <li>Signal Gate <span>${gateText}</span></li>
                 <li>Includi ENG <span>${c.filters.allowEng ? 'SI' : 'NO'}</span></li>
                 <li>StreamingCommunity <span>${scText}</span></li>
+                <li>GuardaHD <span>${ghdText}</span></li>
                 <li>Proxy Ghost <span>${c.mediaflow.proxyDebrid ? 'ATTIVO' : 'NO'}</span></li>
             `;
             const m = document.getElementById('installModal'); m.style.display = 'flex';
