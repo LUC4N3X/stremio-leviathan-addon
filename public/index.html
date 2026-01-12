@@ -1710,12 +1710,27 @@
             adWarning.style.display = service === 'ad' ? 'block' : 'none';
         }
 
+        // --- FUNZIONE DI VALIDAZIONE MODIFICATA ---
         function validateInputs() {
             let isValid = true;
-            ['apiKey'].forEach(id => {
-                const el = document.getElementById(id);
-                if (!el.value.trim()) { el.classList.add('input-error'); isValid = false; }
-            });
+            
+            // Verifica se i moduli Web sono attivi
+            const scActive = document.getElementById('enableVix').checked;
+            const ghdActive = document.getElementById('enableGhd').checked;
+            const isWebEnabled = scActive || ghdActive;
+
+            const el = document.getElementById('apiKey');
+            const value = el.value.trim();
+            
+            // La chiave è obbligatoria SOLO SE nessun modulo web è attivo
+            if (!value && !isWebEnabled) { 
+                el.classList.add('input-error'); 
+                isValid = false; 
+            } else {
+                // Se c'è un valore O se i moduli sono attivi, rimuovi l'errore
+                el.classList.remove('input-error');
+            }
+            
             return isValid;
         }
 
