@@ -15,6 +15,10 @@ const { fetchExternalAddonsFlat } = require("./external-addons");
 const PackResolver = require("./leviathan-pack-resolver");
 const aioFormatter = require("./aiostreams-formatter.cjs");
 
+// --- IMPORT GESTORI WEB (Vix & GuardaHD) ---
+const { searchVix } = require("./vix/vix_handler");
+const { searchGuardaHD } = require("./guardahd/ghd_handler"); // <--- NUOVO IMPORT GUARDA HD
+
 // --- 1. CONFIGURAZIONE LOGGER (Winston) ---
 const logger = winston.createLogger({
   level: 'debug',
@@ -56,7 +60,6 @@ const RD = require("./debrid/realdebrid");
 const AD = require("./debrid/alldebrid");
 const TB = require("./debrid/torbox");
 const dbHelper = require("./db-helper"); 
-const { searchVix } = require("./vix/vix_handler");
 const { getManifest } = require("./manifest");
 
 // Inizializza DB Locale (Serve la pool per insertTorrent)
@@ -422,6 +425,7 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     return { name, title: lines.join("\n") };
 }
 
+// Funzione Helper per Vix (Legacy)
 function formatVixStream(meta, vixData) {
     const isFHD = vixData.isFHD;
     const quality = isFHD ? "1080p" : "720p";
@@ -1019,15 +1023,34 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       debridStreams = (await Promise.all(rdPromises)).filter(Boolean);
   }
 
-  const vixPromise = searchVix(meta, config, reqHost);
-  const rawVix = await vixPromise;
-  const formattedVix = rawVix;
+  // === WEB PROVIDERS (Vix & GuardaHD) ===
   
+  // 1. StreamingCommunity
+  const vixPromise = searchVix(meta, config, reqHost);
+  
+  // 2. GuardaHD (ATTIVATO DA CONFIG INDEX.HTML)
+  let ghdPromise = Promise.resolve([]);
+  if (config.filters && config.filters.enableGhd) {
+      // Passiamo 'config' che contiene config.mediaflow (per eventuale proxy)
+      ghdPromise = searchGuardaHD(meta, config).catch(err => {
+          logger.warn(`GuardaHD Error: ${err.message}`);
+          return [];
+      });
+  }
+
+  // Attendi entrambi i provider Web
+  const [rawVix, formattedGhd] = await Promise.all([vixPromise, ghdPromise]);
+  const formattedVix = rawVix; // Vix è già formattato
+  
+  // UNIONE FINALE
   let finalStreams = [];
+  
+  // Se VixLast è attivo, mettiamo tutti i Web Stream (Vix e GHD) in fondo
   if (config.filters && config.filters.vixLast === true) {
-      finalStreams = [...debridStreams, ...formattedVix];
+      finalStreams = [...debridStreams, ...formattedGhd, ...formattedVix];
   } else {
-      finalStreams = [...formattedVix, ...debridStreams];
+      // Default: Web Stream in cima
+      finalStreams = [...formattedGhd, ...formattedVix, ...debridStreams];
   }
   
   const resultObj = { streams: finalStreams };
@@ -1143,6 +1166,7 @@ app.listen(PORT, () => {
     console.log(`🎬 METADATA: TMDB Primary (User Key Priority)`);
     console.log(`💾 SCRITTURA: DB Locale (Auto-Learning attivo)`);
     console.log(`👁️ SPETTRO VISIVO: Modulo Attivo (Esclusioni 4K/1080/720/SD)`);
+    console.log(`🦁 GUARDA HD: Modulo Integrato e Pronto`);
     console.log(`🦑 LEVIATHAN CORE: Optimized for High Reliability`);
     console.log(`-----------------------------------------------------`);
 });
