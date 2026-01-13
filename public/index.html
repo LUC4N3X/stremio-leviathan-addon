@@ -296,24 +296,65 @@
         .tab-icon { font-size: 2rem; display: block; transition: transform 0.6s ease; filter: drop-shadow(0 0 8px rgba(255,255,255,0.4)); }
         .service-tab:hover .tab-icon { transform: rotate(360deg) scale(1.15); filter: drop-shadow(0 0 12px var(--primary)); }
         
+        /* --- INPUT DESIGN EVOLUTO (NO WHITE BG) --- */
         .input-group { position: relative; margin-bottom: 30px; }
+
+        .custom-input:-webkit-autofill,
+        .custom-input:-webkit-autofill:hover, 
+        .custom-input:-webkit-autofill:focus, 
+        .custom-input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 100px #02060a inset !important; /* Forza sfondo nero su Chrome */
+            -webkit-text-fill-color: var(--primary) !important;
+            transition: background-color 5000s ease-in-out 0s;
+            caret-color: #fff;
+        }
+
         .custom-input {
-            width: 100%; background: rgba(0, 5, 10, 0.7); border: 1px solid rgba(255,255,255,0.15);
-            padding: 22px 22px 22px 22px; padding-right: 150px; border-radius: 15px; color: #fff;
-            font-family: 'Outfit', sans-serif; font-size: 1.1rem; transition: 0.4s ease; letter-spacing: 1.2px;
+            width: 100%;
+            background: rgba(2, 6, 10, 0.8) !important; /* Sfondo scuro sempre */
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            padding: 22px 22px 22px 22px; 
+            padding-right: 170px;
+            border-radius: 12px;
+            
+            /* Stile Testo Tech */
+            color: var(--primary); 
+            font-family: 'Rajdhani', monospace; 
+            font-size: 1.2rem; 
+            font-weight: 700;
+            letter-spacing: 2px;
+            
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.6);
         }
-        .custom-input:focus {
-            border-color: var(--primary); background: rgba(0, 8, 15, 0.95);
-            box-shadow: var(--glow-intense), inset 0 0 15px rgba(0, 242, 255, 0.1);
+
+        .custom-input:focus, 
+        .custom-input:not(:placeholder-shown) {
+            border-color: var(--primary);
+            background: rgba(0, 10, 20, 0.95) !important;
+            color: #fff; /* Testo bianco quando scrivi per leggibilità */
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+            box-shadow: 
+                0 0 30px rgba(0, 242, 255, 0.15),
+                inset 0 0 15px rgba(0, 242, 255, 0.05);
+            outline: none;
+            transform: translateY(-1px);
         }
-        .custom-input.input-error { border-color: var(--error); box-shadow: 0 0 20px rgba(255, 51, 102, 0.4); }
+
+        .custom-input.input-error { 
+            border-color: var(--error); 
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.3), inset 0 0 10px rgba(255, 51, 102, 0.1); 
+            color: var(--error);
+        }
         
         .input-action {
-            position: absolute; right: 10px; top: 10px; bottom: 10px;
-            background: linear-gradient(135deg, rgba(0, 242, 255, 0.15), rgba(112, 0, 255, 0.15)); border: 1px solid rgba(0, 242, 255, 0.4);
-            color: var(--primary); padding: 0 25px; display: flex; align-items: center; gap: 10px;
-            border-radius: 10px; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1rem;
+            position: absolute; right: 8px; top: 8px; bottom: 8px;
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.1), rgba(112, 0, 255, 0.1)); 
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            color: var(--primary); padding: 0 20px; display: flex; align-items: center; gap: 10px;
+            border-radius: 8px; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.95rem;
             text-decoration: none; transition: 0.4s ease; cursor: pointer; text-transform: uppercase;
+            backdrop-filter: blur(5px);
         }
         .input-action:hover { background: var(--primary); color: #000; box-shadow: var(--glow-intense); transform: scale(1.05); }
         
@@ -538,7 +579,7 @@
             .info-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
             .info-card { flex-direction: column; align-items: center; text-align: center; padding: 15px 10px; gap: 10px; height: 100%; }
             .info-text p { display: none; }
-            .custom-input { padding: 18px; font-size: 1rem; text-align: center; padding-bottom: 50px; padding-right: 18px !important; }
+            .custom-input { padding: 18px; font-size: 1.1rem; text-align: left; padding-bottom: 50px; padding-right: 18px !important; }
             .input-action { position: absolute; bottom: 6px; left: 6px; right: 6px; top: auto; width: auto; justify-content: center; padding: 10px; font-size: 0.9rem; background: rgba(0, 242, 255, 0.1); border: 1px solid rgba(0, 242, 255, 0.2); }
             .spectrum-grid { grid-template-columns: repeat(2, 1fr); }
             .aux-grid { grid-template-columns: 1fr !important; }
