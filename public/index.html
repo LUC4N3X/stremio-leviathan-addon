@@ -1321,6 +1321,23 @@
                                 <span class="slider"></span>
                             </label>
                         </div>
+
+                        <div class="control-row">
+                            <div class="control-info">
+                                <div class="control-title">
+                                    <i class="fas fa-cloud-upload-alt" style="color: #ff3366"></i> 
+                                    <span class="notranslate" translate="no">Cache Builder Mode</span>
+                                </div>
+                                <span class="control-desc">
+                                    Mostra anche i torrent <strong>non presenti</strong> nella cache. 
+                                    Cliccandoli, avvierai il download sul cloud Debrid.
+                                </span>
+                            </div>
+                            <label class="switch mf-switch">
+                                <input type="checkbox" id="showUncached">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
                         <div class="mf-group">
                             <input type="text" id="mfUrl" class="mf-input" placeholder="URL MediaFlow Proxy">
                             <input type="password" id="mfPass" class="mf-input" style="margin-top: 10px;" placeholder="Password Proxy (Opzionale)">
@@ -1650,6 +1667,9 @@
                         document.getElementById('vixLast').checked = config.filters.vixLast || false;
                         document.getElementById('dbOnly').checked = config.filters.dbOnly || false;
                         
+                        // --- CARICAMENTO SHOW UNCACHED ---
+                        document.getElementById('showUncached').checked = config.filters.showUncached || false;
+
                         // CARICAMENTO GHD
                         document.getElementById('enableGhd').checked = config.filters.enableGhd || false;
 
@@ -1767,7 +1787,10 @@
                     vixLast: document.getElementById('vixLast').checked,
                     scQuality: currentSCQuality, 
                     dbOnly: document.getElementById('dbOnly').checked,
-                    maxPerQuality: finalMaxQuality
+                    maxPerQuality: finalMaxQuality,
+                    
+                    // --- SALVATAGGIO SHOW UNCACHED ---
+                    showUncached: document.getElementById('showUncached').checked
                 }
             };
         }
@@ -1811,6 +1834,7 @@
             list.innerHTML = `
                 <li>Servizio Debrid <span>${c.service.toUpperCase()}</span></li>
                 <li>Database Core <span>${c.filters.dbOnly ? 'OVERDRIVE ⚡' : 'STANDARD'}</span></li>
+                <li>Cache Builder <span>${c.filters.showUncached ? 'ATTIVO 📥' : 'NO'}</span></li>
                 <li>Filtro Qualità <span>${spectrumStr}</span></li>
                 <li>Signal Gate <span>${gateText}</span></li>
                 <li>Includi ENG <span>${c.filters.allowEng ? 'SI' : 'NO'}</span></li>
