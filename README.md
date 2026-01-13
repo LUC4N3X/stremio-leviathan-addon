@@ -173,7 +173,7 @@ Progettato per l'elusione dei blocchi IP e la gestione di account Multi-Utente.
 | **TARGET ENGINE** | **REGION** | **LATENCY** | **MODE** | **STATUS** |
 | :--- | :---: | :---: | :---: | :---: |
 | **StreamingCommunity** | 🇮🇹 ITA | ![](https://img.shields.io/badge/⏱️_INSTANT-ULTRA-FF0000?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🌪️_HLS-Stream-red?style=flat-square&labelColor=black) | 🟢 |
-| **Guardahd** | 🇮🇹 ITA | ![](https://img.shields.io/badge/⏱️_3000ms-HQ-00eaff?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🌐_HLS‑Stream‑Hybrid‑blue?style=flat-square&labelColor=black) | 🟢 |
+| **Guardahd** | 🇮🇹 ITA | ![](https://img.shields.io/badge/⏱️_INSTANT-PREMIUM-00ff00?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🌪️_HLS-Stream-red?style=flat-square&labelColor=black) | 🟢 |
 | **Il Corsaro Nero** | 🇮🇹 ITA | ![](https://img.shields.io/badge/⏱️_3000ms-HQ-00eaff?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/⚡_Fast-Lane-00eaff?style=flat-square&labelColor=black) | 🟢 |
 | **Knaben** | 🌍 GLB | ![](https://img.shields.io/badge/⏱️_3000ms-HQ-00eaff?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🔌_API-JSON-blueviolet?style=flat-square&labelColor=black) | 🟢 |
 | **The Pirate Bay** | 🌍 GLB | ![](https://img.shields.io/badge/⏱️_3000ms-HQ-00eaff?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🔌_API-JSON-blueviolet?style=flat-square&labelColor=black) | 🟢 |
