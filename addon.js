@@ -388,17 +388,45 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     else if (/eng|en\b|english/i.test(lang || "")) langStr = "🇬🇧 ENG";
     else if (lang) langStr = `🗣️ ${lang.toUpperCase()}`;
     
+    // --- INIZIO MODIFICA GESTIONE FONTI ---
     let displaySource = source || "P2P";
 
+    // 1. Gestione specifica 1337x
     if (/1337/i.test(displaySource)) {
         displaySource = "1337x"; 
-    } else if (/corsaro/i.test(displaySource)) {
+    } 
+    // 2. Gestione Corsaro
+    else if (/corsaro/i.test(displaySource)) {
         displaySource = "ilCorSaRoNeRo";
-    } else if (/knaben/i.test(displaySource)) {
+    } 
+    // 3. Gestione Knaben
+    else if (/knaben/i.test(displaySource)) {
         displaySource = "Knaben";
-    } else if (/comet|stremthru/i.test(displaySource)) {
+    } 
+    // 4. Gestione StremThru/Comet
+    else if (/comet|stremthru/i.test(displaySource)) {
         displaySource = "StremThru";
-    } else {
+    } 
+    // 5. FIX RICHIESTO: Unifica RARBG e TheRARBG
+    else if (/rarbg/i.test(displaySource)) {
+        displaySource = "RARBG";
+    }
+    // 6. FIX RICHIESTO: Estrazione fonte da "rd cache"
+    else if (/rd cache/i.test(displaySource)) {
+        // Tenta di estrarre il gruppo dal nome del file (es: Film-GROUP.mkv -> GROUP)
+        // Cerca l'ultima parte del testo dopo un trattino, ignorando l'estensione del file
+        const groupMatch = fileTitle.match(/[-_]\s*([a-zA-Z0-9]+)(?:\.[a-z0-9]{2,4})?$/i);
+        
+        // Se trova un gruppo valido (lunghezza < 15 caratteri per evitare errori), lo usa
+        if (groupMatch && groupMatch[1] && groupMatch[1].length < 15 && !/mkv|mp4|avi/i.test(groupMatch[1])) {
+            displaySource = groupMatch[1]; 
+        } else {
+            // Se non riesce ad estrarre nulla, mette un nome più pulito di "rd cache"
+            displaySource = "Cloud"; 
+        }
+    }
+    // 7. Gestione Standard (pulizia nomi generici)
+    else {
         displaySource = displaySource
             .replace(/MediaFusion/gi, '') 
             .replace(/[-_]/g, ' ')        
@@ -407,6 +435,7 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
             .replace(/Fallback/ig, '')
             .trim() || "P2P";
     }
+    // --- FINE MODIFICA ---
     
     const sourceLine = `⚡ [${serviceTag}] ${displaySource}`;
     const name = `🦑 LEVIATHAN\n${qIcon} ${quality}`;
