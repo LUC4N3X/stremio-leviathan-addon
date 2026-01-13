@@ -660,9 +660,38 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta = null, d
             streamData = await AD.getStreamLink(apiKey, cleanMagnet, item.season, item.episode, safeFileIdx);
         }
 
-        if (!streamData || (streamData.type === "ready" && streamData.size < CONFIG.REAL_SIZE_FILTER)) return null;
+        // --- LOGICA CACHE BUILDER (COMPLETA E FUNZIONALE) ---
+        if (!streamData || streamData.type !== "ready" || streamData.size < CONFIG.REAL_SIZE_FILTER) {
+            
+            // Verifica se l'utente ha attivato la Cache Builder Mode
+            if (config.filters && config.filters.showUncached) {
+                
+                const serviceTag = service.toUpperCase();
+                
+                // Formatta il titolo ESATTAMENTE come se fosse in cache (estetica uguale)
+                const formatted = formatStreamTitleCinePro(
+                    item.title,
+                    item.source,
+                    item._size || item.sizeBytes || 0,
+                    item.seeders,
+                    serviceTag,
+                    config,
+                    item.hash
+                );
 
-        
+                return { 
+                    name: `[📥 DOWNLOAD]`, // Etichetta distintiva
+                    title: `${formatted.title}\n⚠️ DOWNLOAD RICHIESTO (No Cache)`, 
+                    // PUNTIAMO AL NOSTRO ENDPOINT "add_to_cloud" che caricherà il video locale di conferma
+                    url: `${reqHost}/${config.rawConf}/add_to_cloud/${item.hash}`, 
+                    infoHash: item.hash,
+                    behaviorHints: { notWebReady: true, bingieGroup: `uncached-${item.hash}` } 
+                };
+            }
+            
+            return null; // Nascondi se l'opzione è spenta
+        }
+
         let finalUrl = streamData.url;
 
         // Verifica la struttura esatta generata dal tuo index.html
@@ -1046,6 +1075,17 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           return LIMITERS.rd.schedule(() => resolveDebridLink(config, item, config.filters?.showFake, reqHost, meta, dbHelper));
       });
       debridStreams = (await Promise.all(rdPromises)).filter(Boolean);
+      
+      // --- NUOVA LOGICA DI ORDINAMENTO PER CACHE BUILDER ---
+      // Sposta i file [📥 DOWNLOAD] in fondo alla lista Debrid
+      debridStreams.sort((a, b) => {
+          const aIsUncached = a.name.includes('📥');
+          const bIsUncached = b.name.includes('📥');
+
+          if (aIsUncached && !bIsUncached) return 1; // A (uncached) va dopo B (cached)
+          if (!aIsUncached && bIsUncached) return -1; // A (cached) va prima di B (uncached)
+          return 0; // Mantiene l'ordine originale
+      });
   }
 
   // === WEB PROVIDERS (Vix & GuardaHD) ===
@@ -1106,6 +1146,53 @@ app.get("/:conf/play_tb/:hash", async (req, res) => {
     } catch (err) {
         logger.error(`Error Torbox Play: ${err.message}`);
         res.status(500).send("Errore Server: " + err.message);
+    }
+});
+
+// --- NUOVA ROTTA: AGGIUNTA AL CLOUD CON FEEDBACK VIDEO LOCALE ---
+app.get("/:conf/add_to_cloud/:hash", async (req, res) => {
+    const { conf, hash } = req.params;
+    try {
+        const config = getConfig(conf);
+        const apiKey = config.key || config.rd;
+        const service = config.service || 'rd';
+
+        if (!apiKey) return res.status(400).send("API Key mancante.");
+        
+        logger.info(`📥 [CACHE BUILDER] Richiesta aggiunta hash ${hash} su ${service.toUpperCase()}`);
+
+        if (service === 'rd') {
+            await axios.post("https://api.real-debrid.com/rest/1.0/torrents/addMagnet", 
+                `magnet=magnet:?xt=urn:btih:${hash}`, {
+                headers: { "Authorization": `Bearer ${apiKey}` }
+            });
+        } 
+        else if (service === 'ad') {
+            await axios.get("https://api.alldebrid.com/v4/magnet/upload", {
+                params: { agent: "leviathan", apikey: apiKey, magnet: `magnet:?xt=urn:btih:${hash}` }
+            });
+        }
+        else if (service === 'tb') {
+             await axios.post("https://api.torbox.app/v1/api/torrents/create", 
+                { magnet: `magnet:?xt=urn:btih:${hash}` }, {
+                headers: { "Authorization": `Bearer ${apiKey}` }
+            });
+        }
+
+        // --- FEEDBACK PROFESSIONALE (VIDEO LOCALE) ---
+        // Recupera il protocollo e l'host correnti
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+        const host = `${protocol}://${req.get('host')}`;
+        
+        // Punta al file 'confirmed.mp4' che L'UTENTE DEVE INSERIRE nella cartella public
+        const feedbackVideoUrl = `${host}/confirmed.mp4`;
+        
+        // Redirect al video locale (Stremio lo riprodurrà)
+        res.redirect(feedbackVideoUrl);
+        
+    } catch (err) {
+        logger.error(`Errore Cache Builder: ${err.message}`);
+        res.status(500).send("Errore durante l'aggiunta al cloud: " + err.message);
     }
 });
 
