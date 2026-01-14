@@ -1,32 +1,59 @@
-// rd.js — VERSIONE IBRIDA POTENZIATA (Leviathan Logic + Smart Matching)
-
 const axios = require("axios");
+const https = require("https");
 
-const RD_TIMEOUT = 30000; // Ridotto per essere più reattivi nei check
-const MAX_POLL = 10;
-const POLL_DELAY = 1000;
+// --- CONFIGURAZIONE TURBO ---
+const RD_API_BASE = "https://api.real-debrid.com/rest/1.0";
+const RD_TIMEOUT = 30000; // 30 Secondi timeout
+const MAX_POLL = 30;      // Più tentativi di attesa (per file grossi)
+const POLL_DELAY = 1000;  // 1 secondo tra i check
+
+// --- HTTP AGENT (Keep-Alive per velocità estrema) ---
+// Questo mantiene aperte le connessioni TCP, evitando l'handshake SSL ogni volta.
+const httpsAgent = new https.Agent({ 
+    keepAlive: true, 
+    maxSockets: 64, 
+    keepAliveMsecs: 30000 
+});
+
+const rdClient = axios.create({
+    baseURL: RD_API_BASE,
+    timeout: RD_TIMEOUT,
+    httpsAgent: httpsAgent,
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+});
+
+/* =========================================================================
+   HELPER E STATI
+   ========================================================================= */
 
 function sleep(ms) {
     return new Promise(r => setTimeout(r, ms));
 }
 
-/* =========================
-   FILE MATCHING INTELLIGENTE (Tuo codice originale)
-========================= */
+function isVideo(path) {
+    return /\.(mkv|mp4|avi|mov|wmv|flv|webm|m4v|ts|m2ts|mpg|mpeg)$/i.test(path);
+}
+
+// Stati di Real-Debrid normalizzati
+const Status = {
+    ERROR: (s) => ['error', 'magnet_error'].includes(s),
+    WAITING_SELECTION: (s) => s === 'waiting_files_selection',
+    DOWNLOADING: (s) => ['downloading', 'uploading', 'queued'].includes(s),
+    READY: (s) => ['downloaded', 'dead'].includes(s),
+};
+
+/* =========================================================================
+   MATCHING LEVIATHAN (Logica Originale Ottimizzata)
+   ========================================================================= */
 function matchFile(files, season, episode) {
     if (!files) return null;
 
-    const videoFiles = files.filter(f => {
-        const n = f.path.toLowerCase();
-        return (
-            /\.(mkv|mp4|avi|mov|wmv|flv|webm|m4v|ts|m2ts|mpg|mpeg)$/i.test(n) &&
-            !n.includes("sample")
-        );
-    });
+    // Filtra solo video e rimuovi sample
+    const videoFiles = files.filter(f => isVideo(f.path) && !f.path.toLowerCase().includes("sample"));
 
     if (!videoFiles.length) return null;
     
-    // Se è un film o non ci sono dati s/e, prendi il più grande
+    // Se è un film o non ci sono dati s/e, prendi il più grande (main movie)
     if (!season || !episode) {
         return videoFiles.sort((a,b) => b.bytes - a.bytes)[0].id;
     }
@@ -36,6 +63,7 @@ function matchFile(files, season, episode) {
     const s2 = s.toString().padStart(2, "0");
     const e2 = e.toString().padStart(2, "0");
 
+    // Regex in ordine di precisione
     const rules = [
         new RegExp(`S0*${s}.*?E0*${e}\\b`, "i"),        // S01E01
         new RegExp(`\\b${s}x0*${e}\\b`, "i"),          // 1x01
@@ -49,131 +77,108 @@ function matchFile(files, season, episode) {
         if (f) return f.id;
     }
 
-    // fallback finale: file più grande
+    // Fallback: file più grande (spesso è l'episodio giusto se il pack è piccolo)
     return videoFiles.sort((a,b) => b.bytes - a.bytes)[0].id;
 }
 
-/* =========================
-   RD REQUEST ROBUSTA (Adattata per gestire errori 204 e json)
-========================= */
-async function rdRequest(method, url, token, data = null) {
+/* =========================================================================
+   RICHIESTA HTTP ROBUSTA (Anti-Ban & Retry)
+   ========================================================================= */
+async function rdRequest(method, endpoint, token, data = null) {
     let attempt = 0;
-    while (attempt < 3) {
+    const maxAttempts = 3;
+
+    while (attempt < maxAttempts) {
         try {
             const config = {
                 method,
-                url,
-                headers: { 
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                timeout: RD_TIMEOUT,
+                url: endpoint,
+                headers: { Authorization: `Bearer ${token}` },
                 data
             };
-
-            const res = await axios(config);
+            const res = await rdClient(config);
             return res.data;
         } catch (e) {
             const st = e.response?.status;
-            if (st === 403) return null; // Token invalido
-            if (st === 404) return null; // Non trovato
             
-            // Retry su 429 (Too Many Requests) o errori server 5xx
+            // Errori Fatali (Non riprovare)
+            if (st === 401 || st === 403) {
+                console.error(`[RD AUTH] Token invalido o scaduto.`);
+                return null;
+            }
+            if (st === 404) return null; // Risorsa non trovata
+            
+            // Errori Temporanei (Riprova con backoff)
             if (st === 429 || st >= 500 || e.code === 'ECONNABORTED') {
-                await sleep(1000 + Math.random() * 1000);
+                const isRateLimit = st === 429;
+                const waitTime = isRateLimit ? (2000 + (attempt * 1000)) : 1000;
+                
+                if (isRateLimit) console.warn(`[RD 429] Rate Limit Hit. Pausa tattica di ${waitTime}ms...`);
+                
+                await sleep(waitTime);
                 attempt++;
                 continue;
             }
-            // Altri errori
+
+            // Errore sconosciuto (es. errore logica RD)
+            console.error(`[RD ERROR] ${endpoint} -> ${e.message}`);
             return null;
         }
     }
     return null;
 }
 
-/* =========================
-   MODULO RD DEFINITIVO
-========================= */
+/* =========================================================================
+   CORE MODULE
+   ========================================================================= */
 const RD = {
 
     deleteTorrent: async (token, id) => {
         try {
-            await rdRequest(
-                "DELETE",
-                `https://api.real-debrid.com/rest/1.0/torrents/delete/${id}`,
-                token
-            );
+            await rdRequest("DELETE", `/torrents/delete/${id}`, token);
         } catch {}
     },
 
     /**
      * LEVIATHAN CACHE CHECK
-     * Verifica proattiva: Aggiunge -> Controlla -> Cancella.
-     * Molto più affidabile di /instantAvailability.
+     * Verifica proattiva ibrida.
      */
     checkCacheLeviathan: async (token, magnet, hash) => {
         let torrentId = null;
         try {
-            // 1. Aggiungi Magnet
+            // Aggiungi magnet
             const body = new URLSearchParams();
             body.append("magnet", magnet);
             
-            const add = await rdRequest(
-                "POST",
-                "https://api.real-debrid.com/rest/1.0/torrents/addMagnet",
-                token,
-                body
-            );
-
+            const add = await rdRequest("POST", "/torrents/addMagnet", token, body);
             if (!add?.id) return { cached: false, hash };
             torrentId = add.id;
 
-            // 2. Ottieni Info
-            let info = await rdRequest(
-                "GET",
-                `https://api.real-debrid.com/rest/1.0/torrents/info/${torrentId}`,
-                token
-            );
-
+            // Ottieni info
+            let info = await rdRequest("GET", `/torrents/info/${torrentId}`, token);
             if (!info) {
                 await RD.deleteTorrent(token, torrentId);
                 return { cached: false, hash };
             }
 
-            // 3. Se serve selezione file, seleziona "all" per forzare il check
-            if (info.status === "waiting_files_selection") {
+            // Forza check se necessario
+            if (Status.WAITING_SELECTION(info.status)) {
                 const sel = new URLSearchParams();
                 sel.append("files", "all");
-                
-                await rdRequest(
-                    "POST",
-                    `https://api.real-debrid.com/rest/1.0/torrents/selectFiles/${torrentId}`,
-                    token,
-                    sel
-                );
-
-                // Rileggi info post-selezione
-                info = await rdRequest(
-                    "GET",
-                    `https://api.real-debrid.com/rest/1.0/torrents/info/${torrentId}`,
-                    token
-                );
+                await rdRequest("POST", `/torrents/selectFiles/${torrentId}`, token, sel);
+                info = await rdRequest("GET", `/torrents/info/${torrentId}`, token);
             }
 
-            // 4. Verifica stato "downloaded"
-            const isCached = info?.status === "downloaded";
+            const isCached = Status.READY(info.status);
             
-            // 5. Estrai metadati video principale (Bonus del metodo Leviathan)
+            // Estrazione metadati (Bonus)
             let mainFile = null;
             if (info?.files) {
-                 const videoFiles = info.files.filter(f => 
-                    /\.(mkv|mp4|avi|mov|wmv|flv|webm|m4v|ts|m2ts)$/i.test(f.path)
-                ).sort((a, b) => b.bytes - a.bytes);
-                
-                if (videoFiles.length > 0) mainFile = videoFiles[0];
+                 const videoFiles = info.files.filter(f => isVideo(f.path)).sort((a, b) => b.bytes - a.bytes);
+                 if (videoFiles.length > 0) mainFile = videoFiles[0];
             }
 
-            // 6. Pulizia immediata
+            // Pulizia immediata
             await RD.deleteTorrent(token, torrentId);
 
             return {
@@ -190,63 +195,59 @@ const RD = {
     },
 
     /**
-     * Vecchio metodo veloce (Opzionale, se vuoi fare un check rapido su tanti file)
+     * GET STREAM LINK (Engine Principale)
+     * Flow: CheckExisting -> Add -> Poll -> Select -> Unrestrict -> SmartCleanup
      */
-    checkInstantAvailability: async (token, hashes) => {
-        try {
-            const url = `https://api.real-debrid.com/rest/1.0/torrents/instantAvailability/${hashes.join("/")}`;
-            return await rdRequest("GET", url, token) || {};
-        } catch {
-            return {};
-        }
-    },
-
-    /* =========================
-       STREAM LINK PRINCIPALE (Logica Preservata e Pulita)
-    ========================= */
     getStreamLink: async (token, magnet, season = null, episode = null) => {
         let torrentId = null;
+        let requiresDelete = true; // Default: puliamo ciò che creiamo
 
         try {
-            /* 1️⃣ ADD MAGNET */
-            const body = new URLSearchParams();
-            body.append("magnet", magnet);
+            /* 1️⃣ CHECK INTELLIGENTE ESISTENTE (Modifica God Tier) */
+            // Controlla se il torrent è già attivo nel cloud per evitare duplicati e errori 429
+            const activeTorrents = await rdRequest("GET", "/torrents", token);
+            const magnetHashMatch = magnet.match(/btih:([a-zA-Z0-9]+)/i);
+            const targetHash = magnetHashMatch ? magnetHashMatch[1].toLowerCase() : null;
 
-            const add = await rdRequest(
-                "POST",
-                "https://api.real-debrid.com/rest/1.0/torrents/addMagnet",
-                token,
-                body
-            );
-
-            if (!add?.id) return null;
-            torrentId = add.id;
-
-            /* 2️⃣ INFO + POLLING */
-            let info = null;
-            // Un piccolo delay iniziale aiuta RD a processare il magnet
-            await sleep(500); 
-
-            for (let i = 0; i < MAX_POLL; i++) {
-                info = await rdRequest(
-                    "GET",
-                    `https://api.real-debrid.com/rest/1.0/torrents/info/${torrentId}`,
-                    token
-                );
-                if (info?.status === "waiting_files_selection" || info?.status === "downloaded") {
-                    break;
-                }
-                await sleep(POLL_DELAY);
+            let existing = null;
+            if (targetHash && Array.isArray(activeTorrents)) {
+                // Cerca un torrent con lo stesso hash che non sia in errore
+                existing = activeTorrents.find(t => t.hash.toLowerCase() === targetHash && !Status.ERROR(t.status));
             }
 
-            if (!info || (info.status !== "waiting_files_selection" && info.status !== "downloaded")) {
-                await RD.deleteTorrent(token, torrentId);
-                return null;
+            if (existing) {
+                // Trovato! Usiamo quello esistente.
+                // console.log(`[RD SMART] Recupero torrent esistente: ${existing.id}`);
+                torrentId = existing.id;
+                requiresDelete = false; // NON cancellarlo, potrebbe servire all'utente
+            } else {
+                // Non esiste, lo aggiungiamo
+                const body = new URLSearchParams();
+                body.append("magnet", magnet);
+                const add = await rdRequest("POST", "/torrents/addMagnet", token, body);
+                
+                if (!add?.id) throw new Error("Magnet add failed");
+                torrentId = add.id;
             }
 
-            /* 3️⃣ FILE SELECTION */
-            if (info.status === "waiting_files_selection") {
+            /* 2️⃣ POLLING E STATO INIZIALE */
+            let info = await rdRequest("GET", `/torrents/info/${torrentId}`, token);
+            
+            // Loop di attesa se lo stato è "magnet_conversion"
+            let pollCount = 0;
+            while (info && info.status === 'magnet_conversion' && pollCount < 5) {
+                await sleep(1000);
+                info = await rdRequest("GET", `/torrents/info/${torrentId}`, token);
+                pollCount++;
+            }
+
+            if (!info) throw new Error("Info retrieval failed");
+
+            /* 3️⃣ SELEZIONE FILE (Solo se necessario) */
+            if (Status.WAITING_SELECTION(info.status)) {
                 let fileId = "all";
+                
+                // Match chirurgico del file
                 if (info.files) {
                     const m = matchFile(info.files, season, episode);
                     if (m) fileId = m;
@@ -254,71 +255,72 @@ const RD = {
 
                 const sel = new URLSearchParams();
                 sel.append("files", fileId);
+                await rdRequest("POST", `/torrents/selectFiles/${torrentId}`, token, sel);
 
-                await rdRequest(
-                    "POST",
-                    `https://api.real-debrid.com/rest/1.0/torrents/selectFiles/${torrentId}`,
-                    token,
-                    sel
-                );
-
-                // Polling post-selezione
+                // Polling post-selezione (attesa download)
                 for (let i = 0; i < MAX_POLL; i++) {
                     await sleep(POLL_DELAY);
-                    info = await rdRequest(
-                        "GET",
-                        `https://api.real-debrid.com/rest/1.0/torrents/info/${torrentId}`,
-                        token
-                    );
-                    if (info?.status === "downloaded") break;
+                    info = await rdRequest("GET", `/torrents/info/${torrentId}`, token);
+                    if (Status.READY(info?.status)) break;
+                    if (Status.DOWNLOADING(info?.status) && info.progress === 100) break; 
                 }
             }
 
-            if (info.status !== "downloaded" || !info.links?.length) {
-                await RD.deleteTorrent(token, torrentId);
+            /* 4️⃣ VERIFICA FINALE STATO */
+            // Se ancora non è pronto, abortiamo (o è un uncached lento, o è bloccato)
+            if (!Status.READY(info.status)) {
+                // Se lo abbiamo creato noi e non è pronto, cancelliamo per pulizia
+                if (requiresDelete) await RD.deleteTorrent(token, torrentId);
                 return null;
             }
 
-            /* 4️⃣ IDENTIFICAZIONE LINK TARGET */
-            const targetId = matchFile(info.files, season, episode);
-            let link = info.links[0]; 
+            /* 5️⃣ IDENTIFICAZIONE LINK TARGET */
+            // Cerchiamo il link giusto tra quelli sbloccati
+            const targetFileId = matchFile(info.files, season, episode);
+            let targetLink = null;
 
-            if (targetId) {
+            if (targetFileId) {
+                // Mappa file ID -> Link Index
                 const selectedFiles = info.files.filter(f => f.selected === 1);
-                const linkIndex = selectedFiles.findIndex(f => f.id === targetId);
+                const linkIndex = selectedFiles.findIndex(f => f.id === targetFileId);
                 if (linkIndex !== -1 && info.links[linkIndex]) {
-                    link = info.links[linkIndex];
+                    targetLink = info.links[linkIndex];
                 }
             }
+            
+            // Fallback: primo link disponibile
+            if (!targetLink && info.links.length > 0) targetLink = info.links[0];
+            if (!targetLink) throw new Error("No link found");
 
-            /* 5️⃣ UNRESTRICT */
+            /* 6️⃣ UNRESTRICT (Sblocco finale) */
             const uBody = new URLSearchParams();
-            uBody.append("link", link);
+            uBody.append("link", targetLink);
+            const unrestrict = await rdRequest("POST", "/unrestrict/link", token, uBody);
 
-            const un = await rdRequest(
-                "POST",
-                "https://api.real-debrid.com/rest/1.0/unrestrict/link",
-                token,
-                uBody
-            );
+            /* 🧹 CLEANUP */
+            if (requiresDelete) await RD.deleteTorrent(token, torrentId);
 
-            /* 🧹 DELETE FINALE */
-            await RD.deleteTorrent(token, torrentId);
-
-            if (!un?.download) return null;
+            if (!unrestrict?.download) return null;
 
             return {
                 type: "ready",
-                url: un.download,
-                filename: un.filename,
-                size: un.filesize
+                url: unrestrict.download,
+                filename: unrestrict.filename,
+                size: unrestrict.filesize
             };
 
         } catch (e) {
-            if (torrentId) await RD.deleteTorrent(token, torrentId);
-            console.error("RD Stream Error:", e.message);
+            // console.error("RD Stream Error:", e.message);
+            // In caso di errore, se il torrent è nostro, puliamo
+            if (torrentId && requiresDelete) await RD.deleteTorrent(token, torrentId);
             return null;
         }
+    },
+
+    checkInstantAvailability: async (token, hashes) => {
+        try {
+            return await rdRequest("GET", `/torrents/instantAvailability/${hashes.join("/")}`, token) || {};
+        } catch { return {}; }
     }
 };
 
