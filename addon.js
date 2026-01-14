@@ -75,11 +75,11 @@ const CONFIG = {
   TIMEOUTS: {
     TMDB: 2000,
     SCRAPER: 6000,
-    REMOTE_INDEXER: 3500, 
+    REMOTE_INDEXER: 2500, 
     DB_QUERY: 3000,
     DEBRID: 10000, 
     PACK_RESOLVER: 7000,
-    EXTERNAL: 4500
+    EXTERNAL: 2000
   }
 };
 
@@ -1251,3 +1251,4 @@ app.listen(PORT, () => {
     console.log(`🦑 LEVIATHAN CORE: Optimized for High Reliability`);
     console.log(`-----------------------------------------------------`);
 });
+
