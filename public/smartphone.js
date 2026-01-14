@@ -1,3 +1,9 @@
+/* LEVIATHAN MOBILE PROTOCOL v4.6
+   Tactical Interface - Global Web Priority
+   Features: Global Web Sort Toggle, Deep Sea FX
+   Developed by LUC4N3X
+*/
+
 const mobileCSS = `
 :root {
     --m-bg: #000103;
@@ -54,14 +60,45 @@ body {
     position: relative; z-index: 1; width: 100%; max-width: 100%;
 }
 
+/* HEADER */
+.m-header {
+    padding: 15px 20px; display: flex; align-items: center; justify-content: space-between;
+    background: rgba(0,5,12,0.9); backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0,242,255,0.15); z-index: 10;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+}
+.m-header-left { display: flex; align-items: center; gap: 10px; }
+.m-logo-mini {
+    width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--m-primary);
+    box-shadow: 0 0 15px rgba(0,242,255,0.4);
+    background-image: url('https://i.ibb.co/jvTQLbjb/Gemini-Generated-Image-51j2ce51j2ce51j2-1.png');
+    background-size: cover; background-position: center;
+    animation: sonarPulse 3s infinite;
+}
+@keyframes sonarPulse { 0% { box-shadow: 0 0 0 0 rgba(0, 242, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(0, 242, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 242, 255, 0); } }
+
+.m-brand { 
+    font-family: 'Rajdhani', sans-serif; font-size: 1.4rem; font-weight: 800; 
+    color: #fff; letter-spacing: 1px;
+    background: linear-gradient(90deg, #fff, var(--m-primary));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+
+/* COPY BUTTON */
+.m-header-action {
+    background: rgba(0,242,255,0.1); border: 1px solid rgba(0,242,255,0.3);
+    padding: 6px 12px; border-radius: 20px; color: var(--m-primary);
+    font-size: 0.75rem; font-weight: 700; font-family: 'Rajdhani', sans-serif;
+    display: flex; align-items: center; gap: 6px; letter-spacing: 1px;
+    transition: 0.2s;
+}
+.m-header-action:active { background: var(--m-primary); color: #000; transform: scale(0.95); }
+
 /* PULL TO REFRESH INDICATOR */
 .m-ptr {
-    position: absolute; 
-    top: -80px; /* Start hidden above */
-    left: 0; width: 100%; height: 80px;
+    position: absolute; top: -80px; left: 0; width: 100%; height: 80px;
     display: flex; align-items: flex-end; justify-content: center;
-    padding-bottom: 20px;
-    color: var(--m-primary); z-index: 10;
+    padding-bottom: 20px; color: var(--m-primary); z-index: 10;
     pointer-events: none; opacity: 0; transition: opacity 0.2s;
 }
 .m-ptr-icon {
@@ -69,22 +106,15 @@ body {
     filter: drop-shadow(0 0 15px var(--m-primary));
     background: rgba(0,0,0,0.5); padding: 10px; border-radius: 50%; border: 1px solid rgba(0,242,255,0.3);
 }
-.m-ptr.loading .m-ptr-icon {
-    animation: spin 1s linear infinite; border-color: var(--m-primary);
-}
+.m-ptr.loading .m-ptr-icon { animation: spin 1s linear infinite; border-color: var(--m-primary); }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 /* CONTENT WRAPPER */
-.m-content-wrapper {
-    flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column;
-}
+.m-content-wrapper { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
 .m-content {
     flex: 1; overflow-y: auto; overflow-x: hidden;
-    padding: 0 20px 220px 20px; 
-    scroll-behavior: smooth; width: 100%;
-    will-change: transform;
+    padding: 0 20px 220px 20px; scroll-behavior: smooth; width: 100%; will-change: transform;
 }
-
 .m-page { display: none; animation: fadeIn 0.4s ease; width: 100%; }
 .m-page.active { display: block; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -116,21 +146,14 @@ body {
     font-family: 'Rajdhani', sans-serif; font-size: 3.2rem; font-weight: 800; line-height: 1;
     background: linear-gradient(180deg, #fff 0%, var(--m-primary) 60%, var(--m-secondary) 100%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 15px rgba(0,242,255,0.3)); letter-spacing: -1px; margin: 0;
-    width: 100%;
+    filter: drop-shadow(0 0 15px rgba(0,242,255,0.3)); letter-spacing: -1px; margin: 0; width: 100%;
 }
 
 .m-brand-sub {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 0.85rem; 
-    letter-spacing: 2px;
-    color: var(--m-primary);
-    text-transform: uppercase;
-    margin-top: 10px;
-    font-weight: 700;
+    font-family: 'Rajdhani', sans-serif; font-size: 0.85rem; letter-spacing: 2px;
+    color: var(--m-primary); text-transform: uppercase; margin-top: 10px; font-weight: 700;
     display: flex; align-items: center; justify-content: center;
-    text-shadow: 0 0 10px rgba(0, 242, 255, 0.4);
-    width: 100%;
+    text-shadow: 0 0 10px rgba(0, 242, 255, 0.4); width: 100%;
 }
 .m-brand-sub::before, .m-brand-sub::after {
     content: ''; display: block; width: 25px; height: 2px;
@@ -149,25 +172,18 @@ body {
 .m-card.active-border { border-color: var(--m-primary); box-shadow: 0 0 25px rgba(0,242,255,0.15); }
 .m-card-gold { border-color: rgba(255, 215, 0, 0.4); box-shadow: 0 0 15px rgba(255, 215, 0, 0.1); }
 
-.m-card-header { 
-    display: flex; align-items: center; gap: 12px; margin-bottom: 18px; 
-    color: #fff; font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; 
-    text-transform: uppercase; letter-spacing: 1px; font-weight: 800; 
-}
+.m-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; color: #fff; font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 800; }
 .m-card-icon { color: var(--m-primary); font-size: 1.3rem; filter: drop-shadow(0 0 8px var(--m-primary)); }
 
 /* INPUTS */
 .m-input-group { position: relative; margin-bottom: 15px; }
 .m-input {
-    width: 100%; background: rgba(0,0,0,0.5);
-    border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;
-    padding: 18px; padding-right: 90px;
-    color: var(--m-primary); font-family: 'Rajdhani', monospace; font-size: 1.1rem; font-weight: 700; 
-    transition: 0.3s;
+    width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;
+    padding: 18px; padding-right: 90px; color: var(--m-primary);
+    font-family: 'Rajdhani', monospace; font-size: 1.1rem; font-weight: 700; transition: 0.3s;
 }
 .m-input::placeholder { color: var(--m-dim); font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 400; opacity: 0.5; }
 .m-input:focus { border-color: var(--m-primary); background: rgba(0,10,20,0.8); box-shadow: 0 0 20px rgba(0,242,255,0.15); color: #fff; }
-
 .m-tmdb-input { border-color: rgba(255, 215, 0, 0.3); color: var(--m-gold); }
 .m-tmdb-input:focus { border-color: var(--m-gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.15); }
 
@@ -181,34 +197,18 @@ body {
 .m-paste-btn:active { background: var(--m-primary); color: #000; }
 
 /* TABS */
-.m-tabs-row { 
-    display: flex; gap: 8px; margin-bottom: 25px; 
-    background: rgba(0,0,0,0.4); padding: 5px; border-radius: 16px; 
-    border: 1px solid rgba(255,255,255,0.08);
-}
-.m-tab-btn { 
-    flex: 1; text-align: center; padding: 14px; font-size: 0.9rem; color: var(--m-dim); 
-    font-weight: 700; border-radius: 12px; transition: 0.3s; font-family: 'Rajdhani', sans-serif; 
-    text-transform: uppercase; letter-spacing: 1px;
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-}
+.m-tabs-row { display: flex; gap: 8px; margin-bottom: 25px; background: rgba(0,0,0,0.4); padding: 5px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); }
+.m-tab-btn { flex: 1; text-align: center; padding: 14px; font-size: 0.9rem; color: var(--m-dim); font-weight: 700; border-radius: 12px; transition: 0.3s; font-family: 'Rajdhani', sans-serif; text-transform: uppercase; letter-spacing: 1px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .m-tab-icon { font-size: 1.4rem; display: block; transition: 0.5s; filter: grayscale(1); }
-.m-tab-btn.active { 
-    background: linear-gradient(135deg, rgba(0, 242, 255, 0.15), rgba(112, 0, 255, 0.1)); 
-    color: #fff; border: 1px solid var(--m-primary); 
-    box-shadow: 0 0 20px rgba(0,242,255,0.1); 
-}
+.m-tab-btn.active { background: linear-gradient(135deg, rgba(0, 242, 255, 0.15), rgba(112, 0, 255, 0.1)); color: #fff; border: 1px solid var(--m-primary); box-shadow: 0 0 20px rgba(0,242,255,0.1); }
 .m-tab-btn.active .m-tab-icon { filter: grayscale(0) drop-shadow(0 0 8px rgba(255,255,255,0.6)); animation: rotateIcon 6s linear infinite; }
 @keyframes rotateIcon { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 /* AD WARNING */
 .m-ad-warning {
-    display: none; background: rgba(255, 204, 0, 0.1); 
-    border: 1px solid var(--m-warning); border-radius: 12px;
-    padding: 12px; margin-bottom: 20px; text-align: center;
-    color: var(--m-warning); font-size: 0.85rem; font-weight: 700;
-    box-shadow: 0 0 15px rgba(255, 204, 0, 0.1);
-    animation: fadeIn 0.3s ease;
+    display: none; background: rgba(255, 204, 0, 0.1); border: 1px solid var(--m-warning); border-radius: 12px;
+    padding: 12px; margin-bottom: 20px; text-align: center; color: var(--m-warning); font-size: 0.85rem; font-weight: 700;
+    box-shadow: 0 0 15px rgba(255, 204, 0, 0.1); animation: fadeIn 0.3s ease;
 }
 
 /* SWITCHES & STATUS */
@@ -243,7 +243,7 @@ input:checked + .m-warn-ghd:before { background-color: var(--m-warning) !importa
 .m-q-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--m-dim); padding: 12px 0; text-align: center; border-radius: 10px; font-size: 0.85rem; font-weight: 700; font-family: 'Rajdhani', sans-serif; transition: 0.3s; }
 .m-q-item.excluded { border-color: var(--m-error); color: var(--m-error); opacity: 0.6; text-decoration: line-through; background: rgba(255,51,102,0.15); }
 
-/* CREDITS */
+/* CREDITS & FAQ */
 .m-credits-section { margin-top: 40px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center; gap: 20px; }
 .m-faq-btn { width: 100%; padding: 14px; background: transparent; border: 1px dashed rgba(255,255,255,0.3); color: var(--m-text); border-radius: 12px; font-family: 'Rajdhani', sans-serif; font-weight: 700; display: flex; justify-content: center; align-items: center; gap: 8px; }
 .m-commander-link { text-decoration: none; display: inline-flex; align-items: center; gap: 12px; background: rgba(0, 5, 10, 0.6); border: 1px solid rgba(112, 0, 255, 0.4); padding: 8px 25px 8px 8px; border-radius: 50px; transition: 0.3s; box-shadow: 0 0 15px rgba(0,0,0,0.3); }
@@ -410,6 +410,15 @@ const mobileHTML = `
                         </div>
                         <label class="m-switch"><input type="checkbox" id="m-enableGhd" onchange="updateStatus('m-enableGhd','st-ghd')"><span class="m-slider m-warn-ghd"></span></label>
                     </div>
+
+                    <div class="m-row" style="border-top:1px dashed rgba(255,255,255,0.1); padding-top:15px; margin-top:10px;">
+                        <div class="m-label">
+                            <h4>Priorità Web Bassa</h4>
+                            <p>Mostra risultati Web DOPO i Torrent</p>
+                        </div>
+                        <label class="m-switch"><input type="checkbox" id="m-vixLast"><span class="m-slider"></span></label>
+                    </div>
+
                 </div>
 
                 <div class="m-credits-section">
@@ -608,14 +617,9 @@ function initPullToRefresh() {
         if (diff > 0 && content.scrollTop <= 0) {
             if (e.cancelable) e.preventDefault();
             ptr.style.opacity = 1;
-            // Limit movement physics
             const move = Math.min(diff * 0.5, 100); 
             content.style.transform = `translateY(${move}px)`;
-            
-            // Move icon down as well (physics fix)
             ptr.style.transform = `translateY(${move}px)`;
-            
-            // Rotate icon based on pull
             icon.style.transform = `rotate(${move * 3}deg)`;
             
             if (diff > threshold) {
@@ -632,21 +636,16 @@ function initPullToRefresh() {
         if (!pulling) return;
         pulling = false;
         
-        // Check if dragged enough
         const currentY = e.changedTouches[0].pageY;
         const diff = currentY - startY;
         
         if (diff > threshold && content.scrollTop <= 0) {
-            // Trigger Refresh
             ptr.classList.add('loading');
-            content.style.transform = `translateY(60px)`; // Hold position
-            ptr.style.transform = `translateY(60px)`; // Hold icon
-            if (navigator.vibrate) navigator.vibrate(50); // Haptic
-            setTimeout(() => {
-                location.reload();
-            }, 500);
+            content.style.transform = `translateY(60px)`; 
+            ptr.style.transform = `translateY(60px)`;
+            if (navigator.vibrate) navigator.vibrate(50);
+            setTimeout(() => { location.reload(); }, 500);
         } else {
-            // Reset
             content.style.transform = '';
             ptr.style.transform = '';
             ptr.style.opacity = 0;
@@ -779,6 +778,10 @@ function loadMobileConfig() {
                 document.getElementById('m-allowEng').checked = config.filters.allowEng || false;
                 document.getElementById('m-showUncached').checked = config.filters.showUncached || false;
                 document.getElementById('m-dbOnly').checked = config.filters.dbOnly || false;
+                
+                // Load VixLast
+                if(config.filters.vixLast) document.getElementById('m-vixLast').checked = true;
+
                 const qMap = {'no4k':'mq-4k', 'no1080':'mq-1080', 'no720':'mq-720', 'noScr':'mq-sd'};
                 for(let k in qMap) if(config.filters[k]) document.getElementById(qMap[k]).classList.add('excluded');
                 if(config.filters.scQuality) setScQuality(config.filters.scQuality);
@@ -829,7 +832,8 @@ function getMobileConfig() {
             noCam: document.getElementById('mq-sd').classList.contains('excluded'),
             enableVix: document.getElementById('m-enableVix').checked,
             enableGhd: document.getElementById('m-enableGhd').checked,
-            vixLast: false,
+            // SAVE GLOBAL WEB PRIORITY HERE
+            vixLast: document.getElementById('m-vixLast').checked,
             scQuality: mScQuality,
             dbOnly: document.getElementById('m-dbOnly').checked,
             maxPerQuality: gateActive ? gateVal : 0,
