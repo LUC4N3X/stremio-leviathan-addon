@@ -571,6 +571,7 @@
         }
 
         @media (max-width: 768px) {
+            /* Styles here are kept for compatibility but main mobile logic is handled by smartphone.js */
             header { margin-bottom: 30px; margin-top: 20px; }
             .brand-title { font-size: 3.5rem; letter-spacing: -2px; }
             .logo-container { width: 130px; height: 130px; margin-bottom: 15px; }
@@ -593,22 +594,9 @@
             .gate-left { flex-direction: column; gap: 10px; width: 100%; justify-content: center; }
             .gate-controls { justify-content: center; width: 100%; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
             .gate-slider { width: 100% !important; margin-right: 0; flex-grow: 1; }
-
-            /* FIX MOBILE TABS DISPLAY */
-            .service-tabs { 
-                display: grid !important; 
-                grid-template-columns: 1fr 1fr 1fr; 
-                gap: 8px; 
-                padding: 8px;
-            }
-            .service-tab { 
-                padding: 10px 4px; 
-                min-width: 0;
-            }
-            .tab-name { 
-                font-size: 0.8rem;
-                word-break: break-word;
-            }
+            .service-tabs { display: grid !important; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 8px; }
+            .service-tab { padding: 10px 4px; min-width: 0; }
+            .tab-name { font-size: 0.8rem; word-break: break-word; }
         }
     </style>
 </head>
@@ -965,7 +953,39 @@
     </div>
 
     <script>
+        // --- MOBILE LOADER & INTERCEPTOR ---
+        function isMobileDevice() {
+            return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1) || window.innerWidth < 768;
+        }
+
+        // Se è un dispositivo mobile, nascondi TUTTO del desktop e carica smartphone.js
+        if (isMobileDevice()) {
+            // 1. Inietta stile CSS per nascondere immediatamente l'UI desktop
+            var css = '.ocean-bg, .light-rays, .wave-container, .particles, .main-wrapper, .modal-backdrop { display: none !important; }',
+                head = document.head || document.getElementsByTagName('head')[0],
+                style = document.createElement('style');
+            head.appendChild(style);
+            style.type = 'text/css';
+            style.appendChild(document.createTextNode(css));
+
+            // 2. Carica lo script mobile
+            var script = document.createElement('script');
+            script.src = 'smartphone.js';
+            script.onload = function() {
+                if(typeof initMobileInterface === "function") {
+                    initMobileInterface();
+                }
+            };
+            document.body.appendChild(script);
+
+            // 3. Imposta flag per fermare lo script desktop qui sotto
+            window.stopDesktopLogic = true;
+        }
+        // --- END MOBILE LOADER ---
+
+
         function createParticles() {
+            if(window.stopDesktopLogic) return;
             const container = document.getElementById('particles');
             const isMobile = window.innerWidth < 768;
             const count = isMobile ? 20 : 80;
@@ -1064,6 +1084,8 @@
         function toggleFaq(el) { el.classList.toggle('open'); }
 
         window.onload = function() {
+            if(window.stopDesktopLogic) return; // FERMA TUTTO SU MOBILE
+
             createParticles();
             window.onresize = createParticles;
             try {
@@ -1249,3 +1271,4 @@
     </script>
 </body>
 </html>
+
