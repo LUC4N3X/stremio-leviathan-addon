@@ -968,15 +968,27 @@
             style.type = 'text/css';
             style.appendChild(document.createTextNode(css));
 
-            // 2. Carica lo script mobile
-            var script = document.createElement('script');
-            script.src = 'smartphone.js';
-            script.onload = function() {
-                if(typeof initMobileInterface === "function") {
-                    initMobileInterface();
-                }
-            };
-            document.body.appendChild(script);
+            // NUOVO CODICE CORRETTO
+var script = document.createElement('script');
+
+// CORREZIONE: Usa lo slash iniziale '/' per dire al browser 
+// di cercare il file SEMPRE nella cartella principale del sito, 
+// ignorando le "cartelle virtuali" della configurazione.
+script.src = '/smartphone.js'; 
+
+script.onload = function() {
+    if(typeof initMobileInterface === "function") {
+        initMobileInterface();
+    }
+};
+script.onerror = function() {
+    // Fallback di sicurezza: se non lo trova con lo slash, prova con ../
+    var backupScript = document.createElement('script');
+    backupScript.src = '../smartphone.js';
+    backupScript.onload = function() { if(typeof initMobileInterface === "function") initMobileInterface(); };
+    document.body.appendChild(backupScript);
+};
+document.body.appendChild(script);
 
             // 3. Imposta flag per fermare lo script desktop qui sotto
             window.stopDesktopLogic = true;
