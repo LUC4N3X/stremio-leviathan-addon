@@ -138,7 +138,16 @@ Leviathan evolve oltre il Torrent. Il modulo **VIX** interroga direttamente l'in
 * **Zero-Wait:** Nessun buffering iniziale, nessun bisogno di seeders. Il contenuto parte istantaneamente.
 * **Fallback Intelligente:** Se il torrent non ha seed, il sistema commuta automaticamente sul flusso web.
 
-### 6. 👻 Debrid Ghost Shell (MediaFlow Proxy)
+### 6. 🕶️ GuardaHD Integration Layer
+Modulo web nativo per contenuti ITA-first.
+* **Direct Stream Extraction: Parsing automatico di flussi HLS (m3u8) e MP4 dai player embedded.
+* **ITA Validation: Verifica semantica lingua/audio. Se non è italiano → scartato.
+* **Multi-Player Support: Risoluzione dinamica dei player (MixDrop, StreamTape, ecc.).
+* **Zero-Seed Playback: Avvio immediato, nessuna dipendenza da torrent o debrid.
+* **Fast Web Lane: Priorità alta come fallback dopo VIX.
+* **Risultato: streaming istantaneo, affidabile, solo ITA.
+
+### 7. 👻 Debrid Ghost Shell (MediaFlow Proxy)
 Progettato per l'elusione dei blocchi IP e la gestione di account Multi-Utente.
 * **IP Masking:** Tutto il traffico verso Real-Debrid viene tunnelizzato tramite **MediaFlow Proxy**.
 * **Shared Account Support:** Permette l'utilizzo dello stesso account Debrid su più IP contemporaneamente senza rischiare il ban, poiché il provider vede solo l'IP del Proxy.
