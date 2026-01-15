@@ -93,7 +93,6 @@
 Il core, sviluppato in **Node.js**, orchestra scansioni parallele sui principali index mondiali e italiani. Utilizza una logica proprietaria per distinguere le sorgenti in base alla latenza di risposta, applicando timeout dinamici e tecniche di evasione anti-bot.
 
 ### 🔥 Release 2.1 Highlights
-### 🔥 Release 2.1 Highlights
 
 * 🚀 **Core Refactoring:** Motore riscritto per massimizzare stabilità e concorrenza.
 * 🧠 **Proprietary DB:** Implementazione di un database di proprietà per indicizzazione istantanea e indipendente.
