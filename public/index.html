@@ -713,7 +713,7 @@
                                 <span class="control-desc">Scraper web alta velocità.</span>
                             </div>
                             <label class="switch mf-switch">
-                                <input type="checkbox" id="enableVix" onchange="toggleSCOptions()">
+                                <input type="checkbox" id="enableVix" onchange="checkWebVisibility()">
                                 <span class="slider"></span>
                             </label>
                         </div>
@@ -725,16 +725,6 @@
                                 <div class="q-btn" id="btnQ_720" onclick="setSCQuality('720')">Solo 720p</div>
                             </div>
                         </div>
-                        <div class="control-row sub-row" id="scPriorityRow">
-                            <div class="control-info sub-indicator">
-                                <div class="control-title"><i class="fas fa-sort-amount-down"></i> Priorità Bassa</div>
-                                <span class="control-desc">Risultati SC in fondo alla lista.</span>
-                            </div>
-                            <label class="switch mf-switch">
-                                <input type="checkbox" id="vixLast">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
 
                         <div class="control-row">
                             <div class="control-info">
@@ -744,7 +734,7 @@
                                 <span class="control-desc">Richiede <strong>OBBLIGATORIAMENTE</strong> MediaFlow Proxy.</span>
                             </div>
                             <label class="switch mf-switch">
-                                <input type="checkbox" id="enableGhd">
+                                <input type="checkbox" id="enableGhd" onchange="checkWebVisibility()">
                                 <span class="slider"></span>
                             </label>
                         </div>
@@ -752,15 +742,26 @@
                         <div class="control-row">
                             <div class="control-info">
                                 <div class="control-title notranslate" translate="no">
-                                    <i class="fas fa-shield-alt" style="color: #00ff41"></i> GuardaSerie
+                                    <i class="fas fa-tv" style="color: #ffbf00"></i> GuardaSerie
                                 </div>
                                 <span class="control-desc">Scraper Serie TV. Richiede MediaFlow.</span>
                             </div>
                             <label class="switch mf-switch">
-                                <input type="checkbox" id="enableGs">
+                                <input type="checkbox" id="enableGs" onchange="checkWebVisibility()">
                                 <span class="slider"></span>
                             </label>
                         </div>
+
+                        <div class="control-row sub-row" id="webPriorityRow" style="display:none; margin-top:15px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top:10px;">
+                             <div class="control-info">
+                                 <div class="control-title"><i class="fas fa-sort-amount-down"></i> Gerarchia Sorgenti</div>
+                                 <span class="control-desc">Sposta i risultati Web (SC, GHD, GS) dopo i Torrent.</span>
+                             </div>
+                             <label class="switch mf-switch">
+                                 <input type="checkbox" id="vixLast">
+                                 <span class="slider"></span>
+                             </label>
+                         </div>
 
                     </div>
 
@@ -1046,12 +1047,26 @@
             }
         }
 
-        function toggleSCOptions() {
-            const scActive = document.getElementById('enableVix').checked;
-            const priorityRow = document.getElementById('scPriorityRow');
-            const qualityContainer = document.getElementById('scQualityContainer');
-            if(priorityRow) priorityRow.style.display = scActive ? 'flex' : 'none';
-            if(qualityContainer) qualityContainer.style.display = scActive ? 'block' : 'none';
+        // --- NEW UNIFIED WEB VISIBILITY CHECK ---
+        function checkWebVisibility() {
+            const sc = document.getElementById('enableVix').checked;
+            const ghd = document.getElementById('enableGhd').checked;
+            const gs = document.getElementById('enableGs').checked;
+
+            // Toggle SC specific quality options
+            const qContainer = document.getElementById('scQualityContainer');
+            if(qContainer) qContainer.style.display = sc ? 'block' : 'none';
+
+            // Toggle Global Web Priority (Show if ANY web source is active)
+            const pRow = document.getElementById('webPriorityRow');
+            if(pRow) {
+                if(sc || ghd || gs) {
+                    pRow.style.display = 'flex';
+                    pRow.style.animation = 'fadeInRow 0.3s ease';
+                } else {
+                    pRow.style.display = 'none';
+                }
+            }
         }
 
         function setSCQuality(val) {
@@ -1144,7 +1159,7 @@
                         if (document.getElementById('aiostreams_mode').checked) document.getElementById('card_aio').classList.add('active');
                         toggleDbCard();
                     }
-                    toggleSCOptions(); 
+                    checkWebVisibility(); // TRIGGER INIZIALE CORRETTO
                 }
             } catch (e) {}
         };
