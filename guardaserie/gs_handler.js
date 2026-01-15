@@ -39,7 +39,7 @@ function generateRichDescription(meta, provider, quality = "HD") {
     lines.push(`🎬 ${meta.title || "Episodio"}`);
     lines.push(`🇮🇹 ITA • 🔊 AAC`);
     lines.push(`🎞️ ${quality} • ⚡ Fast`);
-    lines.push(`☁️ ${provider} • 🛡️ GuardaSerie`);
+    lines.push(`☁️ ${provider} • 🍿 GuardaSerie`);
     return lines.join("\n");
 }
 
