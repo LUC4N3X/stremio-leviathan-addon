@@ -15,9 +15,10 @@ const { fetchExternalAddonsFlat } = require("./external-addons");
 const PackResolver = require("./leviathan-pack-resolver");
 const aioFormatter = require("./aiostreams-formatter.cjs");
 
-// --- IMPORT GESTORI WEB (Vix & GuardaHD) ---
+// --- IMPORT GESTORI WEB (Vix, GuardaHD & GuardaSerie) ---
 const { searchVix } = require("./vix/vix_handler");
 const { searchGuardaHD } = require("./guardahd/ghd_handler"); 
+const { searchGuardaserie } = require("./guardaserie/gs_handler"); // <--- AGGIUNTO
 
 // --- 1. CONFIGURAZIONE LOGGER (Winston) ---
 const logger = winston.createLogger({
@@ -823,11 +824,11 @@ async function fetchExternalResults(type, finalId) {
 async function generateStream(type, id, config, userConfStr, reqHost) {
   // --- 1. NUOVO CONTROLLO INIZIALE ---
   const hasDebridKey = (config.key && config.key.length > 0) || (config.rd && config.rd.length > 0);
-  const isWebEnabled = config.filters && (config.filters.enableVix || config.filters.enableGhd);
+  const isWebEnabled = config.filters && (config.filters.enableVix || config.filters.enableGhd || config.filters.enableGs); // <--- AGGIUNTO GS
 
   // Se NON c'è la chiave E NON c'è nessun modulo web attivo -> Errore
   if (!hasDebridKey && !isWebEnabled) {
-      return { streams: [{ name: "⚠️ CONFIG", title: "Inserisci API Key o Attiva SC/GuardaHD" }] };
+      return { streams: [{ name: "⚠️ CONFIG", title: "Inserisci API Key o Attiva SC/GuardaHD/GuardaSerie" }] };
   }
   
   const configHash = crypto.createHash('md5').update(userConfStr || 'no-conf').digest('hex');
@@ -1069,6 +1070,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
 
   // === WEB PROVIDERS ===
   const vixPromise = searchVix(meta, config, reqHost);
+  
   let ghdPromise = Promise.resolve([]);
   if (config.filters && config.filters.enableGhd) {
       ghdPromise = searchGuardaHD(meta, config).catch(err => {
@@ -1077,14 +1079,23 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       });
   }
 
-  const [rawVix, formattedGhd] = await Promise.all([vixPromise, ghdPromise]);
+  // --- AGGIUNTA GUARDASERIE ---
+  let gsPromise = Promise.resolve([]);
+  if (config.filters && config.filters.enableGs) {
+      gsPromise = searchGuardaserie(meta, config).catch(err => {
+          logger.warn(`GuardaSerie Error: ${err.message}`);
+          return [];
+      });
+  }
+
+  const [rawVix, formattedGhd, formattedGs] = await Promise.all([vixPromise, ghdPromise, gsPromise]);
   const formattedVix = rawVix; 
   
   let finalStreams = [];
   if (config.filters && config.filters.vixLast === true) {
-      finalStreams = [...debridStreams, ...formattedGhd, ...formattedVix];
+      finalStreams = [...debridStreams, ...formattedGhd, ...formattedGs, ...formattedVix];
   } else {
-      finalStreams = [...formattedGhd, ...formattedVix, ...debridStreams];
+      finalStreams = [...formattedGhd, ...formattedGs, ...formattedVix, ...debridStreams];
   }
   
   const resultObj = { streams: finalStreams };
@@ -1248,7 +1259,7 @@ app.listen(PORT, () => {
     console.log(`💾 SCRITTURA: DB Locale (Auto-Learning attivo)`);
     console.log(`👁️ SPETTRO VISIVO: Modulo Attivo (Esclusioni 4K/1080/720/SD)`);
     console.log(`🦁 GUARDA HD: Modulo Integrato e Pronto`);
+    console.log(`🛡️ GUARDA SERIE: Modulo Integrato e Pronto`);
     console.log(`🦑 LEVIATHAN CORE: Optimized for High Reliability`);
     console.log(`-----------------------------------------------------`);
 });
-
