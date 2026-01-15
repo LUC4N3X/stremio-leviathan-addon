@@ -140,7 +140,7 @@ Leviathan evolve oltre il Torrent. Il modulo **VIX** interroga direttamente l'in
 
 ### 6. 🕶️ GuardaHD Integration Layer
 Modulo web nativo per contenuti ITA-first.
-* Direct Stream Extraction: Parsing automatico di flussi HLS (m3u8) e MP4 dai player embedded.
+* *Direct Stream Extraction: Parsing automatico di flussi HLS (m3u8) e MP4 dai player embedded.
 * ITA Validation: Verifica semantica lingua/audio. Se non è italiano → scartato.
 * **Multi-Player Support: Risoluzione dinamica dei player (MixDrop, StreamTape, ecc.).
 * **Zero-Seed Playback: Avvio immediato, nessuna dipendenza da torrent o debrid.
