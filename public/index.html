@@ -571,7 +571,6 @@
         }
 
         @media (max-width: 768px) {
-            /* Styles here are kept for compatibility but main mobile logic is handled by smartphone.js */
             header { margin-bottom: 30px; margin-top: 20px; }
             .brand-title { font-size: 3.5rem; letter-spacing: -2px; }
             .logo-container { width: 130px; height: 130px; margin-bottom: 15px; }
@@ -749,6 +748,20 @@
                                 <span class="slider"></span>
                             </label>
                         </div>
+
+                        <div class="control-row">
+                            <div class="control-info">
+                                <div class="control-title notranslate" translate="no">
+                                    <i class="fas fa-shield-alt" style="color: #00ff41"></i> GuardaSerie
+                                </div>
+                                <span class="control-desc">Scraper Serie TV. Richiede MediaFlow.</span>
+                            </div>
+                            <label class="switch mf-switch">
+                                <input type="checkbox" id="enableGs">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
                     </div>
 
                     <div class="module-box" id="netModule" style="border-color: rgba(0, 242, 255, 0.3);">
@@ -938,8 +951,8 @@
                     <div class="faq-a"><span class="notranslate" translate="no">Leviathan</span> scansiona le profondità del web per trovare Torrent (tramite Debrid) e flussi <span class="notranslate" translate="no">StreamingCommunity</span> ad alta velocità.</div>
                 </div>
                 <div class="faq-item" onclick="toggleFaq(this)">
-                    <div class="faq-q">MediaFlow & GuardaHD <i class="fas fa-chevron-down"></i></div>
-                    <div class="faq-a">GuardaHD richiede spesso un Proxy per funzionare correttamente. Inserisci URL e Password del tuo MediaFlow Server nel modulo "Network Bridge".</div>
+                    <div class="faq-q">MediaFlow & GuardaHD/GS <i class="fas fa-chevron-down"></i></div>
+                    <div class="faq-a">I servizi come GuardaHD e GuardaSerie richiedono spesso un Proxy (MediaFlow) per funzionare correttamente su tutti i dispositivi.</div>
                 </div>
                 <div class="faq-item" onclick="toggleFaq(this)">
                     <div class="faq-q">Cos'è il Cache Builder? <i class="fas fa-chevron-down"></i></div>
@@ -960,7 +973,6 @@
 
         // Se è un dispositivo mobile, nascondi TUTTO del desktop e carica smartphone.js
         if (isMobileDevice()) {
-            // 1. Inietta stile CSS per nascondere immediatamente l'UI desktop
             var css = '.ocean-bg, .light-rays, .wave-container, .particles, .main-wrapper, .modal-backdrop { display: none !important; }',
                 head = document.head || document.getElementsByTagName('head')[0],
                 style = document.createElement('style');
@@ -968,29 +980,21 @@
             style.type = 'text/css';
             style.appendChild(document.createTextNode(css));
 
-            // NUOVO CODICE CORRETTO
-var script = document.createElement('script');
+            var script = document.createElement('script');
+            script.src = '/smartphone.js'; 
+            script.onload = function() {
+                if(typeof initMobileInterface === "function") {
+                    initMobileInterface();
+                }
+            };
+            script.onerror = function() {
+                var backupScript = document.createElement('script');
+                backupScript.src = '../smartphone.js';
+                backupScript.onload = function() { if(typeof initMobileInterface === "function") initMobileInterface(); };
+                document.body.appendChild(backupScript);
+            };
+            document.body.appendChild(script);
 
-// CORREZIONE: Usa lo slash iniziale '/' per dire al browser 
-// di cercare il file SEMPRE nella cartella principale del sito, 
-// ignorando le "cartelle virtuali" della configurazione.
-script.src = '/smartphone.js'; 
-
-script.onload = function() {
-    if(typeof initMobileInterface === "function") {
-        initMobileInterface();
-    }
-};
-script.onerror = function() {
-    // Fallback di sicurezza: se non lo trova con lo slash, prova con ../
-    var backupScript = document.createElement('script');
-    backupScript.src = '../smartphone.js';
-    backupScript.onload = function() { if(typeof initMobileInterface === "function") initMobileInterface(); };
-    document.body.appendChild(backupScript);
-};
-document.body.appendChild(script);
-
-            // 3. Imposta flag per fermare lo script desktop qui sotto
             window.stopDesktopLogic = true;
         }
         // --- END MOBILE LOADER ---
@@ -1120,6 +1124,7 @@ document.body.appendChild(script);
                         document.getElementById('dbOnly').checked = config.filters.dbOnly || false;
                         document.getElementById('showUncached').checked = config.filters.showUncached || false;
                         document.getElementById('enableGhd').checked = config.filters.enableGhd || false;
+                        document.getElementById('enableGs').checked = config.filters.enableGs || false; // CARICAMENTO GS
 
                         setSpecState('btn_4k', config.filters.no4k);
                         setSpecState('btn_1080', config.filters.no1080);
@@ -1166,7 +1171,8 @@ document.body.appendChild(script);
             let isValid = true;
             const scActive = document.getElementById('enableVix').checked;
             const ghdActive = document.getElementById('enableGhd').checked;
-            const isWebEnabled = scActive || ghdActive;
+            const gsActive = document.getElementById('enableGs').checked;
+            const isWebEnabled = scActive || ghdActive || gsActive;
             const el = document.getElementById('apiKey');
             const value = el.value.trim();
             
@@ -1200,6 +1206,7 @@ document.body.appendChild(script);
                     noCam: document.getElementById('btn_sd').classList.contains('excluded'),
                     enableVix: document.getElementById('enableVix').checked,
                     enableGhd: document.getElementById('enableGhd').checked,
+                    enableGs: document.getElementById('enableGs').checked, // SALVATAGGIO GS
                     vixLast: document.getElementById('vixLast').checked,
                     scQuality: currentSCQuality, 
                     dbOnly: document.getElementById('dbOnly').checked,
@@ -1231,6 +1238,7 @@ document.body.appendChild(script);
                 else scText += ' (Hybrid)';
             }
             let ghdText = c.filters.enableGhd ? 'ATTIVO 🦁' : 'NO';
+            let gsText = c.filters.enableGs ? 'ATTIVO 🛡️' : 'NO';
             let exclText = [];
             if(c.filters.no4k) exclText.push("4K");
             if(c.filters.no1080) exclText.push("1080p");
@@ -1241,7 +1249,7 @@ document.body.appendChild(script);
 
             list.innerHTML = `
                 <li>Servizio Debrid <span>${c.service.toUpperCase()}</span></li>
-                <li>Sorgenti Web <span>SC: ${scText} | GHD: ${ghdText}</span></li>
+                <li>Sorgenti Web <span>SC: ${scText} | GHD: ${ghdText} | GS: ${gsText}</span></li>
                 <li>Proxy Bridge <span>${c.mediaflow.url ? 'CONFIGURATO' : 'NON ATTIVO'}</span></li>
                 <li>Proxy Ghost <span>${c.mediaflow.proxyDebrid ? 'ATTIVO' : 'NO'}</span></li>
                 <li>Cache Builder <span>${c.filters.showUncached ? 'ATTIVO 📥' : 'NO'}</span></li>
@@ -1283,4 +1291,3 @@ document.body.appendChild(script);
     </script>
 </body>
 </html>
-
