@@ -93,17 +93,19 @@
 Il core, sviluppato in **Node.js**, orchestra scansioni parallele sui principali index mondiali e italiani. Utilizza una logica proprietaria per distinguere le sorgenti in base alla latenza di risposta, applicando timeout dinamici e tecniche di evasione anti-bot.
 
 ### 🔥 Release 2.1 Highlights
+### 🔥 Release 2.1 Highlights
 
 * 🚀 **Core Refactoring:** Motore riscritto per massimizzare stabilità e concorrenza.
 * 🧠 **Proprietary DB:** Implementazione di un database di proprietà per indicizzazione istantanea e indipendente.
-* 🔭 **Source Expansion:** Integrazione nativa di **GuardaHD** e **GuardaSerie** nel motore di ricerca.
-* 🌪️ **VIX Hybrid Module:** Integrazione diretta con **StreamingCommunity** per flussi istantanei (No-P2P).
+* 📱 **Mobile UX:** Implementazione di `smartphone.js` per una GUI completamente ridisegnata e ottimizzata per dispositivi mobili.
+* 🌪️ **VIX Hybrid Module:** Integrazione diretta con **StreamingCommunity**, **GuardaHD** e **GuardaSerie** per flussi istantanei (No-P2P).
 * 👻 **Ghost Proxying:** Supporto nativo a **MediaFlow** per l'uso sicuro di Account Debrid condivisi.
 * 🔗 **AIOStreams:** Supporto nativo per flussi AIOStreams, integrato nel motore Leviathan.
 * 🏎️ **Fast Lane Mode:** Gestione intelligente dei timeout per API ad alta velocità.
 * 🇮🇹 **Strict ITA Validation:** Filtri regex chirurgici per l'eliminazione dei falsi positivi.
 * 🛡️ **Cloudscraper Integration:** Ottimizzazione avanzata per il superamento dei controlli Cloudflare.
 * 💉 **Magnet Injection:** Arricchimento automatico dei metadati con tracker UDP Tier-1.
+
 
 
 ---
