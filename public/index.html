@@ -972,7 +972,7 @@
             return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1) || window.innerWidth < 768;
         }
 
-        // Se è un dispositivo mobile, nascondi TUTTO del desktop e carica smartphone.js
+     // Se è un dispositivo mobile, nascondi TUTTO del desktop e carica smartphone.js
         if (isMobileDevice()) {
             var css = '.ocean-bg, .light-rays, .wave-container, .particles, .main-wrapper, .modal-backdrop { display: none !important; }',
                 head = document.head || document.getElementsByTagName('head')[0],
@@ -981,8 +981,13 @@
             style.type = 'text/css';
             style.appendChild(document.createTextNode(css));
 
+            // --- MODIFICA QUI PER IL CACHE BUSTING ---
+            var version = new Date().getTime(); // Crea un timestamp unico (es. 1705602345678)
+
             var script = document.createElement('script');
-            script.src = '/smartphone.js'; 
+            // Aggiungiamo ?v=timestamp all'URL
+            script.src = '/smartphone.js?v=' + version; 
+            
             script.onload = function() {
                 if(typeof initMobileInterface === "function") {
                     initMobileInterface();
@@ -990,7 +995,8 @@
             };
             script.onerror = function() {
                 var backupScript = document.createElement('script');
-                backupScript.src = '../smartphone.js';
+                // Applichiamo il fix anche al backup script
+                backupScript.src = '../smartphone.js?v=' + version;
                 backupScript.onload = function() { if(typeof initMobileInterface === "function") initMobileInterface(); };
                 document.body.appendChild(backupScript);
             };
