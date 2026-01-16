@@ -1007,7 +1007,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
 app.get("/api/stats", (req, res) => res.json({ status: "ok" }));
 app.get("/favicon.ico", (req, res) => res.status(204).end());
 
-// --- LAZY RESOLVE GENERICO ---
+// --- LAZY RESOLVE GENERICO CON FIX TORBOX ---
 app.get("/:conf/play_lazy/:service/:hash/:fileIdx", async (req, res) => {
     const { conf, service, hash, fileIdx } = req.params;
     const { s, e } = req.query; 
@@ -1019,21 +1019,27 @@ app.get("/:conf/play_lazy/:service/:hash/:fileIdx", async (req, res) => {
         const apiKey = config.key || config.rd;
         if (!apiKey) return res.status(400).send("API Key mancante.");
 
-      
+        // Aggiungiamo trackers per TorBox
+        const magnet = `magnet:?xt=urn:btih:${hash}&tr=udp://open.demonii.com:1337/announce&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://tracker.coppersurfer.tk:6969/announce&tr=udp://tracker.leechers-paradise.org:6969/announce`;
+
         const item = {
             title: `Unknown Video (${hash})`,
             hash: hash,
             season: parseInt(s) || 0,
             episode: parseInt(e) || 0,
             fileIdx: parseInt(fileIdx) === -1 ? undefined : parseInt(fileIdx),
-            magnet: `magnet:?xt=urn:btih:${hash}` // Magnet base per uncache
+            magnet: magnet // Magnet completo di tracker
         };
 
         // Usa le funzioni helper esistenti dei moduli Debrid per risolvere il link reale
         let streamData = null;
         
         if (service === 'tb') {
-            streamData = await TB.getStreamLink(apiKey, item.magnet, item.season, item.episode, item.hash, item.fileIdx);
+            // Conversione parametri in stringa per sicurezza con TorBox
+             const tbFileIdx = item.fileIdx !== undefined ? String(item.fileIdx) : undefined;
+             const tbS = String(item.season);
+             const tbE = String(item.episode);
+             streamData = await TB.getStreamLink(apiKey, item.magnet, tbS, tbE, item.hash, tbFileIdx);
         }
         else if (service === 'rd') {
             streamData = await RD.getStreamLink(apiKey, item.magnet, item.season, item.episode);
