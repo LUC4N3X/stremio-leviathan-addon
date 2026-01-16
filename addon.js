@@ -612,144 +612,36 @@ function saveResultsToDbBackground(meta, results) {
     })().catch(err => console.error("❌ Errore background save:", err.message));
 }
 
-async function resolveDebridLink(config, item, showFake, reqHost, meta = null, dbHelper = null) {
-    try {
-        const service = config.service || 'rd';
-        const apiKey = config.key || config.rd;
-        if (!apiKey) return null;
+// --- GENERATORE DI LINK LAZY (ZERO CHIAMATE RD) ---
+function generateLazyStream(item, config, meta, reqHost, userConfStr) {
+    const service = config.service || 'rd';
+    const serviceTag = service.toUpperCase();
+    
+    // Genera il titolo (esteticamente identico al vecchio metodo)
+    const { name, title } = formatStreamTitleCinePro(
+        item.title,
+        item.source,
+        item._size || item.sizeBytes || 0,
+        item.seeders,
+        serviceTag,
+        config,
+        item.hash
+    );
 
-        if (!item.hash || item.hash.length !== 40) return null;
+    // Parametri per la rotta Lazy
+    const fileIdxParam = item.fileIdx !== undefined ? item.fileIdx : -1;
+    
+    // URL che punta al server Leviathan (NON a Real-Debrid direttamente)
+    // Sarà il server a chiamare RD quando l'utente clicca Play
+    const lazyUrl = `${reqHost}/${userConfStr}/play_lazy/${service}/${item.hash}/${fileIdxParam}?s=${meta.season || 0}&e=${meta.episode || 0}`;
 
-        const isSeries = meta && meta.isSeries;
-        const isPackCandidate = item.fileIdx === undefined || item.fileIdx === null;
-
-        if (isSeries && PackResolver.isSeasonPack(item.title) && isPackCandidate) {
-             try {
-                const resolverConfig = { 
-                    rd_key: service === 'rd' ? apiKey : null,
-                    torbox_key: service === 'tb' ? apiKey : null 
-                };
-                const resolved = await withTimeout(
-                    PackResolver.resolveSeriesPackFile(
-                        item.hash, 
-                        resolverConfig, 
-                        meta.imdb_id, 
-                        meta.season, 
-                        meta.episode, 
-                        dbHelper
-                    ), 
-                    CONFIG.TIMEOUTS.PACK_RESOLVER,
-                    'Pack Resolution'
-                );
-                if (resolved) {
-                    item.fileIdx = resolved.fileIndex;
-                    item.title = resolved.fileName;
-                    item._size = resolved.fileSize;
-                    item.source += " [PACK]";
-                }
-             } catch (err) {
-                 logger.warn(`Pack Resolver skipped/failed: ${err.message}`);
-             }
-        }
-
-        if (service === 'tb') {
-            if (item._tbCached) {
-                const serviceTag = "TB";
-                const { name, title } = formatStreamTitleCinePro(item.title, item.source, item._size, item.seeders, serviceTag, config, item.hash);
-                const proxyUrl = `${reqHost}/${config.rawConf}/play_tb/${item.hash}?s=${item.season || 0}&e=${item.episode || 0}&f=${item.fileIdx !== undefined ? item.fileIdx : ''}`;
-                return { 
-                    name, title, url: proxyUrl, infoHash: item.hash, 
-                    behaviorHints: { notWebReady: false, bingieGroup: `corsaro-tb-${item.hash}` } 
-                };
-            } else { return null; }
-        }
-
-        let streamData = null;
-        const cleanMagnet = `magnet:?xt=urn:btih:${item.hash}&dn=${encodeURIComponent(item.title)}`;
-        const safeFileIdx = item.fileIdx !== undefined && item.fileIdx !== null ? item.fileIdx : 0;
-
-        // MODIFICA LEVIATHAN: RD non ha più bisogno di safeFileIdx, fa auto-matching interno
-        if (service === 'rd') {
-            streamData = await RD.getStreamLink(apiKey, cleanMagnet, item.season, item.episode);
-        }
-        else if (service === 'ad') {
-            streamData = await AD.getStreamLink(apiKey, cleanMagnet, item.season, item.episode, safeFileIdx);
-        }
-
-        // --- LOGICA CACHE BUILDER (COMPLETA E FUNZIONALE) ---
-        if (!streamData || streamData.type !== "ready" || streamData.size < CONFIG.REAL_SIZE_FILTER) {
-            
-            // Verifica se l'utente ha attivato la Cache Builder Mode
-            if (config.filters && config.filters.showUncached) {
-                
-                const serviceTag = service.toUpperCase();
-                
-                // Formatta il titolo ESATTAMENTE come se fosse in cache (estetica uguale)
-                const formatted = formatStreamTitleCinePro(
-                    item.title,
-                    item.source,
-                    item._size || item.sizeBytes || 0,
-                    item.seeders,
-                    serviceTag,
-                    config,
-                    item.hash
-                );
-
-                return { 
-                    name: `[📥 DOWNLOAD]`, // Etichetta distintiva
-                    title: `${formatted.title}\n⚠️ DOWNLOAD RICHIESTO (No Cache)`, 
-                    // PUNTIAMO AL NOSTRO ENDPOINT "add_to_cloud" che caricherà il video locale di conferma
-                    url: `${reqHost}/${config.rawConf}/add_to_cloud/${item.hash}`, 
-                    infoHash: item.hash,
-                    behaviorHints: { notWebReady: true, bingieGroup: `uncached-${item.hash}` } 
-                };
-            }
-            
-            return null; // Nascondi se l'opzione è spenta
-        }
-
-        let finalUrl = streamData.url;
-
-        // Verifica la struttura esatta generata dal tuo index.html
-        if (config.mediaflow && config.mediaflow.proxyDebrid && config.mediaflow.url) {
-            try {
-                const mfpBase = config.mediaflow.url.replace(/\/$/, '');
-                const originalLink = streamData.url;
-                
-                // Costruisce l'URL nel formato MFP: /proxy/stream?d=URL_ENCODED
-                finalUrl = `${mfpBase}/proxy/stream?d=${encodeURIComponent(originalLink)}`;
-
-                if (config.mediaflow.pass) {
-                    finalUrl += `&api_password=${config.mediaflow.pass}`;
-                }
-                
-                logger.info(`🛡️ [MFP] Ghost Mode Attiva per: ${item.hash.substring(0,8)}...`);
-            } catch (err) {
-                logger.error(`❌ Errore MediaFlow: ${err.message}`);
-            }
-        }
-       
-
-        const serviceTag = service.toUpperCase();
-        const effectiveTitle = streamData.filename && streamData.filename.length > 3 ? streamData.filename : item.title;
-        const { name, title } = formatStreamTitleCinePro(effectiveTitle, item.source, streamData.size || item.size, item.seeders, serviceTag, config, item.hash);
-        
-        return { 
-            name, title, 
-            url: finalUrl, // Restituisce l'URL modificato (se MFP attivo) o l'originale
-            infoHash: item.hash, 
-            behaviorHints: { notWebReady: false, bingieGroup: `corsaro-${service}-${item.hash}` } 
-        };
-    } catch (e) {
-        logger.error(`Errore resolveDebridLink: ${e.message}`);
-        if (showFake) {
-            return { 
-                name: `[P2P ⚠️]`, title: `${item.title}\n⚠️ Cache Assente`, url: item.magnet, infoHash: item.hash,
-                behaviorHints: { notWebReady: true } 
-            };
-        }
-        return null;
-    }
+    return {
+        name,
+        title,
+        url: lazyUrl,
+        infoHash: item.hash,
+        behaviorHints: { notWebReady: false, bingieGroup: `corsaro-${service}-${item.hash}` }
+    };
 }
 
 async function queryRemoteIndexer(tmdbId, type, season = null, episode = null) {
@@ -1049,30 +941,10 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
 
   const ranked = rankedList.slice(0, CONFIG.MAX_RESULTS);
 
-  if (config.service === 'tb' && ranked.length > 0 && hasDebridKey) {
-      const hashes = ranked.map(r => r.hash);
-      const cachedHashes = await TB.checkCached(config.key || config.rd, hashes);
-      const cachedSet = new Set(cachedHashes.map(h => h.toUpperCase()));
-      ranked.forEach(item => { if (cachedSet.has(item.hash)) item._tbCached = true; });
-  }
-
   let debridStreams = [];
   if (ranked.length > 0 && hasDebridKey) { 
-      const rdPromises = ranked.map(item => {
-          item.season = meta.season;
-          item.episode = meta.episode;
-          config.rawConf = userConfStr;
-          return LIMITERS.rd.schedule(() => resolveDebridLink(config, item, config.filters?.showFake, reqHost, meta, dbHelper));
-      });
-      debridStreams = (await Promise.all(rdPromises)).filter(Boolean);
-      
-      debridStreams.sort((a, b) => {
-          const aIsUncached = a.name.includes('📥');
-          const bIsUncached = b.name.includes('📥');
-          if (aIsUncached && !bIsUncached) return 1;
-          if (!aIsUncached && bIsUncached) return -1; 
-          return 0;
-      });
+      // --- LAZY RESOLVE MODE ---
+      debridStreams = ranked.map(item => generateLazyStream(item, config, meta, reqHost, userConfStr));
   }
 
   // === WEB PROVIDERS (MODIFICATO PER DB ONLY MODE) ===
@@ -1122,22 +994,77 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
 app.get("/api/stats", (req, res) => res.json({ status: "ok" }));
 app.get("/favicon.ico", (req, res) => res.status(204).end());
 
+// --- LAZY RESOLVE GENERICO ---
+app.get("/:conf/play_lazy/:service/:hash/:fileIdx", async (req, res) => {
+    const { conf, service, hash, fileIdx } = req.params;
+    const { s, e } = req.query; 
+
+    logger.info(`▶️ [LAZY PLAY] Service: ${service} | Hash: ${hash} | Idx: ${fileIdx} | S${s}E${e}`);
+
+    try {
+        const config = getConfig(conf);
+        const apiKey = config.key || config.rd;
+        if (!apiKey) return res.status(400).send("API Key mancante.");
+
+      
+        const item = {
+            title: `Unknown Video (${hash})`,
+            hash: hash,
+            season: parseInt(s) || 0,
+            episode: parseInt(e) || 0,
+            fileIdx: parseInt(fileIdx) === -1 ? undefined : parseInt(fileIdx),
+            magnet: `magnet:?xt=urn:btih:${hash}` // Magnet base per uncache
+        };
+
+        // Usa le funzioni helper esistenti dei moduli Debrid per risolvere il link reale
+        let streamData = null;
+        
+        if (service === 'tb') {
+            streamData = await TB.getStreamLink(apiKey, item.magnet, item.season, item.episode, item.hash, item.fileIdx);
+        }
+        else if (service === 'rd') {
+            streamData = await RD.getStreamLink(apiKey, item.magnet, item.season, item.episode);
+        }
+        else if (service === 'ad') {
+            const safeFileIdx = item.fileIdx !== undefined ? item.fileIdx : 0;
+            streamData = await AD.getStreamLink(apiKey, item.magnet, item.season, item.episode, safeFileIdx);
+        }
+
+        // --- GESTIONE RISULTATO ---
+        if (streamData && streamData.url) {
+            // Se MediaFlow è attivo
+            if (config.mediaflow && config.mediaflow.proxyDebrid && config.mediaflow.url) {
+                try {
+                    const mfpBase = config.mediaflow.url.replace(/\/$/, '');
+                    let finalUrl = `${mfpBase}/proxy/stream?d=${encodeURIComponent(streamData.url)}`;
+                    if (config.mediaflow.pass) finalUrl += `&api_password=${config.mediaflow.pass}`;
+                    return res.redirect(finalUrl);
+                } catch (e) {}
+            }
+            
+            // Redirect Diretto
+            return res.redirect(streamData.url);
+        } 
+        
+        // --- SE NON PRONTO (UNCACHED O DOWNLOADING) ---
+        // Redirect alla pagina "Add to Cloud" per avviare il download o mostrare messaggio
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+        const host = `${protocol}://${req.get('host')}`;
+        const addToCloudUrl = `${host}/${conf}/add_to_cloud/${hash}`;
+        
+        return res.redirect(addToCloudUrl);
+
+    } catch (err) {
+        logger.error(`Error Lazy Play: ${err.message}`);
+        res.status(500).send("Errore nel recupero del link: " + err.message);
+    }
+});
+
+// Mantenuta per retrocompatibilità se necessario, ma la nuova play_lazy copre tutto
 app.get("/:conf/play_tb/:hash", async (req, res) => {
     const { conf, hash } = req.params;
     const { s, e, f } = req.query; 
-    logger.info(`▶️ [TorBox Play] Hash: ${hash} S${s}E${e} F${f}`);
-    try {
-        const config = getConfig(conf);
-        if (!config.key && !config.rd) throw new Error("API Key Mancante");
-        const magnet = `magnet:?xt=urn:btih:${hash}`;
-        const apiKey = config.key || config.rd;
-        const streamData = await TB.getStreamLink(apiKey, magnet, s, e, hash, f);
-        if (streamData && streamData.url) res.redirect(streamData.url);
-        else res.status(404).send("Errore TorBox: Limite raggiunto o File non trovato.");
-    } catch (err) {
-        logger.error(`Error Torbox Play: ${err.message}`);
-        res.status(500).send("Errore Server: " + err.message);
-    }
+    res.redirect(`/${conf}/play_lazy/tb/${hash}/${f || -1}?s=${s}&e=${e}`);
 });
 
 // --- NUOVA ROTTA: AGGIUNTA AL CLOUD CON FEEDBACK VIDEO LOCALE ---
@@ -1264,7 +1191,7 @@ const PUBLIC_PORT = process.env.PUBLIC_PORT || PORT;
 app.listen(PORT, () => {
     console.log(`🚀 Leviathan (God Tier) attivo su porta interna ${PORT}`);
     console.log(`-----------------------------------------------------`);
-    console.log(`⚡ MODE: REMOTE READER + LOCAL WRITER (SEQUENTIAL)`);
+    console.log(`⚡ MODE: LAZY RESOLVE (Zero Initial Debrid Calls)`);
     console.log(`📡 INDEXER URL (ENV): ${CONFIG.INDEXER_URL}`);
     console.log(`🎬 METADATA: TMDB Primary (User Key Priority)`);
     console.log(`💾 SCRITTURA: DB Locale (Auto-Learning attivo)`);
