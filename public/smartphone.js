@@ -120,6 +120,9 @@ body {
 }
 .m-input:focus { border-color: var(--m-primary); background: rgba(0,10,20,0.8); box-shadow: 0 0 20px rgba(0,242,255,0.15); color: #fff; }
 
+/* FIX SPECIFICO PER PASSWORD (NO BOTTONE) */
+#m-mfPass { padding-right: 20px !important; }
+
 .m-tmdb-input { border-color: rgba(176, 38, 255, 0.3); color: var(--m-accent); }
 .m-tmdb-input:focus { border-color: var(--m-accent); box-shadow: 0 0 15px rgba(176, 38, 255, 0.2); }
 
@@ -454,6 +457,21 @@ const mobileHTML = `
                         <label class="m-switch"><input type="checkbox" id="m-dbOnly" onchange="updateStatus('m-dbOnly','st-db')"><span class="m-slider"></span></label>
                     </div>
 
+                    <div class="m-row">
+                        <div class="m-label">
+                            <h4>
+                                <i class="fas fa-stream" style="color:var(--m-secondary)"></i> 
+                                AIO Mode 
+                                <span class="m-status-text" id="st-aio">OFF</span>
+                            </h4>
+                            <p style="color:var(--m-secondary)">Formatta per AIOStreams</p>
+                        </div>
+                        <label class="m-switch">
+                            <input type="checkbox" id="m-aioMode" onchange="updateStatus('m-aioMode','st-aio')">
+                            <span class="m-slider m-slider-purple"></span>
+                        </label>
+                    </div>
+
                      <div class="m-row">
                         <div class="m-label"><h4>Signal Gate <span class="m-status-text" id="st-gate">OFF</span></h4><p>Limita risultati per qualità</p></div>
                         <label class="m-switch"><input type="checkbox" id="m-gateActive" onchange="toggleGate()"><span class="m-slider"></span></label>
@@ -706,6 +724,7 @@ function loadMobileConfig() {
             }
             if(config.key) document.getElementById('m-apiKey').value = config.key;
             if(config.tmdb) document.getElementById('m-tmdb').value = config.tmdb;
+            if(config.aiostreams_mode) document.getElementById('m-aioMode').checked = true;
             if(config.mediaflow) {
                 document.getElementById('m-mfUrl').value = config.mediaflow.url || "";
                 document.getElementById('m-mfPass').value = config.mediaflow.pass || "";
@@ -747,6 +766,7 @@ function loadMobileConfig() {
             updateStatus('m-showUncached', 'st-cache');
             updateStatus('m-dbOnly', 'st-db');
             updateStatus('m-proxyDebrid', 'st-ghost');
+            updateStatus('m-aioMode', 'st-aio');
             toggleScOptions();
             checkWebPriorityVisibility(); // Sync HUD on load
         }
@@ -761,6 +781,7 @@ function getMobileConfig() {
         service: mCurrentService,
         key: document.getElementById('m-apiKey').value.trim(),
         tmdb: document.getElementById('m-tmdb').value.trim(),
+        aiostreams_mode: document.getElementById('m-aioMode').checked,
         mediaflow: {
             url: document.getElementById('m-mfUrl').value.trim().replace(/\/$/, ""),
             pass: document.getElementById('m-mfPass').value.trim(),
