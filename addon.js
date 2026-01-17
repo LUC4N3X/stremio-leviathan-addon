@@ -80,7 +80,7 @@ const CONFIG = {
     DB_QUERY: 3000,
     DEBRID: 10000, 
     PACK_RESOLVER: 7000,
-    EXTERNAL: 5000 // <--- MODIFICATO: Aumentato a 5s per dare tempo a Torrentio
+    EXTERNAL: 5000 
   }
 };
 
@@ -835,24 +835,49 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   const tmdbIdLookup = meta.tmdb_id || (await imdbToTmdb(meta.imdb_id, userTmdbKey))?.tmdbId;
   const dbOnlyMode = config.filters?.dbOnly === true; 
 
-  // --- DEFINIZIONE LOGICA FILTRO (Riutilizzabile) ---
+  // --- DEFINIZIONE LOGICA FILTRO (RIGOROSA E CON LINGUA) ---
   const aggressiveFilter = (item) => {
       if (!item?.magnet) return false;
-      
+
+      // 1. EXTERNAL PASS-THROUGH
+      if (item.isExternal) return true;
+
       const source = (item.source || "").toLowerCase();
-      // Filtro di sicurezza per provider non voluti
+      // Blacklist
       if (source.includes("comet") || source.includes("stremthru")) return false;
 
-      // --- MODIFICA RICHIESTA: SE È EXTERNAL, ACCETTA SEMPRE ---
-      // Poiché l'addon esterno (es. Torrentio) ha già cercato per ID IMDb corretto,
-      // ci fidiamo che il risultato sia giusto, anche se il titolo non combacia 
-      // perfettamente (es. "The Rip" vs "Soldi Sporchi").
-      if (item.isExternal) {
-          return true; 
+      // 2. CONTROLLO LINGUA (Spostato PRIMA della logica serie)
+      const isItalian = isSafeForItalian(item) || /corsaro/i.test(item.source);
+      // Se il filtro "Allow English" è spento E non è italiano -> SCARTA
+      if (!config.filters?.allowEng && !isItalian) return false;
+
+      const t = item.title.toLowerCase();
+
+      // --- LOGICA SERIE TV (Rigorosa su Stagione) ---
+      if (meta.isSeries) {
+          const s = meta.season;
+          const e = meta.episode;
+
+          // A. CONTROLLO NEGATIVO (Anti-Sbaglio): 
+          const wrongSeasonRegex = /(?:s|stagione|season)\s*0?(\d+)(?!\d)/gi;
+          let match;
+          while ((match = wrongSeasonRegex.exec(t)) !== null) {
+              const foundSeason = parseInt(match[1]);
+              if (foundSeason !== s) return false; 
+          }
+
+          // B. CONTROLLO POSITIVO 
+          const hasRightSeason = new RegExp(`(?:s|stagione|season|^)\\s*0?${s}(?!\\d)`, 'i').test(t);
+          const hasRightEpisode = new RegExp(`(?:e|x|ep|episode|^)\\s*0?${e}(?!\\d)`, 'i').test(t);
+          const isPack = /(?:complete|pack|stagione\s*\d+\s*$|season\s*\d+\s*$)/i.test(t) && !/e\d+|x\d+/i.test(t);
+
+          if (hasRightSeason && hasRightEpisode) return true;
+          if (hasRightSeason && isPack) return true;
+
+          return false;
       }
 
-      // --- DA QUI IN GIÙ: LOGICA PER SCRAPER INTERNI / DB (MANTIENE FILTRI ITA) ---
-
+      // --- LOGICA FILM ---
       // 1337x Logic (Internal)
       if (source.includes("1337")) {
           const hasIta = /\b(ita|italian)\b/i.test(item.title);
@@ -860,42 +885,33 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           if (!hasIta || isSubbed) return false; 
       }
 
-      const isItalian = isSafeForItalian(item) || /corsaro/i.test(item.source);
-
       // TGX/YTS Logic (Internal)
       if (source.includes("tgx") || source.includes("torrentgalaxy") || source.includes("yts")) {
           const hasStrictIta = /\b(ita|italian)\b/i.test(item.title);
           if (!hasStrictIta) return false; 
       }
 
-      // Blocco lingua standard (solo per non-external)
-      if (!config.filters?.allowEng && !isItalian) return false;
-
-      // ... match titles for internal ...
-
+      // Match Titolo e Anno per Film
       const cleanFile = item.title.toLowerCase().replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
       const cleanMeta = meta.title.toLowerCase().replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
-
       const regexPrefix = /^(?:the|a|an|il|lo|la|i|gli|le|un|uno|una|el|los|las|les)\s+/i;
       const normFile = cleanFile.replace(regexPrefix, "").trim();
       const normMeta = cleanMeta.replace(regexPrefix, "").trim();
 
-      if (!meta.isSeries) {
-          const metaYear = parseInt(meta.year);
-          if (!isNaN(metaYear)) {
-               const fileYearMatch = item.title.match(REGEX_YEAR);
-               if (fileYearMatch) {
-                   const fileYear = parseInt(fileYearMatch[0]);
-                   if (Math.abs(fileYear - metaYear) > 1) return false; 
-               }
-          }
-          if (normFile.includes(normMeta)) {
-               if (!normFile.startsWith(normMeta)) return false; 
-          }
+      const metaYear = parseInt(meta.year);
+      if (!isNaN(metaYear)) {
+           const fileYearMatch = item.title.match(REGEX_YEAR);
+           if (fileYearMatch) {
+               const fileYear = parseInt(fileYearMatch[0]);
+               if (Math.abs(fileYear - metaYear) > 1) return false; 
+           }
+      }
+      if (normFile.includes(normMeta)) {
+           if (!normFile.startsWith(normMeta)) return false; 
       }
 
+      // Fallback finale solo per Film
       if (smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode)) return true;
-      if (meta.isSeries && simpleSeriesFallback(meta, item.title)) return true;
 
       return false;
   };
