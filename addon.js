@@ -980,49 +980,85 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
        
        // --- [FIX] INIZIO FORMATTAZIONE AIO PER WEB ---
        if (aioFormatter && aioFormatter.isAIOStreamsEnabled(config)) {
-           // Funzione interna per applicare lo stile AIO ai risultati Web
+           
            const applyAioStyle = (streamList, sourceName) => {
                if (!streamList || !Array.isArray(streamList)) return;
                
-               streamList.forEach(stream => {
-                   // 1. Cerchiamo di capire la qualità dal titolo o dal nome originale
+               streamList.forEach((stream, index) => {
+                   // 1. Rilevamento Qualità Avanzato
                    let quality = "HD";
-                   const textToCheck = (stream.title + " " + stream.name).toUpperCase();
-                   if (textToCheck.includes("4K") || textToCheck.includes("2160")) quality = "4K";
-                   else if (textToCheck.includes("1080")) quality = "1080p";
-                   else if (textToCheck.includes("720")) quality = "720p";
-                   else if (textToCheck.includes("SD")) quality = "SD";
+                   let qIcon = "📺";
+                   
+                   // Creiamo una stringa di analisi PULITA dai nomi dei provider che contengono "HD"
+                   // Rimuoviamo "GuardaHD", "StreamingCommunity", "Leviathan" per evitare falsi positivi
+                   let textToCheck = (stream.title + " " + (stream.name || "")).toUpperCase();
+                   textToCheck = textToCheck
+                       .replace("GUARDAHD", "")
+                       .replace("STREAMINGCOMMUNITY", "")
+                       .replace("LEVIATHAN", "")
+                       .replace("VIX", "");
+                   
+                   // Regex più precise per evitare di trovare "HD" dentro altre parole
+                   const regex4k = /\b(4K|2160P|UHD)\b/;
+                   const regex1080 = /\b(1080P|FHD|FULLHD)\b/;
+                   const regex720 = /\b(720P|HD)\b/; // HD solo se parola intera
+                   const regexSD = /\b(480P|SD)\b/;
 
-                   // 2. Riscriviamo il NOME (il box colorato a sinistra)
+                   if (regex4k.test(textToCheck)) { quality = "4K"; qIcon = "🔥"; }
+                   else if (regex1080.test(textToCheck)) { quality = "1080p"; qIcon = "✨"; }
+                   else if (regex720.test(textToCheck)) { quality = "720p"; qIcon = "📺"; }
+                   else if (regexSD.test(textToCheck)) { quality = "SD"; qIcon = "🐢"; }
+                   else {
+                       // Nessuna qualità rilevata (es. titolo pulito senza tag)
+                       quality = "WebStreams"; // Default conservativo
+                   }
+                   
+                   // --- LOGICHE SPECIFICHE PER PROVIDER ---
+                   
+                   // GUARDAHD: Spesso usa "FHD" per 1080p. Se non specificato, spesso è 720p o SD.
+                   // Se però abbiamo rilevato SD e la fonte è GuardaHD, a volte è meglio lasciare HD generico?
+                   // Per ora ci fidiamo della detection sopra. Se nel titolo c'era "FHD", ora è 1080p.
+                   
+                   // VIX (StreamingCommunity): Forzatura 1080p se non rilevato altro
+                   if (sourceName.includes("StreamingCommunity") || sourceName.includes("Vix")) {
+                       if (quality === "SD" && !regexSD.test(textToCheck)) {
+                           // Se era SD solo perché non ha trovato tag, promuoviamo a 1080p
+                           quality = "1080p";
+                           qIcon = "✨";
+                       }
+                   }
+                   // ---------------------------------------
+
+                   // 2. Info Tecniche
+                   const techStr = `🎞️ ${quality} ${qIcon}`;
+
+                   // 3. BOX SINISTRO (BADGE)
                    stream.name = aioFormatter.formatStreamName({
-                       addonName: "Leviathan",
-                       service: "web", // Richiede l'update nel formatter per mostrare [WEB], altrimenti [P2P
-                       cached: true,   // Mette il fulmine ⚡
+                       service: "web", 
+                       cached: true,
                        quality: quality
                    });
 
-                   // 3. Riscriviamo il TITOLO (le 3 righe di testo)
+                   // 4. TITOLO (4 Righe)
                    stream.title = aioFormatter.formatStreamTitle({
-                       title: meta.title,  // Nome pulito del film/serie
-                       size: "Web",        // Al posto dei GB
+                       title: meta.title,  // Titolo pulito
+                       size: "Web",        
                        language: "🇮🇹 ITA",
-                       source: sourceName, // <--- QUI COMPARE LA SORGENTE (Es. GuardaHD)
-                       seeders: null,      // Nasconde l'icona user
-                       episodeTitle: getEpisodeTag(meta.title) || (meta.season ? `S${meta.season}E${meta.episode}` : "")
+                       source: sourceName, 
+                       seeders: null,
+                       techInfo: techStr 
                    });
                    
-                   // Raggruppamento per evitare confusione
+                   // 5. Raggruppamento
                    if (!stream.behaviorHints) stream.behaviorHints = {};
-                   stream.behaviorHints.bingieGroup = `web-${sourceName.toLowerCase().replace(/\s/g,'')}`;
+                   stream.behaviorHints.bingieGroup = `web-${sourceName.replace(/\W/g,'')}-${quality}`;
                });
            };
 
-           // Applichiamo la formattazione alle liste
-           applyAioStyle(rawVix, "StreamingCommunity");
-           applyAioStyle(formattedGhd, "GuardaHD");
-           applyAioStyle(formattedGs, "GuardaSerie");
+           if (typeof rawVix !== 'undefined') applyAioStyle(rawVix, "StreamingCommunity");
+           if (typeof formattedGhd !== 'undefined') applyAioStyle(formattedGhd, "GuardaHD");
+           if (typeof formattedGs !== 'undefined') applyAioStyle(formattedGs, "GuardaSerie");
        }
-       // --- [FIX] FINE ---
 
        formattedVix = rawVix; 
   }
