@@ -178,6 +178,14 @@ body {
 .m-tab-btn.active { background: linear-gradient(135deg, rgba(0, 242, 255, 0.2), rgba(112, 0, 255, 0.1)); color: #fff; border: 1px solid var(--m-primary); }
 .m-tab-btn.active .m-tab-icon { filter: grayscale(0) drop-shadow(0 0 5px #fff); }
 
+/* ANIMAZIONE ROTAZIONE 3D PER LE ICONE */
+@keyframes spin3D {
+    0% { transform: perspective(400px) rotateY(0deg); }
+    40% { transform: perspective(400px) rotateY(180deg); }
+    100% { transform: perspective(400px) rotateY(360deg); }
+}
+.m-spin-effect { animation: spin3D 0.6s ease-in-out; }
+
 /* WARNING BOX */
 .m-ad-warning { display: none; background: rgba(255, 42, 109, 0.1); border: 1px solid var(--m-error); border-radius: 10px; padding: 10px; margin-bottom: 20px; text-align: center; color: var(--m-error); font-size: 0.8rem; font-weight: 700; }
 
@@ -618,15 +626,26 @@ function navTo(pageId, btn) {
     if(btn) btn.classList.add('active');
 }
 
-function setMService(srv, btn) {
-    if(mCurrentService === srv) return;
+function setMService(srv, btn, keepInput = false) {
+    if(mCurrentService === srv && !keepInput) return;
     mCurrentService = srv;
     
-    // RESET API KEY AUTOMATICO
-    document.getElementById('m-apiKey').value = '';
+    // RESET API KEY: SOLO se NON stiamo forzando il caricamento configurazione
+    if (!keepInput) {
+        document.getElementById('m-apiKey').value = '';
+    }
 
     document.querySelectorAll('.m-tab-btn').forEach(t => t.parentElement.classList.contains('m-tabs-row') && !t.id ? t.classList.remove('active') : null);
-    if(btn) btn.classList.add('active');
+    if(btn) {
+        btn.classList.add('active');
+        // --- ANIMAZIONE ROTAZIONE ---
+        const icon = btn.querySelector('.m-tab-icon');
+        if(icon) {
+            icon.classList.remove('m-spin-effect');
+            void icon.offsetWidth; // Force Reflow
+            icon.classList.add('m-spin-effect');
+        }
+    }
     const input = document.getElementById('m-apiKey');
     const placeholders = { 'rd': "RD API Key...", 'ad': "AD API Key...", 'tb': "TB API Key..." };
     input.placeholder = placeholders[srv];
@@ -743,10 +762,13 @@ function loadMobileConfig() {
         if (pathParts.length >= 2 && pathParts[1].length > 10) {
             const config = JSON.parse(atob(pathParts[1]));
             if(config.service) {
-                mCurrentService = config.service;
                 const tabs = document.querySelectorAll('.m-tab-btn');
                 const srvMap = {'rd':0, 'ad':1, 'tb':2};
-                if(srvMap[config.service] !== undefined) tabs[srvMap[config.service]].click();
+                
+                // Chiama setMService con true per NON cancellare l'input
+                if(srvMap[config.service] !== undefined) {
+                    setMService(config.service, tabs[srvMap[config.service]], true);
+                }
                 const warn = document.getElementById('m-ad-warn');
                 if(warn) warn.style.display = (config.service === 'ad') ? 'block' : 'none';
             }
