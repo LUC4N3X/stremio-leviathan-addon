@@ -463,6 +463,80 @@ function formatVixStream(meta, vixData) {
     };
 }
 
+// --- HELPER CACHE CHECK TORBOX (URL FIX + CHUNKED) ---
+async function filterTorBoxCached(apiKey, items) {
+    if (!items || items.length === 0) return [];
+    
+    // 1. Estrai gli hash unici e validi
+    const uniqueHashes = [...new Set(items.map(i => i.hash).filter(Boolean))];
+    if (uniqueHashes.length === 0) return [];
+
+    // 2. Funzione interna per processare un "chunk"
+    const checkChunk = async (hashes) => {
+        try {
+            // CORREZIONE: Reintrodotto /v1/ che è obbligatorio per TorBox
+            const url = "https://api.torbox.app/v1/api/torrents/checkcached";
+            
+            const { data: response } = await axios.get(url, {
+                params: { 
+                    hash: hashes.join(','), 
+                    format: 'object', 
+                    list_files: false 
+                },
+                headers: { Authorization: `Bearer ${apiKey}` },
+                timeout: 6000 
+            });
+
+            if (!response || !response.success || !response.data) {
+                return []; 
+            }
+            
+            const confirmed = [];
+            const data = response.data;
+            
+            // Gestione flessibile (Array o Object)
+            if (Array.isArray(data)) {
+                data.forEach(entry => {
+                    if (typeof entry === 'string') confirmed.push(entry.toLowerCase());
+                    else if (entry.hash) confirmed.push(entry.hash.toLowerCase());
+                });
+            } else {
+                Object.keys(data).forEach(h => confirmed.push(h.toLowerCase()));
+            }
+            
+            return confirmed;
+        } catch (e) {
+            // Se errore 404 o altro, lo logghiamo ma non blocchiamo tutto lo script
+            logger.warn(`⚠️ [TB CHUNK FAIL] Errore API: ${e.message}`);
+            return []; 
+        }
+    };
+
+    // 3. Dividi in gruppi da 40 (Safety Limit)
+    const chunkSize = 40;
+    const chunks = [];
+    for (let i = 0; i < uniqueHashes.length; i += chunkSize) {
+        chunks.push(uniqueHashes.slice(i, i + chunkSize));
+    }
+
+    logger.info(`🔍 [TB CHECK] Verifico ${uniqueHashes.length} hash in ${chunks.length} richieste...`);
+
+    // 4. Esegui in parallelo
+    const results = await Promise.all(chunks.map(chunk => checkChunk(chunk)));
+    
+    // 5. Unisci i risultati
+    const confirmedHashes = new Set(results.flat());
+
+    // 6. Filtra la lista originale
+    const cachedItems = items.filter(item => {
+        return item.hash && confirmedHashes.has(item.hash.toLowerCase());
+    });
+
+    logger.info(`✅ [TB CHECK] Risultato: ${items.length} totali -> ${cachedItems.length} confermati in cache.`);
+    
+    return cachedItems;
+}
+
 function validateStreamRequest(type, id) {
   const validTypes = ['movie', 'series'];
   if (!validTypes.includes(type)) {
@@ -945,7 +1019,18 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       rankedList = filterByQualityLimit(rankedList, config.filters.maxPerQuality);
   }
 
-  const ranked = rankedList.slice(0, CONFIG.MAX_RESULTS);
+  // --- MODIFICA TB: Integrazione Controllo Cache Reale ---
+  let finalRanked = rankedList.slice(0, CONFIG.MAX_RESULTS);
+
+  // Se l'utente usa TorBox (service == 'tb') ed ha una chiave
+  if (config.service === 'tb' && hasDebridKey) {
+      const apiKey = config.key || config.rd; // Recupera la chiave
+      // Eseguiamo il controllo sincrono per filtrare via i fake cached
+      finalRanked = await filterTorBoxCached(apiKey, finalRanked);
+  }
+
+  const ranked = finalRanked;
+  // -------------------------------------------------------
 
   let debridStreams = [];
   if (ranked.length > 0 && hasDebridKey) { 
@@ -1294,6 +1379,7 @@ app.listen(PORT, () => {
     console.log(`⚖️ SIZE LIMITER: Modulo Attivo (GB Filter)`);
     console.log(`🦁 GUARDA HD: Modulo Integrato e Pronto`);
     console.log(`🛡️ GUARDA SERIE: Modulo Integrato e Pronto`);
+    console.log(`📦 TORBOX: True Cache Check Enabled`);
     console.log(`🦑 LEVIATHAN CORE: Optimized for High Reliability`);
     console.log(`-----------------------------------------------------`);
 });
