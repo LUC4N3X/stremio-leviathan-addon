@@ -80,21 +80,17 @@ const CONFIG = {
     DB_QUERY: 3000,
     DEBRID: 10000, 
     PACK_RESOLVER: 7000,
-    EXTERNAL: 5000 
+    EXTERNAL: 5000 // <--- MODIFICATO: Aumentato a 5s per dare tempo a Torrentio
   }
 };
 
 const REGEX_YEAR = /(19|20)\d{2}/;
-
-// --- DEFINIZIONI QUALITÀ POTENZIATE PER IL FILTRO ---
 const REGEX_QUALITY = {
-    "4K": /\b(?:2160p|2160i|4k|uhd|ultra\s?hd|hdr)\b/i,
-    "1080p": /\b(?:1080p|1080i|fhd|full\s?hd|1920x\d+)\b/i,
-    "720p": /\b(?:720p|720i|hd|hdrip|1280x\d+)\b/i,
-    "SD": /\b(?:480p|480i|576p|576i|sd|dvd|dvdrip|xvid|divx|satrip|tvrip)\b/i,
-    "CAM": /\b(?:cam|hdcam|ts|telesync|tc|screener|scr|r5|dvdscreener)\b/i
+    "4K": /2160p|4k|uhd/i,
+    "1080p": /1080p/i,
+    "720p": /720p/i,
+    "SD": /480p|\bsd\b/i
 };
-
 const REGEX_AUDIO = {
     channels: /\b(7\.1|5\.1|2\.1|2\.0)\b/,
     atmos: /atmos/i,
@@ -299,14 +295,10 @@ function extractAudioInfo(title) {
 function extractStreamInfo(title, source) {
   const t = String(title).toLowerCase();
   let q = "HD"; let qIcon = "📺";
-  
   if (REGEX_QUALITY["4K"].test(t)) { q = "4K"; qIcon = "🔥"; }
   else if (REGEX_QUALITY["1080p"].test(t)) { q = "1080p"; qIcon = "✨"; }
   else if (REGEX_QUALITY["720p"].test(t)) { q = "720p"; qIcon = "🎞️"; }
   else if (REGEX_QUALITY["SD"].test(t)) { q = "SD"; qIcon = "🐢"; }
-  // Aggiunto controllo display CAM
-  else if (REGEX_QUALITY["CAM"].test(t)) { q = "CAM"; qIcon = "📹"; }
-
   const videoTags = [];
   if (/hdr/.test(t)) videoTags.push("HDR");
   if (/dolby|vision|\bdv\b/.test(t)) videoTags.push("DV");
@@ -917,54 +909,31 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       saveResultsToDbBackground(meta, cleanResults);
   }
 
-// --- SPETTRO VISIVO: LOGICA STRICT MODE ---
+  //  SPETTRO VISIVO (Exclusion Logic)
   if (config.filters) {
       cleanResults = cleanResults.filter(item => {
           const t = (item.title || "").toLowerCase();
 
-          // 1. FILTRO GB: ELIMINA FILE TROPPO GRANDI
+          // --- NUOVO FILTRO GB: ELIMINA FILE TROPPO GRANDI ---
           if (config.filters.maxSizeGB && config.filters.maxSizeGB > 0) {
+              // Convertiamo i GB in Bytes (1 GB = 1073741824 Bytes)
               const maxBytes = config.filters.maxSizeGB * 1024 * 1024 * 1024;
+              // Recuperiamo la dimensione del file (gestiamo le varie nomenclature usate nello script)
               const itemSize = item._size || item.sizeBytes || 0;
+              
+              // Se il file ha una dimensione valida ed è superiore al limite, lo scartiamo
               if (itemSize > 0 && itemSize > maxBytes) return false;
           }
+          // --------------------------------------------------
 
-          // 2. RILEVAMENTO QUALITÀ
-          const is4k = REGEX_QUALITY["4K"].test(t);
-          const is1080 = REGEX_QUALITY["1080p"].test(t);
-          const is720 = REGEX_QUALITY["720p"].test(t);
-          const isSD = REGEX_QUALITY["SD"].test(t);
-          const isCAM = REGEX_QUALITY["CAM"].test(t);
-
-          // Determina se è "HD Generico" (Nessuna tag trovata)
-          // Se non è 4K, non è 1080, non è 720, non è SD e non è CAM -> è "HD Generico"
-          const isGenericHD = !is4k && !is1080 && !is720 && !isSD && !isCAM;
-
-          // 3. APPLICAZIONE FILTRI
-          
-          // Blocco 4K
-          if (config.filters.no4k && is4k) return false;
-          
-          // Blocco 1080p
-          if (config.filters.no1080 && is1080) return false;
-          
-          // Blocco 720p (STRICT MODE)
-          // Se l'utente non vuole 720p, presumiamo voglia SOLO 1080p o superiore.
-          // Quindi eliminiamo i 720p espliciti E ANCHE gli "HD Generici".
-          if (config.filters.no720) {
-              if (is720) return false;
-              if (isGenericHD) return false; // Elimina i file ambigui come quello nello screenshot
-          }
-          
-          // Blocco SD / CAM (Pulsante Giallo/Arancione)
+          if (config.filters.no4k && REGEX_QUALITY["4K"].test(t)) return false;
+          if (config.filters.no1080 && REGEX_QUALITY["1080p"].test(t)) return false;
+          if (config.filters.no720 && REGEX_QUALITY["720p"].test(t)) return false;
           if (config.filters.noScr) {
-               if (isSD) return false;
-               if (isCAM) return false;
+               if (REGEX_QUALITY["SD"].test(t)) return false;
+               if (/cam|hdcam|ts|telesync|screener|scr\b/i.test(t)) return false;
           }
-          
-          // Fallback legacy CAM
-          if (config.filters.noCam && isCAM) return false;
-
+          if (config.filters.noCam && /cam|hdcam|ts|telesync|screener|scr\b/i.test(t)) return false;
           return true;
       });
   }
@@ -984,7 +953,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       debridStreams = ranked.map(item => generateLazyStream(item, config, meta, reqHost, userConfStr));
   }
 
-  // === WEB PROVIDERS (MODIFICATO PER DB ONLY MODE) ===
+  // === WEB PROVIDERS (MODIFICATO PER DB ONLY MODE & AIO FIX) ===
   let rawVix = [], formattedGhd = [], formattedGs = [], formattedVix = [];
 
   // Esegui i Web Providers SOLO se NON siamo in modalità "Solo DB"
@@ -1008,6 +977,53 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
        }
 
        [rawVix, formattedGhd, formattedGs] = await Promise.all([vixPromise, ghdPromise, gsPromise]);
+       
+       // --- [FIX] INIZIO FORMATTAZIONE AIO PER WEB ---
+       if (aioFormatter && aioFormatter.isAIOStreamsEnabled(config)) {
+           // Funzione interna per applicare lo stile AIO ai risultati Web
+           const applyAioStyle = (streamList, sourceName) => {
+               if (!streamList || !Array.isArray(streamList)) return;
+               
+               streamList.forEach(stream => {
+                   // 1. Cerchiamo di capire la qualità dal titolo o dal nome originale
+                   let quality = "HD";
+                   const textToCheck = (stream.title + " " + stream.name).toUpperCase();
+                   if (textToCheck.includes("4K") || textToCheck.includes("2160")) quality = "4K";
+                   else if (textToCheck.includes("1080")) quality = "1080p";
+                   else if (textToCheck.includes("720")) quality = "720p";
+                   else if (textToCheck.includes("SD")) quality = "SD";
+
+                   // 2. Riscriviamo il NOME (il box colorato a sinistra)
+                   stream.name = aioFormatter.formatStreamName({
+                       addonName: "Leviathan",
+                       service: "web", // Richiede l'update nel formatter per mostrare [WEB], altrimenti [P2P
+                       cached: true,   // Mette il fulmine ⚡
+                       quality: quality
+                   });
+
+                   // 3. Riscriviamo il TITOLO (le 3 righe di testo)
+                   stream.title = aioFormatter.formatStreamTitle({
+                       title: meta.title,  // Nome pulito del film/serie
+                       size: "Web",        // Al posto dei GB
+                       language: "🇮🇹 ITA",
+                       source: sourceName, // <--- QUI COMPARE LA SORGENTE (Es. GuardaHD)
+                       seeders: null,      // Nasconde l'icona user
+                       episodeTitle: getEpisodeTag(meta.title) || (meta.season ? `S${meta.season}E${meta.episode}` : "")
+                   });
+                   
+                   // Raggruppamento per evitare confusione
+                   if (!stream.behaviorHints) stream.behaviorHints = {};
+                   stream.behaviorHints.bingieGroup = `web-${sourceName.toLowerCase().replace(/\s/g,'')}`;
+               });
+           };
+
+           // Applichiamo la formattazione alle liste
+           applyAioStyle(rawVix, "StreamingCommunity");
+           applyAioStyle(formattedGhd, "GuardaHD");
+           applyAioStyle(formattedGs, "GuardaSerie");
+       }
+       // --- [FIX] FINE ---
+
        formattedVix = rawVix; 
   }
 
