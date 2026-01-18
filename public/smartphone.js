@@ -128,6 +128,18 @@ body {
 }
 .m-brand-sub::after { background: linear-gradient(90deg, var(--m-primary), transparent); }
 
+/* VERSION TAG STILE */
+.m-version-tag {
+    margin-top: 12px; font-family: 'Rajdhani', monospace; font-size: 0.75rem;
+    color: var(--m-dim); opacity: 0.6; letter-spacing: 2px;
+    background: rgba(0,0,0,0.3); padding: 4px 14px; border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 8px;
+    transition: all 0.3s ease; cursor: default;
+}
+.m-version-tag:hover { border-color: var(--m-primary); color: #fff; opacity: 1; box-shadow: 0 0 15px rgba(0,242,255,0.1); }
+.m-v-dot { width: 6px; height: 6px; background: var(--m-primary); border-radius: 50%; box-shadow: 0 0 6px var(--m-primary); animation: blinkBase 2s infinite; }
+@keyframes blinkBase { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
+
 
 /* CARDS STANDARD */
 .m-card {
@@ -356,6 +368,7 @@ const mobileHTML = `
                 <div class="m-logo-container"><img src="https://i.ibb.co/jvTQLbjb/Gemini-Generated-Image-51j2ce51j2ce51j2-1.png" class="m-logo-img"></div>
                 <h1 class="m-brand-title">LEVIATHAN</h1>
                 <div class="m-brand-sub">SOVRANO DEGLI ABISSI</div>
+                <div class="m-version-tag"><div class="m-v-dot"></div>v2.1.0 STABLE</div>
             </div>
 
             <div id="page-setup" class="m-page active">
