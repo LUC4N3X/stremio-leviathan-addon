@@ -1420,7 +1420,63 @@ app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "index.ht
 app.get("/:conf/configure", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 app.get("/configure", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 app.get("/manifest.json", (req, res) => { res.setHeader("Access-Control-Allow-Origin", "*"); res.json(getManifest()); });
-app.get("/:conf/manifest.json", (req, res) => { res.setHeader("Access-Control-Allow-Origin", "*"); res.json(getManifest()); });
+app.get("/:conf/manifest.json", (req, res) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+
+    // 1. Carica il manifest originale
+    const manifest = getManifest();
+
+    try {
+        const { conf } = req.params;
+        const config = getConfig(conf);
+        
+        // Rilevamento del servizio
+        const isRD = config.service === 'rd' || (config.rd && !config.service);
+        const isTB = config.service === 'tb' || (config.torbox && !config.service);
+        const isAD = config.service === 'ad';
+
+        // --- STILE & PERSONALIZZAZIONE ---
+        
+        if (isRD) {
+            // Opzione 1: Stile "Fulmine" (Veloce)
+            manifest.name = "Leviathan ⚡ RD";
+            
+            // Modifica descrizione per confermare l'attivazione
+            manifest.description = "✅ Real-Debrid Attivo • " + manifest.description;
+            
+            // ID univoco: Permette di installare sia versione RD che TB insieme
+            manifest.id += ".rd"; 
+        } 
+        else if (isTB) {
+            // Opzione 2: Stile "Box" (Cloud)
+            manifest.name = "Leviathan 📦 TorBox";
+            
+            manifest.description = "✅ TorBox Attivo • " + manifest.description;
+            manifest.id += ".tb";
+        } 
+        else if (isAD) {
+            // Opzione 3: Stile "AllDebrid"
+            manifest.name = "Leviathan 🦅 AllDebrid";
+            
+            manifest.description = "✅ AllDebrid Attivo • " + manifest.description;
+            manifest.id += ".ad";
+        }
+        else {
+            // Nessun servizio configurato (o solo Web)
+            manifest.name = "Leviathan ⚠️ No-Debrid";
+            manifest.description = "⚠️ Modalità limitata (Solo Web/P2P) • " + manifest.description;
+        }
+
+        // Aggiungi versione al nome per renderlo più tecnico (opzionale)
+        // manifest.name += ` v${manifest.version}`;
+
+    } catch (e) {
+        console.error("Errore personalizzazione manifest:", e);
+        // In caso di errore, restituisce il manifest base senza rompere nulla
+    }
+
+    res.json(manifest);
+});
 app.get("/:conf/catalog/:type/:id/:extra?.json", async (req, res) => { res.setHeader("Access-Control-Allow-Origin", "*"); res.json({metas:[]}); });
 app.get("/vixsynthetic.m3u8", handleVixSynthetic);
 
