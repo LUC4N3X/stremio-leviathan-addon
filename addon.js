@@ -1207,6 +1207,38 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   } else {
       finalStreams = [...formattedGhd, ...formattedGs, ...formattedVix, ...debridStreams];
   }
+
+  // --- [FIX] FILTRO FINALE DI SICUREZZA ---
+  // Rimuove anche i "finti HD" o stream Web se l'utente ha escluso quelle risoluzioni
+  if (config.filters) {
+      finalStreams = finalStreams.filter(stream => {
+          // Uniamo titolo e badge per il controllo finale
+          const checkStr = (stream.title + " " + (stream.name || "")).toUpperCase();
+
+          // 1. FILTRO 720p (Esteso per coprire "HD" generico)
+          if (config.filters.no720) {
+              // Se c'è scritto esplicitamente 720P
+              if (checkStr.includes("720P")) return false;
+              
+              // SE IL BADGE DICE "HD" MA NON È 1080P/4K -> LO SCARTIAMO
+              // Questo elimina risultati come "LEVIATHAN HD" se non c'è traccia di 1080/FHD/4K
+              const isGenericHD = /\bHD\b/.test(checkStr) && !/1080|2160|4K|FHD|UHD/.test(checkStr);
+              if (isGenericHD) return false;
+          }
+
+          // 2. FILTRO 4K
+          if (config.filters.no4k && (checkStr.includes("4K") || checkStr.includes("2160P") || checkStr.includes("UHD"))) return false;
+
+          // 3. FILTRO 1080p
+          if (config.filters.no1080 && (checkStr.includes("1080P") || checkStr.includes("FHD") || checkStr.includes("FULLHD"))) return false;
+
+          // 4. FILTRO CAM/SCR
+          if ((config.filters.noScr || config.filters.noCam) && /CAM|SCR|TS|TELESYNC|HDCAM/.test(checkStr)) return false;
+
+          return true;
+      });
+  }
+  // --- [FINE FIX] ---
   
   const resultObj = { streams: finalStreams };
 
