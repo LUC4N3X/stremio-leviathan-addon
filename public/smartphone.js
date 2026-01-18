@@ -9,7 +9,8 @@ const mobileCSS = `
     --m-surface-border: rgba(0, 242, 255, 0.25);
     --m-text: #e0f7fa;
     --m-dim: #7a9ab5; 
-    --m-error: #ff3366;       
+    --m-error: #ff3366;
+    --m-success: #00ff9d;       
     --safe-bottom: env(safe-area-inset-bottom);
     --m-glow: 0 0 12px rgba(0, 242, 255, 0.4); 
     --m-shadow-deep: 0 8px 32px rgba(0,0,0,0.6); 
@@ -300,15 +301,116 @@ input:checked + .m-slider-amber:before { background-color: var(--m-amber); box-s
 .m-range::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--m-primary); box-shadow: 0 0 10px var(--m-primary); cursor: pointer; border: 2px solid #fff; }
 #m-sizeVal::-webkit-slider-thumb { background: var(--m-amber); box-shadow: 0 0 10px var(--m-amber); }
 
-.m-credits-section { margin-top: 35px; padding-top: 25px; border-top: 1px solid rgba(255,255,255,0.15); display: flex; flex-direction: column; align-items: center; gap: 18px; }
-.m-faq-btn { width: 100%; padding: 14px; background: transparent; border: 1px dashed rgba(255,255,255,0.35); color: var(--m-text); border-radius: 12px; font-family: 'Rajdhani', sans-serif; font-weight: 700; display: flex; justify-content: center; align-items: center; gap: 10px; transition: all 0.2s; box-shadow: var(--m-glow); }
-.m-faq-btn:hover { background: rgba(255,255,255,0.05); }
-.m-commander-link { text-decoration: none; display: inline-flex; align-items: center; gap: 12px; background: rgba(0, 5, 10, 0.85); border: 1px solid rgba(112,0,255,0.35); padding: 8px 22px 8px 8px; border-radius: 50px; box-shadow: var(--m-shadow-deep), 0 0 18px rgba(112,0,255,0.2); }
-.m-cmd-avatar { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--m-primary); object-fit: cover; box-shadow: var(--m-glow); }
-.m-cmd-info { display: flex; flex-direction: column; justify-content: center; line-height: 1.1; }
-.m-cmd-name { font-size: 1.05rem; font-weight: 800; color: #fff; font-family: 'Rajdhani', sans-serif; text-shadow: 0 0 4px rgba(255,255,255,0.3); }
-.m-donate-btn { text-decoration: none; color: #fff; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.25); padding: 12px 28px; border-radius: 32px; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; box-shadow: 0 0 15px rgba(255,255,255,0.1); transition: all 0.2s; }
-.m-donate-btn:hover { box-shadow: 0 0 20px rgba(255,42,109,0.3); }
+/* --- CREDITS & DEV HUB (RE-DESIGN) --- */
+.m-credits-section { 
+    margin-top: 30px; 
+    padding-top: 20px; 
+    border-top: 1px solid rgba(255,255,255,0.08); 
+    display: flex; 
+    flex-direction: column; 
+    gap: 15px; 
+}
+
+/* FAQ Button (Style Refined) */
+.m-faq-btn { 
+    width: 100%; 
+    padding: 12px; 
+    background: rgba(255,255,255,0.03); 
+    border: 1px dashed rgba(255,255,255,0.2); 
+    color: var(--m-dim); 
+    border-radius: 10px; 
+    font-family: 'Rajdhani', sans-serif; 
+    font-weight: 700; 
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    gap: 10px; 
+    transition: all 0.3s ease; 
+}
+.m-faq-btn:hover { 
+    background: rgba(255,255,255,0.08); 
+    border-color: var(--m-primary); 
+    color: #fff; 
+    box-shadow: 0 0 15px rgba(0,242,255,0.1);
+}
+
+/* Dev Hub Container */
+.m-dev-hub {
+    display: flex;
+    gap: 10px;
+    height: 55px;
+}
+
+/* Commander Tag (Left Side) */
+.m-cmd-tag {
+    flex: 1;
+    text-decoration: none;
+    background: linear-gradient(90deg, rgba(0, 242, 255, 0.05), rgba(0,0,0,0.4));
+    border: 1px solid rgba(0, 242, 255, 0.25);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 12px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+.m-cmd-tag:hover {
+    background: linear-gradient(90deg, rgba(0, 242, 255, 0.15), rgba(0,0,0,0.6));
+    border-color: var(--m-primary);
+    box-shadow: 0 0 20px rgba(0, 242, 255, 0.15);
+}
+.m-cmd-tag::before {
+    content: ''; position: absolute; top:0; left:0; width: 3px; height: 100%;
+    background: var(--m-primary); box-shadow: 0 0 8px var(--m-primary);
+}
+
+.m-cmd-avatar-mini {
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 1px solid var(--m-primary);
+    object-fit: cover;
+    box-shadow: 0 0 8px rgba(0, 242, 255, 0.4);
+}
+.m-cmd-details { display: flex; flex-direction: column; justify-content: center; }
+.m-cmd-role { font-size: 0.6rem; color: var(--m-primary); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+.m-cmd-nick { font-family: 'Rajdhani', sans-serif; font-size: 1rem; color: #fff; font-weight: 800; line-height: 1; }
+
+/* Donation Button (Right Side - Blue Coffee) */
+.m-coffee-btn {
+    text-decoration: none;
+    width: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 15, 25, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    font-size: 1.2rem;
+    color: var(--m-dim);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+}
+.m-coffee-btn i { transition: transform 0.3s ease; filter: drop-shadow(0 0 0 transparent); }
+
+.m-coffee-btn:hover {
+    border-color: var(--m-primary);
+    background: rgba(0, 242, 255, 0.05);
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+}
+.m-coffee-btn:hover i {
+    color: var(--m-primary); /* BLUE COFFEE */
+    transform: scale(1.2) rotate(-10deg);
+    filter: drop-shadow(0 0 8px var(--m-primary));
+}
+/* Subtle steam animation on hover */
+@keyframes steam { 0% { opacity:0; transform: translateY(0); } 50% { opacity:1; } 100% { opacity:0; transform: translateY(-10px); } }
+.m-coffee-btn:hover::after {
+    content: '♥'; position: absolute; top: 8px; right: 8px; font-size: 8px; color: var(--m-primary);
+    animation: steam 1s infinite;
+}
 
 .m-dock-container { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(2, 5, 10, 0.97); border-top: 1px solid rgba(0,242,255,0.15); z-index: 100; display: flex; flex-direction: column; padding-bottom: var(--safe-bottom); box-shadow: 0 -12px 35px rgba(0,0,0,0.85); backdrop-filter: blur(12px); }
 .m-dock-actions { display: flex; gap: 12px; padding: 12px 18px 6px 18px; }
@@ -456,12 +558,24 @@ const mobileHTML = `
                 </div>
 
                 <div class="m-credits-section">
-                    <button class="m-faq-btn" onclick="openFaq()"><i class="fas fa-question-circle"></i> FAQ DATABASE</button>
-                    <a href="https://github.com/LUC4N3X/stremio-leviathan-addon" target="_blank" class="m-commander-link">
-                        <img src="https://i.ibb.co/gLkrjxXT/Whats-App-Image-2026-01-12-at-20-15-37.jpg" alt="LUC4N3X" class="m-cmd-avatar">
-                        <div class="m-cmd-info"><span class="m-cmd-label">SYSTEM COMMANDER</span><span class="m-cmd-name">LUC4N3X</span></div>
-                    </a>
-                    <a href="https://www.paypal.me/luc4nex" target="_blank" class="m-donate-btn"><i class="fas fa-mug-hot" style="color:var(--m-error)"></i> OFFRIMI UN CAFFÈ</a>
+                    <button class="m-faq-btn" onclick="openFaq()">
+                        <i class="fas fa-terminal"></i> SYSTEM FAQ & MANUAL
+                    </button>
+
+                    <div class="m-dev-hub">
+                        <a href="https://github.com/LUC4N3X/stremio-leviathan-addon" target="_blank" class="m-cmd-tag">
+                            <img src="https://i.ibb.co/gLkrjxXT/Whats-App-Image-2026-01-12-at-20-15-37.jpg" alt="Dev" class="m-cmd-avatar-mini">
+                            <div class="m-cmd-details">
+                                <span class="m-cmd-role">COMMANDER</span>
+                                <span class="m-cmd-nick">LUC4N3X</span>
+                            </div>
+                        </a>
+
+                        <a href="https://www.paypal.me/luc4nex" target="_blank" class="m-coffee-btn" title="Offri un Caffè">
+                            <i class="fas fa-mug-hot"></i>
+                        </a>
+                    </div>
+
                     <div style="height:30px;"></div> 
                 </div>
             </div>
