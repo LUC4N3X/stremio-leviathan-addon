@@ -19,7 +19,7 @@
             --text-dim: #8baac2;
             --error: #ff3366;
             --warning: #ffcc00;
-            --amber: #ff9900; /* Nuovo colore per Limite GB */
+            --limit-neon: #ff0055; /* NUOVO COLORE LIMITATORE (Magenta Neon) */
             --glow-strong: 0 0 20px rgba(0, 242, 255, 0.6);
             --glow-intense: 0 0 40px rgba(0, 242, 255, 0.8), 0 0 60px rgba(0, 242, 255, 0.4);
         }
@@ -457,14 +457,70 @@
         #flux-info-box { transition: opacity 0.2s ease-in-out; }
         .spec-btn i { margin-right: 8px; }
 
-        /* --- CACHE CARD / SIZE CARD SPECIFIC --- */
-        .cache-card { background: rgba(5, 20, 30, 0.6); border: 1px solid rgba(255, 51, 102, 0.3); border-radius: 12px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; transition: 0.3s; }
-        .cache-card:hover { border-color: var(--amber); box-shadow: 0 0 15px rgba(255, 153, 0, 0.15); }
-        .cache-info h4 { margin: 0; color: #fff; font-family: 'Rajdhani', sans-serif; text-transform: uppercase; font-size: 1.1rem; }
-        .cache-info p { margin: 3px 0 0; color: var(--text-dim); font-size: 0.8rem; }
-        .cache-icon { font-size: 1.5rem; color: var(--amber); margin-right: 15px; }
-        .cache-switch input:checked + .slider { background-color: rgba(255, 51, 102, 0.2); border-color: var(--error); }
-        .cache-switch input:checked + .slider:before { background-color: var(--error); box-shadow: 0 0 10px var(--error); }
+        /* --- STILE LIMITATORE PESO (FIGHISSIMO) --- */
+        .limit-card {
+            background: linear-gradient(145deg, rgba(20, 0, 10, 0.6), rgba(0, 0, 0, 0.8));
+            border: 1px solid rgba(255, 0, 85, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: inset 0 0 20px rgba(255, 0, 85, 0.05);
+        }
+
+        .limit-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--limit-neon);
+            box-shadow: 0 0 15px var(--limit-neon);
+        }
+
+        .limit-card:hover {
+            border-color: var(--limit-neon);
+            box-shadow: 0 0 25px rgba(255, 0, 85, 0.2), inset 0 0 30px rgba(255, 0, 85, 0.1);
+            transform: scale(1.01);
+        }
+
+        .limit-icon {
+            font-size: 1.8rem;
+            color: var(--limit-neon);
+            margin-right: 20px;
+            filter: drop-shadow(0 0 8px var(--limit-neon));
+            animation: pulseLimit 3s infinite;
+        }
+
+        @keyframes pulseLimit { 0% { opacity: 0.8; } 50% { opacity: 1; filter: drop-shadow(0 0 15px var(--limit-neon)); } 100% { opacity: 0.8; } }
+
+        .limit-info h4 {
+            margin: 0; font-family: 'Rajdhani', sans-serif; 
+            font-size: 1.2rem; text-transform: uppercase; color: #fff;
+            text-shadow: 0 0 10px rgba(255, 0, 85, 0.5);
+        }
+        .limit-info p { margin: 4px 0 0; color: #aaa; font-size: 0.85rem; }
+
+        .limit-slider {
+            -webkit-appearance: none; width: 100%; height: 6px;
+            background: #2a0a15; border-radius: 10px; outline: none;
+            border: 1px solid rgba(255, 0, 85, 0.2);
+        }
+        .limit-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 22px; height: 22px;
+            border-radius: 50%;
+            background: #000;
+            border: 2px solid var(--limit-neon);
+            box-shadow: 0 0 15px var(--limit-neon), inset 0 0 5px var(--limit-neon);
+            cursor: pointer;
+            transition: 0.2s;
+            transform: translateY(-1px);
+        }
+        .limit-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: var(--limit-neon);
+            box-shadow: 0 0 25px var(--limit-neon);
+        }
 
         .aux-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
         .aux-card { background: linear-gradient(145deg, rgba(5, 15, 25, 0.8), rgba(0, 0, 0, 0.9)); border: 1px solid rgba(0, 242, 255, 0.15); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; transition: 0.3s ease; display: flex; flex-direction: column; justify-content: space-between; }
@@ -709,7 +765,7 @@
                         <div class="control-row">
                             <div class="control-info">
                                 <div class="control-title notranslate" translate="no">
-                                    <i class="fas fa-tv" style="color: #ffbf00"></i> GuardaSerie
+                                    <i class="fas fa-tv" style="color: #aa00ff"></i> GuardaSerie
                                 </div>
                                 <span class="control-desc">Richiede <strong>OBBLIGATORIAMENTE</strong> MediaFlow Proxy.</span>
                             </div>
@@ -797,16 +853,17 @@
 
                             <input type="hidden" id="sortMode" value="balanced">
                         </div>
-                        <div class="cache-card" id="sizeModule" style="border-color: rgba(255, 153, 0, 0.3);">
+                        
+                        <div class="limit-card" id="sizeModule">
                             <div class="gate-left" style="width: 100%;">
-                                <i class="fas fa-weight-hanging cache-icon" style="color: #ff9900;"></i>
-                                <div class="cache-info" style="flex: 1;">
+                                <i class="fas fa-weight-hanging limit-icon"></i>
+                                <div class="limit-info" style="flex: 1;">
                                     <h4>LIMITATORE PESO (GB)</h4>
-                                    <p>Escludi file superiori a <span id="sizeDisplay" style="color: #ff9900; font-weight:800;">∞</span> GB</p>
+                                    <p>Escludi file superiori a <span id="sizeDisplay" style="color: var(--limit-neon); font-weight:800; font-size: 1.2rem;">∞</span> GB</p>
                                 </div>
                                 
                                 <div class="gate-controls" style="opacity: 1; pointer-events: auto; filter: none; margin-left: 15px;">
-                                    <input type="range" min="0" max="100" step="1" value="0" class="gate-slider" id="maxSizeSlider" oninput="updateSizeVal(this.value)" style="background: linear-gradient(90deg, #ff9900, #333); width: 100px;">
+                                    <input type="range" min="0" max="100" step="1" value="0" class="limit-slider" id="maxSizeSlider" oninput="updateSizeVal(this.value)" style="width: 130px;">
                                 </div>
                             </div>
                         </div>
@@ -1123,7 +1180,7 @@
 
         function updateGateVal(val) { document.getElementById('gateDisplay').innerText = val; }
         
-        // --- FUNZIONE AGGIORNAMENTO TESTO LIMITATORE GB ---
+        // --- FUNZIONE AGGIORNAMENTO TESTO LIMITATORE GB (AGGIORNATA COLORE) ---
         function updateSizeVal(val) {
             const display = document.getElementById('sizeDisplay');
             if (val == 0) {
