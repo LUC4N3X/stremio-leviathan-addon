@@ -1,16 +1,15 @@
 const mobileCSS = `
 :root {
     --m-bg: #000000;
-    --m-primary: #00f2ff;     /* Ciano Leviathan */
+    --m-primary: #00f2ff;     /* Ciano Leviathan - Colore Base */
     --m-secondary: #aa00ff;   /* Viola Elettrico */
     --m-accent: #b026ff;      
-    --m-amber: #ff9900;       /* Arancio/Oro per Size */
+    --m-amber: #ff9900;       
     --m-surface: rgba(10, 15, 25, 0.85); 
     --m-surface-border: rgba(0, 242, 255, 0.25);
     --m-text: #e0f7fa;
     --m-dim: #7a9ab5; 
-    --m-error: #ff2a6d;       
-    --m-success: #00ff9d;
+    --m-error: #ff3366;       /* Rosso Tech per Errori/Esclusioni */
     --safe-bottom: env(safe-area-inset-bottom);
     --m-glow: 0 0 12px rgba(0, 242, 255, 0.4); 
     --m-shadow-deep: 0 8px 32px rgba(0,0,0,0.6); 
@@ -139,7 +138,7 @@ body {
 .m-card.active-border { border-color: var(--m-primary); box-shadow: var(--m-shadow-deep), 0 0 25px rgba(0,242,255,0.2); background: rgba(10, 25, 35, 0.85); }
 .m-card-accent { border-color: rgba(176, 38, 255, 0.5); background: rgba(20, 10, 35, 0.85); box-shadow: var(--m-shadow-deep), 0 0 25px rgba(176,38,255,0.2); }
 
-/* --- CARD FLUX PRIORITY (FIGHISSIMA) --- */
+/* --- CARD FLUX PRIORITY --- */
 .m-card-flux {
     background: linear-gradient(145deg, rgba(15, 20, 30, 0.9), rgba(0, 0, 5, 0.95));
     border: 1px solid rgba(0, 242, 255, 0.3);
@@ -151,19 +150,66 @@ body {
     overflow: hidden;
     backdrop-filter: blur(15px);
 }
-/* Bordo laterale neon */
-.m-card-flux::before {
+.m-card-flux::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: linear-gradient(to bottom, var(--m-secondary), var(--m-primary)); box-shadow: 0 0 15px var(--m-primary); }
+.m-card-flux .m-card-header { font-size: 1.4rem; letter-spacing: 2px; color: #fff; text-shadow: 0 0 15px rgba(0, 242, 255, 0.5); margin-bottom: 10px; }
+
+/* --- CARD FILTRO QUALITÀ --- */
+.m-card-quality {
+    background: linear-gradient(145deg, rgba(5, 10, 20, 0.9), rgba(0, 0, 0, 0.95));
+    border: 1px solid rgba(0, 242, 255, 0.2);
+    border-radius: 20px;
+    padding: 25px 22px;
+    margin-bottom: 20px;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0, 242, 255, 0.05);
+    backdrop-filter: blur(15px);
+}
+.m-card-quality::before {
     content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
-    background: linear-gradient(to bottom, var(--m-secondary), var(--m-primary));
-    box-shadow: 0 0 15px var(--m-primary);
+    background: var(--m-secondary);
+    box-shadow: 0 0 15px var(--m-secondary);
 }
-.m-card-flux .m-card-header {
-    font-size: 1.4rem;
-    letter-spacing: 2px;
+.m-card-quality .m-card-header { color: #fff; font-size: 1.2rem; }
+
+/* GRID QUALITÀ */
+.m-q-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 18px; }
+
+.m-q-item { 
+    background: rgba(0, 0, 0, 0.4); 
+    border: 1px solid rgba(255,255,255,0.1); 
+    color: var(--m-dim); 
+    padding: 15px; 
+    text-align: center; border-radius: 12px; 
+    font-size: 0.9rem; font-weight: 700; font-family: 'Rajdhani', sans-serif; 
+    transition: all 0.3s ease; 
+    display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 10px;
+    position: relative; overflow: hidden;
+}
+
+/* STILE "INCLUSO" (ATTIVO - CIANO LEVIATHAN) */
+.m-q-item:not(.excluded) {
+    border-color: var(--m-primary); /* Ciano */
     color: #fff;
-    text-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
-    margin-bottom: 10px;
+    background: linear-gradient(90deg, rgba(0, 242, 255, 0.15), transparent);
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+    text-shadow: 0 0 8px rgba(0, 242, 255, 0.6);
 }
+.m-q-item:not(.excluded) i { 
+    color: var(--m-primary); 
+    filter: drop-shadow(0 0 5px var(--m-primary)); 
+}
+
+/* STILE "ESCLUSO" (DISATTIVO - ROSSO TECH) */
+.m-q-item.excluded { 
+    border-color: rgba(255, 51, 102, 0.5); 
+    color: var(--m-error); 
+    opacity: 0.6; 
+    background: rgba(20, 5, 10, 0.5);
+    text-decoration: line-through;
+    box-shadow: none;
+}
+.m-q-item.excluded i { color: var(--m-error); filter: none; }
+
 
 /* INPUTS */
 .m-input-group { position: relative; margin-bottom: 18px; }
@@ -204,52 +250,21 @@ body {
 .m-tab-btn.active { background: linear-gradient(135deg, rgba(0, 242, 255, 0.25), rgba(112, 0, 255, 0.15)); color: #fff; border: 1px solid var(--m-primary); box-shadow: var(--m-glow); text-shadow: 0 0 5px rgba(255,255,255,0.5); }
 .m-tab-btn.active .m-tab-icon { filter: grayscale(0) drop-shadow(0 0 6px #fff) brightness(1.2); }
 
-/* --- FLUX CARD BUTTONS - PERSONALIZZATI E COLORATI --- */
-.m-card-flux .m-tab-btn {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid transparent;
-}
-.m-card-flux .m-tab-icon {
-    font-size: 1.6rem; /* Icone più grandi */
-    filter: none; /* Rimuove grayscale */
-    margin-bottom: 4px;
-}
+/* --- FLUX CARD BUTTONS --- */
+.m-card-flux .m-tab-btn { background: rgba(255,255,255,0.03); border: 1px solid transparent; }
+.m-card-flux .m-tab-icon { font-size: 1.6rem; filter: none; margin-bottom: 4px; }
 
 /* LEVIATHAN ACTIVE */
-#sort-balanced.active {
-    border-color: var(--m-primary);
-    background: linear-gradient(180deg, rgba(0, 242, 255, 0.15), rgba(0,0,0,0));
-    box-shadow: 0 0 15px rgba(0, 242, 255, 0.3), inset 0 0 10px rgba(0, 242, 255, 0.1);
-    color: #fff;
-}
-#sort-balanced.active .m-tab-icon {
-    filter: drop-shadow(0 0 10px var(--m-primary));
-    transform: scale(1.1);
-}
+#sort-balanced.active { border-color: var(--m-primary); background: linear-gradient(180deg, rgba(0, 242, 255, 0.15), rgba(0,0,0,0)); box-shadow: 0 0 15px rgba(0, 242, 255, 0.3), inset 0 0 10px rgba(0, 242, 255, 0.1); color: #fff; }
+#sort-balanced.active .m-tab-icon { filter: drop-shadow(0 0 10px var(--m-primary)); transform: scale(1.1); }
 
 /* QUALITY ACTIVE */
-#sort-resolution.active {
-    border-color: var(--m-secondary);
-    background: linear-gradient(180deg, rgba(170, 0, 255, 0.15), rgba(0,0,0,0));
-    box-shadow: 0 0 15px rgba(170, 0, 255, 0.3), inset 0 0 10px rgba(170, 0, 255, 0.1);
-    color: #fff;
-}
-#sort-resolution.active .m-tab-icon {
-    filter: drop-shadow(0 0 10px var(--m-secondary));
-    transform: scale(1.1);
-}
+#sort-resolution.active { border-color: var(--m-secondary); background: linear-gradient(180deg, rgba(170, 0, 255, 0.15), rgba(0,0,0,0)); box-shadow: 0 0 15px rgba(170, 0, 255, 0.3), inset 0 0 10px rgba(170, 0, 255, 0.1); color: #fff; }
+#sort-resolution.active .m-tab-icon { filter: drop-shadow(0 0 10px var(--m-secondary)); transform: scale(1.1); }
 
 /* SIZE ACTIVE */
-#sort-size.active {
-    border-color: var(--m-amber);
-    background: linear-gradient(180deg, rgba(255, 153, 0, 0.15), rgba(0,0,0,0));
-    box-shadow: 0 0 15px rgba(255, 153, 0, 0.3), inset 0 0 10px rgba(255, 153, 0, 0.1);
-    color: #fff;
-}
-#sort-size.active .m-tab-icon {
-    filter: drop-shadow(0 0 10px var(--m-amber));
-    transform: scale(1.1);
-}
+#sort-size.active { border-color: var(--m-amber); background: linear-gradient(180deg, rgba(255, 153, 0, 0.15), rgba(0,0,0,0)); box-shadow: 0 0 15px rgba(255, 153, 0, 0.3), inset 0 0 10px rgba(255, 153, 0, 0.1); color: #fff; }
+#sort-size.active .m-tab-icon { filter: drop-shadow(0 0 10px var(--m-amber)); transform: scale(1.1); }
 
 
 @keyframes spin3D {
@@ -299,15 +314,6 @@ input:checked + .m-slider-amber:before { background-color: var(--m-amber); box-s
 .m-gate-control { display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.55); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15); box-shadow: inset 0 0 8px rgba(0,0,0,0.5); }
 .m-range { -webkit-appearance: none; width: 100%; height: 5px; background: linear-gradient(90deg, #333, #666); border-radius: 3px; transition: background 0.2s; }
 .m-range::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 0 12px rgba(0,0,0,0.6), var(--m-glow); }
-
-.m-q-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 18px; }
-.m-q-item { 
-    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: var(--m-dim); 
-    padding: 12px 2px; text-align: center; border-radius: 10px; 
-    font-size: 0.75rem; font-weight: 700; font-family: 'Rajdhani', sans-serif; 
-    transition: all 0.2s ease; box-shadow: inset 0 0 5px rgba(0,0,0,0.3); white-space: nowrap; 
-}
-.m-q-item.excluded { border-color: var(--m-error); color: var(--m-error); opacity: 0.6; text-decoration: line-through; background: rgba(255, 42, 109, 0.15); box-shadow: 0 0 10px rgba(255,42,109,0.2); }
 
 .m-credits-section { margin-top: 35px; padding-top: 25px; border-top: 1px solid rgba(255,255,255,0.15); display: flex; flex-direction: column; align-items: center; gap: 18px; }
 .m-faq-btn { width: 100%; padding: 14px; background: transparent; border: 1px dashed rgba(255,255,255,0.35); color: var(--m-text); border-radius: 12px; font-family: 'Rajdhani', sans-serif; font-weight: 700; display: flex; justify-content: center; align-items: center; gap: 10px; transition: all 0.2s; box-shadow: var(--m-glow); }
@@ -503,14 +509,22 @@ const mobileHTML = `
                     </div>
                 </div>
 
-                <div class="m-card">
-                    <div class="m-card-header"><i class="fas fa-filter m-card-icon" style="color:var(--m-error)"></i> Filtro Qualità</div>
+                <div class="m-card-quality">
+                    <div class="m-card-header"><i class="fas fa-filter m-card-icon" style="color:var(--m-error)"></i> FILTRO QUALITÀ</div>
                     <p style="font-size:0.85rem; color:#fff; margin-bottom:10px; font-weight:300;">Tocca per <b>ESCLUDERE</b> le risoluzioni:</p>
                     <div class="m-q-grid">
-                        <div class="m-q-item" id="mq-4k" onclick="toggleFilter('mq-4k')">4K UHD</div>
-                        <div class="m-q-item" id="mq-1080" onclick="toggleFilter('mq-1080')">1080p</div>
-                        <div class="m-q-item" id="mq-720" onclick="toggleFilter('mq-720')">720p</div>
-                        <div class="m-q-item" id="mq-sd" onclick="toggleFilter('mq-sd')">SD/CAM</div>
+                        <div class="m-q-item" id="mq-4k" onclick="toggleFilter('mq-4k')">
+                            <i class="fas fa-star"></i> 4K UHD
+                        </div>
+                        <div class="m-q-item" id="mq-1080" onclick="toggleFilter('mq-1080')">
+                            <i class="fas fa-check-circle"></i> 1080p
+                        </div>
+                        <div class="m-q-item" id="mq-720" onclick="toggleFilter('mq-720')">
+                            <i class="fas fa-compress"></i> 720p
+                        </div>
+                        <div class="m-q-item" id="mq-sd" onclick="toggleFilter('mq-sd')">
+                            <i class="fas fa-video-slash"></i> SD/CAM
+                        </div>
                     </div>
                 </div>
 
