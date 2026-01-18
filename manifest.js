@@ -1,7 +1,7 @@
 function getManifest() {
     return {
         id: "org.corsaro.brain.v2",
-        version: "2.0.0",
+        version: "2.1.0",
         name: "Leviathan",
         description: "Motore di ricerca parallelo ad alte prestazioni, ottimizzato per i contenuti italiani. Include integrazione StreamingCommunity e supporto nativo Debrid per garantire streaming 4K/HDR fluido e senza buffering.",
         logo: "https://i.ibb.co/jvTQLbjb/Gemini-Generated-Image-51j2ce51j2ce51j2-1.png",
