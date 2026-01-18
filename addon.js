@@ -1438,41 +1438,28 @@ app.get("/:conf/manifest.json", (req, res) => {
         // --- STILE & PERSONALIZZAZIONE ---
         
         if (isRD) {
-            // Opzione 1: Stile "Fulmine" (Veloce)
             manifest.name = "Leviathan ⚡ RD";
-            
-            // Modifica descrizione per confermare l'attivazione
-            manifest.description = "✅ Real-Debrid Attivo • " + manifest.description;
-            
-            // ID univoco: Permette di installare sia versione RD che TB insieme
             manifest.id += ".rd"; 
         } 
         else if (isTB) {
-            // Opzione 2: Stile "Box" (Cloud)
             manifest.name = "Leviathan 📦 TorBox";
-            
-            manifest.description = "✅ TorBox Attivo • " + manifest.description;
             manifest.id += ".tb";
         } 
         else if (isAD) {
-            // Opzione 3: Stile "AllDebrid"
             manifest.name = "Leviathan 🦅 AllDebrid";
-            
-            manifest.description = "✅ AllDebrid Attivo • " + manifest.description;
             manifest.id += ".ad";
         }
         else {
-            // Nessun servizio configurato (o solo Web)
-            manifest.name = "Leviathan ⚠️ No-Debrid";
-            manifest.description = "⚠️ Modalità limitata (Solo Web/P2P) • " + manifest.description;
+            // Caso Web / Nessun Debrid
+            // Sostituito "No-Debrid" con "Web" professionale
+            manifest.name = "Leviathan 🌐 Web";
+            
+            // Opzionale: aggiungi un suffisso all'ID per separarlo dalle versioni Debrid
+            manifest.id += ".web";
         }
-
-        // Aggiungi versione al nome per renderlo più tecnico (opzionale)
-        // manifest.name += ` v${manifest.version}`;
 
     } catch (e) {
         console.error("Errore personalizzazione manifest:", e);
-        // In caso di errore, restituisce il manifest base senza rompere nulla
     }
 
     res.json(manifest);
