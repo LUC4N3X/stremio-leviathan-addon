@@ -9,7 +9,7 @@ const mobileCSS = `
     --m-surface-border: rgba(0, 242, 255, 0.25);
     --m-text: #e0f7fa;
     --m-dim: #7a9ab5; 
-    --m-error: #ff3366;       /* Rosso Tech per Errori/Esclusioni */
+    --m-error: #ff3366;       /* Rosso Tech */
     --safe-bottom: env(safe-area-inset-bottom);
     --m-glow: 0 0 12px rgba(0, 242, 255, 0.4); 
     --m-shadow-deep: 0 8px 32px rgba(0,0,0,0.6); 
@@ -164,50 +164,52 @@ body {
     box-shadow: 0 0 20px rgba(0, 242, 255, 0.05);
     backdrop-filter: blur(15px);
 }
-.m-card-quality::before {
-    content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
-    background: var(--m-secondary);
-    box-shadow: 0 0 15px var(--m-secondary);
-}
+.m-card-quality::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--m-secondary); box-shadow: 0 0 15px var(--m-secondary); }
 .m-card-quality .m-card-header { color: #fff; font-size: 1.2rem; }
+
+/* --- CARD SYSTEM (FIGHISSIMA) --- */
+.m-card-system {
+    background: linear-gradient(145deg, rgba(0, 15, 25, 0.9), rgba(0, 2, 5, 0.95)); /* Deep Abyss Blue */
+    border: 1px solid rgba(0, 242, 255, 0.3);
+    border-radius: 20px;
+    padding: 25px 22px;
+    margin-bottom: 20px;
+    position: relative;
+    box-shadow: 0 0 30px rgba(0, 242, 255, 0.1);
+    overflow: hidden;
+    backdrop-filter: blur(15px);
+}
+/* Side Border */
+.m-card-system::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+    background: linear-gradient(to bottom, #00f2ff, #00457C);
+    box-shadow: 0 0 20px rgba(0, 242, 255, 0.5);
+}
+.m-card-system .m-card-header {
+    font-size: 1.4rem; letter-spacing: 2px; color: #fff;
+    text-shadow: 0 0 15px rgba(0, 242, 255, 0.6);
+    margin-bottom: 15px;
+}
+.m-card-system .m-card-icon {
+    color: var(--m-primary);
+    filter: drop-shadow(0 0 10px var(--m-primary));
+}
+
 
 /* GRID QUALITÀ */
 .m-q-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 18px; }
-
 .m-q-item { 
-    background: rgba(0, 0, 0, 0.4); 
-    border: 1px solid rgba(255,255,255,0.1); 
-    color: var(--m-dim); 
-    padding: 15px; 
-    text-align: center; border-radius: 12px; 
+    background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.1); 
+    color: var(--m-dim); padding: 15px; text-align: center; border-radius: 12px; 
     font-size: 0.9rem; font-weight: 700; font-family: 'Rajdhani', sans-serif; 
-    transition: all 0.3s ease; 
-    display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 10px;
+    transition: all 0.3s ease; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 10px;
     position: relative; overflow: hidden;
 }
-
-/* STILE "INCLUSO" (ATTIVO - CIANO LEVIATHAN) */
-.m-q-item:not(.excluded) {
-    border-color: var(--m-primary); /* Ciano */
-    color: #fff;
-    background: linear-gradient(90deg, rgba(0, 242, 255, 0.15), transparent);
-    box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
-    text-shadow: 0 0 8px rgba(0, 242, 255, 0.6);
-}
-.m-q-item:not(.excluded) i { 
-    color: var(--m-primary); 
-    filter: drop-shadow(0 0 5px var(--m-primary)); 
-}
-
-/* STILE "ESCLUSO" (DISATTIVO - ROSSO TECH) */
-.m-q-item.excluded { 
-    border-color: rgba(255, 51, 102, 0.5); 
-    color: var(--m-error); 
-    opacity: 0.6; 
-    background: rgba(20, 5, 10, 0.5);
-    text-decoration: line-through;
-    box-shadow: none;
-}
+/* STILE "INCLUSO" */
+.m-q-item:not(.excluded) { border-color: var(--m-primary); color: #fff; background: linear-gradient(90deg, rgba(0, 242, 255, 0.15), transparent); box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); text-shadow: 0 0 8px rgba(0, 242, 255, 0.6); }
+.m-q-item:not(.excluded) i { color: var(--m-primary); filter: drop-shadow(0 0 5px var(--m-primary)); }
+/* STILE "ESCLUSO" */
+.m-q-item.excluded { border-color: rgba(255, 51, 102, 0.5); color: var(--m-error); opacity: 0.6; background: rgba(20, 5, 10, 0.5); text-decoration: line-through; box-shadow: none; }
 .m-q-item.excluded i { color: var(--m-error); filter: none; }
 
 
@@ -232,20 +234,8 @@ body {
 .m-paste-btn:hover { background: rgba(255,255,255,0.15); }
 
 /* TABS STANDARD */
-.m-tabs-row { 
-    display: flex; gap: 5px; 
-    margin-bottom: 22px; background: rgba(0,0,0,0.55); 
-    padding: 5px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.15); 
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.5); 
-}
-.m-tab-btn { 
-    flex: 1; text-align: center; 
-    padding: 12px 4px;
-    font-size: 0.9rem; color: var(--m-dim); font-weight: 700; 
-    border-radius: 12px; transition: all 0.25s ease; 
-    font-family: 'Rajdhani', sans-serif; text-transform: uppercase; 
-    display: flex; flex-direction: column; align-items: center; gap: 5px; 
-}
+.m-tabs-row { display: flex; gap: 5px; margin-bottom: 22px; background: rgba(0,0,0,0.55); padding: 5px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.15); box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+.m-tab-btn { flex: 1; text-align: center; padding: 12px 4px; font-size: 0.9rem; color: var(--m-dim); font-weight: 700; border-radius: 12px; transition: all 0.25s ease; font-family: 'Rajdhani', sans-serif; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 5px; }
 .m-tab-icon { font-size: 1.3rem; filter: grayscale(1) brightness(0.8); transition: all 0.25s; }
 .m-tab-btn.active { background: linear-gradient(135deg, rgba(0, 242, 255, 0.25), rgba(112, 0, 255, 0.15)); color: #fff; border: 1px solid var(--m-primary); box-shadow: var(--m-glow); text-shadow: 0 0 5px rgba(255,255,255,0.5); }
 .m-tab-btn.active .m-tab-icon { filter: grayscale(0) drop-shadow(0 0 6px #fff) brightness(1.2); }
@@ -528,8 +518,10 @@ const mobileHTML = `
                     </div>
                 </div>
 
-                <div class="m-card">
-                    <div class="m-card-header"><i class="fas fa-microchip m-card-icon"></i> Sistema</div>
+                <div class="m-card-system">
+                    <div class="m-card-header">
+                        <i class="fas fa-microchip m-card-icon"></i> SISTEMA
+                    </div>
                     
                     <div class="m-row">
                         <div class="m-label">
