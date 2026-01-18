@@ -453,6 +453,10 @@
         .spec-btn.active { background: linear-gradient(135deg, rgba(0, 242, 255, 0.1), transparent); color: var(--primary); text-shadow: 0 0 8px var(--primary); }
         .spec-btn.excluded { background: rgba(20, 0, 5, 0.6); border-color: var(--error); color: var(--error); opacity: 0.6; text-decoration: line-through; box-shadow: none; }
         
+        /* New Flux Styles */
+        #flux-info-box { transition: opacity 0.2s ease-in-out; }
+        .spec-btn i { margin-right: 8px; }
+
         /* --- CACHE CARD / SIZE CARD SPECIFIC --- */
         .cache-card { background: rgba(5, 20, 30, 0.6); border: 1px solid rgba(255, 51, 102, 0.3); border-radius: 12px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; transition: 0.3s; }
         .cache-card:hover { border-color: var(--amber); box-shadow: 0 0 15px rgba(255, 153, 0, 0.15); }
@@ -760,20 +764,39 @@
                     <div class="filters-container">
                         
                         <div class="spectrum-container" style="border-color: var(--secondary); background: linear-gradient(135deg, rgba(0, 5, 10, 0.6), rgba(112, 0, 255, 0.05)); margin-bottom: 20px;">
-                            <div class="spectrum-header" style="color: var(--secondary);">
-                                <span style="display: flex; align-items: center; gap: 10px;">
-                                    <i class="fas fa-sort-amount-up"></i> FLUX PRIORITY
-                                </span>
-                                <span class="spectrum-desc">Scegli il criterio principale per ordinare la lista dei risultati.</span>
+                            
+                           <div class="spectrum-header" style="color: var(--secondary); border-bottom: 1px solid rgba(112, 0, 255, 0.2); padding-bottom: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: flex-end;">
+    <span style="display: flex; align-items: center; gap: 10px; font-size: 1.2rem; white-space: nowrap;">
+        <i class="fas fa-network-wired"></i> FLUX PRIORITY
+    </span>
+    <span class="spectrum-desc" style="margin:0; text-align:right; font-size: 0.85rem; opacity: 0.7;">
+        Scegli come ordinare i risultati.
+    </span>
+</div>
+
+                            <div class="spectrum-grid" style="grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px;">
+                                <div class="spec-btn active" id="sort_balanced" onclick="setSortMode('balanced')" style="border-color: var(--secondary);">
+                                    🦑 LEVIATHAN
+                                </div>
+                                <div class="spec-btn" id="sort_resolution" onclick="setSortMode('resolution')" style="border-color: var(--secondary);">
+                                    <i class="fas fa-eye"></i> RISOLUZIONE
+                                </div>
+                                <div class="spec-btn" id="sort_size" onclick="setSortMode('size')" style="border-color: var(--secondary);">
+                                    <i class="fas fa-hdd"></i> BITRATE
+                                </div>
                             </div>
-                            <div class="spectrum-grid" style="grid-template-columns: repeat(3, 1fr);">
-                                <div class="spec-btn active" id="sort_balanced" onclick="setSortMode('balanced')" style="border-color: var(--secondary); color: #fff;">🦑 LEVIATHAN</div>
-                                <div class="spec-btn" id="sort_resolution" onclick="setSortMode('resolution')" style="border-color: var(--secondary); color: var(--text-dim);">💎 QUALITY</div>
-                                <div class="spec-btn" id="sort_size" onclick="setSortMode('size')" style="border-color: var(--secondary); color: var(--text-dim);">💾 SIZE</div>
+                            
+                            <div id="flux-info-box" style="background: rgba(0,0,0,0.4); border-left: 3px solid var(--secondary); padding: 12px; border-radius: 0 8px 8px 0;">
+                                <div id="flux-title" style="color: #fff; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 4px; text-transform: uppercase;">
+                                    <i class="fas fa-info-circle"></i> MODALITÀ: LEVIATHAN (Consigliata)
+                                </div>
+                                <div id="flux-desc" style="color: var(--text-dim); font-size: 0.9rem; line-height: 1.4;">
+                                    L'algoritmo standard di Leviathan. Cerca il bilanciamento perfetto tra qualità, popolarità del file e velocità. Ideale per l'uso quotidiano.
+                                </div>
                             </div>
+
                             <input type="hidden" id="sortMode" value="balanced">
                         </div>
-
                         <div class="cache-card" id="sizeModule" style="border-color: rgba(255, 153, 0, 0.3);">
                             <div class="gate-left" style="width: 100%;">
                                 <i class="fas fa-weight-hanging cache-icon" style="color: #ff9900;"></i>
@@ -986,22 +1009,52 @@
         let currentService = 'rd';
         let currentSCQuality = 'all';
 
-        // --- LOGICA ORDINAMENTO (FLUX PRIORITY) ---
+        // --- LOGICA ORDINAMENTO (FLUX PRIORITY) AGGIORNATA ---
         function setSortMode(mode) {
             document.getElementById('sortMode').value = mode;
-            // Reset visuale
+            
+            // Definizioni dei testi per ogni modalità
+            const infoData = {
+                'balanced': {
+                    title: "MODALITÀ: LEVIATHAN (Consigliata)",
+                    desc: "L'algoritmo standard di Leviathan. Cerca il bilanciamento perfetto tra qualità, popolarità del file e velocità. Ideale per l'uso quotidiano."
+                },
+                'resolution': {
+                    title: "MODALITÀ: PRIORITÀ RISOLUZIONE",
+                    desc: "Gerarchia visiva rigida. I risultati 4K appariranno sempre per primi, seguiti dai 1080p e infine 720p, indipendentemente dalla grandezza del file."
+                },
+                'size': {
+                    title: "MODALITÀ: PRIORITÀ BITRATE (PESO)",
+                    desc: "Ordina per grandezza del file (dal più grande al più piccolo). Ideale per chi vuole il massimo bitrate possibile e ha una connessione molto veloce."
+                }
+            };
+
+            // Reset visuale pulsanti
             ['balanced', 'resolution', 'size'].forEach(m => {
                 const btn = document.getElementById('sort_' + m);
                 if (m === mode) {
                     btn.classList.add('active');
                     btn.style.color = "#fff";
                     btn.style.boxShadow = "0 0 15px rgba(112, 0, 255, 0.3)";
+                    btn.style.background = "linear-gradient(135deg, rgba(112, 0, 255, 0.2), transparent)";
                 } else {
                     btn.classList.remove('active');
                     btn.style.color = "var(--text-dim)";
                     btn.style.boxShadow = "none";
+                    btn.style.background = "rgba(0, 242, 255, 0.05)";
                 }
             });
+
+            // Aggiornamento Testo Spiegazione con piccola animazione
+            const infoBox = document.getElementById('flux-info-box');
+            if(infoBox) {
+                infoBox.style.opacity = '0.5';
+                setTimeout(() => {
+                    document.getElementById('flux-title').innerHTML = '<i class="fas fa-info-circle"></i> ' + infoData[mode].title;
+                    document.getElementById('flux-desc').innerText = infoData[mode].desc;
+                    infoBox.style.opacity = '1';
+                }, 150);
+            }
         }
 
         function toggleSpectrum(id) {
@@ -1253,8 +1306,8 @@
             
             // Testo Priority
             let sortText = "LEVIATHAN (Balanced)";
-            if(c.sort === 'resolution') sortText = "QUALITÀ (4K/FHD)";
-            if(c.sort === 'size') sortText = "DIMENSIONE (Bitrate)";
+            if(c.sort === 'resolution') sortText = "RISOLUZIONE (4K/FHD)";
+            if(c.sort === 'size') sortText = "BITRATE (Peso)";
 
             list.innerHTML = `
                 <li>Servizio Debrid <span>${c.service.toUpperCase()}</span></li>
