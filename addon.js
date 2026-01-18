@@ -1031,6 +1031,43 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   // Ranking finale
   let rankedList = rankAndFilterResults(cleanResults, meta, config);
 
+  // --- NUOVO: FLUX PRIORITY SORTING ---
+  // Leggiamo il parametro sort (assicurati che arrivi dal config)
+  const sortMode = config.sort || (config.filters && config.filters.sort) || 'balanced';
+  
+  if (sortMode !== 'balanced') {
+      logger.info(`🔄 [SORT] Riordinamento attivo: ${sortMode.toUpperCase()}`);
+      
+      rankedList.sort((a, b) => {
+          // Helper per convertire size in numero
+          const sizeA = a._size || a.sizeBytes || 0;
+          const sizeB = b._size || b.sizeBytes || 0;
+          
+          if (sortMode === 'size') {
+              // Vince il file più grande
+              return sizeB - sizeA;
+          }
+          
+          if (sortMode === 'resolution') {
+              // 4K > 1080p > 720p > SD
+              const getResScore = (title) => {
+                  const t = title.toLowerCase();
+                  if (/2160p|4k|uhd/.test(t)) return 40;
+                  if (/1080p|fhd/.test(t)) return 30;
+                  if (/720p|hd/.test(t)) return 20;
+                  return 10;
+              };
+              const scoreA = getResScore(a.title);
+              const scoreB = getResScore(b.title);
+              
+              if (scoreA !== scoreB) return scoreB - scoreA; // Prima la risoluzione più alta
+              return sizeB - sizeA; // A parità di risoluzione, vince il file più grande
+          }
+          return 0;
+      });
+  }
+  // -------------------------------------
+
   if (config.filters && config.filters.maxPerQuality) {
       rankedList = filterByQualityLimit(rankedList, config.filters.maxPerQuality);
   }
