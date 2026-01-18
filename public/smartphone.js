@@ -179,7 +179,7 @@ body {
 .m-card-quality::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--m-secondary); box-shadow: 0 0 15px var(--m-secondary); }
 .m-card-quality .m-card-header { color: #fff; font-size: 1.2rem; }
 
-/* --- CARD SYSTEM (FIGHISSIMA) --- */
+/* --- CARD SYSTEM --- */
 .m-card-system {
     background: linear-gradient(145deg, rgba(0, 15, 25, 0.9), rgba(0, 2, 5, 0.95)); /* Deep Abyss Blue */
     border: 1px solid rgba(0, 242, 255, 0.3);
@@ -191,20 +191,50 @@ body {
     overflow: hidden;
     backdrop-filter: blur(15px);
 }
-/* Side Border */
 .m-card-system::before {
     content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
     background: linear-gradient(to bottom, #00f2ff, #00457C);
     box-shadow: 0 0 20px rgba(0, 242, 255, 0.5);
 }
-.m-card-system .m-card-header {
-    font-size: 1.4rem; letter-spacing: 2px; color: #fff;
-    text-shadow: 0 0 15px rgba(0, 242, 255, 0.6);
-    margin-bottom: 15px;
+.m-card-system .m-card-header { font-size: 1.4rem; letter-spacing: 2px; color: #fff; text-shadow: 0 0 15px rgba(0, 242, 255, 0.6); margin-bottom: 15px; }
+.m-card-system .m-card-icon { color: var(--m-primary); filter: drop-shadow(0 0 10px var(--m-primary)); }
+
+/* --- CARD MEDIAFLOW (STEALTH REDESIGN) --- */
+.m-card-network {
+    background: linear-gradient(165deg, #0a0510 0%, #050208 100%);
+    border: 1px solid rgba(170, 0, 255, 0.25);
+    border-radius: 20px; padding: 25px 22px; margin-bottom: 20px; position: relative;
+    box-shadow: 0 0 25px rgba(0,0,0,0.8); overflow: hidden; backdrop-filter: blur(15px);
 }
-.m-card-system .m-card-icon {
-    color: var(--m-primary);
-    filter: drop-shadow(0 0 10px var(--m-primary));
+.m-card-network::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--m-secondary), transparent); opacity: 0.7;
+    box-shadow: 0 0 10px var(--m-secondary);
+}
+.m-card-network .m-card-header {
+    font-size: 1.2rem; letter-spacing: 1px; color: #fff; margin-bottom: 18px;
+    display: flex; align-items: center; text-shadow: 0 0 10px rgba(170, 0, 255, 0.4);
+}
+
+.m-ghost-zone {
+    margin-top: 18px; padding: 15px;
+    border: 1px solid rgba(255,255,255,0.08); border-radius: 14px;
+    background: rgba(255,255,255,0.02); transition: all 0.35s ease;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.m-ghost-zone.active {
+    border-color: rgba(170, 0, 255, 0.5);
+    background: linear-gradient(90deg, rgba(170, 0, 255, 0.08), transparent);
+    box-shadow: 0 0 20px rgba(170, 0, 255, 0.1);
+}
+.m-ghost-icon-box {
+    width: 36px; height: 36px; border-radius: 10px; background: rgba(0,0,0,0.4);
+    display: flex; align-items: center; justify-content: center; margin-right: 12px;
+    border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s;
+}
+.m-ghost-zone.active .m-ghost-icon-box {
+    background: var(--m-secondary); border-color: var(--m-secondary); color: #000;
+    box-shadow: 0 0 12px var(--m-secondary);
 }
 
 
@@ -611,24 +641,34 @@ const mobileHTML = `
             </div>
 
             <div id="page-network" class="m-page">
-                <div class="m-card" style="border-color: rgba(112,0,255,0.4)">
-                    <div class="m-card-header"><i class="fas fa-network-wired m-card-icon" style="color:var(--m-secondary)"></i> MEDIAFLOW PROXY</div>
-                    <p style="font-size:0.8rem; color:var(--m-dim); margin-bottom:15px; line-height:1.4;">Bridge essenziale per <b>GuardaHD/GuardaSerie</b> e per la protezione IP <b>Debrid Ghost</b>.</p>
+                <div class="m-card-network">
+                    <div class="m-card-header"><i class="fas fa-network-wired" style="color:var(--m-secondary); margin-right:12px; font-size:1.3rem;"></i> MEDIAFLOW PROXY</div>
+                    <p style="font-size:0.85rem; color:var(--m-dim); margin-bottom:20px; line-height:1.4; font-weight:300;">Bridge essenziale per <b>GuardaHD/GuardaSerie</b> e per la protezione IP <b>Debrid Ghost</b>.</p>
                     
-                    <div style="background:rgba(0,0,0,0.5); padding:10px; border-radius:12px; border:1px dashed rgba(255,255,255,0.1);">
-                        <div class="m-input-group" style="margin-bottom:10px;">
-                            <input type="text" id="m-mfUrl" class="m-input" placeholder="URL Server Proxy">
-                            <div class="m-paste-btn" onclick="pasteTo('m-mfUrl')"><i class="fas fa-paste"></i> PASTE</div>
-                        </div>
-                        <div class="m-input-group" style="margin-bottom:0;">
-                            <input type="password" id="m-mfPass" class="m-input" placeholder="Password (Opzionale)">
-                        </div>
+                    <div class="m-input-group">
+                        <input type="text" id="m-mfUrl" class="m-input" placeholder="URL Server Proxy" style="border-color:rgba(170,0,255,0.3); padding-left:45px;">
+                        <i class="fas fa-server" style="position:absolute; left:16px; top:20px; color:rgba(170,0,255,0.6);"></i>
+                        <div class="m-paste-btn" onclick="pasteTo('m-mfUrl')" style="border-color:rgba(170,0,255,0.3); color:var(--m-secondary);"><i class="fas fa-paste"></i> PASTE</div>
+                    </div>
+                    <div class="m-input-group" style="margin-bottom:0;">
+                         <input type="password" id="m-mfPass" class="m-input" placeholder="Password (Opzionale)" style="border-color:rgba(170,0,255,0.3); padding-left:45px;">
+                         <i class="fas fa-lock" style="position:absolute; left:16px; top:20px; color:rgba(170,0,255,0.6);"></i>
                     </div>
                     
-                    <div class="m-row" style="border-top:1px dashed rgba(255,255,255,0.1); padding-top:15px; margin-top:15px;">
-                        <div class="m-label"><h4>Debrid Ghost <span class="m-status-text" id="st-ghost">OFF</span></h4><p>Maschera IP tramite Proxy</p></div>
-                        <label class="m-switch"><input type="checkbox" id="m-proxyDebrid" onchange="updateStatus('m-proxyDebrid','st-ghost')"><span class="m-slider" style="border-color:var(--m-secondary)"></span></label>
+                    <div class="m-ghost-zone" id="ghost-zone-box">
+                        <div style="display:flex; align-items:center;">
+                            <div class="m-ghost-icon-box"><i class="fas fa-user-shield"></i></div>
+                            <div>
+                                <h4 style="margin:0; font-family:'Rajdhani'; font-size:1rem; color:#fff;">GHOST SHELL</h4>
+                                <p style="margin:3px 0 0; font-size:0.75rem; color:var(--m-dim);">Maschera IP Reale</p>
+                            </div>
+                        </div>
+                        <label class="m-switch">
+                            <input type="checkbox" id="m-proxyDebrid" onchange="updateGhostVisuals()">
+                            <span class="m-slider m-slider-purple"></span>
+                        </label>
                     </div>
+
                 </div>
             </div>
         </div> 
@@ -886,6 +926,14 @@ function setSortMode(mode) {
     }
 }
 
+function updateGhostVisuals() {
+    const chk = document.getElementById('m-proxyDebrid').checked;
+    const box = document.getElementById('ghost-zone-box');
+    if(chk) box.classList.add('active');
+    else box.classList.remove('active');
+    if(navigator.vibrate) navigator.vibrate(15);
+}
+
 function toggleFilter(id) { document.getElementById(id).classList.toggle('excluded'); }
 
 function openFaq() { const m = document.getElementById('m-faq-modal'); m.classList.add('show'); }
@@ -972,8 +1020,10 @@ function loadMobileConfig() {
             updateStatus('m-enableGhd', 'st-ghd');
             updateStatus('m-enableGs', 'st-gs');
             updateStatus('m-allowEng', 'st-eng');
-            updateStatus('m-proxyDebrid', 'st-ghost');
             updateStatus('m-aioMode', 'st-aio');
+            // MediaFlow logic separate
+            updateGhostVisuals();
+
             toggleScOptions();
             checkWebPriorityVisibility(); 
         }
