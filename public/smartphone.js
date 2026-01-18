@@ -2,9 +2,9 @@ const mobileCSS = `
 :root {
     --m-bg: #000000;
     --m-primary: #00f2ff;     /* Ciano Leviathan */
-    --m-secondary: #5e17eb;   /* Deep Viola */
+    --m-secondary: #aa00ff;   /* Viola Elettrico */
     --m-accent: #b026ff;      
-    --m-amber: #ff9900;       
+    --m-amber: #ff9900;       /* Arancio/Oro per Size */
     --m-surface: rgba(10, 15, 25, 0.85); 
     --m-surface-border: rgba(0, 242, 255, 0.25);
     --m-text: #e0f7fa;
@@ -141,13 +141,13 @@ body {
 
 /* --- CARD FLUX PRIORITY (FIGHISSIMA) --- */
 .m-card-flux {
-    background: linear-gradient(145deg, rgba(20, 0, 40, 0.85), rgba(5, 5, 10, 0.95));
-    border: 1px solid rgba(112, 0, 255, 0.4);
+    background: linear-gradient(145deg, rgba(15, 20, 30, 0.9), rgba(0, 0, 5, 0.95));
+    border: 1px solid rgba(0, 242, 255, 0.3);
     border-radius: 20px;
     padding: 25px 22px;
     margin-bottom: 20px;
     position: relative;
-    box-shadow: 0 0 25px rgba(112, 0, 255, 0.15), inset 0 0 40px rgba(112, 0, 255, 0.05);
+    box-shadow: 0 0 30px rgba(0, 242, 255, 0.1), inset 0 0 50px rgba(0, 242, 255, 0.05);
     overflow: hidden;
     backdrop-filter: blur(15px);
 }
@@ -155,22 +155,15 @@ body {
 .m-card-flux::before {
     content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
     background: linear-gradient(to bottom, var(--m-secondary), var(--m-primary));
-    box-shadow: 0 0 15px var(--m-secondary);
+    box-shadow: 0 0 15px var(--m-primary);
 }
 .m-card-flux .m-card-header {
-    font-size: 1.4rem; /* Titolo più grande */
+    font-size: 1.4rem;
     letter-spacing: 2px;
     color: #fff;
-    text-shadow: 0 0 10px rgba(112, 0, 255, 0.6);
+    text-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
     margin-bottom: 10px;
 }
-.m-card-flux .m-card-icon {
-    color: var(--m-primary);
-    filter: drop-shadow(0 0 8px var(--m-primary));
-}
-
-.m-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; color: #fff; font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 900; text-shadow: 0 0 5px rgba(255,255,255,0.3); }
-.m-card-icon { color: var(--m-primary); font-size: 1.3rem; filter: drop-shadow(0 0 6px var(--m-primary)); }
 
 /* INPUTS */
 .m-input-group { position: relative; margin-bottom: 18px; }
@@ -192,16 +185,16 @@ body {
 }
 .m-paste-btn:hover { background: rgba(255,255,255,0.15); }
 
-/* TABS */
+/* TABS STANDARD */
 .m-tabs-row { 
-    display: flex; gap: 5px; /* GAP RIDOTTO PER PIÙ SPAZIO */ 
+    display: flex; gap: 5px; 
     margin-bottom: 22px; background: rgba(0,0,0,0.55); 
     padding: 5px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.15); 
     box-shadow: inset 0 0 10px rgba(0,0,0,0.5); 
 }
 .m-tab-btn { 
     flex: 1; text-align: center; 
-    padding: 12px 4px; /* PADDING RIDOTTO PER EVITARE TESTO CRAMPED */
+    padding: 12px 4px;
     font-size: 0.9rem; color: var(--m-dim); font-weight: 700; 
     border-radius: 12px; transition: all 0.25s ease; 
     font-family: 'Rajdhani', sans-serif; text-transform: uppercase; 
@@ -211,14 +204,52 @@ body {
 .m-tab-btn.active { background: linear-gradient(135deg, rgba(0, 242, 255, 0.25), rgba(112, 0, 255, 0.15)); color: #fff; border: 1px solid var(--m-primary); box-shadow: var(--m-glow); text-shadow: 0 0 5px rgba(255,255,255,0.5); }
 .m-tab-btn.active .m-tab-icon { filter: grayscale(0) drop-shadow(0 0 6px #fff) brightness(1.2); }
 
-/* OVERRIDE PER FLUX CARD ACTIVE BUTTONS */
-.m-card-flux .m-tab-btn.active {
-    background: linear-gradient(135deg, var(--m-primary), var(--m-secondary));
-    box-shadow: 0 0 15px rgba(112, 0, 255, 0.4);
-    border-color: #fff;
-    color: #000;
+/* --- FLUX CARD BUTTONS - PERSONALIZZATI E COLORATI --- */
+.m-card-flux .m-tab-btn {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid transparent;
 }
-.m-card-flux .m-tab-btn.active .m-tab-icon { filter: brightness(0); /* Icona nera per contrasto */ }
+.m-card-flux .m-tab-icon {
+    font-size: 1.6rem; /* Icone più grandi */
+    filter: none; /* Rimuove grayscale */
+    margin-bottom: 4px;
+}
+
+/* LEVIATHAN ACTIVE */
+#sort-balanced.active {
+    border-color: var(--m-primary);
+    background: linear-gradient(180deg, rgba(0, 242, 255, 0.15), rgba(0,0,0,0));
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.3), inset 0 0 10px rgba(0, 242, 255, 0.1);
+    color: #fff;
+}
+#sort-balanced.active .m-tab-icon {
+    filter: drop-shadow(0 0 10px var(--m-primary));
+    transform: scale(1.1);
+}
+
+/* QUALITY ACTIVE */
+#sort-resolution.active {
+    border-color: var(--m-secondary);
+    background: linear-gradient(180deg, rgba(170, 0, 255, 0.15), rgba(0,0,0,0));
+    box-shadow: 0 0 15px rgba(170, 0, 255, 0.3), inset 0 0 10px rgba(170, 0, 255, 0.1);
+    color: #fff;
+}
+#sort-resolution.active .m-tab-icon {
+    filter: drop-shadow(0 0 10px var(--m-secondary));
+    transform: scale(1.1);
+}
+
+/* SIZE ACTIVE */
+#sort-size.active {
+    border-color: var(--m-amber);
+    background: linear-gradient(180deg, rgba(255, 153, 0, 0.15), rgba(0,0,0,0));
+    box-shadow: 0 0 15px rgba(255, 153, 0, 0.3), inset 0 0 10px rgba(255, 153, 0, 0.1);
+    color: #fff;
+}
+#sort-size.active .m-tab-icon {
+    filter: drop-shadow(0 0 10px var(--m-amber));
+    transform: scale(1.1);
+}
 
 
 @keyframes spin3D {
@@ -455,9 +486,15 @@ const mobileHTML = `
                     </div>
                     <p style="font-size:0.85rem; color:var(--m-dim); margin-bottom:15px; font-weight:300;">Scegli come ordinare i risultati.</p>
                     <div class="m-tabs-row" style="background:rgba(0,0,0,0.4);">
-                        <div class="m-tab-btn active" id="sort-balanced" onclick="setSortMode('balanced')"><span class="m-tab-icon">🦑</span> LEVIATHAN</div>
-                        <div class="m-tab-btn" id="sort-resolution" onclick="setSortMode('resolution')"><span class="m-tab-icon">💎</span> QUALITY</div>
-                        <div class="m-tab-btn" id="sort-size" onclick="setSortMode('size')"><span class="m-tab-icon">💾</span> SIZE</div>
+                        <div class="m-tab-btn active" id="sort-balanced" onclick="setSortMode('balanced')">
+                            <i class="fas fa-dragon m-tab-icon" style="color:var(--m-primary)"></i> LEVIATHAN
+                        </div>
+                        <div class="m-tab-btn" id="sort-resolution" onclick="setSortMode('resolution')">
+                            <i class="fas fa-gem m-tab-icon" style="color:var(--m-secondary)"></i> QUALITY
+                        </div>
+                        <div class="m-tab-btn" id="sort-size" onclick="setSortMode('size')">
+                            <i class="fas fa-hdd m-tab-icon" style="color:var(--m-amber)"></i> SIZE
+                        </div>
                     </div>
                     <div id="flux-desc-container" style="min-height: 60px; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; margin-top: 10px; border: 1px dashed rgba(255,255,255,0.1);">
                         <p id="flux-description" style="margin:0; font-size: 0.85rem; color: var(--m-dim); line-height: 1.4; transition: opacity 0.2s ease;">
