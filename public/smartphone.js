@@ -301,7 +301,7 @@ input:checked + .m-slider-amber:before { background-color: var(--m-amber); box-s
 .m-range::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--m-primary); box-shadow: 0 0 10px var(--m-primary); cursor: pointer; border: 2px solid #fff; }
 #m-sizeVal::-webkit-slider-thumb { background: var(--m-amber); box-shadow: 0 0 10px var(--m-amber); }
 
-/* --- CREDITS & DEV HUB (RE-DESIGN) --- */
+/* --- CREDITS & DEV HUB (FINAL) --- */
 .m-credits-section { 
     margin-top: 30px; 
     padding-top: 20px; 
@@ -311,7 +311,6 @@ input:checked + .m-slider-amber:before { background-color: var(--m-amber); box-s
     gap: 15px; 
 }
 
-/* FAQ Button (Style Refined) */
 .m-faq-btn { 
     width: 100%; 
     padding: 12px; 
@@ -339,13 +338,13 @@ input:checked + .m-slider-amber:before { background-color: var(--m-amber); box-s
 /* Dev Hub Container */
 .m-dev-hub {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     height: 55px;
 }
 
-/* Commander Tag (Left Side) */
+/* Developer Tag (Left Side) */
 .m-cmd-tag {
-    flex: 1;
+    flex: 1; /* Prende lo spazio rimanente */
     text-decoration: none;
     background: linear-gradient(90deg, rgba(0, 242, 255, 0.05), rgba(0,0,0,0.4));
     border: 1px solid rgba(0, 242, 255, 0.25);
@@ -369,31 +368,48 @@ input:checked + .m-slider-amber:before { background-color: var(--m-amber); box-s
 }
 
 .m-cmd-avatar-mini {
-    width: 34px; height: 34px; border-radius: 50%;
+    width: 36px; height: 36px; border-radius: 50%;
     border: 1px solid var(--m-primary);
     object-fit: cover;
     box-shadow: 0 0 8px rgba(0, 242, 255, 0.4);
 }
 .m-cmd-details { display: flex; flex-direction: column; justify-content: center; }
-.m-cmd-role { font-size: 0.6rem; color: var(--m-primary); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
-.m-cmd-nick { font-family: 'Rajdhani', sans-serif; font-size: 1rem; color: #fff; font-weight: 800; line-height: 1; }
+.m-cmd-role { font-size: 0.65rem; color: var(--m-primary); letter-spacing: 2px; text-transform: uppercase; font-weight: 800; opacity: 0.8; }
+.m-cmd-nick { 
+    font-family: 'Rajdhani', sans-serif; font-size: 1.05rem; color: #fff; font-weight: 800; line-height: 1; 
+    display: flex; align-items: center; gap: 8px;
+}
+/* GitHub Icon Animation */
+.m-git-icon { font-size: 1rem; color: #fff; transition: transform 0.3s; opacity: 0.7; }
+.m-cmd-tag:hover .m-git-icon { color: var(--m-primary); transform: rotate(360deg); opacity: 1; filter: drop-shadow(0 0 5px var(--m-primary)); }
 
-/* Donation Button (Right Side - Blue Coffee) */
+
+/* Donation Button (Right Side - Expanded for Clarity) */
 .m-coffee-btn {
     text-decoration: none;
-    width: 55px;
+    padding: 0 15px; /* Più largo per il testo */
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     background: rgba(10, 15, 25, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 12px;
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: var(--m-dim);
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
 }
-.m-coffee-btn i { transition: transform 0.3s ease; filter: drop-shadow(0 0 0 transparent); }
+
+/* Testo "SUPPORT" per chiarezza */
+.m-coffee-text {
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    color: var(--m-dim);
+    transition: color 0.3s;
+}
 
 .m-coffee-btn:hover {
     border-color: var(--m-primary);
@@ -401,14 +417,16 @@ input:checked + .m-slider-amber:before { background-color: var(--m-amber); box-s
     box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
 }
 .m-coffee-btn:hover i {
-    color: var(--m-primary); /* BLUE COFFEE */
-    transform: scale(1.2) rotate(-10deg);
+    color: var(--m-primary);
+    transform: scale(1.1) rotate(-10deg);
     filter: drop-shadow(0 0 8px var(--m-primary));
 }
-/* Subtle steam animation on hover */
+.m-coffee-btn:hover .m-coffee-text { color: #fff; }
+
+/* Subtle steam animation */
 @keyframes steam { 0% { opacity:0; transform: translateY(0); } 50% { opacity:1; } 100% { opacity:0; transform: translateY(-10px); } }
 .m-coffee-btn:hover::after {
-    content: '♥'; position: absolute; top: 8px; right: 8px; font-size: 8px; color: var(--m-primary);
+    content: '♥'; position: absolute; top: 6px; left: 50%; transform:translateX(-50%); font-size: 8px; color: var(--m-primary);
     animation: steam 1s infinite;
 }
 
@@ -467,9 +485,12 @@ const mobileHTML = `
                 <div id="m-ad-warn" class="m-ad-warning"><i class="fas fa-exclamation-triangle"></i> ATTENZIONE: AllDebrid funziona SOLO se hostato in LOCALE.</div>
 
                 <div class="m-terminal-card">
-                    <div class="m-terminal-label">
+                    <div class="m-terminal-label" style="justify-content:flex-start; gap:10px;">
+                        <div style="width:28px; height:28px; border-radius:6px; background:rgba(0,242,255,0.1); display:flex; align-items:center; justify-content:center;">
+                            <i class="fas fa-key" style="color:var(--m-primary); font-size:0.8rem;"></i>
+                        </div>
                         <span>Debrid API Key</span>
-                        <div class="m-status-dot"></div>
+                        <div class="m-status-dot" style="margin-left:auto;"></div>
                     </div>
                     <div style="position:relative;">
                         <input type="text" id="m-apiKey" class="m-terminal-input" placeholder="Inserisci la chiave API...">
@@ -482,9 +503,12 @@ const mobileHTML = `
                 </div>
 
                 <div class="m-terminal-card" style="padding: 15px 20px;">
-                    <div class="m-terminal-label">
+                    <div class="m-terminal-label" style="justify-content:flex-start; gap:10px;">
+                        <div style="width:28px; height:28px; border-radius:6px; background:rgba(176, 38, 255, 0.1); display:flex; align-items:center; justify-content:center;">
+                            <i class="fas fa-film" style="color:var(--m-accent); font-size:0.8rem;"></i>
+                        </div>
                         <span style="color:var(--m-accent)">TMDB API (Opzionale)</span>
-                        <div class="m-status-dot" style="background:#444;"></div>
+                        <div class="m-status-dot" style="background:#444; margin-left:auto;"></div>
                     </div>
                     <div style="position:relative;">
                         <input type="text" id="m-tmdb" class="m-terminal-input" placeholder="Chiave TMDB Personale" style="border-bottom-color: rgba(176, 38, 255, 0.3);">
@@ -492,7 +516,7 @@ const mobileHTML = `
                     </div>
                 </div>
 
-                <div class="m-modules-title">Sorgenti & Moduli</div>
+                <div class="m-modules-title">WEB SOURCES</div>
                 <div class="m-module-grid">
                     
                     <div class="m-module-wrapper">
@@ -566,13 +590,16 @@ const mobileHTML = `
                         <a href="https://github.com/LUC4N3X/stremio-leviathan-addon" target="_blank" class="m-cmd-tag">
                             <img src="https://i.ibb.co/gLkrjxXT/Whats-App-Image-2026-01-12-at-20-15-37.jpg" alt="Dev" class="m-cmd-avatar-mini">
                             <div class="m-cmd-details">
-                                <span class="m-cmd-role">COMMANDER</span>
-                                <span class="m-cmd-nick">LUC4N3X</span>
+                                <span class="m-cmd-role">LEAD DEVELOPER</span>
+                                <span class="m-cmd-nick">
+                                    LUC4N3X <i class="fab fa-github m-git-icon"></i>
+                                </span>
                             </div>
                         </a>
 
                         <a href="https://www.paypal.me/luc4nex" target="_blank" class="m-coffee-btn" title="Offri un Caffè">
                             <i class="fas fa-mug-hot"></i>
+                            <span class="m-coffee-text">DONATE</span>
                         </a>
                     </div>
 
