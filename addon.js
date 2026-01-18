@@ -1430,31 +1430,31 @@ app.get("/:conf/manifest.json", (req, res) => {
         const { conf } = req.params;
         const config = getConfig(conf);
         
-        // Rilevamento del servizio
-        const isRD = config.service === 'rd' || (config.rd && !config.service);
-        const isTB = config.service === 'tb' || (config.torbox && !config.service);
-        const isAD = config.service === 'ad';
+        // Rilevamento STRETTO del servizio (verifica se esiste la Key)
+        // Se config.service è 'rd' ma config.key è vuoto -> NON è RD.
+        const hasRDKey = (config.service === 'rd' && config.key) || config.rd;
+        const hasTBKey = (config.service === 'tb' && config.key) || config.torbox;
+        const hasADKey = (config.service === 'ad' && config.key) || config.alldebrid; // assuming fallback keyname
 
         // --- STILE & PERSONALIZZAZIONE ---
         
-        if (isRD) {
+        if (hasRDKey) {
             manifest.name = "Leviathan ⚡ RD";
             manifest.id += ".rd"; 
         } 
-        else if (isTB) {
-            manifest.name = "Leviathan 📦 TorBox";
+        else if (hasTBKey) {
+            // RICHIESTA UTENTE: Nome TB invece di TorBox
+            manifest.name = "Leviathan 📦 TB";
             manifest.id += ".tb";
         } 
-        else if (isAD) {
-            manifest.name = "Leviathan 🦅 AllDebrid";
+        else if (hasADKey) {
+            manifest.name = "Leviathan 🦅 AD";
             manifest.id += ".ad";
         }
         else {
-            // Caso Web / Nessun Debrid
+            // Caso Web / Nessun Debrid (Solo se nessuna Key è valida)
             // Sostituito "No-Debrid" con "Web" professionale
             manifest.name = "Leviathan 🌐 Web";
-            
-            // Opzionale: aggiungi un suffisso all'ID per separarlo dalle versioni Debrid
             manifest.id += ".web";
         }
 
