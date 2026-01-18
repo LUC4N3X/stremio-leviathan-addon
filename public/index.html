@@ -764,10 +764,10 @@
                                 <span style="display: flex; align-items: center; gap: 10px;">
                                     <i class="fas fa-sort-amount-up"></i> FLUX PRIORITY
                                 </span>
-                                <span class="spectrum-desc">Logica di ordinamento risultati in cima alla lista.</span>
+                                <span class="spectrum-desc">Scegli il criterio principale per ordinare la lista dei risultati.</span>
                             </div>
                             <div class="spectrum-grid" style="grid-template-columns: repeat(3, 1fr);">
-                                <div class="spec-btn active" id="sort_balanced" onclick="setSortMode('balanced')" style="border-color: var(--secondary); color: #fff;">⚖️ SMART</div>
+                                <div class="spec-btn active" id="sort_balanced" onclick="setSortMode('balanced')" style="border-color: var(--secondary); color: #fff;">🦑 LEVIATHAN</div>
                                 <div class="spec-btn" id="sort_resolution" onclick="setSortMode('resolution')" style="border-color: var(--secondary); color: var(--text-dim);">💎 QUALITY</div>
                                 <div class="spec-btn" id="sort_size" onclick="setSortMode('size')" style="border-color: var(--secondary); color: var(--text-dim);">💾 SIZE</div>
                             </div>
@@ -1252,7 +1252,7 @@
             let sizeText = c.filters.maxSizeGB ? `${c.filters.maxSizeGB} GB` : 'ILLIMITATO';
             
             // Testo Priority
-            let sortText = "SMART (Balanced)";
+            let sortText = "LEVIATHAN (Balanced)";
             if(c.sort === 'resolution') sortText = "QUALITÀ (4K/FHD)";
             if(c.sort === 'size') sortText = "DIMENSIONE (Bitrate)";
 
