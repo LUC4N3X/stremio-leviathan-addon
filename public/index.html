@@ -410,7 +410,6 @@
             padding: 12px 15px; margin-bottom: 10px; border-radius: 8px; animation: fadeInRow 0.3s ease;
         }
         @keyframes fadeInRow { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        .sub-row .control-title { font-size: 1rem; color: var(--text-dim); }
         .sub-indicator { border-left: 2px solid var(--primary); padding-left: 15px; }
 
         .sc-quality-container {
@@ -424,40 +423,6 @@
         .q-btn { flex: 1; padding: 8px 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-dim); text-align: center; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.8rem; cursor: pointer; border-radius: 6px; text-transform: uppercase; }
         .q-btn:hover { background: rgba(255,255,255,0.1); }
         .q-btn.active { background: rgba(112, 0, 255, 0.2); border-color: var(--secondary); color: #fff; box-shadow: 0 0 10px rgba(112, 0, 255, 0.3); }
-
-        /* --- DB / CACHE / SEARCH STYLES --- */
-        .db-card {
-            background: rgba(0, 10, 20, 0.8); border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 18px; padding: 25px; position: relative; overflow: hidden;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            margin-bottom: 20px;
-        }
-        .db-bg-anim {
-            position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: conic-gradient(from 0deg, transparent 0deg, transparent 60deg, var(--primary) 180deg, transparent 300deg);
-            opacity: 0; transition: opacity 0.5s; animation: rotateBg 4s linear infinite; pointer-events: none; mix-blend-mode: screen;
-        }
-        .db-card::before { content: ''; position: absolute; inset: 1px; background: rgba(2, 8, 12, 0.95); border-radius: 17px; z-index: 1; }
-        .db-content { position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
-        .db-info { flex: 1; min-width: 0; }
-        .db-header { display: flex; align-items: center; gap: 15px; margin-bottom: 8px; }
-        .db-icon-main { font-size: 1.8rem; color: var(--text-dim); transition: 0.4s; }
-        .db-title { font-family: 'Rajdhani', sans-serif; font-size: 1.5rem; font-weight: 800; letter-spacing: 2px; color: #fff; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
-        .db-desc { margin: 0; font-size: 0.95rem; color: var(--text-dim); line-height: 1.4; }
-        .db-status { display: inline-block; margin-left: 10px; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: rgba(255,255,255,0.1); color: #888; transition: 0.4s; letter-spacing: 1px; }
-
-        .db-card.active { border-color: var(--primary); box-shadow: 0 0 40px rgba(0, 242, 255, 0.15), inset 0 0 20px rgba(0, 242, 255, 0.05); transform: scale(1.02); }
-        .db-card.active .db-bg-anim { opacity: 0.3; }
-        .db-card.active .db-icon-main { color: var(--primary); filter: drop-shadow(0 0 10px var(--primary)); transform: scale(1.1); animation: pulse 1.5s infinite; }
-        .db-card.active .db-title { background: linear-gradient(90deg, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .db-card.active .db-status { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary); }
-
-        .db-switch { position: relative; display: inline-block; width: 60px; height: 34px; flex-shrink: 0; margin-left: 10px; }
-        .db-switch input { opacity: 0; width: 0; height: 0; }
-        .db-switch .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); transition: .4s; border-radius: 34px; }
-        .db-switch .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 3px; top: 50%; transform: translateY(-50%); background-color: #b0b0b0; transition: .4s; border-radius: 50%; }
-        .db-switch input:checked + .slider { background-color: rgba(0, 242, 255, 0.2); border-color: var(--primary); }
-        .db-switch input:checked + .slider:before { transform: translate(26px, -50%); background-color: var(--primary); box-shadow: 0 0 10px var(--primary); }
 
         /* --- GATE CARD --- */
         .gate-card { background: rgba(10, 0, 20, 0.6); border: 1px solid rgba(112, 0, 255, 0.2); border-radius: 12px; padding: 15px 25px; display: flex; align-items: center; justify-content: space-between; transition: 0.4s ease; position: relative; overflow: hidden; margin-bottom: 20px; }
@@ -587,9 +552,6 @@
             .glass-panel, .logo-container, .modal-backdrop { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgba(0, 5, 10, 0.98) !important; }
             .light-rays, .wave-container { display: none !important; }
             .action-area { flex-direction: column; }
-            .db-content { flex-direction: column; text-align: center; }
-            .db-header { justify-content: center; }
-            .db-status { display: block; margin: 10px auto 0; width: fit-content; }
             .gate-card { flex-direction: column; gap: 15px; align-items: stretch; text-align: center; padding: 20px !important; }
             .gate-left { flex-direction: column; gap: 10px; width: 100%; justify-content: center; }
             .gate-controls { justify-content: center; width: 100%; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
@@ -797,27 +759,19 @@
             
                     <div class="filters-container">
                         
-                        <div class="db-card" id="dbCard">
-                            <div class="db-bg-anim"></div>
-                            <div class="db-content">
-                                <div class="db-info">
-                                    <div class="db-header">
-                                        <i class="fas fa-bolt db-icon-main"></i>
-                                        <span class="db-title">DATABASE OVERDRIVE</span>
-                                    </div>
-                                    <p class="db-desc">
-                                        Disabilita la ricerca esterna e gli scraper. 
-                                        Viene interrogato <u>ESCLUSIVAMENTE</u> il Database interno di Leviathan. 
-                                        Velocità massima, ma risultati limitati all'indice centrale.
-                                        <span class="db-status" id="dbStatusText">STANDBY</span>
-                                    </p>
-                                </div>
-                                <div class="db-action">
-                                    <label class="db-switch"> <input type="checkbox" id="dbOnly" onchange="toggleDbCard()">
-                                        <span class="slider"></span>
-                                    </label>
-                                </div>
+                        <div class="spectrum-container" style="border-color: var(--secondary); background: linear-gradient(135deg, rgba(0, 5, 10, 0.6), rgba(112, 0, 255, 0.05)); margin-bottom: 20px;">
+                            <div class="spectrum-header" style="color: var(--secondary);">
+                                <span style="display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-sort-amount-up"></i> FLUX PRIORITY
+                                </span>
+                                <span class="spectrum-desc">Logica di ordinamento risultati in cima alla lista.</span>
                             </div>
+                            <div class="spectrum-grid" style="grid-template-columns: repeat(3, 1fr);">
+                                <div class="spec-btn active" id="sort_balanced" onclick="setSortMode('balanced')" style="border-color: var(--secondary); color: #fff;">⚖️ SMART</div>
+                                <div class="spec-btn" id="sort_resolution" onclick="setSortMode('resolution')" style="border-color: var(--secondary); color: var(--text-dim);">💎 QUALITY</div>
+                                <div class="spec-btn" id="sort_size" onclick="setSortMode('size')" style="border-color: var(--secondary); color: var(--text-dim);">💾 SIZE</div>
+                            </div>
+                            <input type="hidden" id="sortMode" value="balanced">
                         </div>
 
                         <div class="cache-card" id="sizeModule" style="border-color: rgba(255, 153, 0, 0.3);">
@@ -1032,6 +986,24 @@
         let currentService = 'rd';
         let currentSCQuality = 'all';
 
+        // --- LOGICA ORDINAMENTO (FLUX PRIORITY) ---
+        function setSortMode(mode) {
+            document.getElementById('sortMode').value = mode;
+            // Reset visuale
+            ['balanced', 'resolution', 'size'].forEach(m => {
+                const btn = document.getElementById('sort_' + m);
+                if (m === mode) {
+                    btn.classList.add('active');
+                    btn.style.color = "#fff";
+                    btn.style.boxShadow = "0 0 15px rgba(112, 0, 255, 0.3)";
+                } else {
+                    btn.classList.remove('active');
+                    btn.style.color = "var(--text-dim)";
+                    btn.style.boxShadow = "none";
+                }
+            });
+        }
+
         function toggleSpectrum(id) {
             const el = document.getElementById(id);
             if (el.classList.contains('excluded')) {
@@ -1080,19 +1052,6 @@
             currentSCQuality = val;
             document.querySelectorAll('.q-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById('btnQ_' + val).classList.add('active');
-        }
-
-        function toggleDbCard() {
-            const chk = document.getElementById('dbOnly');
-            const card = document.getElementById('dbCard');
-            const statusText = document.getElementById('dbStatusText');
-            if (chk.checked) {
-                card.classList.add('active');
-                statusText.innerText = "ONLINE ⚡";
-            } else {
-                card.classList.remove('active');
-                statusText.innerText = "STANDBY";
-            }
         }
 
         function toggleGate() {
@@ -1153,7 +1112,6 @@
                         document.getElementById('allowEng').checked = config.filters.allowEng || false;
                         document.getElementById('enableVix').checked = config.filters.enableVix || false;
                         document.getElementById('vixLast').checked = config.filters.vixLast || false;
-                        document.getElementById('dbOnly').checked = config.filters.dbOnly || false;
                         document.getElementById('enableGhd').checked = config.filters.enableGhd || false;
                         document.getElementById('enableGs').checked = config.filters.enableGs || false; 
 
@@ -1179,7 +1137,10 @@
                         
                         if (document.getElementById('allowEng').checked) document.getElementById('card_audio').classList.add('active');
                         if (document.getElementById('aiostreams_mode').checked) document.getElementById('card_aio').classList.add('active');
-                        toggleDbCard();
+                        
+                        // RECUPERO SORT
+                        if (config.sort) setSortMode(config.sort);
+                        else setSortMode('balanced');
                     }
                     checkWebVisibility(); // TRIGGER INIZIALE CORRETTO
                 }
@@ -1231,6 +1192,7 @@
                 service: currentService,
                 key: document.getElementById('apiKey').value.trim(),
                 tmdb: document.getElementById('tmdbKey').value.trim(),
+                sort: document.getElementById('sortMode').value,
                 aiostreams_mode: document.getElementById('aiostreams_mode').checked,
                 mediaflow: {
                     url: document.getElementById('mfUrl').value.trim().replace(/\/$/, ""),
@@ -1249,9 +1211,8 @@
                     enableGs: document.getElementById('enableGs').checked, 
                     vixLast: document.getElementById('vixLast').checked,
                     scQuality: currentSCQuality, 
-                    dbOnly: document.getElementById('dbOnly').checked,
                     maxPerQuality: finalMaxQuality,
-                    maxSizeGB: sizeVal > 0 ? sizeVal : null // NUOVO PARAMETRO
+                    maxSizeGB: sizeVal > 0 ? sizeVal : null 
                 }
             };
         }
@@ -1289,10 +1250,16 @@
 
             // Testo per il Limite GB
             let sizeText = c.filters.maxSizeGB ? `${c.filters.maxSizeGB} GB` : 'ILLIMITATO';
+            
+            // Testo Priority
+            let sortText = "SMART (Balanced)";
+            if(c.sort === 'resolution') sortText = "QUALITÀ (4K/FHD)";
+            if(c.sort === 'size') sortText = "DIMENSIONE (Bitrate)";
 
             list.innerHTML = `
                 <li>Servizio Debrid <span>${c.service.toUpperCase()}</span></li>
                 <li>Sorgenti Web <span>SC: ${scText} | GHD: ${ghdText} | GS: ${gsText}</span></li>
+                <li>Flux Priority <span>${sortText}</span></li>
                 <li>Proxy Bridge <span>${c.mediaflow.url ? 'CONFIGURATO' : 'NON ATTIVO'}</span></li>
                 <li>Proxy Ghost <span>${c.mediaflow.proxyDebrid ? 'ATTIVO' : 'NO'}</span></li>
                 <li>Limite Dimensione <span>${sizeText}</span></li>
