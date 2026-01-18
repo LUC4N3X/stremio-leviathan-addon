@@ -21,56 +21,62 @@ body {
     position: relative; width: 100%;
 }
 
-/* --- LEVIATHAN OCEAN FX --- */
+/* --- LEVIATHAN OCEAN FX (GPU OPTIMIZED) --- */
 
-/* 1. Base Abissale */
+/* 1. Base Abissale - Statico */
 .m-bg-layer { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -5; 
     background: radial-gradient(circle at 50% 10%, #0f1c30 0%, #020408 60%, #000000 100%);
-    will-change: transform;
+    transform: translateZ(0); /* Force GPU */
 }
 
-/* 2. Correnti Marine */
+/* 2. Correnti Marine - Optimized Transform */
 .m-ocean-flow {
     position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; z-index: -4;
     background: radial-gradient(ellipse at center, rgba(0, 242, 255, 0.03) 0%, transparent 60%);
     opacity: 0.6;
     animation: oceanSwell 15s infinite alternate ease-in-out;
     pointer-events: none;
+    will-change: transform, opacity;
+    transform: translateZ(0);
 }
 @keyframes oceanSwell {
-    0% { transform: translateY(0) scale(1); opacity: 0.4; }
-    100% { transform: translateY(-20px) scale(1.1); opacity: 0.7; }
+    0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.4; }
+    100% { transform: translate3d(0, -20px, 0) scale(1.1); opacity: 0.7; }
 }
 
-/* 3. Caustiche (Luce) */
+/* 3. Caustiche (Luce) - HEAVILY OPTIMIZED */
+/* Prima usava background-position (CPU), ora usa translate3d (GPU) */
 .m-caustics {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -4;
+    position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; z-index: -4;
     background-image: 
         repeating-linear-gradient(45deg, transparent 0, transparent 20px, rgba(0, 242, 255, 0.02) 20px, rgba(0, 242, 255, 0.02) 40px),
         repeating-linear-gradient(-45deg, transparent 0, transparent 20px, rgba(112, 0, 255, 0.02) 20px, rgba(112, 0, 255, 0.02) 40px);
-    background-size: 200% 200%;
-    animation: glimmer 20s linear infinite;
+    background-size: 100% 100%;
+    animation: glimmer 25s linear infinite; /* Rallentato leggermente per fluidità */
     pointer-events: none;
+    will-change: transform;
+    transform: translateZ(0);
 }
 @keyframes glimmer {
-    0% { background-position: 0% 0%; }
-    100% { background-position: 50% 50%; }
+    0% { transform: translate3d(0, 0, 0) rotate(0deg); }
+    100% { transform: translate3d(-20px, -20px, 0) rotate(2deg); }
 }
 
-/* 4. Bolle */
+/* 4. Bolle - Optimized */
 .m-bubbles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -3; pointer-events: none; }
 .bubble {
     position: absolute; bottom: -20px; background: rgba(0, 242, 255, 0.15); border-radius: 50%;
     box-shadow: 0 0 10px rgba(0, 242, 255, 0.1);
     animation: riseUp linear infinite;
     will-change: transform, opacity;
+    transform: translateZ(0); /* GPU */
 }
 @keyframes riseUp {
-    0% { transform: translateY(0) scale(1); opacity: 0; } 
+    0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0; } 
     20% { opacity: 0.6; }
     80% { opacity: 0.4; } 
-    100% { transform: translateY(-110vh) scale(1.5); opacity: 0; }
+    100% { transform: translate3d(0, -110vh, 0) scale(1.5); opacity: 0; }
 }
 
 /* --- LAYOUT --- */
@@ -82,6 +88,7 @@ body {
     display: flex; align-items: flex-end; justify-content: center;
     padding-bottom: 15px; color: var(--m-primary); z-index: 10;
     pointer-events: none; opacity: 0; transition: opacity 0.2s;
+    will-change: transform;
 }
 .m-ptr-icon {
     font-size: 1.5rem; transition: transform 0.2s;
@@ -102,7 +109,7 @@ body {
 
 .m-page { display: none; width: 100%; }
 .m-page.active { display: block; animation: fadeFast 0.3s ease-out; }
-@keyframes fadeFast { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeFast { from { opacity: 0; transform: translate3d(0, 10px, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
 
 /* HERO */
 .m-hero { text-align: center; padding: 25px 10px 15px 10px; display: flex; flex-direction: column; align-items: center; width: 100%; }
@@ -111,6 +118,7 @@ body {
     display: flex; align-items: center; justify-content: center;
     background: rgba(0,0,0,0.5); box-shadow: 0 0 30px rgba(0,242,255,0.2);
     backdrop-filter: blur(5px);
+    will-change: transform;
 }
 .m-logo-img { width: 90%; height: 90%; object-fit: contain; border-radius: 50%; animation: rotateLogo 60s linear infinite; filter: drop-shadow(0 0 10px var(--m-primary)); }
 @keyframes rotateLogo { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -145,6 +153,7 @@ body {
     border: 1px solid var(--m-surface-border); border-radius: 16px;
     padding: 20px; margin-bottom: 16px; position: relative;
     box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    /* No backdrop-filter on cards to save GPU on scroll */
 }
 .m-card.active-border { border-color: var(--m-primary); box-shadow: 0 0 20px rgba(0,242,255,0.15); background: rgba(10, 25, 35, 0.8); }
 .m-card-accent { border-color: rgba(176, 38, 255, 0.4); background: rgba(20, 10, 35, 0.8); }
@@ -398,6 +407,19 @@ const mobileHTML = `
             </div>
 
             <div id="page-filters" class="m-page">
+            
+                <div class="m-card m-card-accent" style="border-color: rgba(0, 242, 255, 0.5);">
+                    <div class="m-card-header">
+                        <i class="fas fa-sort-amount-up m-card-icon" style="color:#fff"></i> Flux Priority
+                    </div>
+                    <p style="font-size:0.85rem; color:#ccc; margin-bottom:15px;">Scegli il criterio principale per ordinare la lista dei risultati.</p>
+                    <div class="m-tabs-row" style="background:rgba(0,0,0,0.6);">
+                        <div class="m-tab-btn active" id="sort-balanced" onclick="setSortMode('balanced')"><span class="m-tab-icon">🦑</span> LEVIATHAN</div>
+                        <div class="m-tab-btn" id="sort-resolution" onclick="setSortMode('resolution')"><span class="m-tab-icon">💎</span> QUALITY</div>
+                        <div class="m-tab-btn" id="sort-size" onclick="setSortMode('size')"><span class="m-tab-icon">💾</span> SIZE</div>
+                    </div>
+                </div>
+
                 <div class="m-card">
                     <div class="m-card-header"><i class="fas fa-filter m-card-icon" style="color:var(--m-error)"></i> Filtro Qualità</div>
                     <p style="font-size:0.85rem; color:#fff; margin-bottom:10px; font-weight:300;">Tocca per <b>ESCLUDERE</b> le risoluzioni:</p>
@@ -422,18 +444,6 @@ const mobileHTML = `
                             <p>Cerca anche audio ENG</p>
                         </div>
                         <label class="m-switch"><input type="checkbox" id="m-allowEng" onchange="updateStatus('m-allowEng','st-eng')"><span class="m-slider"></span></label>
-                    </div>
-
-                    <div class="m-row">
-                        <div class="m-label">
-                            <h4>
-                                <i class="fas fa-bolt" style="color:var(--m-secondary)"></i>
-                                Database Mode 
-                                <span class="m-status-text" id="st-db">OFF</span>
-                            </h4>
-                            <p>Solo DB interno (Max Speed)</p>
-                        </div>
-                        <label class="m-switch"><input type="checkbox" id="m-dbOnly" onchange="updateStatus('m-dbOnly','st-db')"><span class="m-slider"></span></label>
                     </div>
 
                     <div class="m-row">
@@ -550,6 +560,7 @@ const mobileHTML = `
 
 let mCurrentService = 'rd';
 let mScQuality = 'all';
+let mSortMode = 'balanced';
 
 function createBubbles() {
     const container = document.getElementById('m-bubbles');
@@ -577,6 +588,7 @@ function initMobileInterface() {
     loadMobileConfig();
 }
 
+// --- OPTIMIZED PTR (REQUEST ANIMATION FRAME) ---
 function initPullToRefresh() {
     const content = document.querySelector('.m-content');
     const ptr = document.getElementById('m-ptr-indicator');
@@ -584,6 +596,7 @@ function initPullToRefresh() {
     let startY = 0;
     let pulling = false;
     let threshold = 80;
+    let rAF = null;
 
     content.addEventListener('touchstart', (e) => {
         if (content.scrollTop === 0) { startY = e.touches[0].pageY; pulling = true; }
@@ -593,13 +606,25 @@ function initPullToRefresh() {
         if (!pulling) return;
         const currentY = e.touches[0].pageY;
         const diff = currentY - startY;
+
         if (diff > 0 && content.scrollTop <= 0) {
-            ptr.style.opacity = Math.min(diff / 100, 1);
-            const move = Math.min(diff * 0.4, 80); 
-            ptr.style.transform = `translateY(${move}px)`;
-            icon.style.transform = `rotate(${move * 3}deg)`;
-            if (diff > threshold) { icon.classList.remove('fa-arrow-down'); icon.classList.add('fa-sync-alt'); } 
-            else { icon.classList.remove('fa-sync-alt'); icon.classList.add('fa-arrow-down'); }
+            // Usa requestAnimationFrame per non bloccare il thread principale
+            if (rAF) return;
+            rAF = requestAnimationFrame(() => {
+                ptr.style.opacity = Math.min(diff / 100, 1);
+                const move = Math.min(diff * 0.4, 80); 
+                ptr.style.transform = `translate3d(0, ${move}px, 0)`;
+                icon.style.transform = `rotate(${move * 3}deg)`;
+                
+                if (diff > threshold) { 
+                    icon.classList.remove('fa-arrow-down'); 
+                    icon.classList.add('fa-sync-alt'); 
+                } else { 
+                    icon.classList.remove('fa-sync-alt'); 
+                    icon.classList.add('fa-arrow-down'); 
+                }
+                rAF = null;
+            });
         }
     }, {passive: true});
 
@@ -608,14 +633,16 @@ function initPullToRefresh() {
         pulling = false;
         const currentY = e.changedTouches[0].pageY;
         const diff = currentY - startY;
+        
         if (diff > threshold && content.scrollTop <= 0) {
             ptr.classList.add('loading');
-            ptr.style.transform = `translateY(50px)`;
+            ptr.style.transform = `translate3d(0, 50px, 0)`;
             if (navigator.vibrate) navigator.vibrate(50);
             setTimeout(() => { location.reload(); }, 500);
         } else {
             ptr.style.transform = ''; ptr.style.opacity = 0;
         }
+        if(rAF) { cancelAnimationFrame(rAF); rAF = null; }
     });
 }
 
@@ -740,6 +767,16 @@ function setScQuality(val) {
     ['all','1080','720'].forEach(q => document.getElementById('mq-sc-'+q).classList.remove('active'));
     document.getElementById('mq-sc-' + val).classList.add('active');
 }
+// --- FLUX PRIORITY LOGIC ---
+function setSortMode(mode) {
+    mSortMode = mode;
+    ['balanced', 'resolution', 'size'].forEach(m => {
+        const btn = document.getElementById('sort-' + m);
+        if(m === mode) btn.classList.add('active');
+        else btn.classList.remove('active');
+    });
+}
+
 function toggleFilter(id) { document.getElementById(id).classList.toggle('excluded'); }
 
 function openFaq() { const m = document.getElementById('m-faq-modal'); m.classList.add('show'); }
@@ -776,6 +813,11 @@ function loadMobileConfig() {
 
             if(config.tmdb) document.getElementById('m-tmdb').value = config.tmdb;
             if(config.aiostreams_mode) document.getElementById('m-aioMode').checked = true;
+            
+            // LOAD SORT MODE
+            if(config.sort) setSortMode(config.sort);
+            else setSortMode('balanced');
+
             if(config.mediaflow) {
                 document.getElementById('m-mfUrl').value = config.mediaflow.url || "";
                 document.getElementById('m-mfPass').value = config.mediaflow.pass || "";
@@ -786,7 +828,7 @@ function loadMobileConfig() {
                 document.getElementById('m-enableGhd').checked = config.filters.enableGhd || false;
                 document.getElementById('m-enableGs').checked = config.filters.enableGs || false;
                 document.getElementById('m-allowEng').checked = config.filters.allowEng || false;
-                document.getElementById('m-dbOnly').checked = config.filters.dbOnly || false;
+                
                 
                 if(config.filters.vixLast) {
                     document.getElementById('m-vixLast').checked = true;
@@ -824,7 +866,6 @@ function loadMobileConfig() {
             updateStatus('m-enableGhd', 'st-ghd');
             updateStatus('m-enableGs', 'st-gs');
             updateStatus('m-allowEng', 'st-eng');
-            updateStatus('m-dbOnly', 'st-db');
             updateStatus('m-proxyDebrid', 'st-ghost');
             updateStatus('m-aioMode', 'st-aio');
             toggleScOptions();
@@ -844,6 +885,7 @@ function getMobileConfig() {
         service: mCurrentService,
         key: document.getElementById('m-apiKey').value.trim(),
         tmdb: document.getElementById('m-tmdb').value.trim(),
+        sort: mSortMode, 
         aiostreams_mode: document.getElementById('m-aioMode').checked,
         mediaflow: {
             url: document.getElementById('m-mfUrl').value.trim().replace(/\/$/, ""),
@@ -862,7 +904,6 @@ function getMobileConfig() {
             enableGs: document.getElementById('m-enableGs').checked,
             vixLast: document.getElementById('m-vixLast').checked,
             scQuality: mScQuality,
-            dbOnly: document.getElementById('m-dbOnly').checked,
             maxPerQuality: gateActive ? gateVal : 0,
             maxSizeGB: finalMaxSizeGB > 0 ? finalMaxSizeGB : null
         }
