@@ -1265,8 +1265,23 @@ app.get("/:conf/play_lazy/:service/:hash/:fileIdx", async (req, res) => {
         const apiKey = config.key || config.rd;
         if (!apiKey) return res.status(400).send("API Key mancante.");
 
-        // Aggiungiamo trackers per TorBox
-        const magnet = `magnet:?xt=urn:btih:${hash}&tr=udp://open.demonii.com:1337/announce&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://tracker.coppersurfer.tk:6969/announce&tr=udp://tracker.leechers-paradise.org:6969/announce`;
+        // --- TRACKERS AGGIORNATI PER RD/DEBRID ---
+        const trackers = [
+            "udp://tracker.opentrackr.org:1337/announce",
+            "udp://open.demonoid.ch:6969/announce",
+            "udp://open.demonii.com:1337/announce",
+            "udp://open.stealth.si:80/announce",
+            "udp://tracker.torrent.eu.org:451/announce",
+            "udp://tracker.therarbg.to:6969/announce",
+            "udp://tracker.doko.moe:6969/announce",
+            "udp://opentracker.i2p.rocks:6969/announce",
+            "udp://exodus.desync.com:6969/announce",
+            "udp://tracker.moeking.me:6969/announce"
+        ];
+        
+        // Costruiamo la stringa magnet con i tracker aggiornati
+        const trackerStr = trackers.map(tr => `&tr=${tr}`).join(""); 
+        const magnet = `magnet:?xt=urn:btih:${hash}${trackerStr}`;
 
         const item = {
             title: `Unknown Video (${hash})`,
