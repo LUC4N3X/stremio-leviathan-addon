@@ -62,7 +62,9 @@ body {
 body.low-power .m-ocean-flow,
 body.low-power .m-caustics,
 body.low-power .m-bubbles,
-body.low-power .m-bg-layer {
+body.low-power .m-bg-layer,
+body.low-power .m-hero-grid,
+body.low-power .m-hud-lines {
     display: none !important;
     animation: none !important;
 }
@@ -98,8 +100,55 @@ body.low-power {
 .m-page.active { display: block; animation: fadeFast 0.35s ease-out; }
 @keyframes fadeFast { from { opacity: 0; transform: translate3d(0, 15px, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
 
-/* --- HERO SECTION REDESIGNED --- */
-.m-hero { text-align: center; padding: 35px 10px 25px 10px; display: flex; flex-direction: column; align-items: center; width: 100%; position: relative; } 
+/* --- HERO SECTION REDESIGNED & FILLED --- */
+.m-hero { text-align: center; padding: 40px 10px 30px 10px; display: flex; flex-direction: column; align-items: center; width: 100%; position: relative; overflow:hidden; } 
+
+/* NEW BACKGROUND DECORATIONS */
+.m-hero-grid {
+    position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
+    background: 
+        linear-gradient(transparent 0%, rgba(0, 242, 255, 0.05) 1px, transparent 2px),
+        linear-gradient(90deg, transparent 0%, rgba(0, 242, 255, 0.05) 1px, transparent 2px);
+    background-size: 40px 30px;
+    transform: perspective(300px) rotateX(60deg);
+    transform-origin: bottom center;
+    z-index: 0;
+    pointer-events: none;
+    mask-image: linear-gradient(to top, black, transparent);
+    -webkit-mask-image: linear-gradient(to top, black, transparent);
+}
+
+.m-hud-lines {
+    position: absolute; top: 20%; bottom: 10%; width: 100%;
+    pointer-events: none; z-index: 1;
+}
+.m-hud-v-line {
+    position: absolute; top: 0; bottom: 0; width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--m-primary), transparent);
+    opacity: 0.3;
+}
+.m-hud-left { left: 15px; }
+.m-hud-right { right: 15px; }
+
+.m-hud-bracket {
+    position: absolute; width: 20px; height: 100%;
+    border: 1px solid rgba(0, 242, 255, 0.15);
+    border-right: none;
+    border-left: 2px solid var(--m-primary);
+    opacity: 0.4;
+    top: 0;
+}
+.m-bracket-l { left: 0; border-radius: 10px 0 0 10px; border-right: none; }
+.m-bracket-r { right: 0; border-radius: 0 10px 10px 0; border-left: none; border-right: 2px solid var(--m-primary); }
+
+.m-hud-tech-text {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    font-family: 'Rajdhani', monospace; font-size: 0.6rem; color: var(--m-primary);
+    opacity: 0.7; writing-mode: vertical-rl; text-orientation: mixed;
+    letter-spacing: 2px; text-shadow: 0 0 5px var(--m-primary);
+}
+.m-text-l { left: 5px; }
+.m-text-r { right: 5px; transform: translateY(-50%) rotate(180deg); }
 
 /* --- NEW LOGO REACTOR CORE --- */
 .m-hero-portal {
@@ -107,12 +156,13 @@ body.low-power {
     width: 180px; height: 180px;
     display: flex; justify-content: center; align-items: center;
     perspective: 1000px;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
+    z-index: 10; /* Sopra le decorazioni */
 }
 
 /* The User Image (The Gate Seal) */
 .m-portal-img {
-    width: 115px; height: 115px;
+    width: 120px; height: 120px;
     object-fit: contain;
     z-index: 10;
     animation: portalLevitate 6s ease-in-out infinite;
@@ -183,6 +233,7 @@ body.low-power {
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;
     filter: drop-shadow(0 0 12px rgba(0, 242, 255, 0.5));
     text-shadow: 0 0 8px rgba(0,242,255,0.3);
+    position: relative; z-index: 10;
 }
 
 .m-brand-sub {
@@ -190,6 +241,7 @@ body.low-power {
     color: var(--m-primary); text-transform: uppercase; margin-top: 10px; font-weight: 700; opacity: 0.95;
     display: flex; align-items: center; justify-content: center; width: 100%;
     text-shadow: 0 0 6px var(--m-primary); white-space: nowrap;
+    position: relative; z-index: 10;
 }
 .m-brand-sub::before, .m-brand-sub::after { 
     content: ''; display: block; width: 25px; height: 2px; 
@@ -210,6 +262,7 @@ body.low-power {
     display: flex; align-items: center; gap: 6px;
     transition: all 0.3s ease; cursor: default;
     box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    position: relative; z-index: 10;
 }
 .m-version-tag:hover { border-color: var(--m-primary); color: #fff; opacity: 1; box-shadow: 0 0 15px rgba(0,242,255,0.15); }
 .m-v-dot { width: 5px; height: 5px; background: var(--m-success); border-radius: 50%; box-shadow: 0 0 5px var(--m-success); animation: blinkBase 2s infinite; }
@@ -231,6 +284,7 @@ body.low-power {
     display: flex; align-items: center; gap: 6px;
     transition: all 0.3s ease;
     backdrop-filter: none;
+    z-index: 20;
 }
 .m-eco-toggle i { font-size: 0.9rem; }
 .m-eco-toggle.active {
@@ -599,11 +653,21 @@ const mobileHTML = `
         <div class="m-content">
             <div class="m-hero">
                 
+                <div class="m-hero-grid"></div>
+                <div class="m-hud-lines">
+                    <div class="m-hud-v-line m-hud-left"></div>
+                    <div class="m-hud-v-line m-hud-right"></div>
+                    <div class="m-hud-bracket m-bracket-l"></div>
+                    <div class="m-hud-bracket m-bracket-r"></div>
+                    <div class="m-hud-tech-text m-text-l">SYS.01</div>
+                    <div class="m-hud-tech-text m-text-r">NET.OK</div>
+                </div>
+
                 <div class="m-hero-portal">
                     <div class="m-energy-core"></div>
                     <div class="m-ring-plasma"></div>
                     <div class="m-ring-flux"></div>
-                    <img src="https://i.ibb.co/bMWdjVyc/file-00000000c9a471f4bae960d830c30b53.png" class="m-portal-img">
+                    <img src="https://i.ibb.co/0j2gLPzY/file-000000008ac871f4ba9b75ed76470d4b-2.png" class="m-portal-img">
                 </div>
                 
                 <h1 class="m-brand-title">LEVIATHAN</h1>
