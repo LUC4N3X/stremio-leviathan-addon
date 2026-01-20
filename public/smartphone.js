@@ -98,17 +98,84 @@ body.low-power {
 .m-page.active { display: block; animation: fadeFast 0.35s ease-out; }
 @keyframes fadeFast { from { opacity: 0; transform: translate3d(0, 15px, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
 
-/* --- HERO SECTION --- */
-.m-hero { text-align: center; padding: 30px 10px 20px 10px; display: flex; flex-direction: column; align-items: center; width: 100%; position: relative; } 
-.m-logo-container {
-    width: 130px; height: 130px; margin-bottom: 20px; border-radius: 50%; border: 2px solid rgba(0,242,255,0.5);
-    display: flex; align-items: center; justify-content: center;
-    background: rgba(0,0,0,0.6); box-shadow: var(--m-shadow-deep), var(--m-glow);
-    backdrop-filter: blur(8px); animation: pulseLogo 2s infinite alternate ease-in-out;
+/* --- HERO SECTION REDESIGNED --- */
+.m-hero { text-align: center; padding: 35px 10px 25px 10px; display: flex; flex-direction: column; align-items: center; width: 100%; position: relative; } 
+
+/* --- NEW LOGO REACTOR CORE --- */
+.m-hero-portal {
+    position: relative;
+    width: 180px; height: 180px;
+    display: flex; justify-content: center; align-items: center;
+    perspective: 1000px;
+    margin-bottom: 30px;
 }
-@keyframes pulseLogo { 0% { transform: scale(1); box-shadow: var(--m-glow); } 100% { transform: scale(1.05); box-shadow: 0 0 25px rgba(0,242,255,0.5); } }
-.m-logo-img { width: 95%; height: 95%; object-fit: contain; border-radius: 50%; animation: rotateLogo 50s linear infinite; filter: drop-shadow(0 0 12px var(--m-primary)); }
-@keyframes rotateLogo { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* The User Image (The Gate Seal) */
+.m-portal-img {
+    width: 115px; height: 115px;
+    object-fit: contain;
+    z-index: 10;
+    animation: portalLevitate 6s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px rgba(0, 242, 255, 0.8));
+}
+
+/* Backlight Energy Core */
+.m-energy-core {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 100px; height: 100px;
+    margin-left: -50px; margin-top: -50px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--m-primary) 10%, var(--m-secondary) 60%, transparent 70%);
+    opacity: 0.6;
+    z-index: 5;
+    filter: blur(15px);
+    animation: corePulse 4s ease-in-out infinite;
+}
+
+/* Rotating Rings - Cyan */
+.m-ring-plasma {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    border: 3px solid transparent;
+    border-top-color: var(--m-primary);
+    border-left-color: rgba(0, 242, 255, 0.4);
+    border-radius: 50%;
+    z-index: 8;
+    animation: spinGyro 8s linear infinite;
+    box-shadow: 0 0 25px rgba(0, 242, 255, 0.4), inset 0 0 10px rgba(0, 242, 255, 0.2);
+}
+
+/* Rotating Rings - Purple */
+.m-ring-flux {
+    position: absolute; top: 15px; left: 15px; right: 15px; bottom: 15px;
+    border: 2px dashed rgba(170, 0, 255, 0.7);
+    border-radius: 50%;
+    z-index: 7;
+    animation: spinGyroRev 12s linear infinite;
+    filter: drop-shadow(0 0 10px var(--m-secondary));
+}
+
+/* Animations */
+@keyframes portalLevitate {
+    0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 20px rgba(0, 242, 255, 0.7)); }
+    50% { transform: translateY(-12px) scale(1.05); filter: drop-shadow(0 0 40px rgba(0, 242, 255, 1)) brightness(1.2); }
+}
+
+@keyframes corePulse {
+    0%, 100% { transform: scale(0.9); opacity: 0.4; }
+    50% { transform: scale(1.6); opacity: 0.8; }
+}
+
+@keyframes spinGyro {
+    0% { transform: rotateX(65deg) rotateY(0deg) rotateZ(0deg); }
+    100% { transform: rotateX(65deg) rotateY(360deg) rotateZ(360deg); }
+}
+@keyframes spinGyroRev {
+    0% { transform: rotateX(-65deg) rotateY(360deg) rotateZ(0deg); }
+    100% { transform: rotateX(-65deg) rotateY(0deg) rotateZ(-360deg); }
+}
+/* --------------------------- */
+
 
 .m-brand-title {
     font-family: 'Rajdhani', sans-serif; font-size: 3.2rem; font-weight: 900; line-height: 1;
@@ -531,7 +598,14 @@ const mobileHTML = `
 
         <div class="m-content">
             <div class="m-hero">
-                <div class="m-logo-container"><img src="https://i.ibb.co/jvTQLbjb/Gemini-Generated-Image-51j2ce51j2ce51j2-1.png" class="m-logo-img"></div>
+                
+                <div class="m-hero-portal">
+                    <div class="m-energy-core"></div>
+                    <div class="m-ring-plasma"></div>
+                    <div class="m-ring-flux"></div>
+                    <img src="https://i.ibb.co/bMWdjVyc/file-00000000c9a471f4bae960d830c30b53.png" class="m-portal-img">
+                </div>
+                
                 <h1 class="m-brand-title">LEVIATHAN</h1>
                 <div class="m-brand-sub">SOVRANO DEGLI ABISSI</div>
                 <div class="m-version-tag"><div class="m-v-dot"></div>v2.1.0 STABLE</div>
@@ -579,6 +653,10 @@ const mobileHTML = `
                     <div style="position:relative;">
                         <input type="text" id="m-tmdb" class="m-terminal-input" placeholder="Chiave TMDB Personale" style="border-bottom-color: rgba(176, 38, 255, 0.3);">
                          <div class="m-paste-btn" onclick="pasteTo('m-tmdb')" style="top:-5px; right:0; bottom:auto; background:transparent; border:none; color:var(--m-accent); box-shadow:none;"><i class="fas fa-paste"></i></div>
+                    </div>
+                     <div class="m-row" style="padding: 10px 0 0; border:none; margin-top:5px;">
+                        <span style="font-size:0.75rem; color:var(--m-dim);">Non hai la chiave?</span>
+                        <button class="m-paste-btn" style="position:static; width:auto; border:1px solid rgba(255,255,255,0.15); padding:4px 12px;" onclick="openApiPage('tmdb')"><i class="fas fa-external-link-alt"></i> OTTIENI</button>
                     </div>
                 </div>
 
@@ -1074,7 +1152,11 @@ function updateSizeDisplay(val) {
     if (val == 0) { display.innerText = "∞"; } else { display.innerText = val; }
 }
 
-function openApiPage() {
+function openApiPage(type) {
+    if(type === 'tmdb') {
+         window.open('https://www.themoviedb.org/settings/api', '_blank');
+         return;
+    }
     const links = { 'rd': 'https://real-debrid.com/apitoken', 'ad': 'https://alldebrid.com/apikeys', 'tb': 'https://torbox.app/settings' };
     window.open(links[mCurrentService], '_blank');
 }
