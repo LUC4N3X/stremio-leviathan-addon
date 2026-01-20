@@ -243,6 +243,7 @@ function isSafeForItalian(item) {
   return REGEX_ITA.some(p => p.test(item.title));
 }
 
+// --- FIX DOPPIE PARENTESI (Es. "Frankenstein ( (2025)") ---
 function cleanFilename(filename) {
   if (!filename) return "";
   const yearMatch = filename.match(REGEX_YEAR);
@@ -254,6 +255,8 @@ function cleanFilename(filename) {
   }
   cleanTitle = cleanTitle.replace(/[._]/g, " ");
   cleanTitle = cleanTitle.replace(REGEX_CLEANER, "");
+  // [FIX] Rimuove parentesi o spazi finali prima di riattaccare l'anno
+  cleanTitle = cleanTitle.replace(/[\(\[\-\s]+$/, ""); 
   return `${cleanTitle.trim()}${year}`;
 }
 
@@ -852,6 +855,15 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       if (!config.filters?.allowEng && !isItalian) return false;
 
       const t = item.title.toLowerCase();
+      const metaYear = parseInt(meta.year);
+
+      // --- FIX SPECIFICO FRANKENSTEIN (Richiesto dall'utente) ---
+      // Se cerchiamo "Frankenstein" del 2025, il file DEVE avere "2025" nel nome.
+      // Altrimenti scartiamo (così evitiamo Frankenstein Jr del 1974 o file senza anno).
+      if (metaYear === 2025 && /frankenstein/i.test(meta.title)) {
+           if (!item.title.includes("2025")) return false;
+      }
+      // ----------------------------------------------------------
 
       // --- LOGICA SERIE TV (Rigorosa su Stagione) ---
       if (meta.isSeries) {
@@ -898,7 +910,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       const normFile = cleanFile.replace(regexPrefix, "").trim();
       const normMeta = cleanMeta.replace(regexPrefix, "").trim();
 
-      const metaYear = parseInt(meta.year);
       if (!isNaN(metaYear)) {
            const fileYearMatch = item.title.match(REGEX_YEAR);
            if (fileYearMatch) {
