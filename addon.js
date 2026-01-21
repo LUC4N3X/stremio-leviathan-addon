@@ -918,13 +918,21 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           let searchKeyword = strToCheck.replace(/^(the|a|an|il|lo|la|i|gli|le)\s+/i, "").trim();
 
           // 2. FIX SPECIFICO PER "RIP" (Applicato alla keyword pulita)
-          // Se la parola chiave risultante è "rip", attiviamo la pulizia aggressiva dei tag tecnici
+          // Il problema è che "Rip" è ovunque (WEBRip, BDRip, o "1080p Rip").
+          // Se cerchiamo il film "The Rip", imponiamo che il file DEBBA INIZIARE con il titolo.
           if (searchKeyword === "rip") {
-               // Rimuoviamo "dvd rip", "web rip", "bd rip" ecc. dal nome del file prima del confronto
-               const tempClean = cleanFile.replace(/\b(dvd|bd|br|web|hd|tv|vhs|ppv|screener|cam|hdtv|bluray)\s+rip\b/gi, "");
+               // Regex: L'inizio della stringa (^) deve essere opzionalmente "the " o "il ", seguito da "rip"
+               // seguito da un fine parola (\b). Questo esclude "The Strangers... Rip".
+               // cleanFile ha già subito la sostituzione di punti/underscore con spazi.
+               const strictStartRegex = /^(the\s+|il\s+)?rip\b/i;
                
-               // Ora cerchiamo "rip" solo se è rimasto come parola isolata (titolo reale)
-               return /\brip\b/i.test(tempClean);
+               // Se il file inizia con "The Rip" o "Rip", è il nostro film.
+               if (strictStartRegex.test(cleanFile)) return true;
+
+               // Caso speciale: Se il titolo contiene anche "Soldi Sporchi" (il sottotitolo),
+               // la logica precedente (checkMatch cleanMeta) l'avrebbe già preso. 
+               // Se siamo qui, stiamo valutando solo la keyword "Rip", quindi scartiamo tutto il resto.
+               return false;
           }
 
           // 3. Se la stringa è molto corta (es "IO", "NO"), usiamo Word Boundary per evitare match parziali
