@@ -1082,7 +1082,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       // --- MODIFICA HYBRID MODE (Top 10 Instant / Resto Lazy) ---
       // Fix: Se TorBox, processiamo tutto subito (no lazy)
       const isTorBox = config.service === 'tb';
-      const TOP_LIMIT = isTorBox ? ranked.length : 7; 
+      const TOP_LIMIT = isTorBox ? ranked.length : 8; 
       
       const topItems = ranked.slice(0, TOP_LIMIT);
       const lazyItems = ranked.slice(TOP_LIMIT);
