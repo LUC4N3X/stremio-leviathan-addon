@@ -63,12 +63,11 @@ const TB = require("./debrid/torbox");
 const dbHelper = require("./db-helper"); 
 const { getManifest } = require("./manifest");
 
-// Inizializza DB Locale (Serve la pool per insertTorrent)
+// Inizializza DB Locale
 dbHelper.initDatabase();
 
 // --- CONFIGURAZIONE CENTRALE ---
 const CONFIG = {
-  //  Legge l'URL dal file .env 
   INDEXER_URL: process.env.INDEXER_URL || "", 
   CINEMETA_URL: "https://v3-cinemeta.strem.io",
   REAL_SIZE_FILTER: 80 * 1024 * 1024,
@@ -117,7 +116,9 @@ const REGEX_ITA = [
     /\b(il|lo|la|i|gli|le|un|uno|una|del|dello|della|dei|degli|delle|nel|nello|nella|nei|negli|nelle)\s+/i,
     /\b(tutto|niente|sempre|mai|ancora|già|ora|dove|come|quando|perché|chi|cosa|vita|morte|amore|cuore|mondo|tempo|uomo|donna|bambino|polizia|poliziotto|commissario|squadra|omicidio|indagine|prova)\b/i
 ];
-const REGEX_CLEANER = /\b(ita|eng|ger|fre|spa|latino|rus|sub|h264|h265|x264|x265|hevc|avc|vc1|1080p|1080i|720p|480p|4k|2160p|uhd|sdr|hdr|hdr10|dv|dolby|vision|bluray|bd|bdrip|brrip|web-?dl|webrip|hdtv|rip|remux|mux|ac-?3|aac|dts|ddp|flac|truehd|atmos|multi|dual|complete|pack|amzn|nf|dsnp|hmax|atvp|apple|hulu|peacock|rakuten|iyp|dvd|dvdrip|unrated|extended|director|cut)\b.*/yi;
+
+// [FIX] Spostato 'rip' più avanti per evitare cancellazioni aggressive su titoli come "RIP"
+const REGEX_CLEANER = /\b(ita|eng|ger|fre|spa|latino|rus|sub|h264|h265|x264|x265|hevc|avc|vc1|1080p|1080i|720p|480p|4k|2160p|uhd|sdr|hdr|hdr10|dv|dolby|vision|bluray|bd|bdrip|brrip|web-?dl|webrip|hdtv|remux|mux|ac-?3|aac|dts|ddp|flac|truehd|atmos|multi|dual|complete|pack|amzn|nf|dsnp|hmax|atvp|apple|hulu|peacock|rakuten|iyp|dvd|dvdrip|unrated|extended|director|cut|rip)\b.*/yi;
 
 function base32ToHex(base32) {
     const base32chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
@@ -212,7 +213,6 @@ function deduplicateResults(results) {
   return Array.from(hashMap.values());
 }
 
-// --- FILTRO PER QUALITÀ (QUANTITÀ) ---
 function filterByQualityLimit(results, limit) {
     if (!limit || limit === 0 || limit === "0") return results;
     
@@ -243,7 +243,6 @@ function isSafeForItalian(item) {
   return REGEX_ITA.some(p => p.test(item.title));
 }
 
-// --- FIX DOPPIE PARENTESI (Es. "Frankenstein ( (2025)") ---
 function cleanFilename(filename) {
   if (!filename) return "";
   const yearMatch = filename.match(REGEX_YEAR);
@@ -255,7 +254,6 @@ function cleanFilename(filename) {
   }
   cleanTitle = cleanTitle.replace(/[._]/g, " ");
   cleanTitle = cleanTitle.replace(REGEX_CLEANER, "");
-  // [FIX] Rimuove parentesi o spazi finali prima di riattaccare l'anno
   cleanTitle = cleanTitle.replace(/[\(\[\-\s]+$/, ""); 
   return `${cleanTitle.trim()}${year}`;
 }
@@ -320,7 +318,7 @@ function extractStreamInfo(title, source) {
   return { quality: q, qIcon, info: detailsParts.join(" | "), lang, audioInfo };
 }
 
-function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag = "RD", config = {}, infoHash = null) {
+function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag = "RD", config = {}, infoHash = null, isLazy = false) {
     const { quality, qIcon, info, lang, audioInfo } = extractStreamInfo(fileTitle, source);
     const cleanNameTitle = cleanFilename(fileTitle);
 
@@ -427,7 +425,11 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
             .trim() || "P2P";
     }
     
-    const sourceLine = `⚡ [${serviceTag}] ${displaySource}`;
+    // --- MODIFICA LAZY TAG ---
+    // Se è Lazy, cambiamo il tag del servizio in [LAZY]
+    const finalServiceTag = isLazy ? `${serviceTag}❓` : serviceTag;
+    
+    const sourceLine = `⚡ [${finalServiceTag}] ${displaySource}`;
     const name = `🦑 LEVIATHAN\n${qIcon} ${quality}`;
     const cleanName = cleanFilename(fileTitle)
         .replace(/(s\d{1,2}e\d{1,2}|\d{1,2}x\d{1,2}|s\d{1,2})/ig, "")
@@ -446,7 +448,6 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     return { name, title: lines.join("\n") };
 }
 
-// Funzione Helper per Vix (Legacy)
 function formatVixStream(meta, vixData) {
     const isFHD = vixData.isFHD;
     const quality = isFHD ? "1080p" : "720p";
@@ -466,18 +467,14 @@ function formatVixStream(meta, vixData) {
     };
 }
 
-// --- HELPER CACHE CHECK TORBOX (URL FIX + CHUNKED) ---
 async function filterTorBoxCached(apiKey, items) {
     if (!items || items.length === 0) return [];
     
-    // 1. Estrai gli hash unici e validi
     const uniqueHashes = [...new Set(items.map(i => i.hash).filter(Boolean))];
     if (uniqueHashes.length === 0) return [];
 
-    // 2. Funzione interna per processare un "chunk"
     const checkChunk = async (hashes) => {
         try {
-            // CORREZIONE: Reintrodotto /v1/ che è obbligatorio per TorBox
             const url = "https://api.torbox.app/v1/api/torrents/checkcached";
             
             const { data: response } = await axios.get(url, {
@@ -497,7 +494,6 @@ async function filterTorBoxCached(apiKey, items) {
             const confirmed = [];
             const data = response.data;
             
-            // Gestione flessibile (Array o Object)
             if (Array.isArray(data)) {
                 data.forEach(entry => {
                     if (typeof entry === 'string') confirmed.push(entry.toLowerCase());
@@ -509,13 +505,11 @@ async function filterTorBoxCached(apiKey, items) {
             
             return confirmed;
         } catch (e) {
-            // Se errore 404 o altro, lo logghiamo ma non blocchiamo tutto lo script
             logger.warn(`⚠️ [TB CHUNK FAIL] Errore API: ${e.message}`);
             return []; 
         }
     };
 
-    // 3. Dividi in gruppi da 40 (Safety Limit)
     const chunkSize = 40;
     const chunks = [];
     for (let i = 0; i < uniqueHashes.length; i += chunkSize) {
@@ -523,33 +517,28 @@ async function filterTorBoxCached(apiKey, items) {
     }
 
     logger.info(`🔍 [TB CHECK] Verifico ${uniqueHashes.length} hash in ${chunks.length} richieste...`);
-
-    // 4. Esegui in parallelo
     const results = await Promise.all(chunks.map(chunk => checkChunk(chunk)));
-    
-    // 5. Unisci i risultati
     const confirmedHashes = new Set(results.flat());
 
-    // 6. Filtra la lista originale
     const cachedItems = items.filter(item => {
-        return item.hash && confirmedHashes.has(item.hash.toLowerCase());
+        const isCached = item.hash && confirmedHashes.has(item.hash.toLowerCase());
+        // [FIX TB] Se confermato in cache, settiamo il flag per resolveDebridLink
+        if (isCached) item._tbCached = true;
+        return isCached;
     });
 
     logger.info(`✅ [TB CHECK] Risultato: ${items.length} totali -> ${cachedItems.length} confermati in cache.`);
-    
     return cachedItems;
 }
 
 function validateStreamRequest(type, id) {
   const validTypes = ['movie', 'series'];
   if (!validTypes.includes(type)) {
-    logger.error(`Tipo non valido: ${type}`);
     throw new Error(`Tipo non valido: ${type}`);
   }
   const cleanIdToCheck = id.replace('ai-recs:', '');
   const idPattern = /^(tt\d+|\d+|tmdb:\d+|kitsu:\d+)(:\d+)?(:\d+)?$/;
   if (!idPattern.test(cleanIdToCheck) && !idPattern.test(id)) {
-    logger.error(`Formato ID non valido: ${id}`);
     throw new Error(`Formato ID non valido: ${id}`);
   }
   return true;
@@ -570,7 +559,6 @@ async function withTimeout(promise, ms, operation = 'Operation') {
   }
 }
 
-// --- HELPER TMDB METADATA ---
 async function fetchTmdbMeta(tmdbId, type, userApiKey) {
     if (!tmdbId) return null;
     const apiKey = (userApiKey && userApiKey.length > 1) ? userApiKey : "4b9dfb8b1c9f1720b5cd1d7efea1d845";
@@ -585,7 +573,6 @@ async function fetchTmdbMeta(tmdbId, type, userApiKey) {
     }
 }
 
-// --- METADATA RETRIEVER CON PRIORITÀ TMDB ---
 async function getMetadata(id, type, config = {}) {
   try {
     const allowedTypes = ["movie", "series"];
@@ -618,11 +605,11 @@ async function getMetadata(id, type, config = {}) {
                 const releaseDate = tmdbData.release_date || tmdbData.first_air_date;
                 const year = releaseDate ? releaseDate.split("-")[0] : "";
 
-                logger.info(`✅ [META] Usato TMDB (UserKey: ${!!userTmdbKey}): ${title} (${year}) [ID: ${tmdbId}]`);
+                logger.info(`✅ [META] Usato TMDB (UserKey: ${!!userTmdbKey}): ${title} (${year}) [ID: ${tmdbId}] Orig: ${originalTitle}`);
 
                 return {
                     title: title,
-                    originalTitle: originalTitle,
+                    originalTitle: originalTitle, // Cruciale per "The Rip - Soldi Sporchi" vs "The Rip"
                     year: year,
                     imdb_id: cleanId,
                     tmdb_id: tmdbId, 
@@ -641,7 +628,7 @@ async function getMetadata(id, type, config = {}) {
     
     return cData?.meta ? {
       title: cData.meta.name,
-      originalTitle: cData.meta.name,
+      originalTitle: cData.meta.name, 
       year: cData.meta.year?.split("–")[0],
       imdb_id: cleanId,
       isSeries: type === "series",
@@ -655,18 +642,6 @@ async function getMetadata(id, type, config = {}) {
   }
 }
 
-function simpleSeriesFallback(meta, filename) {
-    if (!meta.isSeries || !filename) return false;
-    const cleanMeta = meta.title.toLowerCase().replace(/[^a-z0-9]/g, "");
-    const cleanFile = filename.toLowerCase().replace(/[^a-z0-9]/g, "");
-    if (!cleanFile.includes(cleanMeta)) return false;
-    const s = meta.season;
-    const e = meta.episode;
-    const re = new RegExp(`(?:s|season|^|\\b|x)0?${s}(?:[ ._x-]*)(?:e|episode|x)?0?${e}(?!\\d)`, 'i');
-    return re.test(filename);
-}
-
-// --- SALVATAGGIO BACKGROUND (Auto-Learning) ---
 function saveResultsToDbBackground(meta, results) {
     if (!results || results.length === 0) return;
     (async () => {
@@ -689,12 +664,42 @@ function saveResultsToDbBackground(meta, results) {
     })().catch(err => console.error("❌ Errore background save:", err.message));
 }
 
-// --- GENERATORE DI LINK LAZY (ZERO CHIAMATE RD) ---
-function generateLazyStream(item, config, meta, reqHost, userConfStr) {
+async function resolveDebridLink(config, item, showFake, reqHost) {
+    try {
+        const service = config.service || 'rd';
+        const apiKey = config.key || config.rd;
+        if (!apiKey) return null;
+
+        // Torbox generalmente gestito via cache check, ma se qui:
+        if (service === 'tb') {
+            if (item._tbCached) {
+                const serviceTag = "TB";
+                const { name, title } = formatStreamTitleCinePro(item.title, item.source, item._size, item.seeders, serviceTag, config, item.hash);
+                const proxyUrl = `${reqHost}/${config.rawConf}/play_tb/${item.hash}?s=${item.season || 0}&e=${item.episode || 0}`;
+                return { name, title, url: proxyUrl, behaviorHints: { notWebReady: false, bingieGroup: `corsaro-tb` } };
+            } else { return null; }
+        }
+
+        let streamData = null;
+        if (service === 'rd') streamData = await RD.getStreamLink(apiKey, item.magnet, item.season, item.episode);
+        else if (service === 'ad') streamData = await AD.getStreamLink(apiKey, item.magnet, item.season, item.episode);
+
+        if (!streamData || (streamData.type === "ready" && streamData.size < CONFIG.REAL_SIZE_FILTER)) return null;
+
+        const serviceTag = service.toUpperCase();
+        const { name, title } = formatStreamTitleCinePro(streamData.filename || item.title, item.source, streamData.size || item.size, item.seeders, serviceTag, config, item.hash);
+        return { name, title, url: streamData.url, behaviorHints: { notWebReady: false, bingieGroup: `corsaro-${service}` } };
+    } catch (e) {
+        if (showFake) return { name: `[P2P ⚠️]`, title: `${item.title}\n⚠️ Cache Assente`, url: item.magnet, behaviorHints: { notWebReady: true } };
+        return null;
+    }
+}
+
+function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = false) {
     const service = config.service || 'rd';
     const serviceTag = service.toUpperCase();
     
-    // Genera il titolo (esteticamente identico al vecchio metodo)
+    // --- MODIFICA RICHIESTA: Se è Lazy, passiamo isLazy a formatStreamTitleCinePro ---
     const { name, title } = formatStreamTitleCinePro(
         item.title,
         item.source,
@@ -702,14 +707,11 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr) {
         item.seeders,
         serviceTag,
         config,
-        item.hash
+        item.hash,
+        isLazy // Passiamo il flag
     );
 
-    // Parametri per la rotta Lazy
     const fileIdxParam = item.fileIdx !== undefined ? item.fileIdx : -1;
-    
-    // URL che punta al server Leviathan (NON a Real-Debrid direttamente)
-    // Sarà il server a chiamare RD quando l'utente clicca Play
     const lazyUrl = `${reqHost}/${userConfStr}/play_lazy/${service}/${item.hash}/${fileIdxParam}?s=${meta.season || 0}&e=${meta.episode || 0}`;
 
     return {
@@ -764,7 +766,7 @@ async function fetchExternalResults(type, finalId) {
                 return items.map(i => ({
                     title: i.title || i.filename,
                     magnet: i.magnetLink,
-                    size: i.size,            
+                    size: i.size,             
                     sizeBytes: i.mainFileSize,
                     seeders: i.seeders,
                     source: i.externalProvider || i.source.replace(/\[EXT\]\s*/, ''),
@@ -789,13 +791,11 @@ async function fetchExternalResults(type, finalId) {
     }
 }
 
-// --- GENERATE STREAM CON LOGICA SEQUENZIALE INTELLIGENTE ---
+// --- GENERATE STREAM ---
 async function generateStream(type, id, config, userConfStr, reqHost) {
-  // --- 1. NUOVO CONTROLLO INIZIALE ---
   const hasDebridKey = (config.key && config.key.length > 0) || (config.rd && config.rd.length > 0);
-  const isWebEnabled = config.filters && (config.filters.enableVix || config.filters.enableGhd || config.filters.enableGs); // <--- AGGIUNTO GS
+  const isWebEnabled = config.filters && (config.filters.enableVix || config.filters.enableGhd || config.filters.enableGs);
 
-  // Se NON c'è la chiave E NON c'è nessun modulo web attivo -> Errore
   if (!hasDebridKey && !isWebEnabled) {
       return { streams: [{ name: "⚠️ CONFIG", title: "Inserisci API Key o Attiva SC/GuardaHD/GuardaSerie" }] };
   }
@@ -838,78 +838,58 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   const tmdbIdLookup = meta.tmdb_id || (await imdbToTmdb(meta.imdb_id, userTmdbKey))?.tmdbId;
   const dbOnlyMode = config.filters?.dbOnly === true; 
 
-  // --- DEFINIZIONE LOGICA FILTRO (RIGOROSA E CON LINGUA) ---
+  // --- FILTRO AGGRESSIVO CON FIX PER "RIP" E TITOLI COMPOSTI ---
   const aggressiveFilter = (item) => {
       if (!item?.magnet) return false;
-
-      // 1. EXTERNAL PASS-THROUGH
       if (item.isExternal) return true;
 
       const source = (item.source || "").toLowerCase();
-      // Blacklist
       if (source.includes("comet") || source.includes("stremthru")) return false;
 
-      // 2. CONTROLLO LINGUA (Spostato PRIMA della logica serie)
       const isItalian = isSafeForItalian(item) || /corsaro/i.test(item.source);
-      // Se il filtro "Allow English" è spento E non è italiano -> SCARTA
       if (!config.filters?.allowEng && !isItalian) return false;
 
       const t = item.title.toLowerCase();
       const metaYear = parseInt(meta.year);
 
-      // --- FIX SPECIFICO FRANKENSTEIN (Richiesto dall'utente) ---
-      // Se cerchiamo "Frankenstein" del 2025, il file DEVE avere "2025" nel nome.
-      // Altrimenti scartiamo (così evitiamo Frankenstein Jr del 1974 o file senza anno).
+      // --- FIX FRANKENSTEIN ---
       if (metaYear === 2025 && /frankenstein/i.test(meta.title)) {
            if (!item.title.includes("2025")) return false;
       }
-      // ----------------------------------------------------------
 
-      // --- LOGICA SERIE TV (Rigorosa su Stagione) ---
+      // --- LOGICA SERIE TV ---
       if (meta.isSeries) {
           const s = meta.season;
           const e = meta.episode;
-
-          // A. CONTROLLO NEGATIVO (Anti-Sbaglio): 
           const wrongSeasonRegex = /(?:s|stagione|season)\s*0?(\d+)(?!\d)/gi;
           let match;
           while ((match = wrongSeasonRegex.exec(t)) !== null) {
               const foundSeason = parseInt(match[1]);
               if (foundSeason !== s) return false; 
           }
-
-          // B. CONTROLLO POSITIVO 
           const hasRightSeason = new RegExp(`(?:s|stagione|season|^)\\s*0?${s}(?!\\d)`, 'i').test(t);
           const hasRightEpisode = new RegExp(`(?:e|x|ep|episode|^)\\s*0?${e}(?!\\d)`, 'i').test(t);
           const isPack = /(?:complete|pack|stagione\s*\d+\s*$|season\s*\d+\s*$)/i.test(t) && !/e\d+|x\d+/i.test(t);
 
           if (hasRightSeason && hasRightEpisode) return true;
           if (hasRightSeason && isPack) return true;
-
           return false;
       }
 
-      // --- LOGICA FILM ---
-      // 1337x Logic (Internal)
+      // --- LOGICA FILM (POTENZIATA PER "RIP") ---
+      // 1337x
       if (source.includes("1337")) {
           const hasIta = /\b(ita|italian)\b/i.test(item.title);
           const isSubbed = /\b(sub|subs|subbed|vost|vostit)\b/i.test(item.title);
           if (!hasIta || isSubbed) return false; 
       }
-
-      // TGX/YTS Logic (Internal)
+      // TGX/YTS
       if (source.includes("tgx") || source.includes("torrentgalaxy") || source.includes("yts")) {
           const hasStrictIta = /\b(ita|italian)\b/i.test(item.title);
           if (!hasStrictIta) return false; 
       }
 
-      // Match Titolo e Anno per Film
-      const cleanFile = item.title.toLowerCase().replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
-      const cleanMeta = meta.title.toLowerCase().replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
-      const regexPrefix = /^(?:the|a|an|il|lo|la|i|gli|le|un|uno|una|el|los|las|les)\s+/i;
-      const normFile = cleanFile.replace(regexPrefix, "").trim();
-      const normMeta = cleanMeta.replace(regexPrefix, "").trim();
-
+      // Check Anno
       if (!isNaN(metaYear)) {
            const fileYearMatch = item.title.match(REGEX_YEAR);
            if (fileYearMatch) {
@@ -917,17 +897,57 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
                if (Math.abs(fileYear - metaYear) > 1) return false; 
            }
       }
-      if (normFile.includes(normMeta)) {
-           if (!normFile.startsWith(normMeta)) return false; 
-      }
 
-      // Fallback finale solo per Film
+      // --- FIX MATCH TITOLO (Gestione "The Rip - Soldi Sporchi") ---
+      
+      // 1. Pulizia Standard
+      const cleanFile = item.title.toLowerCase().replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
+      const cleanMeta = meta.title.toLowerCase().replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
+      
+      // 2. Pulizia "Smart": Rimuove sottotitoli italiani dopo "-" o ":"
+      // Es. "The Rip - Soldi Sporchi" diventa "The Rip"
+      const metaTitleShort = meta.title.split(/ - |: /)[0].toLowerCase().trim();
+      
+      // 3. Original Title (da TMDB): Es. "RIP"
+      const metaOriginal = (meta.originalTitle || "").toLowerCase().trim();
+
+    const checkMatch = (strToCheck) => {
+          if (!strToCheck) return false;
+
+          // 1. Rimuoviamo subito gli articoli per analizzare la "keyword" reale
+          let searchKeyword = strToCheck.replace(/^(the|a|an|il|lo|la|i|gli|le)\s+/i, "").trim();
+
+          // 2. FIX SPECIFICO PER "RIP" (Applicato alla keyword pulita)
+          // Se la parola chiave risultante è "rip", attiviamo la pulizia aggressiva dei tag tecnici
+          if (searchKeyword === "rip") {
+               // Rimuoviamo "dvd rip", "web rip", "bd rip" ecc. dal nome del file prima del confronto
+               const tempClean = cleanFile.replace(/\b(dvd|bd|br|web|hd|tv|vhs|ppv|screener|cam|hdtv|bluray)\s+rip\b/gi, "");
+               
+               // Ora cerchiamo "rip" solo se è rimasto come parola isolata (titolo reale)
+               return /\brip\b/i.test(tempClean);
+          }
+
+          // 3. Se la stringa è molto corta (es "IO", "NO"), usiamo Word Boundary per evitare match parziali
+          if (searchKeyword.length <= 3) {
+              const regexShort = new RegExp(`\\b${searchKeyword}\\b`, 'i');
+              return regexShort.test(cleanFile);
+          }
+          
+          // 4. Match standard (inclusione)
+          return cleanFile.includes(searchKeyword);
+      };
+
+      // Controllo Gerarchico
+      if (checkMatch(cleanMeta)) return true;       // Match intero ("The Rip - Soldi Sporchi")
+      if (checkMatch(metaTitleShort)) return true;  // Match parziale ("The Rip")
+      if (checkMatch(metaOriginal)) return true;    // Match originale ("RIP")
+
       if (smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode)) return true;
 
       return false;
   };
 
-  // --- FASE 1: FONTI VELOCI (Remote + External) ---
+  // --- FASE 1: FONTI VELOCI ---
   const remotePromise = withTimeout(
       queryRemoteIndexer(tmdbIdLookup, type, meta.season, meta.episode),
       CONFIG.TIMEOUTS.REMOTE_INDEXER,
@@ -944,18 +964,13 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
 
   const [remoteResults, externalResults] = await Promise.all([remotePromise, externalPromise]);
   
-  if (remoteResults.length > 0) logger.info(`✅ [REMOTE] ${remoteResults.length} items`);
-  if (externalResults.length > 0) logger.info(`✅ [EXTERNAL] ${externalResults.length} items`);
-
-  // Filtra e deduplica i risultati veloci
   let fastResults = [...remoteResults, ...externalResults].filter(aggressiveFilter);
   let cleanResults = deduplicateResults(fastResults);
   const validFastCount = cleanResults.length;
 
   logger.info(`⚡ [FAST CHECK] Trovati ${validFastCount} risultati validi da fonti veloci.`);
 
-  // --- FASE 2: SCRAPER PESANTI (Solo se necessario) ---
-  // Se non abbiamo almeno 3 risultati validi e NON siamo in modalità "Solo DB", attiviamo gli scraper.
+  // --- FASE 2: SCRAPER ---
   if (!dbOnlyMode && validFastCount < 3) {
       logger.info(`⚠️ [HEAVY] Meno di 3 risultati (${validFastCount}). Attivazione Scraper Locali...`);
       
@@ -990,43 +1005,28 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
               });
           });
           scrapedResults = await Promise.all(allScraperTasks).then(results => results.flat());
-          logger.info(`✅ [SCRAPER] ${scrapedResults.length} items trovati`);
-          
-          // Filtra i risultati degli scraper
           const filteredScraped = scrapedResults.filter(aggressiveFilter);
-          // Unisci ai risultati precedenti (fastResults già filtrati + nuovi filtrati)
           const combined = [...cleanResults, ...filteredScraped];
-          // Riesegui la deduplica finale
           cleanResults = deduplicateResults(combined);
-      }
-  } else {
-      if (!dbOnlyMode) {
-        logger.info(`🚀 [SKIP] Scraper saltati: Trovati abbastanza risultati (${validFastCount} >= 3).`);
       }
   }
 
-  // --- FINALIZZAZIONE RISULTATI ---
+  // --- FINALIZZAZIONE ---
   if (!dbOnlyMode) {
       saveResultsToDbBackground(meta, cleanResults);
   }
 
-  //  SPETTRO VISIVO (Exclusion Logic)
+  // --- [MODIFICA RICHIESTA: RIMOSSO FILTRO 0 SEEDERS] ---
+  // Ora vengono mostrati TUTTI i risultati, anche se hanno 0 seeders.
+  
   if (config.filters) {
       cleanResults = cleanResults.filter(item => {
           const t = (item.title || "").toLowerCase();
-
-          // --- NUOVO FILTRO GB: ELIMINA FILE TROPPO GRANDI ---
           if (config.filters.maxSizeGB && config.filters.maxSizeGB > 0) {
-              // Convertiamo i GB in Bytes (1 GB = 1073741824 Bytes)
               const maxBytes = config.filters.maxSizeGB * 1024 * 1024 * 1024;
-              // Recuperiamo la dimensione del file (gestiamo le varie nomenclature usate nello script)
               const itemSize = item._size || item.sizeBytes || 0;
-              
-              // Se il file ha una dimensione valida ed è superiore al limite, lo scartiamo
               if (itemSize > 0 && itemSize > maxBytes) return false;
           }
-          // --------------------------------------------------
-
           if (config.filters.no4k && REGEX_QUALITY["4K"].test(t)) return false;
           if (config.filters.no1080 && REGEX_QUALITY["1080p"].test(t)) return false;
           if (config.filters.no720 && REGEX_QUALITY["720p"].test(t)) return false;
@@ -1039,28 +1039,15 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       });
   }
 
-  // Ranking finale
   let rankedList = rankAndFilterResults(cleanResults, meta, config);
-
-  // --- NUOVO: FLUX PRIORITY SORTING ---
-  // Leggiamo il parametro sort (assicurati che arrivi dal config)
   const sortMode = config.sort || (config.filters && config.filters.sort) || 'balanced';
   
   if (sortMode !== 'balanced') {
-      logger.info(`🔄 [SORT] Riordinamento attivo: ${sortMode.toUpperCase()}`);
-      
       rankedList.sort((a, b) => {
-          // Helper per convertire size in numero
           const sizeA = a._size || a.sizeBytes || 0;
           const sizeB = b._size || b.sizeBytes || 0;
-          
-          if (sortMode === 'size') {
-              // Vince il file più grande
-              return sizeB - sizeA;
-          }
-          
+          if (sortMode === 'size') return sizeB - sizeA;
           if (sortMode === 'resolution') {
-              // 4K > 1080p > 720p > SD
               const getResScore = (title) => {
                   const t = title.toLowerCase();
                   if (/2160p|4k|uhd/.test(t)) return 40;
@@ -1070,45 +1057,59 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
               };
               const scoreA = getResScore(a.title);
               const scoreB = getResScore(b.title);
-              
-              if (scoreA !== scoreB) return scoreB - scoreA; // Prima la risoluzione più alta
-              return sizeB - sizeA; // A parità di risoluzione, vince il file più grande
+              if (scoreA !== scoreB) return scoreB - scoreA;
+              return sizeB - sizeA;
           }
           return 0;
       });
   }
-  // -------------------------------------
 
   if (config.filters && config.filters.maxPerQuality) {
       rankedList = filterByQualityLimit(rankedList, config.filters.maxPerQuality);
   }
 
-  // --- MODIFICA TB: Integrazione Controllo Cache Reale ---
   let finalRanked = rankedList.slice(0, CONFIG.MAX_RESULTS);
 
-  // Se l'utente usa TorBox (service == 'tb') ed ha una chiave
   if (config.service === 'tb' && hasDebridKey) {
-      const apiKey = config.key || config.rd; // Recupera la chiave
-      // Eseguiamo il controllo sincrono per filtrare via i fake cached
+      const apiKey = config.key || config.rd; 
       finalRanked = await filterTorBoxCached(apiKey, finalRanked);
   }
 
   const ranked = finalRanked;
-  // -------------------------------------------------------
 
   let debridStreams = [];
-  if (ranked.length > 0 && hasDebridKey) { 
-      // --- LAZY RESOLVE MODE ---
-      debridStreams = ranked.map(item => generateLazyStream(item, config, meta, reqHost, userConfStr));
+  if (ranked.length > 0 && hasDebridKey) {
+      // --- MODIFICA HYBRID MODE (Top 10 Instant / Resto Lazy) ---
+      // Fix: Se TorBox, processiamo tutto subito (no lazy)
+      const isTorBox = config.service === 'tb';
+      const TOP_LIMIT = isTorBox ? ranked.length : 7; 
+      
+      const topItems = ranked.slice(0, TOP_LIMIT);
+      const lazyItems = ranked.slice(TOP_LIMIT);
+
+      // 1. Risoluzione Immediata (Top 10 o Tutti per TB)
+      const immediatePromises = topItems.map(item => {
+          item.season = meta.season;
+          item.episode = meta.episode;
+          config.rawConf = userConfStr; 
+          return LIMITERS.rd.schedule(() => resolveDebridLink(config, item, config.filters?.showFake, reqHost));
+      });
+
+      // 2. Generazione Lazy (Dall'11° in poi, vuoto per TB)
+      // Passiamo 'true' come ultimo parametro per segnalare Lazy Mode e mettere l'etichetta [LAZY]
+      const lazyStreams = lazyItems.map(item =>
+          generateLazyStream(item, config, meta, reqHost, userConfStr, true)
+      );
+
+      const resolvedInstant = (await Promise.all(immediatePromises)).filter(Boolean);
+      debridStreams = [...resolvedInstant, ...lazyStreams];
   }
 
-  // === WEB PROVIDERS (MODIFICATO PER DB ONLY MODE & AIO FIX) ===
+  // === WEB PROVIDERS ===
   let rawVix = [], formattedGhd = [], formattedGs = [], formattedVix = [];
 
-  // Esegui i Web Providers SOLO se NON siamo in modalità "Solo DB"
   if (!dbOnlyMode) {
        const vixPromise = searchVix(meta, config, reqHost);
-       
        let ghdPromise = Promise.resolve([]);
        if (config.filters && config.filters.enableGhd) {
            ghdPromise = searchGuardaHD(meta, config).catch(err => {
@@ -1127,88 +1128,56 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
 
        [rawVix, formattedGhd, formattedGs] = await Promise.all([vixPromise, ghdPromise, gsPromise]);
        
-       // --- [FIX] INIZIO FORMATTAZIONE AIO PER WEB ---
        if (aioFormatter && aioFormatter.isAIOStreamsEnabled(config)) {
-           
            const applyAioStyle = (streamList, sourceName) => {
                if (!streamList || !Array.isArray(streamList)) return;
-               
                streamList.forEach((stream, index) => {
-                   // 1. Rilevamento Qualità Avanzato
                    let quality = "HD";
                    let qIcon = "📺";
-                   
-                   // Creiamo una stringa di analisi PULITA dai nomi dei provider che contengono "HD"
-                   // Rimuoviamo "GuardaHD", "StreamingCommunity", "Leviathan" per evitare falsi positivi
                    let textToCheck = (stream.title + " " + (stream.name || "")).toUpperCase();
                    textToCheck = textToCheck
                        .replace("GUARDAHD", "")
                        .replace("STREAMINGCOMMUNITY", "")
                        .replace("LEVIATHAN", "")
                        .replace("VIX", "");
-                   
-                   // Regex più precise per evitare di trovare "HD" dentro altre parole
                    const regex4k = /\b(4K|2160P|UHD)\b/;
                    const regex1080 = /\b(1080P|FHD|FULLHD)\b/;
-                   const regex720 = /\b(720P|HD)\b/; // HD solo se parola intera
+                   const regex720 = /\b(720P|HD)\b/;
                    const regexSD = /\b(480P|SD)\b/;
 
                    if (regex4k.test(textToCheck)) { quality = "4K"; qIcon = "🔥"; }
                    else if (regex1080.test(textToCheck)) { quality = "1080p"; qIcon = "✨"; }
                    else if (regex720.test(textToCheck)) { quality = "720p"; qIcon = "📺"; }
                    else if (regexSD.test(textToCheck)) { quality = "SD"; qIcon = "🐢"; }
-                   else {
-                       // Nessuna qualità rilevata (es. titolo pulito senza tag)
-                       quality = "WebStreams"; // Default conservativo
-                   }
+                   else { quality = "WebStreams"; }
                    
-                   // --- LOGICHE SPECIFICHE PER PROVIDER ---
-                   
-                   // GUARDAHD: Spesso usa "FHD" per 1080p. Se non specificato, spesso è 720p o SD.
-                   // Se però abbiamo rilevato SD e la fonte è GuardaHD, a volte è meglio lasciare HD generico?
-                   // Per ora ci fidiamo della detection sopra. Se nel titolo c'era "FHD", ora è 1080p.
-                   
-                   // VIX (StreamingCommunity): Forzatura 1080p se non rilevato altro
                    if (sourceName.includes("StreamingCommunity") || sourceName.includes("Vix")) {
                        if (quality === "SD" && !regexSD.test(textToCheck)) {
-                           // Se era SD solo perché non ha trovato tag, promuoviamo a 1080p
-                           quality = "1080p";
-                           qIcon = "✨";
+                           quality = "1080p"; qIcon = "✨";
                        }
                    }
-                   // ---------------------------------------
-
-                   // 2. Info Tecniche
                    const techStr = `🎞️ ${quality} ${qIcon}`;
-
-                   // 3. BOX SINISTRO (BADGE)
                    stream.name = aioFormatter.formatStreamName({
                        service: "web", 
                        cached: true,
                        quality: quality
                    });
-
-                   // 4. TITOLO (4 Righe)
                    stream.title = aioFormatter.formatStreamTitle({
-                       title: meta.title,  // Titolo pulito
+                       title: meta.title,  
                        size: "Web",        
                        language: "🇮🇹 ITA",
                        source: sourceName, 
                        seeders: null,
                        techInfo: techStr 
                    });
-                   
-                   // 5. Raggruppamento
                    if (!stream.behaviorHints) stream.behaviorHints = {};
                    stream.behaviorHints.bingieGroup = `web-${sourceName.replace(/\W/g,'')}-${quality}`;
                });
            };
-
            if (typeof rawVix !== 'undefined') applyAioStyle(rawVix, "StreamingCommunity");
            if (typeof formattedGhd !== 'undefined') applyAioStyle(formattedGhd, "GuardaHD");
            if (typeof formattedGs !== 'undefined') applyAioStyle(formattedGs, "GuardaSerie");
        }
-
        formattedVix = rawVix; 
   }
 
@@ -1219,37 +1188,20 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       finalStreams = [...formattedGhd, ...formattedGs, ...formattedVix, ...debridStreams];
   }
 
-  // --- [FIX] FILTRO FINALE DI SICUREZZA ---
-  // Rimuove anche i "finti HD" o stream Web se l'utente ha escluso quelle risoluzioni
   if (config.filters) {
       finalStreams = finalStreams.filter(stream => {
-          // Uniamo titolo e badge per il controllo finale
           const checkStr = (stream.title + " " + (stream.name || "")).toUpperCase();
-
-          // 1. FILTRO 720p (Esteso per coprire "HD" generico)
           if (config.filters.no720) {
-              // Se c'è scritto esplicitamente 720P
               if (checkStr.includes("720P")) return false;
-              
-              // SE IL BADGE DICE "HD" MA NON È 1080P/4K -> LO SCARTIAMO
-              // Questo elimina risultati come "LEVIATHAN HD" se non c'è traccia di 1080/FHD/4K
               const isGenericHD = /\bHD\b/.test(checkStr) && !/1080|2160|4K|FHD|UHD/.test(checkStr);
               if (isGenericHD) return false;
           }
-
-          // 2. FILTRO 4K
           if (config.filters.no4k && (checkStr.includes("4K") || checkStr.includes("2160P") || checkStr.includes("UHD"))) return false;
-
-          // 3. FILTRO 1080p
           if (config.filters.no1080 && (checkStr.includes("1080P") || checkStr.includes("FHD") || checkStr.includes("FULLHD"))) return false;
-
-          // 4. FILTRO CAM/SCR
           if ((config.filters.noScr || config.filters.noCam) && /CAM|SCR|TS|TELESYNC|HDCAM/.test(checkStr)) return false;
-
           return true;
       });
   }
-  // --- [FINE FIX] ---
   
   const resultObj = { streams: finalStreams };
 
@@ -1264,19 +1216,14 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
 app.get("/api/stats", (req, res) => res.json({ status: "ok" }));
 app.get("/favicon.ico", (req, res) => res.status(204).end());
 
-// --- LAZY RESOLVE GENERICO CON FIX TORBOX ---
 app.get("/:conf/play_lazy/:service/:hash/:fileIdx", async (req, res) => {
     const { conf, service, hash, fileIdx } = req.params;
     const { s, e } = req.query; 
-
     logger.info(`▶️ [LAZY PLAY] Service: ${service} | Hash: ${hash} | Idx: ${fileIdx} | S${s}E${e}`);
-
     try {
         const config = getConfig(conf);
         const apiKey = config.key || config.rd;
         if (!apiKey) return res.status(400).send("API Key mancante.");
-
-        // --- TRACKERS AGGIORNATI PER RD/DEBRID ---
         const trackers = [
             "udp://tracker.opentrackr.org:1337/announce",
             "udp://open.demonoid.ch:6969/announce",
@@ -1289,25 +1236,18 @@ app.get("/:conf/play_lazy/:service/:hash/:fileIdx", async (req, res) => {
             "udp://exodus.desync.com:6969/announce",
             "udp://tracker.moeking.me:6969/announce"
         ];
-        
-        // Costruiamo la stringa magnet con i tracker aggiornati
         const trackerStr = trackers.map(tr => `&tr=${tr}`).join(""); 
         const magnet = `magnet:?xt=urn:btih:${hash}${trackerStr}`;
-
         const item = {
             title: `Unknown Video (${hash})`,
             hash: hash,
             season: parseInt(s) || 0,
             episode: parseInt(e) || 0,
             fileIdx: parseInt(fileIdx) === -1 ? undefined : parseInt(fileIdx),
-            magnet: magnet // Magnet completo di tracker
+            magnet: magnet 
         };
-
-        // Usa le funzioni helper esistenti dei moduli Debrid per risolvere il link reale
         let streamData = null;
-        
         if (service === 'tb') {
-            // Conversione parametri in stringa per sicurezza con TorBox
              const tbFileIdx = item.fileIdx !== undefined ? String(item.fileIdx) : undefined;
              const tbS = String(item.season);
              const tbE = String(item.episode);
@@ -1320,10 +1260,7 @@ app.get("/:conf/play_lazy/:service/:hash/:fileIdx", async (req, res) => {
             const safeFileIdx = item.fileIdx !== undefined ? item.fileIdx : 0;
             streamData = await AD.getStreamLink(apiKey, item.magnet, item.season, item.episode, safeFileIdx);
         }
-
-        // --- GESTIONE RISULTATO ---
         if (streamData && streamData.url) {
-            // Se MediaFlow è attivo
             if (config.mediaflow && config.mediaflow.proxyDebrid && config.mediaflow.url) {
                 try {
                     const mfpBase = config.mediaflow.url.replace(/\/$/, '');
@@ -1332,44 +1269,32 @@ app.get("/:conf/play_lazy/:service/:hash/:fileIdx", async (req, res) => {
                     return res.redirect(finalUrl);
                 } catch (e) {}
             }
-            
-            // Redirect Diretto
             return res.redirect(streamData.url);
         } 
-        
-        // --- SE NON PRONTO (UNCACHED O DOWNLOADING) ---
-        // Redirect alla pagina "Add to Cloud" per avviare il download o mostrare messaggio
         const protocol = req.headers['x-forwarded-proto'] || req.protocol;
         const host = `${protocol}://${req.get('host')}`;
         const addToCloudUrl = `${host}/${conf}/add_to_cloud/${hash}`;
-        
         return res.redirect(addToCloudUrl);
-
     } catch (err) {
         logger.error(`Error Lazy Play: ${err.message}`);
         res.status(500).send("Errore nel recupero del link: " + err.message);
     }
 });
 
-// Mantenuta per retrocompatibilità se necessario, ma la nuova play_lazy copre tutto
 app.get("/:conf/play_tb/:hash", async (req, res) => {
     const { conf, hash } = req.params;
     const { s, e, f } = req.query; 
     res.redirect(`/${conf}/play_lazy/tb/${hash}/${f || -1}?s=${s}&e=${e}`);
 });
 
-// --- NUOVA ROTTA: AGGIUNTA AL CLOUD CON FEEDBACK VIDEO LOCALE ---
 app.get("/:conf/add_to_cloud/:hash", async (req, res) => {
     const { conf, hash } = req.params;
     try {
         const config = getConfig(conf);
         const apiKey = config.key || config.rd;
         const service = config.service || 'rd';
-
         if (!apiKey) return res.status(400).send("API Key mancante.");
-        
         logger.info(`📥 [CACHE BUILDER] Richiesta aggiunta hash ${hash} su ${service.toUpperCase()}`);
-
         if (service === 'rd') {
             await axios.post("https://api.real-debrid.com/rest/1.0/torrents/addMagnet", 
                 `magnet=magnet:?xt=urn:btih:${hash}`, {
@@ -1387,18 +1312,10 @@ app.get("/:conf/add_to_cloud/:hash", async (req, res) => {
                 headers: { "Authorization": `Bearer ${apiKey}` }
             });
         }
-
-        // --- FEEDBACK PROFESSIONALE (VIDEO LOCALE) ---
-        // Recupera il protocollo e l'host correnti
         const protocol = req.headers['x-forwarded-proto'] || req.protocol;
         const host = `${protocol}://${req.get('host')}`;
-        
-        // Punta al file 'confirmed.mp4' che L'UTENTE DEVE INSERIRE nella cartella public
         const feedbackVideoUrl = `${host}/confirmed.mp4`;
-        
-        // Redirect al video locale (Stremio lo riprodurrà)
         res.redirect(feedbackVideoUrl);
-        
     } catch (err) {
         logger.error(`Errore Cache Builder: ${err.message}`);
         res.status(500).send("Errore durante l'aggiunta al cloud: " + err.message);
@@ -1448,28 +1365,18 @@ app.get("/configure", (req, res) => res.sendFile(path.join(__dirname, "public", 
 app.get("/manifest.json", (req, res) => { res.setHeader("Access-Control-Allow-Origin", "*"); res.json(getManifest()); });
 app.get("/:conf/manifest.json", (req, res) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
-
-    // 1. Carica il manifest originale
     const manifest = getManifest();
-
     try {
         const { conf } = req.params;
         const config = getConfig(conf);
-        
-        // Rilevamento STRETTO del servizio (verifica se esiste la Key)
-        // Se config.service è 'rd' ma config.key è vuoto -> NON è RD.
         const hasRDKey = (config.service === 'rd' && config.key) || config.rd;
         const hasTBKey = (config.service === 'tb' && config.key) || config.torbox;
-        const hasADKey = (config.service === 'ad' && config.key) || config.alldebrid; // assuming fallback keyname
-
-        // --- STILE & PERSONALIZZAZIONE ---
-        
+        const hasADKey = (config.service === 'ad' && config.key) || config.alldebrid;
         if (hasRDKey) {
             manifest.name = "Leviathan ⚡ RD";
             manifest.id += ".rd"; 
         } 
         else if (hasTBKey) {
-            // RICHIESTA UTENTE: Nome TB invece di TorBox
             manifest.name = "Leviathan 📦 TB";
             manifest.id += ".tb";
         } 
@@ -1478,16 +1385,12 @@ app.get("/:conf/manifest.json", (req, res) => {
             manifest.id += ".ad";
         }
         else {
-            // Caso Web / Nessun Debrid (Solo se nessuna Key è valida)
-            // Sostituito "No-Debrid" con "Web" professionale
             manifest.name = "Leviathan 🌐 Web";
             manifest.id += ".web";
         }
-
     } catch (e) {
         console.error("Errore personalizzazione manifest:", e);
     }
-
     res.json(manifest);
 });
 app.get("/:conf/catalog/:type/:id/:extra?.json", async (req, res) => { res.setHeader("Access-Control-Allow-Origin", "*"); res.json({metas:[]}); });
@@ -1525,7 +1428,7 @@ const PUBLIC_PORT = process.env.PUBLIC_PORT || PORT;
 app.listen(PORT, () => {
     console.log(`🚀 Leviathan (God Tier) attivo su porta interna ${PORT}`);
     console.log(`-----------------------------------------------------`);
-    console.log(`⚡ MODE: LAZY RESOLVE (Zero Initial Debrid Calls)`);
+    console.log(`⚡ MODE: HYBRID 10 (Top 10 Instant / Rest Lazy)`);
     console.log(`📡 INDEXER URL (ENV): ${CONFIG.INDEXER_URL}`);
     console.log(`🎬 METADATA: TMDB Primary (User Key Priority)`);
     console.log(`💾 SCRITTURA: DB Locale (Auto-Learning attivo)`);
