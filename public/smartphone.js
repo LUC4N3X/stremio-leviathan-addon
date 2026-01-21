@@ -64,7 +64,7 @@ body.low-power .m-caustics,
 body.low-power .m-bubbles,
 body.low-power .m-bg-layer,
 body.low-power .m-hero-grid,
-body.low-power .m-hud-lines {
+body.low-power .m-side-pylons {
     display: none !important;
     animation: none !important;
 }
@@ -100,10 +100,9 @@ body.low-power {
 .m-page.active { display: block; animation: fadeFast 0.35s ease-out; }
 @keyframes fadeFast { from { opacity: 0; transform: translate3d(0, 15px, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
 
-/* --- HERO SECTION REDESIGNED & FILLED --- */
+/* --- HERO SECTION REDESIGNED --- */
 .m-hero { text-align: center; padding: 40px 10px 30px 10px; display: flex; flex-direction: column; align-items: center; width: 100%; position: relative; overflow:hidden; } 
 
-/* NEW BACKGROUND DECORATIONS */
 .m-hero-grid {
     position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
     background: 
@@ -118,37 +117,94 @@ body.low-power {
     -webkit-mask-image: linear-gradient(to top, black, transparent);
 }
 
-.m-hud-lines {
-    position: absolute; top: 20%; bottom: 10%; width: 100%;
-    pointer-events: none; z-index: 1;
+/* --- QUANTUM PYLONS (REPLACES OLD TEXT HUD) --- */
+.m-side-pylons {
+    position: absolute;
+    top: 50%; left: 0; width: 100%; height: 220px; 
+    transform: translateY(-50%);
+    pointer-events: none;
+    z-index: 5;
+    display: flex; justify-content: space-between; padding: 0 12px;
 }
-.m-hud-v-line {
-    position: absolute; top: 0; bottom: 0; width: 1px;
-    background: linear-gradient(to bottom, transparent, var(--m-primary), transparent);
+
+.m-pylon {
+    position: relative;
+    width: 6px; height: 100%;
+    background: rgba(10, 20, 30, 0.8);
+    border: 1px solid rgba(0, 242, 255, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    display: flex; flex-direction: column; justify-content: space-between;
+}
+
+.m-pylon-core {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(to bottom, 
+        transparent 0%, 
+        var(--m-primary) 45%, 
+        #fff 50%, 
+        var(--m-primary) 55%, 
+        transparent 100%);
+    background-size: 100% 300%;
     opacity: 0.3;
+    filter: blur(2px);
+    animation: energyFlow 3s ease-in-out infinite;
+    mix-blend-mode: screen;
 }
-.m-hud-left { left: 15px; }
-.m-hud-right { right: 15px; }
 
-.m-hud-bracket {
-    position: absolute; width: 20px; height: 100%;
-    border: 1px solid rgba(0, 242, 255, 0.15);
-    border-right: none;
-    border-left: 2px solid var(--m-primary);
-    opacity: 0.4;
-    top: 0;
+.m-pylon-scan {
+    position: absolute; left: -2px; right: -2px; height: 30px;
+    background: linear-gradient(to bottom, transparent, var(--m-primary), transparent);
+    opacity: 0.8;
+    filter: drop-shadow(0 0 6px var(--m-primary));
+    animation: scannerMove 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
-.m-bracket-l { left: 0; border-radius: 10px 0 0 10px; border-right: none; }
-.m-bracket-r { right: 0; border-radius: 0 10px 10px 0; border-left: none; border-right: 2px solid var(--m-primary); }
 
-.m-hud-tech-text {
-    position: absolute; top: 50%; transform: translateY(-50%);
-    font-family: 'Rajdhani', monospace; font-size: 0.6rem; color: var(--m-primary);
-    opacity: 0.7; writing-mode: vertical-rl; text-orientation: mixed;
-    letter-spacing: 2px; text-shadow: 0 0 5px var(--m-primary);
+.m-pylon-cap {
+    width: 100%; height: 8px;
+    background: #0f1820;
+    border: 1px solid rgba(0, 242, 255, 0.3);
+    z-index: 2;
 }
-.m-text-l { left: 5px; }
-.m-text-r { right: 5px; transform: translateY(-50%) rotate(180deg); }
+.m-pylon-cap.top { border-bottom: none; border-radius: 2px 2px 0 0; }
+.m-pylon-cap.btm { border-top: none; border-radius: 0 0 2px 2px; }
+
+.m-data-stream {
+    position: absolute; top: 15%; bottom: 15%; width: 2px;
+}
+.m-ds-left { right: -8px; }
+.m-ds-right { left: -8px; }
+
+.m-data-bit {
+    position: absolute; left: 0; width: 2px; height: 6px;
+    background: var(--m-secondary);
+    opacity: 0;
+    box-shadow: 0 0 6px var(--m-secondary);
+    animation: bitFloat 3s linear infinite;
+    border-radius: 2px;
+}
+
+@keyframes energyFlow {
+    0% { background-position: 0% 0%; opacity: 0.2; }
+    50% { background-position: 0% 50%; opacity: 0.6; }
+    100% { background-position: 0% 100%; opacity: 0.2; }
+}
+@keyframes scannerMove {
+    0%, 100% { top: -20%; opacity: 0; }
+    10% { opacity: 1; }
+    50% { top: 120%; opacity: 0; }
+    51% { top: 120%; opacity: 0; }
+    60% { opacity: 1; }
+    90% { top: -20%; opacity: 0; }
+}
+@keyframes bitFloat {
+    0% { transform: translateY(120px) scaleY(1); opacity: 0; }
+    20% { opacity: 0.9; }
+    80% { opacity: 0.9; }
+    100% { transform: translateY(-120px) scaleY(1.5); opacity: 0; }
+}
+/* ------------------------------------- */
 
 /* --- NEW LOGO REACTOR CORE --- */
 .m-hero-portal {
@@ -157,10 +213,9 @@ body.low-power {
     display: flex; justify-content: center; align-items: center;
     perspective: 1000px;
     margin-bottom: 25px;
-    z-index: 10; /* Sopra le decorazioni */
+    z-index: 10;
 }
 
-/* The User Image (The Gate Seal) */
 .m-portal-img {
     width: 120px; height: 120px;
     object-fit: contain;
@@ -169,7 +224,6 @@ body.low-power {
     filter: drop-shadow(0 0 20px rgba(0, 242, 255, 0.8));
 }
 
-/* Backlight Energy Core */
 .m-energy-core {
     position: absolute;
     top: 50%; left: 50%;
@@ -183,7 +237,6 @@ body.low-power {
     animation: corePulse 4s ease-in-out infinite;
 }
 
-/* Rotating Rings - Cyan */
 .m-ring-plasma {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     border: 3px solid transparent;
@@ -195,7 +248,6 @@ body.low-power {
     box-shadow: 0 0 25px rgba(0, 242, 255, 0.4), inset 0 0 10px rgba(0, 242, 255, 0.2);
 }
 
-/* Rotating Rings - Purple */
 .m-ring-flux {
     position: absolute; top: 15px; left: 15px; right: 15px; bottom: 15px;
     border: 2px dashed rgba(170, 0, 255, 0.7);
@@ -205,7 +257,6 @@ body.low-power {
     filter: drop-shadow(0 0 10px var(--m-secondary));
 }
 
-/* Animations */
 @keyframes portalLevitate {
     0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 20px rgba(0, 242, 255, 0.7)); }
     50% { transform: translateY(-12px) scale(1.05); filter: drop-shadow(0 0 40px rgba(0, 242, 255, 1)) brightness(1.2); }
@@ -224,8 +275,6 @@ body.low-power {
     0% { transform: rotateX(-65deg) rotateY(360deg) rotateZ(0deg); }
     100% { transform: rotateX(-65deg) rotateY(0deg) rotateZ(-360deg); }
 }
-/* --------------------------- */
-
 
 .m-brand-title {
     font-family: 'Rajdhani', sans-serif; font-size: 3.2rem; font-weight: 900; line-height: 1;
@@ -250,10 +299,9 @@ body.low-power {
 }
 .m-brand-sub::after { background: linear-gradient(90deg, var(--m-primary), transparent); }
 
-/* VERSIONE PICCOLA */
 .m-version-tag {
     margin-top: 12px; font-family: 'Rajdhani', monospace; 
-    font-size: 0.65rem; /* Ridotto */
+    font-size: 0.65rem; 
     color: #e0f7fa; opacity: 0.9; letter-spacing: 2px;
     background: rgba(0, 242, 255, 0.1);
     padding: 4px 12px;
@@ -268,7 +316,6 @@ body.low-power {
 .m-v-dot { width: 5px; height: 5px; background: var(--m-success); border-radius: 50%; box-shadow: 0 0 5px var(--m-success); animation: blinkBase 2s infinite; }
 @keyframes blinkBase { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
 
-/* ECO MODE DISCRETO */
 .m-eco-toggle {
     position: absolute;
     top: 15px; right: 15px;
@@ -318,7 +365,6 @@ body.low-power {
 @keyframes railSpin { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.3); } 100% { transform: rotate(360deg) scale(1); } }
 .m-rail-btn.spin-anim .m-rail-icon { animation: railSpin 0.6s ease-out; }
 
-/* Service Colors */
 .m-rail-btn[onclick*="'rd'"].active { background: #fff; box-shadow: 0 0 20px rgba(255,255,255,0.6); }
 .m-rail-btn[onclick*="'ad'"].active { background: var(--m-primary); box-shadow: 0 0 20px var(--m-primary); }
 .m-rail-btn[onclick*="'tb'"].active { background: var(--m-accent); color:#fff; box-shadow: 0 0 20px var(--m-accent); }
@@ -358,7 +404,6 @@ body.low-power {
 .m-module-info { flex: 1; padding: 0 15px; }
 .m-module-name { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1.05rem; color: #fff; line-height: 1.2; }
 
-/* Leggibilità Migliorata */
 .m-module-desc { 
     font-family: 'Outfit', sans-serif; 
     font-size: 0.8rem; 
@@ -439,22 +484,20 @@ body.low-power {
 /* UTILS & WIDGETS */
 .m-input-group { position: relative; margin-bottom: 18px; }
 
-/* FIX: Padding right increased to 100px so text doesn't go under button */
 .m-input { 
     width: 100%; background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; 
-    padding: 18px; padding-right: 100px; /* SPAZIO AGGIUNTIVO PER NON SOVRAPPORRE */
+    padding: 18px; padding-right: 100px;
     color: var(--m-primary); font-family: 'Rajdhani', monospace; font-size: 1.1rem; font-weight: 700; transition: all 0.3s ease; 
 }
 .m-input:focus { border-color: var(--m-primary); background: rgba(0,0,0,0.85); box-shadow: var(--m-glow), 0 0 18px rgba(0,242,255,0.15); }
 
-/* FIX: Compact Paste Button */
 .m-paste-btn { 
     position: absolute; right: 6px; top: 6px; bottom: 6px; 
     background: rgba(255,255,255,0.1); color: var(--m-primary); border: 1px solid rgba(255,255,255,0.15); 
     border-radius: 10px; 
-    padding: 0 10px; /* Reduced Padding */
+    padding: 0 10px; 
     display: flex; align-items: center; justify-content: center; gap: 6px; 
-    font-size: 0.65rem; /* Reduced Font Size */
+    font-size: 0.65rem; 
     font-weight: 700; font-family: 'Rajdhani', sans-serif; transition: all 0.2s ease; box-shadow: var(--m-glow); 
 }
 .m-paste-btn:hover { background: rgba(255,255,255,0.15); }
@@ -486,7 +529,6 @@ body.low-power {
 .m-label { flex: 1; min-width: 0; padding-right: 5px; }
 .m-label h4 { margin: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 1.05rem; color: #fff; font-family: 'Rajdhani', sans-serif; font-weight: 700; text-shadow: 0 0 4px rgba(255,255,255,0.2); }
 
-/* Leggibilità Migliorata */
 .m-label p { 
     font-family: 'Outfit', sans-serif; 
     margin: 5px 0 0; 
@@ -627,7 +669,6 @@ input:checked + .m-slider-amber:before { background-color: var(--m-amber); box-s
 .m-faq-item:hover { background: rgba(255,255,255,0.03); }
 .m-faq-q { font-weight: 700; color: #fff; font-size: 1rem; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
 
-/* Leggibilità Migliorata */
 .m-faq-a { 
     font-family: 'Outfit', sans-serif; 
     font-size: 0.9rem; 
@@ -654,13 +695,32 @@ const mobileHTML = `
             <div class="m-hero">
                 
                 <div class="m-hero-grid"></div>
-                <div class="m-hud-lines">
-                    <div class="m-hud-v-line m-hud-left"></div>
-                    <div class="m-hud-v-line m-hud-right"></div>
-                    <div class="m-hud-bracket m-bracket-l"></div>
-                    <div class="m-hud-bracket m-bracket-r"></div>
-                    <div class="m-hud-tech-text m-text-l">SYS.01</div>
-                    <div class="m-hud-tech-text m-text-r">NET.OK</div>
+                
+                <div class="m-side-pylons">
+                    <div class="m-pylon">
+                        <div class="m-pylon-cap top"></div>
+                        <div class="m-pylon-core"></div>
+                        <div class="m-pylon-scan" style="animation-delay: 0s;"></div>
+                        <div class="m-pylon-cap btm"></div>
+                        
+                        <div class="m-data-stream m-ds-left">
+                            <div class="m-data-bit" style="top:80%; animation-delay:0.5s;"></div>
+                            <div class="m-data-bit" style="top:40%; animation-delay:1.2s;"></div>
+                            <div class="m-data-bit" style="top:10%; animation-delay:2.5s;"></div>
+                        </div>
+                    </div>
+
+                    <div class="m-pylon">
+                        <div class="m-pylon-cap top"></div>
+                        <div class="m-pylon-core" style="animation-direction: reverse;"></div>
+                        <div class="m-pylon-scan" style="animation-delay: 2s;"></div>
+                        <div class="m-pylon-cap btm"></div>
+
+                        <div class="m-data-stream m-ds-right">
+                            <div class="m-data-bit" style="top:70%; animation-delay:0.8s; background:var(--m-primary); box-shadow:0 0 5px var(--m-primary);"></div>
+                            <div class="m-data-bit" style="top:30%; animation-delay:1.9s; background:var(--m-primary); box-shadow:0 0 5px var(--m-primary);"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="m-hero-portal">
