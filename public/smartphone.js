@@ -831,6 +831,20 @@ const mobileHTML = `
                             <span class="m-slider m-slider-purple"></span>
                         </label>
                     </div>
+                    
+                    <div class="m-module" id="mod-webstr" style="border-color: rgba(255, 255, 255, 0.2);">
+                        <div class="m-module-icon" style="color:#fff"><i class="fas fa-spider"></i></div>
+                        <div class="m-module-info">
+                            <div class="m-module-name">WebStreamr Fallback</div>
+                            <div class="m-module-desc" style="font-size:0.75rem; line-height:1.3; margin-top:4px;">
+                                <strong>Protocollo di Emergenza.</strong> Si attiva in automatico quando non si trovano risultati Debrid e gli altri servizi Web (come SC o GuardaHD) sono disabilitati o vuoti. Recupera stream di backup da database esterni.
+                            </div>
+                        </div>
+                        <label class="m-switch">
+                            <input type="checkbox" id="m-enableWebStreamr" checked onchange="toggleModuleStyle('m-enableWebStreamr', 'mod-webstr');">
+                            <span class="m-slider" style="background-color:#333;"></span>
+                        </label>
+                    </div>
 
                 </div>
 
@@ -1041,6 +1055,7 @@ const mobileHTML = `
         <div class="m-modal-header"><div class="m-modal-title">DATABASE FAQ</div><div class="m-close-icon" onclick="closeFaq()"><i class="fas fa-times"></i></div></div>
         <div class="m-faq-content">
             <div class="m-faq-item" onclick="toggleFaqItem(this)"><div class="m-faq-q">Come funziona? <i class="fas fa-chevron-down"></i></div><div class="m-faq-a">Leviathan scansiona le profondità del web per trovare Torrent e flussi StreamingCommunity ad alta velocità.</div></div>
+            <div class="m-faq-item" onclick="toggleFaqItem(this)"><div class="m-faq-q">WebStreamr Fallback <i class="fas fa-chevron-down"></i></div><div class="m-faq-a">È un sistema di emergenza. Se Leviathan non trova alcun risultato Torrent o Web normale, attiva WebStreamr per cercare flussi HTTP diretti gratuiti (non Debrid) da database di riserva.</div></div>
             <div class="m-faq-item" onclick="toggleFaqItem(this)"><div class="m-faq-q">MediaFlow & GuardaHD/GS <i class="fas fa-chevron-down"></i></div><div class="m-faq-a">GuardaHD e GuardaSerie richiedono un Proxy. Inserisci URL e Password del tuo MediaFlow Server nel modulo "Network".</div></div>
             <div class="m-faq-item" onclick="toggleFaqItem(this)"><div class="m-faq-q">Cos'è il Cache Builder? <i class="fas fa-chevron-down"></i></div><div class="m-faq-a">Mostra Torrent NON ancora scaricati su Debrid. Cliccandoli, avvierai il download.</div></div>
              <div class="m-faq-item" onclick="toggleFaqItem(this)"><div class="m-faq-q">Debrid Ghost Mode <i class="fas fa-chevron-down"></i></div><div class="m-faq-a">Debrid Ghost instrada tutte le richieste Debrid tramite il proxy MediaFlow configurato, nascondendo il tuo IP domestico al provider Debrid.</div></div>
@@ -1397,6 +1412,10 @@ function loadMobileConfig() {
 
                 document.getElementById('m-enableGs').checked = config.filters.enableGs || false;
                 toggleModuleStyle('m-enableGs', 'mod-gs');
+                
+                // [NEW] WebStreamr Config Load
+                document.getElementById('m-enableWebStreamr').checked = config.filters.enableWebStreamr !== false;
+                toggleModuleStyle('m-enableWebStreamr', 'mod-webstr');
 
                 document.getElementById('m-allowEng').checked = config.filters.allowEng || false;
                 
@@ -1474,6 +1493,8 @@ function getMobileConfig() {
             enableVix: document.getElementById('m-enableVix').checked,
             enableGhd: document.getElementById('m-enableGhd').checked,
             enableGs: document.getElementById('m-enableGs').checked,
+            // [NEW] WebStreamr Config Save
+            enableWebStreamr: document.getElementById('m-enableWebStreamr').checked,
             vixLast: document.getElementById('m-vixLast').checked,
             scQuality: mScQuality,
             maxPerQuality: gateActive ? gateVal : 0,
