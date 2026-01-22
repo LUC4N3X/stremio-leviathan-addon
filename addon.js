@@ -14,6 +14,8 @@ const NodeCache = require("node-cache");
 const { fetchExternalAddonsFlat } = require("./external-addons");
 const PackResolver = require("./leviathan-pack-resolver");
 const aioFormatter = require("./aiostreams-formatter.cjs");
+// [NUOVO] Import Gestore Fallback
+const { searchWebStreamr } = require("./webstreamr_handler");
 
 // --- IMPORT GESTORI WEB (Vix, GuardaHD & GuardaSerie) ---
 const { searchVix } = require("./vix/vix_handler");
@@ -425,9 +427,8 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
             .trim() || "P2P";
     }
     
-    // --- MODIFICA LAZY TAG ---
-    // Se è Lazy, cambiamo il tag del servizio in [LAZY]
-    const finalServiceTag = isLazy ? `${serviceTag}❓` : serviceTag;
+    // --- MODIFICA LAZY TAG: USA DADO 🎲 PER INDICARE "TENTA LA FORTUNA/DUBBIO" ---
+    const finalServiceTag = isLazy ? `${serviceTag} 🎲` : serviceTag;
     
     const sourceLine = `⚡ [${finalServiceTag}] ${displaySource}`;
     const name = `🦑 LEVIATHAN\n${qIcon} ${quality}`;
@@ -1087,15 +1088,23 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
 
   let debridStreams = [];
   if (ranked.length > 0 && hasDebridKey) {
-      // --- MODIFICA HYBRID MODE (Top 10 Instant / Resto Lazy) ---
+      // --- MODIFICA HYBRID MODE ---
       // Fix: Se TorBox, processiamo tutto subito (no lazy)
+      // Fix Serie: Se è una serie, NON controlliamo nulla istantaneamente (tutto Lazy)
       const isTorBox = config.service === 'tb';
-      const TOP_LIMIT = isTorBox ? ranked.length : 8; 
+      
+      let TOP_LIMIT = 13; // Default per Film (Top 13 istantanei)
+      
+      if (isTorBox) {
+          TOP_LIMIT = ranked.length; // TB controlla tutto
+      } else if (type === 'series') {
+          TOP_LIMIT = 0; // Serie TV -> 0 Istantanei, TUTTO Lazy
+      }
       
       const topItems = ranked.slice(0, TOP_LIMIT);
       const lazyItems = ranked.slice(TOP_LIMIT);
 
-      // 1. Risoluzione Immediata (Top 10 o Tutti per TB)
+      // 1. Risoluzione Immediata (Top 13 Film o Tutti TB)
       const immediatePromises = topItems.map(item => {
           item.season = meta.season;
           item.episode = meta.episode;
@@ -1103,8 +1112,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           return LIMITERS.rd.schedule(() => resolveDebridLink(config, item, config.filters?.showFake, reqHost));
       });
 
-      // 2. Generazione Lazy (Dall'11° in poi, vuoto per TB)
-      // Passiamo 'true' come ultimo parametro per segnalare Lazy Mode e mettere l'etichetta [LAZY]
+      // 2. Generazione Lazy (Tutto il resto, o TUTTO se è una serie)
       const lazyStreams = lazyItems.map(item =>
           generateLazyStream(item, config, meta, reqHost, userConfStr, true)
       );
@@ -1209,6 +1217,18 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           if ((config.filters.noScr || config.filters.noCam) && /CAM|SCR|TS|TELESYNC|HDCAM/.test(checkStr)) return false;
           return true;
       });
+  }
+
+  // --- FALLBACK WEBSTREAMR: SOLO SE 0 RISULTATI (P2P + WEB LOCALI) ---
+  if (finalStreams.length === 0) {
+      logger.info(`⚠️ [FALLBACK] Nessun risultato trovato (P2P/Web Locali). Attivo WebStreamr...`);
+      const webStreamrResults = await searchWebStreamr(type, finalId);
+      if (webStreamrResults.length > 0) {
+           finalStreams.push(...webStreamrResults);
+           logger.info(`🕷️ [WEBSTREAMR] Aggiunti ${webStreamrResults.length} stream di fallback.`);
+      } else {
+           logger.info(`❌ [WEBSTREAMR] Nessun risultato trovato.`);
+      }
   }
   
   const resultObj = { streams: finalStreams };
@@ -1436,7 +1456,8 @@ const PUBLIC_PORT = process.env.PUBLIC_PORT || PORT;
 app.listen(PORT, () => {
     console.log(`🚀 Leviathan (God Tier) attivo su porta interna ${PORT}`);
     console.log(`-----------------------------------------------------`);
-    console.log(`⚡ MODE: HYBRID 10 (Top 10 Instant / Rest Lazy)`);
+    console.log(`⚡ MODE: HYBRID 13 (Top 13 Instant / Rest Lazy)`);
+    console.log(`🎬 SERIES: Full Lazy Mode (No Instant Check)`);
     console.log(`📡 INDEXER URL (ENV): ${CONFIG.INDEXER_URL}`);
     console.log(`🎬 METADATA: TMDB Primary (User Key Priority)`);
     console.log(`💾 SCRITTURA: DB Locale (Auto-Learning attivo)`);
@@ -1444,6 +1465,7 @@ app.listen(PORT, () => {
     console.log(`⚖️ SIZE LIMITER: Modulo Attivo (GB Filter)`);
     console.log(`🦁 GUARDA HD: Modulo Integrato e Pronto`);
     console.log(`🛡️ GUARDA SERIE: Modulo Integrato e Pronto`);
+    console.log(`🕷️ WEBSTREAMR: Fallback Attivo (Su 0 Risultati)`);
     console.log(`📦 TORBOX: True Cache Check Enabled`);
     console.log(`🦑 LEVIATHAN CORE: Optimized for High Reliability`);
     console.log(`-----------------------------------------------------`);
