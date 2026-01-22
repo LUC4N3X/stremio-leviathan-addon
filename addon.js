@@ -317,11 +317,13 @@ function extractStreamInfo(title, source) {
   const audioInfo = extractAudioInfo(title);
   let detailsParts = [];
   if (videoTags.length) detailsParts.push(`🖥️ ${videoTags.join(" ")}`);
-  return { quality: q, qIcon, info: detailsParts.join(" | "), lang, audioInfo };
+  
+  // Ritorno 'rawVideoTags' per la logica di Binge Grouping
+  return { quality: q, qIcon, info: detailsParts.join(" | "), lang, audioInfo, rawVideoTags: videoTags };
 }
 
 function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag = "RD", config = {}, infoHash = null, isLazy = false) {
-    const { quality, qIcon, info, lang, audioInfo } = extractStreamInfo(fileTitle, source);
+    const { quality, qIcon, info, lang, audioInfo, rawVideoTags } = extractStreamInfo(fileTitle, source);
     const cleanNameTitle = cleanFilename(fileTitle);
 
     let sizeString = size ? formatBytes(size) : "";
@@ -339,6 +341,13 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
         else gb = 1 + (seed % 200) / 100;
         sizeString = `${gb.toFixed(2)} GB`;
     }
+
+    // --- BINGE GROUPING INTELLIGENTE ---
+    // Uniamo Qualità + Tech Specs (HDR, DV, etc) + Service Provider
+    // Esempio: "Leviathan|4K|HDR|RD"
+    // Questo dice a Stremio: "Per il prossimo episodio, cerca un flusso che sia 4K, HDR e su RD"
+    const techClean = rawVideoTags ? rawVideoTags.join("") : "";
+    const bingeGroup = `Leviathan|${quality}|${techClean}|${serviceTag}`;
 
     if (aioFormatter && aioFormatter.isAIOStreamsEnabled(config)) {
         let fullService = 'p2p';
@@ -380,7 +389,7 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
             isPack: false,
             episodeTitle: getEpisodeTag(fileTitle)
         });
-        return { name, title };
+        return { name, title, bingeGroup };
     }
 
     const sizeStr = `🧲 ${sizeString}`;
@@ -446,7 +455,7 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     const techLine = [sizeStr, seedersStr].filter(Boolean).join(" • ");
     if (techLine) lines.push(techLine);
     if (sourceLine) lines.push(sourceLine);
-    return { name, title: lines.join("\n") };
+    return { name, title: lines.join("\n"), bingeGroup };
 }
 
 function formatVixStream(meta, vixData) {
@@ -460,11 +469,14 @@ function formatVixStream(meta, vixData) {
     lines.push(`☁️ Web Stream • ⚡ Instant`);
     lines.push(`🍝 StreamingCommunity`);
     
+    // Binge Group Web Unificato
+    const bingeGroup = `Leviathan|${quality}|Web|SC`;
+
     return {
         name: `🌪️ StreamingCommunity\n${qIcon} ${quality}`,
         title: lines.join("\n"),
         url: vixData.url,
-        behaviorHints: { notWebReady: false, bingieGroup: "vix-stream" }
+        behaviorHints: { notWebReady: false, bingieGroup: bingeGroup }
     };
 }
 
@@ -675,9 +687,9 @@ async function resolveDebridLink(config, item, showFake, reqHost) {
         if (service === 'tb') {
             if (item._tbCached) {
                 const serviceTag = "TB";
-                const { name, title } = formatStreamTitleCinePro(item.title, item.source, item._size, item.seeders, serviceTag, config, item.hash);
+                const { name, title, bingeGroup } = formatStreamTitleCinePro(item.title, item.source, item._size, item.seeders, serviceTag, config, item.hash);
                 const proxyUrl = `${reqHost}/${config.rawConf}/play_tb/${item.hash}?s=${item.season || 0}&e=${item.episode || 0}`;
-                return { name, title, url: proxyUrl, behaviorHints: { notWebReady: false, bingieGroup: `corsaro-tb` } };
+                return { name, title, url: proxyUrl, behaviorHints: { notWebReady: false, bingieGroup: bingeGroup } };
             } else { return null; }
         }
 
@@ -688,8 +700,8 @@ async function resolveDebridLink(config, item, showFake, reqHost) {
         if (!streamData || (streamData.type === "ready" && streamData.size < CONFIG.REAL_SIZE_FILTER)) return null;
 
         const serviceTag = service.toUpperCase();
-        const { name, title } = formatStreamTitleCinePro(streamData.filename || item.title, item.source, streamData.size || item.size, item.seeders, serviceTag, config, item.hash);
-        return { name, title, url: streamData.url, behaviorHints: { notWebReady: false, bingieGroup: `corsaro-${service}` } };
+        const { name, title, bingeGroup } = formatStreamTitleCinePro(streamData.filename || item.title, item.source, streamData.size || item.size, item.seeders, serviceTag, config, item.hash);
+        return { name, title, url: streamData.url, behaviorHints: { notWebReady: false, bingieGroup: bingeGroup } };
     } catch (e) {
         if (showFake) return { name: `[P2P ⚠️]`, title: `${item.title}\n⚠️ Cache Assente`, url: item.magnet, behaviorHints: { notWebReady: true } };
         return null;
@@ -701,7 +713,7 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
     const serviceTag = service.toUpperCase();
     
     // --- MODIFICA RICHIESTA: Se è Lazy, passiamo isLazy a formatStreamTitleCinePro ---
-    const { name, title } = formatStreamTitleCinePro(
+    const { name, title, bingeGroup } = formatStreamTitleCinePro(
         item.title,
         item.source,
         item._size || item.sizeBytes || 0,
@@ -720,7 +732,7 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
         title,
         url: lazyUrl,
         infoHash: item.hash,
-        behaviorHints: { notWebReady: false, bingieGroup: `corsaro-${service}-${item.hash}` }
+        behaviorHints: { notWebReady: false, bingieGroup: bingeGroup }
     };
 }
 
@@ -1187,7 +1199,8 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
                        techInfo: techStr 
                    });
                    if (!stream.behaviorHints) stream.behaviorHints = {};
-                   stream.behaviorHints.bingieGroup = `web-${sourceName.replace(/\W/g,'')}-${quality}`;
+                   // Binge Group Web Unificato
+                   stream.behaviorHints.bingieGroup = `Leviathan|${quality}|Web|${sourceName.replace(/\W/g,'')}`;
                });
            };
            if (typeof rawVix !== 'undefined') applyAioStyle(rawVix, "StreamingCommunity");
@@ -1219,12 +1232,8 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       });
   }
 
-  // --- FALLBACK WEBSTREAMR: ATTIVO DEFAULT (DISATTIVABILE DA CONFIG) ---
-  // Se 'enableWebStreamr' è undefined o true, il fallback è attivo.
-  // Solo se config.filters.enableWebStreamr === false viene disattivato.
-  const isWebStreamrEnabled = config.filters?.enableWebStreamr !== false;
-
-  if (finalStreams.length === 0 && isWebStreamrEnabled) {
+  // --- FALLBACK WEBSTREAMR: SOLO SE 0 RISULTATI (P2P + WEB LOCALI) ---
+  if (finalStreams.length === 0) {
       logger.info(`⚠️ [FALLBACK] Nessun risultato trovato (P2P/Web Locali). Attivo WebStreamr...`);
       const webStreamrResults = await searchWebStreamr(type, finalId);
       if (webStreamrResults.length > 0) {
@@ -1233,8 +1242,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       } else {
            logger.info(`❌ [WEBSTREAMR] Nessun risultato trovato.`);
       }
-  } else if (finalStreams.length === 0 && !isWebStreamrEnabled) {
-       logger.info(`ℹ️ [FALLBACK] Nessun risultato, WebStreamr disabilitato da config.`);
   }
   
   const resultObj = { streams: finalStreams };
@@ -1471,7 +1478,7 @@ app.listen(PORT, () => {
     console.log(`⚖️ SIZE LIMITER: Modulo Attivo (GB Filter)`);
     console.log(`🦁 GUARDA HD: Modulo Integrato e Pronto`);
     console.log(`🛡️ GUARDA SERIE: Modulo Integrato e Pronto`);
-    console.log(`🕷️ WEBSTREAMR: Fallback Attivo (Disattivabile da Config)`);
+    console.log(`🕷️ WEBSTREAMR: Fallback Attivo (Su 0 Risultati)`);
     console.log(`📦 TORBOX: True Cache Check Enabled`);
     console.log(`🦑 LEVIATHAN CORE: Optimized for High Reliability`);
     console.log(`-----------------------------------------------------`);
