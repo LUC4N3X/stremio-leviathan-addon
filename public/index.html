@@ -19,7 +19,7 @@
             --text-dim: #8baac2;
             --error: #ff3366;
             --warning: #ffcc00;
-            --limit-neon: #ff0055; /* Magenta Neon (USATO PER CAFFE E LIMITATORE) */
+            --limit-neon: #ff0055; /* Magenta Neon (USATO SOLO PER LIMITATORE) */
             --glow-strong: 0 0 20px rgba(0, 242, 255, 0.6);
             --glow-intense: 0 0 40px rgba(0, 242, 255, 0.8), 0 0 60px rgba(0, 242, 255, 0.4);
         }
@@ -437,32 +437,33 @@
         .cmd-role { font-family: 'Rajdhani', sans-serif; font-size: 0.75rem; color: var(--primary); letter-spacing: 2px; text-transform: uppercase; }
         .cmd-nick { font-family: 'Rajdhani', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; text-shadow: 0 0 10px rgba(0, 242, 255, 0.3); }
 
-        /* Donate Card (Plasma Style - NO YELLOW) */
+        /* Donate Card (STILE LEVIATHAN - CIANO/VIOLA) */
         .fuel-card {
-            background: linear-gradient(145deg, rgba(25, 0, 10, 0.8), rgba(255, 0, 85, 0.05));
-            border-color: rgba(255, 0, 85, 0.3); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(145deg, rgba(0, 20, 40, 0.8), rgba(0, 242, 255, 0.05));
+            border-color: rgba(0, 242, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
         .fuel-card:hover {
-            border-color: var(--limit-neon); /* Magenta Neon */
-            box-shadow: 0 0 35px rgba(255, 0, 85, 0.3), inset 0 0 20px rgba(255, 0, 85, 0.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 35px rgba(0, 242, 255, 0.3), inset 0 0 20px rgba(0, 242, 255, 0.1);
             transform: translateY(-5px) scale(1.02);
         }
         .fuel-icon {
-            font-size: 1.8rem; color: var(--limit-neon); /* Icona Magenta */
-            filter: drop-shadow(0 0 10px rgba(255, 0, 85, 0.6)); /* Bagliore colorato */
+            font-size: 1.8rem; color: var(--primary); /* Icona Ciano */
+            filter: drop-shadow(0 0 10px var(--primary)); 
             animation: plasmaPulse 1.5s infinite alternate;
         }
         @keyframes plasmaPulse { 
-            0% { opacity: 0.8; text-shadow: 0 0 10px var(--limit-neon); transform: scale(1); } 
-            100% { opacity: 1; text-shadow: 0 0 25px var(--limit-neon), 0 0 40px var(--limit-neon); transform: scale(1.1); } 
+            0% { opacity: 0.8; text-shadow: 0 0 10px var(--primary); transform: scale(1); } 
+            100% { opacity: 1; text-shadow: 0 0 25px var(--primary), 0 0 40px var(--secondary); transform: scale(1.1); } 
         }
         .fuel-data h4 {
             margin: 0; font-family: 'Rajdhani', sans-serif; color: #fff; font-size: 1.2rem; font-weight: 800;
             text-transform: uppercase; letter-spacing: 1px;
-            background: linear-gradient(90deg, #fff, var(--limit-neon)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background: linear-gradient(90deg, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
         .fuel-data span { font-size: 0.8rem; color: rgba(255, 255, 255, 0.6); letter-spacing: 2px; text-transform: uppercase; }
-        .fuel-card:hover .fuel-data span { color: #fff; text-shadow: 0 0 5px rgba(255, 0, 85, 0.5); }
+        .fuel-card:hover .fuel-data span { color: #fff; text-shadow: 0 0 5px var(--primary); }
         
         .signature { font-family: 'Rajdhani', sans-serif; color: rgba(255, 255, 255, 0.2); font-size: 0.8rem; letter-spacing: 3px; text-transform: uppercase; }
 
@@ -547,10 +548,10 @@
                     </div>
                 </div>
                 <div class="info-card">
-                    <div class="info-icon"><i class="fas fa-biohazard"></i></div>
+                    <div class="info-icon"><i class="fas fa-spider"></i></div>
                     <div class="info-text">
-                        <h4 class="notranslate" translate="no">Hybrid Core</h4>
-                        <p>Fusione Torrent + SC Stream.</p>
+                        <h4 class="notranslate" translate="no">WebStreamr</h4>
+                        <p>Protocollo di Fallback d'Emergenza.</p>
                     </div>
                 </div>
             </div>
@@ -632,6 +633,18 @@
                              </div>
                              <label class="switch mf-switch"><input type="checkbox" id="vixLast"><span class="slider"></span></label>
                          </div>
+                         
+                      <div class="control-row" style="margin-top:15px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top:15px;">
+                            <div class="control-info">
+                                <div class="control-title">
+                                    <i class="fas fa-spider" style="color: #fff"></i> WebStreamr Fallback
+                                </div>
+                                <span class="control-desc">
+                                    <strong>Protocollo di Emergenza.</strong> Si attiva in automatico quando non si trovano risultati Debrid e gli altri servizi Web (come SC o GuardaHD) sono disabilitati o vuoti. Recupera stream di backup da database esterni.
+                                </span>
+                            </div>
+                            <label class="switch"><input type="checkbox" id="enableWebStreamr" checked><span class="slider"></span></label>
+                        </div>
                     </div>
 
                     <div class="module-box" id="netModule" style="border-color: rgba(0, 242, 255, 0.3);">
@@ -799,6 +812,10 @@
                     <div class="faq-a"><span class="notranslate" translate="no">Leviathan</span> scansiona le profondità del web per trovare Torrent (tramite Debrid) e flussi <span class="notranslate" translate="no">StreamingCommunity</span> ad alta velocità.</div>
                 </div>
                 <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-q">WebStreamr Fallback <i class="fas fa-chevron-down"></i></div>
+                    <div class="faq-a">È un sistema di emergenza. Se Leviathan non trova alcun risultato Torrent o Web normale, attiva WebStreamr per cercare flussi HTTP diretti gratuiti (non Debrid) da database di riserva.</div>
+                </div>
+                <div class="faq-item" onclick="toggleFaq(this)">
                     <div class="faq-q">MediaFlow & GuardaHD/GS <i class="fas fa-chevron-down"></i></div>
                     <div class="faq-a">I servizi come GuardaHD e GuardaSerie richiedono spesso un Proxy (MediaFlow) per funzionare correttamente su tutti i dispositivi.</div>
                 </div>
@@ -964,7 +981,10 @@
                         document.getElementById('enableVix').checked = config.filters.enableVix || false;
                         document.getElementById('vixLast').checked = config.filters.vixLast || false;
                         document.getElementById('enableGhd').checked = config.filters.enableGhd || false;
-                        document.getElementById('enableGs').checked = config.filters.enableGs || false; 
+                        document.getElementById('enableGs').checked = config.filters.enableGs || false;
+                        // WEBSTREAMR: Se undefined è true, altrimenti usa valore
+                        document.getElementById('enableWebStreamr').checked = config.filters.enableWebStreamr !== false;
+                        
                         setSpecState('btn_4k', config.filters.no4k);
                         setSpecState('btn_1080', config.filters.no1080);
                         setSpecState('btn_720', config.filters.no720);
@@ -1039,7 +1059,8 @@
                     noCam: document.getElementById('btn_sd').classList.contains('excluded'),
                     enableVix: document.getElementById('enableVix').checked,
                     enableGhd: document.getElementById('enableGhd').checked,
-                    enableGs: document.getElementById('enableGs').checked, 
+                    enableGs: document.getElementById('enableGs').checked,
+                    enableWebStreamr: document.getElementById('enableWebStreamr').checked,
                     vixLast: document.getElementById('vixLast').checked,
                     scQuality: currentSCQuality, 
                     maxPerQuality: gateActive ? gateVal : 0,
@@ -1067,6 +1088,7 @@
             }
             let ghdText = c.filters.enableGhd ? 'ATTIVO 🦁' : 'NO';
             let gsText = c.filters.enableGs ? 'ATTIVO 🛡️' : 'NO';
+            let webStreamrText = c.filters.enableWebStreamr ? 'ATTIVO 🕷️' : 'DISATTIVATO';
             let exclText = [];
             if(c.filters.no4k) exclText.push("4K");
             if(c.filters.no1080) exclText.push("1080p");
@@ -1082,6 +1104,7 @@
             list.innerHTML = `
                 <li>Servizio Debrid <span>${c.service.toUpperCase()}</span></li>
                 <li>Sorgenti Web <span>SC: ${scText} | GHD: ${ghdText} | GS: ${gsText}</span></li>
+                <li>Fallback WebStreamr <span>${webStreamrText}</span></li>
                 <li>Flux Priority <span>${sortText}</span></li>
                 <li>Proxy Bridge <span>${c.mediaflow.url ? 'CONFIGURATO' : 'NON ATTIVO'}</span></li>
                 <li>Proxy Ghost <span>${c.mediaflow.proxyDebrid ? 'ATTIVO' : 'NO'}</span></li>
