@@ -1219,8 +1219,12 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       });
   }
 
-  // --- FALLBACK WEBSTREAMR: SOLO SE 0 RISULTATI (P2P + WEB LOCALI) ---
-  if (finalStreams.length === 0) {
+  // --- FALLBACK WEBSTREAMR: ATTIVO DEFAULT (DISATTIVABILE DA CONFIG) ---
+  // Se 'enableWebStreamr' è undefined o true, il fallback è attivo.
+  // Solo se config.filters.enableWebStreamr === false viene disattivato.
+  const isWebStreamrEnabled = config.filters?.enableWebStreamr !== false;
+
+  if (finalStreams.length === 0 && isWebStreamrEnabled) {
       logger.info(`⚠️ [FALLBACK] Nessun risultato trovato (P2P/Web Locali). Attivo WebStreamr...`);
       const webStreamrResults = await searchWebStreamr(type, finalId);
       if (webStreamrResults.length > 0) {
@@ -1229,6 +1233,8 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       } else {
            logger.info(`❌ [WEBSTREAMR] Nessun risultato trovato.`);
       }
+  } else if (finalStreams.length === 0 && !isWebStreamrEnabled) {
+       logger.info(`ℹ️ [FALLBACK] Nessun risultato, WebStreamr disabilitato da config.`);
   }
   
   const resultObj = { streams: finalStreams };
@@ -1465,7 +1471,7 @@ app.listen(PORT, () => {
     console.log(`⚖️ SIZE LIMITER: Modulo Attivo (GB Filter)`);
     console.log(`🦁 GUARDA HD: Modulo Integrato e Pronto`);
     console.log(`🛡️ GUARDA SERIE: Modulo Integrato e Pronto`);
-    console.log(`🕷️ WEBSTREAMR: Fallback Attivo (Su 0 Risultati)`);
+    console.log(`🕷️ WEBSTREAMR: Fallback Attivo (Disattivabile da Config)`);
     console.log(`📦 TORBOX: True Cache Check Enabled`);
     console.log(`🦑 LEVIATHAN CORE: Optimized for High Reliability`);
     console.log(`-----------------------------------------------------`);
