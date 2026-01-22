@@ -1,18 +1,27 @@
 const EXTERNAL_ADDONS = {
     torrentio: {
-        baseUrl: 'https://torrentio.stremioluca.dpdns.org/oResults=false/aHR0cHM6Ly90b3JyZW50aW8uc3RyZW0uZnVuL3Byb3ZpZGVycz15dHMsZXp0dixyYXJiZywxMzM3eCx0aGVwaXJhdGViYXksa2lja2Fzc3RvcnJlbnRzLHRvcnJlbnRnYWxheHksbWFnbmV0ZGwsaG9ycmlibGVzdWJzLG55YWFzaSx0b2t5b3Rvc2hvLGFuaWRleCxydXRvcixydXRyYWNrZXIsY29tYW5kbyxibHVkdix0b3JyZW50OSxpbGNvcnNhcm9uZXJvLG1lam9ydG9ycmVudCx3b2xmbWF4NGssY2luZWNhbGlkYWQsYmVzdHRvcnJlbnRzfGxhbmd1YWdlPWl0YWxpYW4=',
+        // Configurazione con FAILOVER (triplo link)
+        baseUrls: [
+            // 1. Nuovo link (torrentioita)
+            'https://torrentioita.stremio.dpdns.org/oResults=false/aHR0cHM6Ly90b3JyZW50aW8uc3RyZW0uZnVuL3Byb3ZpZGVycz15dHMsZXp0dixyYXJiZywxMzM3eCx0aGVwaXJhdGViYXksa2lja2Fzc3RvcnJlbnRzLHRvcnJlbnRnYWxheHksbWFnbmV0ZGwsaG9ycmlibGVzdWJzLG55YWFzaSx0b2t5b3Rvc2hvLGFuaWRleCxydXRvcixydXRyYWNrZXIsY29tYW5kbyxibHVkdix0b3JyZW50OSxpbGNvcnNhcm9uZXJvLG1lam9ydG9ycmVudCx3b2xmbWF4NGssY2luZWNhbGlkYWQsYmVzdHRvcnJlbnRzfGxhbmd1YWdlPWl0YWxpYW4=',
+            
+            // 2. Vecchio link (stremioluca) come backup
+            'https://torrentio.stremioluca.dpdns.org/oResults=false/aHR0cHM6Ly90b3JyZW50aW8uc3RyZW0uZnVuL3Byb3ZpZGVycz15dHMsZXp0dixyYXJiZywxMzM3eCx0aGVwaXJhdGViYXksa2lja2Fzc3RvcnJlbnRzLHRvcnJlbnRnYWxheHksbWFnbmV0ZGwsaG9ycmlibGVzdWJzLG55YWFzaSx0b2t5b3Rvc2hvLGFuaWRleCxydXRvcixydXRyYWNrZXIsY29tYW5kbyxibHVkdix0b3JyZW50OSxpbGNvcnNhcm9uZXJvLG1lam9ydG9ycmVudCx3b2xmbWF4NGssY2luZWNhbGlkYWQsYmVzdHRvcnJlbnRzfGxhbmd1YWdlPWl0YWxpYW4=',
+            
+            // 3. Link di EMERGENZA (Solo ITA/Nyaa - Filtrato rigorosamente)
+            'https://torrentio.strem.fun/providers=nyaasi,ilcorsaronero%7Clanguage=italian%7Cdebridoptions=nodownloadlinks'
+        ],
         name: 'Torrentio',
         emoji: '🅣',
         timeout: 4500
     },
-    /* DISABILITATO SU RICHIESTA
     mediafusion: {
-        baseUrl: 'https://mediafusion.elfhosted.com/D-eX-S0MgfjbkgX-RCYPkCCvGKtrpBi3gaqyHsZS5HwxhrUYUDDvRwy4GhWUfcR6vbD6gw1fsASGluQzLWBphgGcBq_MmwGZwgKb24x7WlOO7OjmL6KfX3Zyg0mvIqGyajrkFQ7rld9uzzjph2jyNMAvFxF82F_-AmPIZ6xHreXztAADuN4rcro67zzvBhoNCJlXtsF5HrvmDedt4gTeeu-g',
+        // ATTIVATO
+        baseUrl: 'https://mediafusion.stremio.ru/D-T67taQDYh1r-Zq9_jdKJwgJfyPyZypBcztc8rIcsLJqQDS1eBLvFIssvKFXj-u0U',
         name: 'MediaFusion',
         emoji: '🅜',
         timeout: 4500
     },
-    */
     /* DISABILITATO SU RICHIESTA
     comet: {
         baseUrl: 'https://comet.elfhosted.com', 
@@ -143,41 +152,76 @@ async function fetchExternalAddon(addonKey, type, id) {
         return [];
     }
 
-    const url = `${addon.baseUrl}/stream/${type}/${id}.json`;
-    console.log(`🌐 [${addon.name}] Fetching: ${type}/${id}`);
+    // Costruisce la lista di URL da provare (supporta sia baseUrls array che baseUrl stringa singola)
+    const urlsToTry = [];
+    if (addon.baseUrls && Array.isArray(addon.baseUrls)) {
+        urlsToTry.push(...addon.baseUrls);
+    } else if (addon.baseUrl) {
+        urlsToTry.push(addon.baseUrl);
+    }
 
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), addon.timeout);
-
-        const response = await fetch(url, {
-            signal: controller.signal,
-            headers: {
-                'User-Agent': 'IlCorsaroViola/1.0 (Stremio Addon)',
-                'Accept': 'application/json'
-            }
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-            console.error(`❌ [${addon.name}] HTTP ${response.status}`);
-            return [];
-        }
-
-        const data = await response.json();
-        const streams = data.streams || [];
-        console.log(`✅ [${addon.name}] Received ${streams.length} streams`);
-        return streams.map(stream => normalizeExternalStream(stream, addonKey));
-
-    } catch (error) {
-        if (error.name === 'AbortError') {
-            console.error(`⏱️ [${addon.name}] Timeout after ${addon.timeout}ms`);
-        } else {
-            console.error(`❌ [${addon.name}] Error:`, error.message);
-        }
+    if (urlsToTry.length === 0) {
+        console.error(`❌ [External] No URLs configured for: ${addon.name}`);
         return [];
     }
+
+    // Ciclo sui vari URL (Logica di Failover)
+    for (let i = 0; i < urlsToTry.length; i++) {
+        const baseUrl = urlsToTry[i];
+        const url = `${baseUrl}/stream/${type}/${id}.json`;
+        console.log(`🌐 [${addon.name}] Attempt ${i + 1}/${urlsToTry.length}: Fetching ${type}/${id} ...`);
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), addon.timeout);
+
+            const response = await fetch(url, {
+                signal: controller.signal,
+                headers: {
+                    'User-Agent': 'IlCorsaroViola/1.0 (Stremio Addon)',
+                    'Accept': 'application/json'
+                }
+            });
+
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                console.warn(`⚠️ [${addon.name}] HTTP ${response.status} on URL ${i + 1}. Trying next if available...`);
+                continue; // Prova il prossimo URL
+            }
+
+            const data = await response.json();
+            const streams = data.streams || [];
+            console.log(`✅ [${addon.name}] Success on URL ${i + 1}. Received ${streams.length} streams`);
+            
+            // Logica EXTRA per il link di EMERGENZA (filtro ITA)
+            // Se siamo sull'ultimo URL (quello di emergenza), filtriamo via tutto ciò che non sembra ITA
+            // Questo è un controllo di sicurezza aggiuntivo lato codice, oltre alla configurazione del link
+            if (i === 2 && addonKey === 'torrentio') { 
+                 const filteredStreams = streams.filter(s => {
+                    const txt = (s.title + " " + s.name + " " + (s.description||"")).toLowerCase();
+                    // Accetta solo se contiene ita/italian o è nyaa (anime spesso multi/sub)
+                    return txt.includes('ita') || txt.includes('italian') || txt.includes('nyaa');
+                });
+                console.log(`⚠️ [Emergenza] Filtrati ${streams.length - filteredStreams.length} stream non-ITA.`);
+                return filteredStreams.map(stream => normalizeExternalStream(stream, addonKey));
+            }
+
+            // Se ha successo, ritorna subito e ferma il ciclo
+            return streams.map(stream => normalizeExternalStream(stream, addonKey));
+
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.warn(`⏱️ [${addon.name}] Timeout on URL ${i + 1} (${addon.timeout}ms).`);
+            } else {
+                console.warn(`❌ [${addon.name}] Error on URL ${i + 1}:`, error.message);
+            }
+            // Continua al prossimo giro del ciclo per provare il prossimo URL
+        }
+    }
+
+    console.error(`❌ [${addon.name}] All URLs failed.`);
+    return [];
 }
 
 function normalizeExternalStream(stream, addonKey) {
