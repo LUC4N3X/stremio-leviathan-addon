@@ -1,14 +1,17 @@
+const axios = require("axios");
+
+// --- CONFIGURAZIONE ADDON ESTERNI ---
 const EXTERNAL_ADDONS = {
     torrentio: {
         // Configurazione con FAILOVER (triplo link)
         baseUrls: [
-            // 1. Nuovo link (torrentioita)
+            // 1. Nuovo link (torrentioita) 
             'https://torrentioita.stremio.dpdns.org/oResults=false/aHR0cHM6Ly90b3JyZW50aW8uc3RyZW0uZnVuL3Byb3ZpZGVycz15dHMsZXp0dixyYXJiZywxMzM3eCx0aGVwaXJhdGViYXksa2lja2Fzc3RvcnJlbnRzLHRvcnJlbnRnYWxheHksbWFnbmV0ZGwsaG9ycmlibGVzdWJzLG55YWFzaSx0b2t5b3Rvc2hvLGFuaWRleCxydXRvcixydXRyYWNrZXIsY29tYW5kbyxibHVkdix0b3JyZW50OSxpbGNvcnNhcm9uZXJvLG1lam9ydG9ycmVudCx3b2xmbWF4NGssY2luZWNhbGlkYWQsYmVzdHRvcnJlbnRzfGxhbmd1YWdlPWl0YWxpYW4=',
             
-            // 2. Vecchio link (stremioluca) come backup
+            // 2. Vecchio link (stremioluca) 
             'https://torrentio.stremioluca.dpdns.org/oResults=false/aHR0cHM6Ly90b3JyZW50aW8uc3RyZW0uZnVuL3Byb3ZpZGVycz15dHMsZXp0dixyYXJiZywxMzM3eCx0aGVwaXJhdGViYXksa2lja2Fzc3RvcnJlbnRzLHRvcnJlbnRnYWxheHksbWFnbmV0ZGwsaG9ycmlibGVzdWJzLG55YWFzaSx0b2t5b3Rvc2hvLGFuaWRleCxydXRvcixydXRyYWNrZXIsY29tYW5kbyxibHVkdix0b3JyZW50OSxpbGNvcnNhcm9uZXJvLG1lam9ydG9ycmVudCx3b2xmbWF4NGssY2luZWNhbGlkYWQsYmVzdHRvcnJlbnRzfGxhbmd1YWdlPWl0YWxpYW4=',
             
-            // 3. Link di EMERGENZA (Solo ITA/Nyaa - Filtrato rigorosamente)
+            // 3. Link di EMERGENZA 
             'https://torrentio.strem.fun/providers=nyaasi,ilcorsaronero%7Clanguage=italian%7Cdebridoptions=nodownloadlinks'
         ],
         name: 'Torrentio',
@@ -16,25 +19,35 @@ const EXTERNAL_ADDONS = {
         timeout: 4500
     },
     mediafusion: {
-        // ATTIVATO
+        // URL MediaFusion
         baseUrl: 'https://mediafusion.stremio.ru/D-T67taQDYh1r-Zq9_jdKJwgJfyPyZypBcztc8rIcsLJqQDS1eBLvFIssvKFXj-u0U',
         name: 'MediaFusion',
         emoji: '🅜',
-        timeout: 4500
-    },
-    /* DISABILITATO SU RICHIESTA
-    comet: {
-        baseUrl: 'https://comet.elfhosted.com', 
-        name: 'Comet',
-        emoji: '🅒',
-        timeout: 4500
+        timeout: 4500,
+        filterIta: true 
     }
-    */
 };
 
 // ============================================================================
+
 // HELPER FUNCTIONS
-// ============================================================================
+
+// Regex per rilevare contenuto Italiano
+const REGEX_STRICT_ITA = /\b(ITA|ITALIAN|ITALY|IT|SUB\s*ITA|VOST|VOSTIT)\b/i;
+
+function isItalianContent(stream) {
+    const fullText = (
+        (stream.title || "") + " " + 
+        (stream.name || "") + " " + 
+        (stream.description || "") + " " +
+        (stream.behaviorHints?.filename || "")
+    ).toUpperCase();
+
+    if (REGEX_STRICT_ITA.test(fullText)) return true;
+    if (/CORSARO|ICV|MEGAPHONE|IDN_CREW|MUX|DDN|ITALIAN/.test(fullText)) return true;
+
+    return false;
+}
 
 function extractInfoHash(stream) {
     if (stream.infoHash) {
@@ -85,7 +98,6 @@ function extractSize(text) {
 function extractOriginalProvider(text) {
     if (!text) return null;
     
-    // 1. Pattern classici Torrentio/Stremio (Emoji)
     const torrentioMatch = text.match(/🔍\s*([^\n]+)/);
     if (torrentioMatch) return torrentioMatch[1].trim();
 
@@ -95,30 +107,12 @@ function extractOriginalProvider(text) {
     const cometMatch = text.match(/🔎\s*([^\n]+)/);
     if (cometMatch) return cometMatch[1].trim();
 
-    // 2. DIZIONARIO PROVIDER (Case Insensitive)
     const knownProviders = [
-        "ilCorSaRoNeRo", "Corsaro",
-        "1337x", "1337X",
-        "TorrentGalaxy", "TGX", "GalaxyRG",
-        "RARBG", "Rarbg",
-        "EZTV", "Eztv",
-        "YTS", "YIFY",
-        "MagnetDL",
-        "TorLock",
-        "PirateBay", "TPB", "ThePirateBay",
-        "Nyaa",
-        "RuTracker",
-        "SolidTorrents",
-        "KickAss", "KAT",
-        "LimeTorrents",
-        "Zooqle",
-        "GloDLS",
-        "TorrentDownload",
-        "YourBittorrent",
-        "BitSearch",
-        "Knaben",
-        "iDope",
-        "TorrentFunk"
+        "ilCorSaRoNeRo", "Corsaro", "1337x", "1337X", "TorrentGalaxy", "TGX", "GalaxyRG",
+        "RARBG", "Rarbg", "EZTV", "Eztv", "YTS", "YIFY", "MagnetDL", "TorLock",
+        "PirateBay", "TPB", "ThePirateBay", "Nyaa", "RuTracker", "SolidTorrents",
+        "KickAss", "KAT", "LimeTorrents", "Zooqle", "GloDLS", "TorrentDownload",
+        "YourBittorrent", "BitSearch", "Knaben", "iDope", "TorrentFunk"
     ];
 
     const lowerText = text.toLowerCase();
@@ -127,7 +121,6 @@ function extractOriginalProvider(text) {
             return provider;
         }
     }
-
     return null;
 }
 
@@ -141,93 +134,8 @@ function extractFilename(stream) {
     return stream.name || '';
 }
 
-// ============================================================================
-// MAIN FUNCTIONS
-// ============================================================================
-
-async function fetchExternalAddon(addonKey, type, id) {
-    const addon = EXTERNAL_ADDONS[addonKey];
-    if (!addon) {
-        console.error(`❌ [External] Unknown addon: ${addonKey}`);
-        return [];
-    }
-
-    // Costruisce la lista di URL da provare (supporta sia baseUrls array che baseUrl stringa singola)
-    const urlsToTry = [];
-    if (addon.baseUrls && Array.isArray(addon.baseUrls)) {
-        urlsToTry.push(...addon.baseUrls);
-    } else if (addon.baseUrl) {
-        urlsToTry.push(addon.baseUrl);
-    }
-
-    if (urlsToTry.length === 0) {
-        console.error(`❌ [External] No URLs configured for: ${addon.name}`);
-        return [];
-    }
-
-    // Ciclo sui vari URL (Logica di Failover)
-    for (let i = 0; i < urlsToTry.length; i++) {
-        const baseUrl = urlsToTry[i];
-        const url = `${baseUrl}/stream/${type}/${id}.json`;
-        console.log(`🌐 [${addon.name}] Attempt ${i + 1}/${urlsToTry.length}: Fetching ${type}/${id} ...`);
-
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), addon.timeout);
-
-            const response = await fetch(url, {
-                signal: controller.signal,
-                headers: {
-                    'User-Agent': 'IlCorsaroViola/1.0 (Stremio Addon)',
-                    'Accept': 'application/json'
-                }
-            });
-
-            clearTimeout(timeoutId);
-
-            if (!response.ok) {
-                console.warn(`⚠️ [${addon.name}] HTTP ${response.status} on URL ${i + 1}. Trying next if available...`);
-                continue; // Prova il prossimo URL
-            }
-
-            const data = await response.json();
-            const streams = data.streams || [];
-            console.log(`✅ [${addon.name}] Success on URL ${i + 1}. Received ${streams.length} streams`);
-            
-            // Logica EXTRA per il link di EMERGENZA (filtro ITA)
-            // Se siamo sull'ultimo URL (quello di emergenza), filtriamo via tutto ciò che non sembra ITA
-            // Questo è un controllo di sicurezza aggiuntivo lato codice, oltre alla configurazione del link
-            if (i === 2 && addonKey === 'torrentio') { 
-                 const filteredStreams = streams.filter(s => {
-                    const txt = (s.title + " " + s.name + " " + (s.description||"")).toLowerCase();
-                    // Accetta solo se contiene ita/italian o è nyaa (anime spesso multi/sub)
-                    return txt.includes('ita') || txt.includes('italian') || txt.includes('nyaa');
-                });
-                console.log(`⚠️ [Emergenza] Filtrati ${streams.length - filteredStreams.length} stream non-ITA.`);
-                return filteredStreams.map(stream => normalizeExternalStream(stream, addonKey));
-            }
-
-            // Se ha successo, ritorna subito e ferma il ciclo
-            return streams.map(stream => normalizeExternalStream(stream, addonKey));
-
-        } catch (error) {
-            if (error.name === 'AbortError') {
-                console.warn(`⏱️ [${addon.name}] Timeout on URL ${i + 1} (${addon.timeout}ms).`);
-            } else {
-                console.warn(`❌ [${addon.name}] Error on URL ${i + 1}:`, error.message);
-            }
-            // Continua al prossimo giro del ciclo per provare il prossimo URL
-        }
-    }
-
-    console.error(`❌ [${addon.name}] All URLs failed.`);
-    return [];
-}
-
 function normalizeExternalStream(stream, addonKey) {
     const addon = EXTERNAL_ADDONS[addonKey];
-    
-    // Combina Titolo, Nome e Descrizione per cercare il provider ovunque
     const fullTextSearch = `${stream.title || ''} ${stream.name || ''} ${stream.description || ''}`;
     
     const infoHash = extractInfoHash(stream);
@@ -238,15 +146,9 @@ function normalizeExternalStream(stream, addonKey) {
     const originalProvider = extractOriginalProvider(fullTextSearch);
 
     let sizeBytes = sizeInfo.bytes;
-    if (stream.behaviorHints?.videoSize) {
-        sizeBytes = stream.behaviorHints.videoSize;
-    }
-    if (stream.video_size) {
-        sizeBytes = stream.video_size;
-    }
+    if (stream.behaviorHints?.videoSize) sizeBytes = stream.behaviorHints.videoSize;
+    if (stream.video_size) sizeBytes = stream.video_size;
 
-    // 🔥 FIX PACK RESOLVER: Se fileIdx non c'è, mettiamo undefined (NON 0).
-    // Questo permette a Leviathan di capire che è un pack da esplorare.
     let fileIndex = undefined;
     if (stream.fileIdx !== undefined && stream.fileIdx !== null) {
         fileIndex = stream.fileIdx;
@@ -293,6 +195,106 @@ function buildMagnetLink(infoHash, sources) {
         }
     }
     return magnet;
+}
+
+// ============================================================================
+
+// MAIN FUNCTIONS (CORRETTA E POTENZIATA)
+async function fetchExternalAddon(addonKey, type, id) {
+    const addon = EXTERNAL_ADDONS[addonKey];
+    if (!addon) {
+        console.error(`❌ [External] Unknown addon: ${addonKey}`);
+        return [];
+    }
+
+    const urlsToTry = [];
+    if (addon.baseUrls && Array.isArray(addon.baseUrls)) {
+        urlsToTry.push(...addon.baseUrls);
+    } else if (addon.baseUrl) {
+        urlsToTry.push(addon.baseUrl);
+    }
+
+    if (urlsToTry.length === 0) return [];
+
+    for (let i = 0; i < urlsToTry.length; i++) {
+        // Pulisce l'URL e lo costruisce
+        const baseUrl = urlsToTry[i].replace(/\/$/, '');
+        const url = `${baseUrl}/stream/${type}/${id}.json`;
+        
+        console.log(`🌐 [${addon.name}] Attempt ${i + 1}/${urlsToTry.length} ...`);
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), addon.timeout);
+
+            const response = await fetch(url, {
+                signal: controller.signal,
+                headers: {
+                    'User-Agent': 'StremioAddon/1.0', 
+                    'Accept': 'application/json'
+                }
+            });
+
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                console.warn(`⚠️ [${addon.name}] Link ${i + 1} failed (HTTP ${response.status}). Next...`);
+                continue; 
+            }
+
+            // Parsing sicuro del JSON
+            const text = await response.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (jsonErr) {
+                console.warn(`⚠️ [${addon.name}] Link ${i + 1} invalid JSON. Next...`);
+                continue;
+            }
+
+            let streams = data.streams || [];
+
+            // =========================================================
+            //  FIX: SE TROVA 0 STREAM, LO CONSIDERA FALLITO E VA AVANTI
+            // =========================================================
+            if (streams.length === 0) {
+                console.warn(`⚠️ [${addon.name}] Link ${i + 1} returned 0 streams. Trying next mirror...`);
+                // Se non è l'ultimo link, prova il prossimo
+                if (i < urlsToTry.length - 1) {
+                    continue; 
+                }
+            }
+
+            // FILTRI SPECIALI
+            if (i === 2 && addonKey === 'torrentio') { 
+                 const countBefore = streams.length;
+                 streams = streams.filter(isItalianContent);
+                 console.log(`⚠️ [Torrentio Emergency] Filtered ${countBefore} -> ${streams.length} (ITA Only)`);
+            }
+
+            if (addonKey === 'mediafusion' && addon.filterIta === true) {
+                const countBefore = streams.length;
+                streams = streams.filter(isItalianContent);
+                console.log(`🇮🇹 [MediaFusion] Strict Filter: ${countBefore} -> ${streams.length}`);
+            }
+
+            // Se abbiamo risultati o è l'ultimo tentativo, restituiamo
+            if (streams.length > 0 || i === urlsToTry.length - 1) {
+                console.log(`✅ [${addon.name}] Success on URL ${i + 1}. Found ${streams.length} streams.`);
+                return streams.map(stream => normalizeExternalStream(stream, addonKey));
+            }
+
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.warn(`⏱️ [${addon.name}] Timeout on URL ${i + 1}.`);
+            } else {
+                console.warn(`❌ [${addon.name}] Error on URL ${i + 1}: ${error.message}`);
+            }
+        }
+    }
+
+    console.error(`❌ [${addon.name}] All URLs failed or returned 0 results.`);
+    return [];
 }
 
 async function fetchAllExternalAddons(type, id, options = {}) {
