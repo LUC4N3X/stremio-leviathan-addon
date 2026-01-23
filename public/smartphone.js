@@ -402,7 +402,21 @@ body.low-power {
 .m-module-icon { width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--m-dim); transition: all 0.3s; }
 .m-module.active .m-module-icon { background: rgba(0,242,255,0.15); color: var(--m-primary); box-shadow: 0 0 10px rgba(0,242,255,0.2); }
 .m-module-info { flex: 1; padding: 0 15px; }
-.m-module-name { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1.05rem; color: #fff; line-height: 1.2; }
+.m-module-name { display: flex; align-items: center; gap: 8px; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1.05rem; color: #fff; line-height: 1.2; }
+
+/* NUOVO TAG PROXY QUADRATINO */
+.m-proxy-tag {
+    font-size: 0.6rem;
+    padding: 2px 5px;
+    border: 1px solid var(--m-amber);
+    color: var(--m-amber);
+    border-radius: 4px;
+    background: rgba(255, 153, 0, 0.1);
+    font-family: 'Rajdhani', monospace;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 5px rgba(255, 153, 0, 0.2);
+}
 
 .m-module-desc { 
     font-family: 'Outfit', sans-serif; 
@@ -649,8 +663,23 @@ input:checked + .m-slider-amber:before { background-color: var(--m-amber); box-s
 
 .m-dock-container { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(2, 5, 10, 0.97); border-top: 1px solid rgba(0,242,255,0.15); z-index: 100; display: flex; flex-direction: column; padding-bottom: var(--safe-bottom); box-shadow: 0 -12px 35px rgba(0,0,0,0.85); backdrop-filter: blur(12px); }
 .m-dock-actions { display: flex; gap: 12px; padding: 12px 18px 6px 18px; }
-.m-btn-install { flex: 3; background: linear-gradient(90deg, var(--m-primary), var(--m-secondary)); color: #000; border: none; border-radius: 12px; height: 48px; font-family: 'Rajdhani', sans-serif; font-size: 1.15rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 0 18px rgba(0,242,255,0.25); transition: all 0.2s; }
+.m-btn-install { flex: 3; background: linear-gradient(90deg, var(--m-primary), var(--m-secondary)); color: #000; border: none; border-radius: 12px; height: 48px; font-family: 'Rajdhani', sans-serif; font-size: 1.15rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 0 18px rgba(0,242,255,0.25); transition: all 0.2s; position: relative; overflow: hidden; }
 .m-btn-install:hover { transform: scale(1.02); box-shadow: 0 0 25px rgba(0,242,255,0.35); }
+
+/* PERSONAL TOUCH: HEARTBEAT SCAN */
+.m-btn-install::after {
+    content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+    transform: skewX(-20deg);
+    animation: scannerBtn 3s infinite ease-in-out;
+}
+@keyframes scannerBtn {
+    0% { left: -100%; opacity: 0; }
+    20% { opacity: 0.5; }
+    50% { left: 200%; opacity: 0; }
+    100% { left: 200%; opacity: 0; }
+}
+
 .m-btn-copy { flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 12px; height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Rajdhani', sans-serif; font-size: 0.7rem; font-weight: 700; transition: all 0.2s; box-shadow: var(--m-glow); }
 .m-btn-copy:hover { background: rgba(255,255,255,0.15); }
 .m-dock-nav { display: flex; justify-content: space-around; align-items: center; padding: 8px 0 10px 0; }
@@ -811,8 +840,10 @@ const mobileHTML = `
                     <div class="m-module" id="mod-ghd">
                         <div class="m-module-icon" style="color:var(--m-primary)"><i class="fas fa-film"></i></div>
                         <div class="m-module-info">
-                            <div class="m-module-name">GuardaHD</div>
-                            <div class="m-module-desc" style="color:var(--m-amber)">Richiede MediaFlow Proxy</div>
+                            <div class="m-module-name">
+                                GuardaHD <span class="m-proxy-tag">PROXY</span>
+                            </div>
+                            <div class="m-module-desc">Streaming ITA HD</div>
                         </div>
                         <label class="m-switch">
                             <input type="checkbox" id="m-enableGhd" onchange="updateStatus('m-enableGhd','st-ghd'); toggleModuleStyle('m-enableGhd', 'mod-ghd');">
@@ -823,8 +854,10 @@ const mobileHTML = `
                     <div class="m-module" id="mod-gs">
                         <div class="m-module-icon" style="color:var(--m-accent)"><i class="fas fa-tv"></i></div>
                         <div class="m-module-info">
-                            <div class="m-module-name">GuardaSerie</div>
-                            <div class="m-module-desc" style="color:var(--m-amber)">Richiede MediaFlow Proxy</div>
+                            <div class="m-module-name">
+                                GuardaSerie <span class="m-proxy-tag">PROXY</span>
+                            </div>
+                            <div class="m-module-desc">Serie TV ITA</div>
                         </div>
                         <label class="m-switch">
                             <input type="checkbox" id="m-enableGs" onchange="updateStatus('m-enableGs','st-gs'); toggleModuleStyle('m-enableGs', 'mod-gs');">
