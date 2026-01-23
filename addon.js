@@ -14,8 +14,11 @@ const NodeCache = require("node-cache");
 const { fetchExternalAddonsFlat } = require("./external-addons");
 const PackResolver = require("./leviathan-pack-resolver");
 const aioFormatter = require("./aiostreams-formatter.cjs");
-// [NUOVO] Import Gestore Fallback
+// Import Gestore Fallback
 const { searchWebStreamr } = require("./webstreamr_handler");
+
+// --- IMPORT GESTORE TRAILER (YouTube/Invidious) ---
+const { getTrailerStreams } = require("./trailerProvider"); 
 
 // --- IMPORT GESTORI WEB (Vix, GuardaHD & GuardaSerie) ---
 const { searchVix } = require("./vix/vix_handler");
@@ -119,7 +122,6 @@ const REGEX_ITA = [
     /\b(tutto|niente|sempre|mai|ancora|già|ora|dove|come|quando|perché|chi|cosa|vita|morte|amore|cuore|mondo|tempo|uomo|donna|bambino|polizia|poliziotto|commissario|squadra|omicidio|indagine|prova)\b/i
 ];
 
-// [FIX] Spostato 'rip' più avanti per evitare cancellazioni aggressive su titoli come "RIP"
 const REGEX_CLEANER = /\b(ita|eng|ger|fre|spa|latino|rus|sub|h264|h265|x264|x265|hevc|avc|vc1|1080p|1080i|720p|480p|4k|2160p|uhd|sdr|hdr|hdr10|dv|dolby|vision|bluray|bd|bdrip|brrip|web-?dl|webrip|hdtv|remux|mux|ac-?3|aac|dts|ddp|flac|truehd|atmos|multi|dual|complete|pack|amzn|nf|dsnp|hmax|atvp|apple|hulu|peacock|rakuten|iyp|dvd|dvdrip|unrated|extended|director|cut|rip)\b.*/yi;
 
 function base32ToHex(base32) {
@@ -318,7 +320,6 @@ function extractStreamInfo(title, source) {
   let detailsParts = [];
   if (videoTags.length) detailsParts.push(`🖥️ ${videoTags.join(" ")}`);
   
-  // Ritorno 'rawVideoTags' per la logica di Binge Grouping
   return { quality: q, qIcon, info: detailsParts.join(" | "), lang, audioInfo, rawVideoTags: videoTags };
 }
 
@@ -342,10 +343,6 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
         sizeString = `${gb.toFixed(2)} GB`;
     }
 
-    // --- BINGE GROUPING INTELLIGENTE ---
-    // Uniamo Qualità + Tech Specs (HDR, DV, etc) + Service Provider
-    // Esempio: "Leviathan|4K|HDR|RD"
-    // Questo dice a Stremio: "Per il prossimo episodio, cerca un flusso che sia 4K, HDR e su RD"
     const techClean = rawVideoTags ? rawVideoTags.join("") : "";
     const bingeGroup = `Leviathan|${quality}|${techClean}|${serviceTag}`;
 
@@ -436,8 +433,6 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
             .trim() || "P2P";
     }
     
-    // --- FAKE CACHE / LAZY CLEAN ---
-    // Rimossa la logica del dado 🎲. Anche se Lazy, mostriamo tag pulito.
     const finalServiceTag = serviceTag;
     
     const sourceLine = `⚡ [${finalServiceTag}] ${displaySource}`;
@@ -470,7 +465,6 @@ function formatVixStream(meta, vixData) {
     lines.push(`☁️ Web Stream • ⚡ Instant`);
     lines.push(`🍝 StreamingCommunity`);
     
-    // Binge Group Web Unificato
     const bingeGroup = `Leviathan|${quality}|Web|SC`;
 
     return {
@@ -536,7 +530,6 @@ async function filterTorBoxCached(apiKey, items) {
 
     const cachedItems = items.filter(item => {
         const isCached = item.hash && confirmedHashes.has(item.hash.toLowerCase());
-        // [FIX TB] Se confermato in cache, settiamo il flag per resolveDebridLink
         if (isCached) item._tbCached = true;
         return isCached;
     });
@@ -623,7 +616,7 @@ async function getMetadata(id, type, config = {}) {
 
                 return {
                     title: title,
-                    originalTitle: originalTitle, // Cruciale per "The Rip - Soldi Sporchi" vs "The Rip"
+                    originalTitle: originalTitle, 
                     year: year,
                     imdb_id: cleanId,
                     tmdb_id: tmdbId, 
@@ -679,8 +672,6 @@ function saveResultsToDbBackground(meta, results) {
 }
 
 async function resolveDebridLink(config, item, showFake, reqHost) {
-    // FUNZIONE DISABILITATA IN FULL LAZY MODE
-    // Lasciata qui per compatibilità se si volesse ripristinare in futuro
     return null;
 }
 
@@ -688,7 +679,6 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
     const service = config.service || 'rd';
     const serviceTag = service.toUpperCase();
     
-    // --- FULL LAZY: Nessun dado, sembrano tutti cached ---
     const { name, title, bingeGroup } = formatStreamTitleCinePro(
         item.title,
         item.source,
@@ -697,7 +687,7 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
         serviceTag,
         config,
         item.hash,
-        isLazy // Passiamo il flag
+        isLazy 
     );
 
     const fileIdxParam = item.fileIdx !== undefined ? item.fileIdx : -1;
@@ -747,12 +737,8 @@ async function queryRemoteIndexer(tmdbId, type, season = null, episode = null) {
     }
 }
 
-// [NUOVO] Funzione per leggere dal DB Locale
 async function queryLocalDb(imdbId, type) {
     try {
-        // Tenta di recuperare i torrent dal DB locale
-        // Assumiamo che dbHelper abbia un metodo getTorrents (standard)
-        // Se non trova nulla, ritorna array vuoto
         if (!dbHelper.getTorrents) return [];
         
         const rows = await dbHelper.getTorrents(imdbId);
@@ -769,7 +755,7 @@ async function queryLocalDb(imdbId, type) {
                 size: "💾 DB",
                 sizeBytes: parseInt(t.size),
                 seeders: t.seeders,
-                source: `💾 ${t.provider || 'Local'}`, // Mostra che viene dal DB locale
+                source: `💾 ${t.provider || 'Local'}`, 
                 fileIdx: t.file_index
             };
         });
@@ -859,13 +845,11 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   const tmdbIdLookup = meta.tmdb_id || (await imdbToTmdb(meta.imdb_id, userTmdbKey))?.tmdbId;
   const dbOnlyMode = config.filters?.dbOnly === true; 
 
-  // --- FILTRO AGGRESSIVO CON FIX PER "RIP" E TITOLI COMPOSTI ---
   const aggressiveFilter = (item) => {
       if (!item?.magnet) return false;
       if (item.isExternal) return true;
 
       const source = (item.source || "").toLowerCase();
-      // Permetti risultati dal DB Locale
       if (source.includes("local") || source.includes("db")) return true;
 
       if (source.includes("comet") || source.includes("stremthru")) return false;
@@ -876,12 +860,10 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       const t = item.title.toLowerCase();
       const metaYear = parseInt(meta.year);
 
-      // --- FIX FRANKENSTEIN ---
       if (metaYear === 2025 && /frankenstein/i.test(meta.title)) {
            if (!item.title.includes("2025")) return false;
       }
 
-      // --- LOGICA SERIE TV ---
       if (meta.isSeries) {
           const s = meta.season;
           const e = meta.episode;
@@ -900,20 +882,16 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           return false;
       }
 
-      // --- LOGICA FILM (POTENZIATA PER "RIP") ---
-      // 1337x
       if (source.includes("1337")) {
           const hasIta = /\b(ita|italian)\b/i.test(item.title);
           const isSubbed = /\b(sub|subs|subbed|vost|vostit)\b/i.test(item.title);
           if (!hasIta || isSubbed) return false; 
       }
-      // TGX/YTS
       if (source.includes("tgx") || source.includes("torrentgalaxy") || source.includes("yts")) {
           const hasStrictIta = /\b(ita|italian)\b/i.test(item.title);
           if (!hasStrictIta) return false; 
       }
 
-      // Check Anno
       if (!isNaN(metaYear)) {
            const fileYearMatch = item.title.match(REGEX_YEAR);
            if (fileYearMatch) {
@@ -921,65 +899,40 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
                if (Math.abs(fileYear - metaYear) > 1) return false; 
            }
       }
-
-      // --- FIX MATCH TITOLO (Gestione "The Rip - Soldi Sporchi") ---
       
-      // 1. Pulizia Standard
       const cleanFile = item.title.toLowerCase().replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
       const cleanMeta = meta.title.toLowerCase().replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
       
-      // 2. Pulizia "Smart": Rimuove sottotitoli italiani dopo "-" o ":"
-      // Es. "The Rip - Soldi Sporchi" diventa "The Rip"
       const metaTitleShort = meta.title.split(/ - |: /)[0].toLowerCase().trim();
-      
-      // 3. Original Title (da TMDB): Es. "RIP"
       const metaOriginal = (meta.originalTitle || "").toLowerCase().trim();
 
-    const checkMatch = (strToCheck) => {
+      const checkMatch = (strToCheck) => {
           if (!strToCheck) return false;
-
-          // 1. Rimuoviamo subito gli articoli per analizzare la "keyword" reale
           let searchKeyword = strToCheck.replace(/^(the|a|an|il|lo|la|i|gli|le)\s+/i, "").trim();
 
-          // 2. FIX SPECIFICO PER "RIP" (Applicato alla keyword pulita)
-          // Il problema è che "Rip" è ovunque (WEBRip, BDRip, o "1080p Rip").
-          // Se cerchiamo il film "The Rip", imponiamo che il file DEBBA INIZIARE con il titolo.
           if (searchKeyword === "rip") {
-               // Regex: L'inizio della stringa (^) deve essere opzionalmente "the " o "il ", seguito da "rip"
-               // seguito da un fine parola (\b). Questo esclude "The Strangers... Rip".
-               // cleanFile ha già subito la sostituzione di punti/underscore con spazi.
                const strictStartRegex = /^(the\s+|il\s+)?rip\b/i;
-               
-               // Se il file inizia con "The Rip" o "Rip", è il nostro film.
                if (strictStartRegex.test(cleanFile)) return true;
-
-               // Caso speciale: Se il titolo contiene anche "Soldi Sporchi" (il sottotitolo),
-               // la logica precedente (checkMatch cleanMeta) l'avrebbe già preso. 
-               // Se siamo qui, stiamo valutando solo la keyword "Rip", quindi scartiamo tutto il resto.
                return false;
           }
 
-          // 3. Se la stringa è molto corta (es "IO", "NO"), usiamo Word Boundary per evitare match parziali
           if (searchKeyword.length <= 3) {
               const regexShort = new RegExp(`\\b${searchKeyword}\\b`, 'i');
               return regexShort.test(cleanFile);
           }
           
-          // 4. Match standard (inclusione)
           return cleanFile.includes(searchKeyword);
       };
 
-      // Controllo Gerarchico
-      if (checkMatch(cleanMeta)) return true;       // Match intero ("The Rip - Soldi Sporchi")
-      if (checkMatch(metaTitleShort)) return true;  // Match parziale ("The Rip")
-      if (checkMatch(metaOriginal)) return true;    // Match originale ("RIP")
+      if (checkMatch(cleanMeta)) return true;       
+      if (checkMatch(metaTitleShort)) return true;  
+      if (checkMatch(metaOriginal)) return true;    
 
       if (smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode)) return true;
 
       return false;
   };
 
-  // --- FASE 1: FONTI VELOCI (VPS + LOCAL DB + EXTERNAL) ---
   const remotePromise = withTimeout(
       queryRemoteIndexer(tmdbIdLookup, type, meta.season, meta.episode),
       CONFIG.TIMEOUTS.REMOTE_INDEXER,
@@ -989,7 +942,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       return [];
   });
 
-  // [NUOVO] Query al DB Locale
   const localDbPromise = withTimeout(
       queryLocalDb(meta.imdb_id, type),
       CONFIG.TIMEOUTS.DB_QUERY,
@@ -1004,17 +956,14 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       externalPromise = fetchExternalResults(type, finalId);
   }
 
-  // Eseguiamo tutte e 3 le chiamate in parallelo
   const [remoteResults, localResults, externalResults] = await Promise.all([remotePromise, localDbPromise, externalPromise]);
   
-  // Uniamo i risultati: Remote + Local + External
   let fastResults = [...remoteResults, ...localResults, ...externalResults].filter(aggressiveFilter);
   let cleanResults = deduplicateResults(fastResults);
   const validFastCount = cleanResults.length;
 
   logger.info(`⚡ [FAST CHECK] Trovati ${validFastCount} risultati validi da fonti veloci (VPS+DB+Ext).`);
 
-  // --- FASE 2: SCRAPER ---
   if (!dbOnlyMode && validFastCount < 3) {
       logger.info(`⚠️ [HEAVY] Meno di 3 risultati (${validFastCount}). Attivazione Scraper Locali...`);
       
@@ -1055,7 +1004,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       }
   }
 
-  // --- FINALIZZAZIONE ---
   if (!dbOnlyMode) {
       saveResultsToDbBackground(meta, cleanResults);
   }
@@ -1064,10 +1012,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       cleanResults = cleanResults.filter(item => {
           const t = (item.title || "").toLowerCase();
           
-          // [MODIFICA] Filtro HD con 0 Seeders
           if ((item.seeders === 0 || item.seeders == null)) {
-              // Se è HD/1080p/4K e ha 0 seeders -> Rimuovi
-              // Mantiene invece gli SD con 0 seeders (spesso roba vecchia rara)
               if (REGEX_QUALITY["4K"].test(t) || REGEX_QUALITY["1080p"].test(t) || REGEX_QUALITY["720p"].test(t) || /\bhd\b/i.test(t)) {
                   return false;
               }
@@ -1130,11 +1075,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
 
   let debridStreams = [];
   if (ranked.length > 0 && hasDebridKey) {
-      // --- MODALITÀ FULL LAZY (FAKE CACHE) ---
-      // Tutti i risultati vengono trattati come Lazy, ma formattati come "Cached"
-      // Questo elimina il controllo istantaneo (Hybrid) e velocizza la risposta
-      // Il link viene risolto solo quando l'utente clicca.
-      
       debridStreams = ranked.map(item =>
           generateLazyStream(item, config, meta, reqHost, userConfStr, true)
       );
@@ -1206,7 +1146,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
                        techInfo: techStr 
                    });
                    if (!stream.behaviorHints) stream.behaviorHints = {};
-                   // Binge Group Web Unificato
                    stream.behaviorHints.bingieGroup = `Leviathan|${quality}|Web|${sourceName.replace(/\W/g,'')}`;
                });
            };
@@ -1250,6 +1189,33 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
            logger.info(`❌ [WEBSTREAMR] Nessun risultato trovato.`);
       }
   }
+
+  // --- [TRAILER SECTION - UPDATED] ---
+  // Attivo solo se richiesto dalla configurazione.
+  // Se attivo, lo mette IN CIMA alla lista (unshift).
+  if (config.filters && config.filters.enableTrailers) {
+      try {
+         if (meta && meta.title) {
+             const trailerStreams = await getTrailerStreams(
+                 type,
+                 meta.imdb_id,
+                 meta.title,
+                 meta.season,
+                 meta.tmdb_id,
+                 'it-IT'
+             );
+
+             if (trailerStreams && trailerStreams.length > 0) {
+                 // UNSHIFT per metterlo come PRIMO risultato
+                 finalStreams.unshift(...trailerStreams);
+                 logger.info(`🎬 [TRAILER] Aggiunto trailer in testa per: ${meta.title}`);
+             }
+         }
+      } catch (err) {
+         logger.warn(`⚠️ Errore recupero Trailer: ${err.message}`);
+      }
+  }
+  // ----------------------------------------
   
   const resultObj = { streams: finalStreams };
 
@@ -1488,6 +1454,7 @@ app.listen(PORT, () => {
     console.log(`🦁 GUARDA HD: Modulo Integrato e Pronto`);
     console.log(`🛡️ GUARDA SERIE: Modulo Integrato e Pronto`);
     console.log(`🕷️ WEBSTREAMR: Fallback Attivo (Su 0 Risultati)`);
+    console.log(`🎬 TRAILER: Attivabile da Config (Default: OFF, Primo Risultato se ON)`);
     console.log(`📦 TORBOX: True Cache Check Enabled`);
     console.log(`🦑 LEVIATHAN CORE: Optimized for High Reliability`);
     console.log(`-----------------------------------------------------`);
