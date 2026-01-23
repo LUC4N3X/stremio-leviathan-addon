@@ -5,7 +5,7 @@ const mobileCSS = `
     --m-secondary: #aa00ff;   /* Viola Elettrico */
     --m-accent: #b026ff;      
     --m-amber: #ff9900;       /* Arancio Tecnico */
-    --m-cine: #ff0055;        /* Magenta Cinema (NUOVO) */
+    --m-cine: #ff0055;        /* Magenta Cinema (TRAILER COLOR) */
     --m-surface: rgba(10, 15, 25, 0.85); 
     --m-surface-border: rgba(0, 242, 255, 0.25);
     --m-text: #e0f7fa;
@@ -1006,14 +1006,14 @@ const mobileHTML = `
                         </label>
                     </div>
 
-                    <div class="m-row">
+                <div class="m-row">
                         <div class="m-label">
                             <h4>
-                                <i class="fas fa-photo-video" style="color:var(--m-cine)"></i>
-                                Cine-Preview
+                                <i class="fas fa-film" style="color:var(--m-cine)"></i>
+                                TRAILER MODE
                                 <span class="m-status-text" id="st-trailer">OFF</span>
                             </h4>
-                            <p style="color:rgba(255, 0, 85, 0.7)">Trailer Protocol (Top Result)</p>
+                            <p>Cinema Experience (Auto-Play)</p>
                         </div>
                         <label class="m-switch">
                             <input type="checkbox" id="m-enableTrailers" onchange="updateStatus('m-enableTrailers','st-trailer')">
