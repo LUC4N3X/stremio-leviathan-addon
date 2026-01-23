@@ -1103,23 +1103,16 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
 
   let debridStreams = [];
   if (ranked.length > 0 && hasDebridKey) {
-      // --- MODIFICA HYBRID MODE ---
-      // Fix: Se TorBox, processiamo tutto subito (no lazy)
-      // Fix Serie: Se è una serie, NON controlliamo nulla istantaneamente (tutto Lazy)
+      // --- MODIFICA FULL LAZY MODE (Film & Serie) ---
+      // Impostiamo TOP_LIMIT a 0 in modo che TUTTO venga gestito come Lazy Stream.
+      
       const isTorBox = config.service === 'tb';
-      
-      let TOP_LIMIT = 10; // Default per Film (Top 13 istantanei)
-      
-      if (isTorBox) {
-          TOP_LIMIT = ranked.length; // TB controlla tutto
-      } else if (type === 'series') {
-          TOP_LIMIT = 3; // Serie TV -> 0 Istantanei, TUTTO Lazy
-      }
-      
+      let TOP_LIMIT = 0; // Tutto Lazy
+
       const topItems = ranked.slice(0, TOP_LIMIT);
       const lazyItems = ranked.slice(TOP_LIMIT);
 
-      // 1. Risoluzione Immediata (Top 13 Film o Tutti TB)
+      // 1. Risoluzione Immediata (Verrà saltata perché topItems è vuoto)
       const immediatePromises = topItems.map(item => {
           item.season = meta.season;
           item.episode = meta.episode;
@@ -1127,7 +1120,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           return LIMITERS.rd.schedule(() => resolveDebridLink(config, item, config.filters?.showFake, reqHost));
       });
 
-      // 2. Generazione Lazy (Tutto il resto, o TUTTO se è una serie)
+      // 2. Generazione Lazy (Tutto qui)
       const lazyStreams = lazyItems.map(item =>
           generateLazyStream(item, config, meta, reqHost, userConfStr, true)
       );
@@ -1499,7 +1492,7 @@ const PUBLIC_PORT = process.env.PUBLIC_PORT || PORT;
 app.listen(PORT, () => {
     console.log(`🚀 Leviathan (God Tier) attivo su porta interna ${PORT}`);
     console.log(`-----------------------------------------------------`);
-    console.log(`⚡ MODE: HYBRID 13 (Top 13 Instant / Rest Lazy)`);
+    console.log(`⚡ MODE: FULL LAZY (All items Lazy)`);
     console.log(`🎬 SERIES: Full Lazy Mode (No Instant Check)`);
     console.log(`📡 INDEXER URL (ENV): ${CONFIG.INDEXER_URL}`);
     console.log(`🎬 METADATA: TMDB Primary (User Key Priority)`);
