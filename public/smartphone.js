@@ -5,6 +5,7 @@ const mobileCSS = `
     --m-secondary: #aa00ff;   /* Viola Elettrico */
     --m-accent: #b026ff;      
     --m-amber: #ff9900;       /* Arancio Tecnico */
+    --m-cine: #ff0055;        /* Magenta Cinema (NUOVO) */
     --m-surface: rgba(10, 15, 25, 0.85); 
     --m-surface-border: rgba(0, 242, 255, 0.25);
     --m-text: #e0f7fa;
@@ -568,6 +569,11 @@ input:checked + .m-slider-purple:before { background-color: var(--m-accent); box
 input:checked + .m-slider-amber { background-color: rgba(255, 153, 0, 0.3); border-color: var(--m-amber); box-shadow: inset 0 0 10px rgba(255,153,0,0.4); }
 input:checked + .m-slider-amber:before { background-color: var(--m-amber); box-shadow: 0 0 10px var(--m-amber); }
 
+/* --- NEW CINEMA SLIDER STYLE --- */
+.m-slider-pink { background-color: #1c1c1c; }
+input:checked + .m-slider-pink { background-color: rgba(255, 0, 85, 0.3); border-color: var(--m-cine); box-shadow: inset 0 0 10px rgba(255,0,85,0.4); }
+input:checked + .m-slider-pink:before { background-color: var(--m-cine); box-shadow: 0 0 10px var(--m-cine); }
+
 .m-priority-wrapper { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.35s ease; margin: 0 -10px; }
 .m-priority-wrapper.show { max-height: 130px; opacity: 1; margin-top: 18px; padding: 0 10px; }
 
@@ -761,7 +767,7 @@ const mobileHTML = `
                 
                 <h1 class="m-brand-title">LEVIATHAN</h1>
                 <div class="m-brand-sub">SOVRANO DEGLI ABISSI</div>
-                <div class="m-version-tag"><div class="m-v-dot"></div>v2.1.0 STABLE</div>
+                <div class="m-version-tag"><div class="m-v-dot"></div>v2.2.0 STABLE</div>
                 <div class="m-eco-toggle" id="m-eco-btn" onclick="toggleLowPower()">
                     <i class="fas fa-leaf"></i> <span>ECO MODE</span>
                 </div>
@@ -997,6 +1003,21 @@ const mobileHTML = `
                         <label class="m-switch">
                             <input type="checkbox" id="m-aioMode" onchange="updateStatus('m-aioMode','st-aio')">
                             <span class="m-slider m-slider-purple"></span>
+                        </label>
+                    </div>
+
+                    <div class="m-row">
+                        <div class="m-label">
+                            <h4>
+                                <i class="fas fa-photo-video" style="color:var(--m-cine)"></i>
+                                Cine-Preview
+                                <span class="m-status-text" id="st-trailer">OFF</span>
+                            </h4>
+                            <p style="color:rgba(255, 0, 85, 0.7)">Trailer Protocol (Top Result)</p>
+                        </div>
+                        <label class="m-switch">
+                            <input type="checkbox" id="m-enableTrailers" onchange="updateStatus('m-enableTrailers','st-trailer')">
+                            <span class="m-slider m-slider-pink"></span>
                         </label>
                     </div>
 
@@ -1451,6 +1472,8 @@ function loadMobileConfig() {
                 toggleModuleStyle('m-enableWebStreamr', 'mod-webstr');
 
                 document.getElementById('m-allowEng').checked = config.filters.allowEng || false;
+                // [NEW] TRAILER CONFIG LOAD
+                document.getElementById('m-enableTrailers').checked = config.filters.enableTrailers || false;
                 
                 if(config.filters.vixLast) {
                     document.getElementById('m-vixLast').checked = true;
@@ -1489,6 +1512,8 @@ function loadMobileConfig() {
             updateStatus('m-enableGs', 'st-gs');
             updateStatus('m-allowEng', 'st-eng');
             updateStatus('m-aioMode', 'st-aio');
+            updateStatus('m-enableTrailers', 'st-trailer'); // Update visual
+            
             // MediaFlow logic separate
             updateGhostVisuals();
 
@@ -1528,6 +1553,8 @@ function getMobileConfig() {
             enableGs: document.getElementById('m-enableGs').checked,
             // [NEW] WebStreamr Config Save
             enableWebStreamr: document.getElementById('m-enableWebStreamr').checked,
+            // [NEW] Trailer Config Save
+            enableTrailers: document.getElementById('m-enableTrailers').checked,
             vixLast: document.getElementById('m-vixLast').checked,
             scQuality: mScQuality,
             maxPerQuality: gateActive ? gateVal : 0,
