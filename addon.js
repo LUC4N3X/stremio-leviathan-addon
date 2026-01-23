@@ -84,7 +84,7 @@ const CONFIG = {
     DB_QUERY: 3000,
     DEBRID: 10000, 
     PACK_RESOLVER: 7000,
-    EXTERNAL: 5000 
+    EXTERNAL: 20000 
   }
 };
 
