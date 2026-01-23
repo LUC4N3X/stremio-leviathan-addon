@@ -83,8 +83,8 @@ const CONFIG = {
     REMOTE_INDEXER: 2500, 
     DB_QUERY: 3000,
     DEBRID: 10000, 
-    PACK_RESOLVER: 7000,
-    EXTERNAL: 5000 
+    PACK_RESOLVER: 4000,
+    EXTERNAL: 20000 
   }
 };
 
@@ -440,7 +440,7 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     }
     
     // --- MODIFICA LAZY TAG: USA DADO 🎲 PER INDICARE "TENTA LA FORTUNA/DUBBIO" ---
-    const finalServiceTag = isLazy ? `${serviceTag} 🎲` : serviceTag;
+    const finalServiceTag = serviceTag;
     
     const sourceLine = `⚡ [${finalServiceTag}] ${displaySource}`;
     const name = `🦑 LEVIATHAN\n${qIcon} ${quality}`;
@@ -1108,12 +1108,12 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       // Fix Serie: Se è una serie, NON controlliamo nulla istantaneamente (tutto Lazy)
       const isTorBox = config.service === 'tb';
       
-      let TOP_LIMIT = 13; // Default per Film (Top 13 istantanei)
+      let TOP_LIMIT = 10; // Default per Film (Top 13 istantanei)
       
       if (isTorBox) {
           TOP_LIMIT = ranked.length; // TB controlla tutto
       } else if (type === 'series') {
-          TOP_LIMIT = 0; // Serie TV -> 0 Istantanei, TUTTO Lazy
+          TOP_LIMIT = 3; // Serie TV -> 0 Istantanei, TUTTO Lazy
       }
       
       const topItems = ranked.slice(0, TOP_LIMIT);
