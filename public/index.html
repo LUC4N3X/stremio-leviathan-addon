@@ -518,7 +518,7 @@
             <h1 class="brand-title notranslate" translate="no">LEVIATHAN</h1>
             <div class="brand-subtitle notranslate" translate="no">SOVRANO DEGLI ABISSI</div>
             <p class="logo-desc">Il protocollo profondo che domina i flussi digitali</p>
-            <div class="version-badge">CORE v2.1.0</div>
+            <div class="version-badge">CORE v2.2.0</div>
         </header>
         <div class="glass-panel">
             <div class="panel-header">
@@ -752,6 +752,16 @@
                                     <span class="toggle-track"><span class="toggle-knob"></span><span class="label-off">DISABILITA</span><span class="label-on">ABILITA</span></span>
                                 </label>
                             </div>
+                            <div class="aux-card" id="card_trailer">
+                                <div class="aux-header">
+                                    <div class="status-led"></div><i class="fas fa-film aux-icon"></i><span>TRAILER PROTOCOL</span>
+                                </div>
+                                <div class="aux-desc">Visualizza anteprima video prima dello streaming.</div>
+                                <label class="cyber-toggle">
+                                    <input type="checkbox" id="enableTrailers" onchange="toggleAuxCard('card_trailer')">
+                                    <span class="toggle-track"><span class="toggle-knob"></span><span class="label-off">OFF</span><span class="label-on">CINE ON</span></span>
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -982,8 +992,8 @@
                         document.getElementById('vixLast').checked = config.filters.vixLast || false;
                         document.getElementById('enableGhd').checked = config.filters.enableGhd || false;
                         document.getElementById('enableGs').checked = config.filters.enableGs || false;
-                        // WEBSTREAMR: Se undefined è true, altrimenti usa valore
                         document.getElementById('enableWebStreamr').checked = config.filters.enableWebStreamr !== false;
+                        document.getElementById('enableTrailers').checked = config.filters.enableTrailers || false; // TRAILER LOGIC
                         
                         setSpecState('btn_4k', config.filters.no4k);
                         setSpecState('btn_1080', config.filters.no1080);
@@ -1001,6 +1011,7 @@
                         }
                         if (document.getElementById('allowEng').checked) document.getElementById('card_audio').classList.add('active');
                         if (document.getElementById('aiostreams_mode').checked) document.getElementById('card_aio').classList.add('active');
+                        if (document.getElementById('enableTrailers').checked) document.getElementById('card_trailer').classList.add('active'); // ACTIVATE CARD
                         if (config.sort) setSortMode(config.sort); else setSortMode('balanced');
                     }
                     checkWebVisibility();
@@ -1061,6 +1072,7 @@
                     enableGhd: document.getElementById('enableGhd').checked,
                     enableGs: document.getElementById('enableGs').checked,
                     enableWebStreamr: document.getElementById('enableWebStreamr').checked,
+                    enableTrailers: document.getElementById('enableTrailers').checked, // SAVE TRAILER STATE
                     vixLast: document.getElementById('vixLast').checked,
                     scQuality: currentSCQuality, 
                     maxPerQuality: gateActive ? gateVal : 0,
@@ -1100,6 +1112,7 @@
             let sortText = "LEVIATHAN (Balanced)";
             if(c.sort === 'resolution') sortText = "RISOLUZIONE (4K/FHD)";
             if(c.sort === 'size') sortText = "BITRATE (Peso)";
+            let trailerText = c.filters.enableTrailers ? 'ATTIVO 🎬' : 'NO'; // TRAILER SUMMARY
 
             list.innerHTML = `
                 <li>Servizio Debrid <span>${c.service.toUpperCase()}</span></li>
@@ -1112,6 +1125,7 @@
                 <li>Filtro Qualità <span>${spectrumStr}</span></li>
                 <li>Signal Gate <span>${gateText}</span></li>
                 <li>Lingua ENG <span>${c.filters.allowEng ? 'SI' : 'NO'}</span></li>
+                <li>Cinema Mode <span>${trailerText}</span></li>
             `;
             const m = document.getElementById('installModal'); m.style.display = 'flex'; setTimeout(() => m.classList.add('show'), 10);
         }
