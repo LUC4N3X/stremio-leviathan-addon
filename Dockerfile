@@ -1,5 +1,5 @@
 # Usa Node 20 (necessario per supportare l'oggetto File globale)                                         M-6 Copy
-FROM node:20-alpine
+FROM node:20-slim
 
 # Imposta la directory di lavoro
 WORKDIR /app
