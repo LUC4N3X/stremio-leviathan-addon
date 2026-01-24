@@ -18,59 +18,46 @@ const mobileCSS = `
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
+
+/* --- STATIC PRO BACKGROUND (EX ECO MODE) --- */
 body { 
-    margin: 0; background-color: var(--m-bg); 
-    font-family: 'Outfit', sans-serif; overflow: hidden; height: 100vh; color: var(--m-text); 
-    position: relative; width: 100%;
+    margin: 0; 
+    /* Gradiente profondo "Abisso Tecnico" */
+    background: radial-gradient(circle at 50% 35%, #131b29 0%, #05080d 60%, #000000 100%);
+    font-family: 'Outfit', sans-serif; 
+    overflow: hidden; 
+    height: 100vh; 
+    color: var(--m-text); 
+    position: relative; 
+    width: 100%;
     overscroll-behavior-y: contain;
 }
 
-/* --- LEVIATHAN OCEAN FX --- */
-.m-bg-layer { 
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -5; 
-    background: radial-gradient(circle at 50% 20%, rgba(15, 28, 48, 0.8) 0%, #020408 50%, #000000 100%);
-    transform: translateZ(0); box-shadow: inset 0 0 100px rgba(0,0,0,1);
-}
-.m-ocean-flow {
-    position: fixed; top: -60%; left: -60%; width: 220%; height: 220%; z-index: -4;
-    background: radial-gradient(ellipse at center, rgba(0, 242, 255, 0.05) 0%, transparent 70%);
-    opacity: 0.65; animation: oceanSwell 18s infinite alternate ease-in-out;
-    pointer-events: none; transform: translateZ(0); filter: blur(10px);
-}
-@keyframes oceanSwell { 0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.45; } 100% { transform: translate3d(0, -30px, 0) scale(1.15); opacity: 0.75; } }
-
-.m-caustics {
-    position: fixed; top: -60%; left: -60%; width: 220%; height: 220%; z-index: -4;
+/* Griglia Cibernetica Statica */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: -10;
+    /* Griglia Ciano tecnica */
     background-image: 
-        repeating-linear-gradient(45deg, transparent 0, transparent 25px, rgba(0, 242, 255, 0.03) 25px, rgba(0, 242, 255, 0.03) 50px),
-        repeating-linear-gradient(-45deg, transparent 0, transparent 25px, rgba(112, 0, 255, 0.03) 25px, rgba(112, 0, 255, 0.03) 50px),
-        radial-gradient(circle, rgba(255,255,255,0.02) 0%, transparent 50%);
-    background-size: 200% 200%, 200% 200%, 100% 100%;
-    animation: glimmer 30s linear infinite; pointer-events: none;
-    transform: translateZ(0); mix-blend-mode: screen; opacity: 0.8;
+        linear-gradient(rgba(0, 242, 255, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 242, 255, 0.08) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    /* Maschera radiale per sfumare ai bordi */
+    mask-image: radial-gradient(circle at center, black 30%, rgba(0,0,0,0.5) 80%, transparent 100%);
+    -webkit-mask-image: radial-gradient(circle at center, black 30%, rgba(0,0,0,0.5) 80%, transparent 100%);
 }
-@keyframes glimmer { 0% { transform: translate3d(0, 0, 0) rotate(0deg); } 100% { transform: translate3d(-30px, -30px, 0) rotate(3deg); } }
 
-.m-bubbles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -3; pointer-events: none; overflow: hidden; }
-.bubble {
-    position: absolute; bottom: -30px; background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(0, 242, 255, 0.1) 100%);
-    border-radius: 50%; box-shadow: var(--m-glow), inset 0 0 5px rgba(255,255,255,0.3);
-    animation: riseUp linear infinite; transform: translateZ(0); filter: blur(1px);
-}
-@keyframes riseUp { 0% { transform: translate3d(0, 0, 0) scale(0.8); opacity: 0; } 15% { opacity: 0.7; } 85% { opacity: 0.5; } 100% { transform: translate3d(0, -120vh, 0) scale(1.8); opacity: 0; } }
-
-/* LOW POWER MODE CSS */
-body.low-power .m-ocean-flow,
-body.low-power .m-caustics,
-body.low-power .m-bubbles,
-body.low-power .m-bg-layer,
-body.low-power .m-hero-grid,
-body.low-power .m-side-pylons {
-    display: none !important;
-    animation: none !important;
-}
-body.low-power {
-    background: #050505;
+/* Bagliore dal basso */
+body::after {
+    content: '';
+    position: fixed;
+    bottom: 0; left: 0; width: 100%; height: 50%;
+    z-index: -9;
+    background: linear-gradient(to top, rgba(0, 242, 255, 0.08), transparent);
+    pointer-events: none;
 }
 
 /* --- LAYOUT --- */
@@ -103,109 +90,6 @@ body.low-power {
 
 /* --- HERO SECTION REDESIGNED --- */
 .m-hero { text-align: center; padding: 40px 10px 30px 10px; display: flex; flex-direction: column; align-items: center; width: 100%; position: relative; overflow:hidden; } 
-
-.m-hero-grid {
-    position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
-    background: 
-        linear-gradient(transparent 0%, rgba(0, 242, 255, 0.05) 1px, transparent 2px),
-        linear-gradient(90deg, transparent 0%, rgba(0, 242, 255, 0.05) 1px, transparent 2px);
-    background-size: 40px 30px;
-    transform: perspective(300px) rotateX(60deg);
-    transform-origin: bottom center;
-    z-index: 0;
-    pointer-events: none;
-    mask-image: linear-gradient(to top, black, transparent);
-    -webkit-mask-image: linear-gradient(to top, black, transparent);
-}
-
-/* --- QUANTUM PYLONS (REPLACES OLD TEXT HUD) --- */
-.m-side-pylons {
-    position: absolute;
-    top: 50%; left: 0; width: 100%; height: 220px; 
-    transform: translateY(-50%);
-    pointer-events: none;
-    z-index: 5;
-    display: flex; justify-content: space-between; padding: 0 12px;
-}
-
-.m-pylon {
-    position: relative;
-    width: 6px; height: 100%;
-    background: rgba(10, 20, 30, 0.8);
-    border: 1px solid rgba(0, 242, 255, 0.2);
-    border-radius: 4px;
-    overflow: hidden;
-    box-shadow: 0 0 15px rgba(0,0,0,0.5);
-    display: flex; flex-direction: column; justify-content: space-between;
-}
-
-.m-pylon-core {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(to bottom, 
-        transparent 0%, 
-        var(--m-primary) 45%, 
-        #fff 50%, 
-        var(--m-primary) 55%, 
-        transparent 100%);
-    background-size: 100% 300%;
-    opacity: 0.3;
-    filter: blur(2px);
-    animation: energyFlow 3s ease-in-out infinite;
-    mix-blend-mode: screen;
-}
-
-.m-pylon-scan {
-    position: absolute; left: -2px; right: -2px; height: 30px;
-    background: linear-gradient(to bottom, transparent, var(--m-primary), transparent);
-    opacity: 0.8;
-    filter: drop-shadow(0 0 6px var(--m-primary));
-    animation: scannerMove 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}
-
-.m-pylon-cap {
-    width: 100%; height: 8px;
-    background: #0f1820;
-    border: 1px solid rgba(0, 242, 255, 0.3);
-    z-index: 2;
-}
-.m-pylon-cap.top { border-bottom: none; border-radius: 2px 2px 0 0; }
-.m-pylon-cap.btm { border-top: none; border-radius: 0 0 2px 2px; }
-
-.m-data-stream {
-    position: absolute; top: 15%; bottom: 15%; width: 2px;
-}
-.m-ds-left { right: -8px; }
-.m-ds-right { left: -8px; }
-
-.m-data-bit {
-    position: absolute; left: 0; width: 2px; height: 6px;
-    background: var(--m-secondary);
-    opacity: 0;
-    box-shadow: 0 0 6px var(--m-secondary);
-    animation: bitFloat 3s linear infinite;
-    border-radius: 2px;
-}
-
-@keyframes energyFlow {
-    0% { background-position: 0% 0%; opacity: 0.2; }
-    50% { background-position: 0% 50%; opacity: 0.6; }
-    100% { background-position: 0% 100%; opacity: 0.2; }
-}
-@keyframes scannerMove {
-    0%, 100% { top: -20%; opacity: 0; }
-    10% { opacity: 1; }
-    50% { top: 120%; opacity: 0; }
-    51% { top: 120%; opacity: 0; }
-    60% { opacity: 1; }
-    90% { top: -20%; opacity: 0; }
-}
-@keyframes bitFloat {
-    0% { transform: translateY(120px) scaleY(1); opacity: 0; }
-    20% { opacity: 0.9; }
-    80% { opacity: 0.9; }
-    100% { transform: translateY(-120px) scaleY(1.5); opacity: 0; }
-}
-/* ------------------------------------- */
 
 /* --- NEW LOGO REACTOR CORE --- */
 .m-hero-portal {
@@ -316,33 +200,6 @@ body.low-power {
 .m-version-tag:hover { border-color: var(--m-primary); color: #fff; opacity: 1; box-shadow: 0 0 15px rgba(0,242,255,0.15); }
 .m-v-dot { width: 5px; height: 5px; background: var(--m-success); border-radius: 50%; box-shadow: 0 0 5px var(--m-success); animation: blinkBase 2s infinite; }
 @keyframes blinkBase { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
-
-.m-eco-toggle {
-    position: absolute;
-    top: 15px; right: 15px;
-    background: transparent;
-    border: none;
-    border-radius: 12px;
-    padding: 8px;
-    font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.5);
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex; align-items: center; gap: 6px;
-    transition: all 0.3s ease;
-    backdrop-filter: none;
-    z-index: 20;
-}
-.m-eco-toggle i { font-size: 0.9rem; }
-.m-eco-toggle.active {
-    background: rgba(0, 255, 157, 0.15);
-    color: var(--m-success);
-    box-shadow: 0 0 15px rgba(0, 255, 157, 0.3);
-    border: 1px solid rgba(0, 255, 157, 0.3);
-    backdrop-filter: blur(5px);
-}
-.m-eco-toggle:hover:not(.active) { color: #fff; }
 
 
 /* --- PLASMA RAIL (Service Selector) --- */
@@ -717,11 +574,6 @@ input:checked + .m-slider-pink:before { background-color: var(--m-cine); box-sha
 `;
 
 const mobileHTML = `
-<div class="m-bg-layer"></div>
-<div class="m-ocean-flow"></div>
-<div class="m-caustics"></div>
-<div class="m-bubbles" id="m-bubbles"></div>
-
 <div id="app-container">
     <div class="m-content-wrapper">
         <div class="m-ptr" id="m-ptr-indicator"><i class="fas fa-arrow-down m-ptr-icon"></i></div>
@@ -729,35 +581,6 @@ const mobileHTML = `
         <div class="m-content">
             <div class="m-hero">
                 
-                <div class="m-hero-grid"></div>
-                
-                <div class="m-side-pylons">
-                    <div class="m-pylon">
-                        <div class="m-pylon-cap top"></div>
-                        <div class="m-pylon-core"></div>
-                        <div class="m-pylon-scan" style="animation-delay: 0s;"></div>
-                        <div class="m-pylon-cap btm"></div>
-                        
-                        <div class="m-data-stream m-ds-left">
-                            <div class="m-data-bit" style="top:80%; animation-delay:0.5s;"></div>
-                            <div class="m-data-bit" style="top:40%; animation-delay:1.2s;"></div>
-                            <div class="m-data-bit" style="top:10%; animation-delay:2.5s;"></div>
-                        </div>
-                    </div>
-
-                    <div class="m-pylon">
-                        <div class="m-pylon-cap top"></div>
-                        <div class="m-pylon-core" style="animation-direction: reverse;"></div>
-                        <div class="m-pylon-scan" style="animation-delay: 2s;"></div>
-                        <div class="m-pylon-cap btm"></div>
-
-                        <div class="m-data-stream m-ds-right">
-                            <div class="m-data-bit" style="top:70%; animation-delay:0.8s; background:var(--m-primary); box-shadow:0 0 5px var(--m-primary);"></div>
-                            <div class="m-data-bit" style="top:30%; animation-delay:1.9s; background:var(--m-primary); box-shadow:0 0 5px var(--m-primary);"></div>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="m-hero-portal">
                     <div class="m-energy-core"></div>
                     <div class="m-ring-plasma"></div>
@@ -768,9 +591,6 @@ const mobileHTML = `
                 <h1 class="m-brand-title">LEVIATHAN</h1>
                 <div class="m-brand-sub">SOVRANO DEGLI ABISSI</div>
                 <div class="m-version-tag"><div class="m-v-dot"></div>v2.2.0 STABLE</div>
-                <div class="m-eco-toggle" id="m-eco-btn" onclick="toggleLowPower()">
-                    <i class="fas fa-leaf"></i> <span>ECO MODE</span>
-                </div>
             </div>
 
             <div id="page-setup" class="m-page active">
@@ -1163,7 +983,7 @@ function initMobileInterface() {
     styleSheet.innerText = mobileCSS;
     document.head.appendChild(styleSheet);
     document.body.innerHTML = mobileHTML;
-    createBubbles();
+    // createBubbles removed since they belong to high-perf mode
     initPullToRefresh();
     loadMobileConfig();
 }
@@ -1272,13 +1092,6 @@ function updateStatus(inputId, statusId) {
     
     if(inputId === 'm-enableVix') toggleScOptions();
     checkWebPriorityVisibility();
-    if(navigator.vibrate) navigator.vibrate(10);
-}
-
-function toggleLowPower() {
-    document.body.classList.toggle('low-power');
-    const btn = document.getElementById('m-eco-btn');
-    btn.classList.toggle('active');
     if(navigator.vibrate) navigator.vibrate(10);
 }
 
