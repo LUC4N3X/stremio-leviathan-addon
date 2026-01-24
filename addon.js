@@ -122,7 +122,6 @@ const REGEX_ITA = [
     /\b(tutto|niente|sempre|mai|ancora|già|ora|dove|come|quando|perché|chi|cosa|vita|morte|amore|cuore|mondo|tempo|uomo|donna|bambino|polizia|poliziotto|commissario|squadra|omicidio|indagine|prova)\b/i
 ];
 
-// [FIX] Spostato 'rip' più avanti per evitare cancellazioni aggressive su titoli come "RIP"
 const REGEX_CLEANER = /\b(ita|eng|ger|fre|spa|latino|rus|sub|h264|h265|x264|x265|hevc|avc|vc1|1080p|1080i|720p|480p|4k|2160p|uhd|sdr|hdr|hdr10|dv|dolby|vision|bluray|bd|bdrip|brrip|web-?dl|webrip|hdtv|remux|mux|ac-?3|aac|dts|ddp|flac|truehd|atmos|multi|dual|complete|pack|amzn|nf|dsnp|hmax|atvp|apple|hulu|peacock|rakuten|iyp|dvd|dvdrip|unrated|extended|director|cut|rip)\b.*/yi;
 
 function base32ToHex(base32) {
@@ -321,11 +320,11 @@ function extractStreamInfo(title, source) {
   let detailsParts = [];
   if (videoTags.length) detailsParts.push(`🖥️ ${videoTags.join(" ")}`);
   
-  // Ritorno 'rawVideoTags' per la logica di Binge Grouping
   return { quality: q, qIcon, info: detailsParts.join(" | "), lang, audioInfo, rawVideoTags: videoTags };
 }
 
-function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag = "RD", config = {}, infoHash = null, isLazy = false) {
+// [MODIFICATA] Aggiunto parametro isPackItem per gestire i Season Packs
+function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag = "RD", config = {}, infoHash = null, isLazy = false, isPackItem = false) {
     const { quality, qIcon, info, lang, audioInfo, rawVideoTags } = extractStreamInfo(fileTitle, source);
     const cleanNameTitle = cleanFilename(fileTitle);
 
@@ -345,10 +344,6 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
         sizeString = `${gb.toFixed(2)} GB`;
     }
 
-    // --- BINGE GROUPING INTELLIGENTE ---
-    // Uniamo Qualità + Tech Specs (HDR, DV, etc) + Service Provider
-    // Esempio: "Leviathan|4K|HDR|RD"
-    // Questo dice a Stremio: "Per il prossimo episodio, cerca un flusso che sia 4K, HDR e su RD"
     const techClean = rawVideoTags ? rawVideoTags.join("") : "";
     const bingeGroup = `Leviathan|${quality}|${techClean}|${serviceTag}`;
 
@@ -389,8 +384,8 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
             language: lang,
             source: displaySource,
             seeders: seeders,
-            isPack: false,
-            episodeTitle: getEpisodeTag(fileTitle)
+            isPack: isPackItem, // Passiamo il flag al formatter AIO
+            episodeTitle: isPackItem ? "📦 SEASON PACK" : getEpisodeTag(fileTitle)
         });
         return { name, title, bingeGroup };
     }
@@ -439,7 +434,6 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
             .trim() || "P2P";
     }
     
-    // --- MODIFICA LAZY TAG: USA DADO 🎲 PER INDICARE "TENTA LA FORTUNA/DUBBIO" ---
     const finalServiceTag = serviceTag;
     
     const sourceLine = `⚡ [${finalServiceTag}] ${displaySource}`;
@@ -448,9 +442,13 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
         .replace(/(s\d{1,2}e\d{1,2}|\d{1,2}x\d{1,2}|s\d{1,2})/ig, "")
         .replace(/\s{2,}/g, " ")
         .trim();
+    
+    // Gestione Tag Episodio / Pack
     const epTag = getEpisodeTag(fileTitle);
+    const finalEpTag = isPackItem ? "📦 SEASON PACK" : epTag;
+
     const lines = [];
-    lines.push(`🎬 ${cleanName}${epTag ? ` ${epTag}` : ""}`);
+    lines.push(`🎬 ${cleanName}${finalEpTag ? ` ${finalEpTag}` : ""}`);
     const audioLine = [langStr, audioInfo].filter(Boolean).join(" • ");
     if (audioLine) lines.push(audioLine);
     const cleanInfo = info ? info.replace("🖥️ ", "") : "";
@@ -471,8 +469,6 @@ function formatVixStream(meta, vixData) {
     lines.push(`🎞️ HLS • Bitrate Variabile`);
     lines.push(`☁️ Web Stream • ⚡ Instant`);
     lines.push(`🍝 StreamingCommunity`);
-    
-    // Binge Group Web Unificato
     const bingeGroup = `Leviathan|${quality}|Web|SC`;
 
     return {
@@ -538,7 +534,6 @@ async function filterTorBoxCached(apiKey, items) {
 
     const cachedItems = items.filter(item => {
         const isCached = item.hash && confirmedHashes.has(item.hash.toLowerCase());
-        // [FIX TB] Se confermato in cache, settiamo il flag per resolveDebridLink
         if (isCached) item._tbCached = true;
         return isCached;
     });
@@ -625,7 +620,7 @@ async function getMetadata(id, type, config = {}) {
 
                 return {
                     title: title,
-                    originalTitle: originalTitle, // Cruciale per "The Rip - Soldi Sporchi" vs "The Rip"
+                    originalTitle: originalTitle, 
                     year: year,
                     imdb_id: cleanId,
                     tmdb_id: tmdbId, 
@@ -686,11 +681,11 @@ async function resolveDebridLink(config, item, showFake, reqHost) {
         const apiKey = config.key || config.rd;
         if (!apiKey) return null;
 
-        // Torbox generalmente gestito via cache check, ma se qui:
         if (service === 'tb') {
             if (item._tbCached) {
                 const serviceTag = "TB";
-                const { name, title, bingeGroup } = formatStreamTitleCinePro(item.title, item.source, item._size, item.seeders, serviceTag, config, item.hash);
+                // Passiamo item._isPack
+                const { name, title, bingeGroup } = formatStreamTitleCinePro(item.title, item.source, item._size, item.seeders, serviceTag, config, item.hash, false, item._isPack);
                 const proxyUrl = `${reqHost}/${config.rawConf}/play_tb/${item.hash}?s=${item.season || 0}&e=${item.episode || 0}`;
                 return { name, title, url: proxyUrl, behaviorHints: { notWebReady: false, bingieGroup: bingeGroup } };
             } else { return null; }
@@ -703,7 +698,7 @@ async function resolveDebridLink(config, item, showFake, reqHost) {
         if (!streamData || (streamData.type === "ready" && streamData.size < CONFIG.REAL_SIZE_FILTER)) return null;
 
         const serviceTag = service.toUpperCase();
-        const { name, title, bingeGroup } = formatStreamTitleCinePro(streamData.filename || item.title, item.source, streamData.size || item.size, item.seeders, serviceTag, config, item.hash);
+        const { name, title, bingeGroup } = formatStreamTitleCinePro(streamData.filename || item.title, item.source, streamData.size || item.size, item.seeders, serviceTag, config, item.hash, false, item._isPack);
         return { name, title, url: streamData.url, behaviorHints: { notWebReady: false, bingieGroup: bingeGroup } };
     } catch (e) {
         if (showFake) return { name: `[P2P ⚠️]`, title: `${item.title}\n⚠️ Cache Assente`, url: item.magnet, behaviorHints: { notWebReady: true } };
@@ -715,7 +710,7 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
     const service = config.service || 'rd';
     const serviceTag = service.toUpperCase();
     
-    // --- MODIFICA RICHIESTA: Se è Lazy, passiamo isLazy a formatStreamTitleCinePro ---
+    // Passiamo item._isPack al formattatore
     const { name, title, bingeGroup } = formatStreamTitleCinePro(
         item.title,
         item.source,
@@ -724,7 +719,8 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
         serviceTag,
         config,
         item.hash,
-        isLazy // Passiamo il flag
+        isLazy,
+        item._isPack 
     );
 
     const fileIdxParam = item.fileIdx !== undefined ? item.fileIdx : -1;
@@ -854,7 +850,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   const tmdbIdLookup = meta.tmdb_id || (await imdbToTmdb(meta.imdb_id, userTmdbKey))?.tmdbId;
   const dbOnlyMode = config.filters?.dbOnly === true; 
 
-  // --- FILTRO AGGRESSIVO CON FIX PER "RIP" E TITOLI COMPOSTI ---
+  // --- FILTRO AGGRESSIVO CON FIX SEASON PACKS ---
   const aggressiveFilter = (item) => {
       if (!item?.magnet) return false;
       if (item.isExternal) return true;
@@ -873,22 +869,38 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
            if (!item.title.includes("2025")) return false;
       }
 
-      // --- LOGICA SERIE TV ---
+      // --- LOGICA SERIE TV (AGGIORNATA PER SEASON PACKS) ---
       if (meta.isSeries) {
           const s = meta.season;
           const e = meta.episode;
+          
+          // 1. Scarta se trova un riferimento a una stagione DIVERSA (es. cerchi S01, trovi S02)
           const wrongSeasonRegex = /(?:s|stagione|season)\s*0?(\d+)(?!\d)/gi;
           let match;
           while ((match = wrongSeasonRegex.exec(t)) !== null) {
               const foundSeason = parseInt(match[1]);
               if (foundSeason !== s) return false; 
           }
-          const hasRightSeason = new RegExp(`(?:s|stagione|season|^)\\s*0?${s}(?!\\d)`, 'i').test(t);
-          const hasRightEpisode = new RegExp(`(?:e|x|ep|episode|^)\\s*0?${e}(?!\\d)`, 'i').test(t);
-          const isPack = /(?:complete|pack|stagione\s*\d+\s*$|season\s*\d+\s*$)/i.test(t) && !/e\d+|x\d+/i.test(t);
 
+          // 2. Verifica se la stagione è corretta
+          const hasRightSeason = new RegExp(`(?:s|stagione|season|^)\\s*0?${s}(?!\\d)`, 'i').test(t);
+          
+          // 3. Verifica se c'è l'episodio specifico (es. E05)
+          const hasRightEpisode = new RegExp(`(?:e|x|ep|episode|^)\\s*0?${e}(?!\\d)`, 'i').test(t);
+          
+          // 4. Rileva se è un PACK (Contiene "Complete", "Pack" o NON ha indicazioni di episodio specifico)
+          const hasAnyEpisodeTag = /(?:e|x|ep|episode)\s*0?\d+/i.test(t);
+          const isExplicitPack = /(?:complete|pack|stagione\s*\d+\s*$|season\s*\d+\s*$|tutta|completa)/i.test(t);
+          
+          // A. Match Esatto: Stagione Giusta + Episodio Giusto
           if (hasRightSeason && hasRightEpisode) return true;
-          if (hasRightSeason && isPack) return true;
+
+          // B. Season Pack: Stagione Giusta + (È un Pack Esplicito OPPURE Non c'è nessun tag episodio)
+          if (hasRightSeason && (isExplicitPack || !hasAnyEpisodeTag)) {
+              item._isPack = true; // Mark per la UI
+              return true;
+          }
+
           return false;
       }
 
@@ -914,57 +926,32 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
            }
       }
 
-      // --- FIX MATCH TITOLO (Gestione "The Rip - Soldi Sporchi") ---
-      
-      // 1. Pulizia Standard
+      // --- FIX MATCH TITOLO ---
       const cleanFile = item.title.toLowerCase().replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
       const cleanMeta = meta.title.toLowerCase().replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
       
-      // 2. Pulizia "Smart": Rimuove sottotitoli italiani dopo "-" o ":"
-      // Es. "The Rip - Soldi Sporchi" diventa "The Rip"
       const metaTitleShort = meta.title.split(/ - |: /)[0].toLowerCase().trim();
-      
-      // 3. Original Title (da TMDB): Es. "RIP"
       const metaOriginal = (meta.originalTitle || "").toLowerCase().trim();
 
-    const checkMatch = (strToCheck) => {
+      const checkMatch = (strToCheck) => {
           if (!strToCheck) return false;
-
-          // 1. Rimuoviamo subito gli articoli per analizzare la "keyword" reale
           let searchKeyword = strToCheck.replace(/^(the|a|an|il|lo|la|i|gli|le)\s+/i, "").trim();
 
-          // 2. FIX SPECIFICO PER "RIP" (Applicato alla keyword pulita)
-          // Il problema è che "Rip" è ovunque (WEBRip, BDRip, o "1080p Rip").
-          // Se cerchiamo il film "The Rip", imponiamo che il file DEBBA INIZIARE con il titolo.
           if (searchKeyword === "rip") {
-               // Regex: L'inizio della stringa (^) deve essere opzionalmente "the " o "il ", seguito da "rip"
-               // seguito da un fine parola (\b). Questo esclude "The Strangers... Rip".
-               // cleanFile ha già subito la sostituzione di punti/underscore con spazi.
                const strictStartRegex = /^(the\s+|il\s+)?rip\b/i;
-               
-               // Se il file inizia con "The Rip" o "Rip", è il nostro film.
                if (strictStartRegex.test(cleanFile)) return true;
-
-               // Caso speciale: Se il titolo contiene anche "Soldi Sporchi" (il sottotitolo),
-               // la logica precedente (checkMatch cleanMeta) l'avrebbe già preso. 
-               // Se siamo qui, stiamo valutando solo la keyword "Rip", quindi scartiamo tutto il resto.
                return false;
           }
-
-          // 3. Se la stringa è molto corta (es "IO", "NO"), usiamo Word Boundary per evitare match parziali
           if (searchKeyword.length <= 3) {
               const regexShort = new RegExp(`\\b${searchKeyword}\\b`, 'i');
               return regexShort.test(cleanFile);
           }
-          
-          // 4. Match standard (inclusione)
           return cleanFile.includes(searchKeyword);
       };
 
-      // Controllo Gerarchico
-      if (checkMatch(cleanMeta)) return true;       // Match intero ("The Rip - Soldi Sporchi")
-      if (checkMatch(metaTitleShort)) return true;  // Match parziale ("The Rip")
-      if (checkMatch(metaOriginal)) return true;    // Match originale ("RIP")
+      if (checkMatch(cleanMeta)) return true;       
+      if (checkMatch(metaTitleShort)) return true;  
+      if (checkMatch(metaOriginal)) return true;    
 
       if (smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode)) return true;
 
@@ -1040,9 +1027,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       saveResultsToDbBackground(meta, cleanResults);
   }
 
-  // --- [MODIFICA RICHIESTA: RIMOSSO FILTRO 0 SEEDERS] ---
-  // Ora vengono mostrati TUTTI i risultati, anche se hanno 0 seeders.
-  
   if (config.filters) {
       cleanResults = cleanResults.filter(item => {
           const t = (item.title || "").toLowerCase();
@@ -1103,16 +1087,12 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
 
   let debridStreams = [];
   if (ranked.length > 0 && hasDebridKey) {
-      // --- MODIFICA FULL LAZY MODE (Film & Serie) ---
-      // Impostiamo TOP_LIMIT a 0 in modo che TUTTO venga gestito come Lazy Stream.
-      
       const isTorBox = config.service === 'tb';
-      let TOP_LIMIT = 0; // Tutto Lazy
+      let TOP_LIMIT = 0; 
 
       const topItems = ranked.slice(0, TOP_LIMIT);
       const lazyItems = ranked.slice(TOP_LIMIT);
 
-      // 1. Risoluzione Immediata (Verrà saltata perché topItems è vuoto)
       const immediatePromises = topItems.map(item => {
           item.season = meta.season;
           item.episode = meta.episode;
@@ -1120,7 +1100,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           return LIMITERS.rd.schedule(() => resolveDebridLink(config, item, config.filters?.showFake, reqHost));
       });
 
-      // 2. Generazione Lazy (Tutto qui)
       const lazyStreams = lazyItems.map(item =>
           generateLazyStream(item, config, meta, reqHost, userConfStr, true)
       );
@@ -1195,7 +1174,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
                        techInfo: techStr 
                    });
                    if (!stream.behaviorHints) stream.behaviorHints = {};
-                   // Binge Group Web Unificato
                    stream.behaviorHints.bingieGroup = `Leviathan|${quality}|Web|${sourceName.replace(/\W/g,'')}`;
                });
            };
@@ -1228,7 +1206,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       });
   }
 
-  // --- FALLBACK WEBSTREAMR: SOLO SE 0 RISULTATI (P2P + WEB LOCALI) ---
   if (finalStreams.length === 0) {
       logger.info(`⚠️ [FALLBACK] Nessun risultato trovato (P2P/Web Locali). Attivo WebStreamr...`);
       const webStreamrResults = await searchWebStreamr(type, finalId);
@@ -1240,9 +1217,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       }
   }
 
-  // --- [TRAILER SECTION - UPDATED] ---
-  // Attivo solo se richiesto dalla configurazione.
-  // Se attivo, lo mette IN CIMA alla lista (unshift).
   if (config.filters && config.filters.enableTrailers) {
       try {
          if (meta && meta.title) {
@@ -1256,7 +1230,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
              );
 
              if (trailerStreams && trailerStreams.length > 0) {
-                 // UNSHIFT per metterlo come PRIMO risultato
                  finalStreams.unshift(...trailerStreams);
                  logger.info(`🎬 [TRAILER] Aggiunto trailer in testa per: ${meta.title}`);
              }
@@ -1265,7 +1238,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
          logger.warn(`⚠️ Errore recupero Trailer: ${err.message}`);
       }
   }
-  // ----------------------------------------
   
   const resultObj = { streams: finalStreams };
 
@@ -1493,7 +1465,7 @@ app.listen(PORT, () => {
     console.log(`🚀 Leviathan (God Tier) attivo su porta interna ${PORT}`);
     console.log(`-----------------------------------------------------`);
     console.log(`⚡ MODE: FULL LAZY (All items Lazy)`);
-    console.log(`🎬 SERIES: Full Lazy Mode (No Instant Check)`);
+    console.log(`🎬 SERIES: Full Lazy Mode (Pack Support Active)`);
     console.log(`📡 INDEXER URL (ENV): ${CONFIG.INDEXER_URL}`);
     console.log(`🎬 METADATA: TMDB Primary (User Key Priority)`);
     console.log(`💾 SCRITTURA: DB Locale (Auto-Learning attivo)`);
