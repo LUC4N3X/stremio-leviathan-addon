@@ -450,7 +450,7 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     const finalServiceTag = serviceTag;
     
     const sourceLine = `⚡ [${finalServiceTag}] ${displaySource}`;
-    const name = `🦑 LEVIATHAN\n${qIcon} ${quality}`;
+   const name = `🦑 𝗟𝗘𝗩𝗜𝗔𝗧𝗛𝗔𝗡\n${qIcon} ${quality}`;
     const cleanName = cleanFilename(fileTitle)
         .replace(/(s\d{1,2}e\d{1,2}|\d{1,2}x\d{1,2}|s\d{1,2})/ig, "")
         .replace(/\s{2,}/g, " ")
