@@ -465,8 +465,11 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     
     const finalServiceTag = serviceTag;
 
-    // Usa lo scatolo 📦 solo se il tag è TB, altrimenti usa il fulmine ⚡
-    const serviceIcon = finalServiceTag === "TB" ? "📦" : "⚡";
+    // --- GESTIONE ICONA SERVIZIO ---
+    let serviceIcon = "⚡"; // Fallback / P2P
+    if (finalServiceTag === "TB") serviceIcon = "📦";      // TorBox = Scatola
+    else if (finalServiceTag === "RD") serviceIcon = "☄️"; // RealDebrid = Cometa
+    else if (finalServiceTag === "AD") serviceIcon = "🦅"; // AllDebrid = Aquila
     
     const sourceLine = `${serviceIcon} [${finalServiceTag}] ${displaySource}`;
 
@@ -1643,7 +1646,8 @@ app.get("/:conf/manifest.json", (req, res) => {
         const hasTBKey = (config.service === 'tb' && config.key) || config.torbox;
         const hasADKey = (config.service === 'ad' && config.key) || config.alldebrid;
         if (hasRDKey) {
-            manifest.name = "Leviathan ⚡ RD";
+            // [MODIFICATO] ICONA COMETA PER IL NOME ADDON
+            manifest.name = "Leviathan ☄️ RD";
             manifest.id += ".rd"; 
         } 
         else if (hasTBKey) {
