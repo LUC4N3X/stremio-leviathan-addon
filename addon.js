@@ -520,8 +520,8 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     const finalEpTag = isPackItem ? "📦 SEASON PACK" : epTag;
 
     const lines = [];
-    // Icona Film: ✨🎥
-    lines.push(`✨🎥 ${cleanName}${finalEpTag ? ` ${finalEpTag}` : ""}`);
+    // Icona Film: 🗂️ (DOSSIER STYLE - MODIFICATA SU RICHIESTA)
+    lines.push(`🗂️ ${cleanName}${finalEpTag ? ` ${finalEpTag}` : ""}`);
     
     // Lingua + Audio
     const audioLine = [langStr, audioInfo].filter(Boolean).join(" • ");
