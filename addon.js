@@ -420,12 +420,12 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     }
 
     const sizeStr = `🧲 ${sizeString}`;
-    const seedersStr = seeders != null ? `👤 ${seeders}` : "";
+    const seedersStr = seeders != null ? `👥 ${seeders}` : "";
 
-    let langStr = "🌐 ?";
-    if (/multi/i.test(lang || "")) langStr = "🌐 MULTI"; 
-    else if (/ita|it\b|italiano/i.test(lang || "")) langStr = "🇮🇹 ITA";
-    else if (/eng|en\b|english/i.test(lang || "")) langStr = "🇬🇧 ENG";
+    let langStr = "🗣️ ❓";
+    if (/multi/i.test(lang || "")) langStr = "🗣️ 🌐"; 
+    else if (/ita|it\b|italiano/i.test(lang || "")) langStr = "🗣️ 🇮🇹";
+    else if (/eng|en\b|english/i.test(lang || "")) langStr = "🗣️ 🇬🇧";
     else if (lang) langStr = `🗣️ ${lang.toUpperCase()}`;
     
     let displaySource = source || "P2P";
@@ -484,7 +484,7 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     const finalEpTag = isPackItem ? "📦 SEASON PACK" : epTag;
 
     const lines = [];
-    lines.push(`🎬 ${cleanName}${finalEpTag ? ` ${finalEpTag}` : ""}`);
+    lines.push(`✨🎥 ${cleanName}${finalEpTag ? ` ${finalEpTag}` : ""}`);
     const audioLine = [langStr, audioInfo].filter(Boolean).join(" • ");
     if (audioLine) lines.push(audioLine);
     const cleanInfo = info ? info.replace("🖥️ ", "") : "";
