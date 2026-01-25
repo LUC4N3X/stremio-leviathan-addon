@@ -109,20 +109,31 @@ const REGEX_AUDIO = {
     flac: /\bflac\b/i
 };
 
-// [MODIFICATO] PULIZIA RADICALE REGEX ITA
+// [MODIFICATO] NUOVA REGEX ITA POTENZIATA PER KNABEN/1337X
 const REGEX_ITA = [
-    /\b(ITA|ITALIAN|ITALY)\b/i,
-    /\b(AUDIO|LINGUA)\s*[:\-]?\s*(ITA|IT)\b/i,
-    /\b(AC-?3|AAC|DDP?|DTS|PCM|TRUEHD|ATMOS|MP3|WMA|FLAC).*(ITA|IT)\b/i,
-    /\b(DD|DDP|AAC|DTS)\s*5\.1\s*(ITA|IT)\b/i,
-    /\b(MULTI|DUAL|TRIPLE).*(ITA|IT)\b/i,
-    /\b(SUB|SUBS|SOTTOTITOLI).*(ITA|IT)\b/i,
-    /\b(H\.?264|H\.?265|X264|X265|HEVC|AVC|DIVX|XVID).*(ITA|IT)\b/i,
-    // Release groups noti
-    /\b(iDN_CreW|CORSARO|MUX|WMS|TRIDIM|SPEEDVIDEO|EAGLE|TRL|MEA|LUX|DNA|LEST|GHIZZO|USAbit|Bric|Dtone|Gaiage|BlackBit|Pantry|Vics|Papeete)\b/i,
-    // Parole chiave sicure per Serie TV
-    /\b(STAGIONE|EPISODIO|SERIE COMPLETA|STAGIONE COMPLETA)\b/i
+    // 1. Espliciti: Audio ITA, Lingua ITA
+    /\b(AUDIO|LINGUA|LANG|VO)\s*[:.\-_]?\s*(ITA|IT|ITALIAN)\b/i,
+    
+    // 2. Codec o Qualità + ITA (es. "AC3 ITA", "1080p ITA", "WebRip.ITA")
+    /\b(AC-?3|AAC|DDP?|DTS|PCM|TRUEHD|ATMOS|MP3|FLAC|MD|LD|DD\+?|5\.1|H\.?264|H\.?265|X264|X265|HEVC|AVC|DIVX|XVID|BLURAY|BD|BDRIP|WEBRIP|WEB-?DL|HDTV|1080[pi]|720[pi]|480[pi]|4K|2160[pi])[\s.\-_]+(ITA|IT|ITALIAN)\b/i,
+    
+    // 3. Multi/Dual che include ITA
+    /\b(MULTI|DUAL|TRIPLE).*ITA\b/i,
+    
+    // 4. ITA seguito da altro (es. "ITA-ENG", "ITA.AC3")
+    /\b(ITA|IT|ITALIAN)[\s.\-_]+(ENG|EN|ENGLISH|FRA|GER|SPA|RUS|AC3|AAC|DDP|DTS|H264|H265)\b/i,
+    
+    // 5. ITA Isolato tra separatori (es. "[ITA]", ".ITA.", "-ITA-", " ITA ")
+    /(?:^|[_\-. \[(\/])(ITA|ITALIAN|ITALY)(?:$|[_\-. \])\/])/i,
+    
+    // 6. Release Groups noti (Aggiungine altri se ne trovi)
+    /\b(iDN_CreW|CORSARO|MUX|WMS|TRIDIM|SPEEDVIDEO|EAGLE|TRL|MEA|LUX|DNA|LEST|GHIZZO|USAbit|Bric|Dtone|Gaiage|BlackBit|Pantry|Vics|Papeete|Lidri|MirCrew)\b/i
 ];
+
+// Regex specifica per escludere i soli sottotitoli (False Positives)
+const REGEX_SUB_ONLY = /\b(SUB|SUBS|SUBBED|SOTTOTITOLI|VOST|VOSTIT)\s*[:.\-_]?\s*(ITA|IT|ITALIAN)\b/i;
+// Regex per confermare che, anche se c'è scritto SUB, c'è pure l'audio (es. "Audio ITA - Sub ITA")
+const REGEX_AUDIO_CONFIRM = /\b(AUDIO|AC3|AAC|DTS|MD|LD|DDP|MP3|LINGUA)[\s.\-_]+(ITA|IT)\b/i;
 
 const REGEX_CLEANER = /\b(ita|eng|ger|fre|spa|latino|rus|sub|h264|h265|x264|x265|hevc|avc|vc1|1080p|1080i|720p|480p|4k|2160p|uhd|sdr|hdr|hdr10|dv|dolby|vision|bluray|bd|bdrip|brrip|web-?dl|webrip|hdtv|remux|mux|ac-?3|aac|dts|ddp|flac|truehd|atmos|multi|dual|complete|pack|amzn|nf|dsnp|hmax|atvp|apple|hulu|peacock|rakuten|iyp|dvd|dvdrip|unrated|extended|director|cut|rip)\b.*/yi;
 
@@ -1005,115 +1016,115 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   const tmdbIdLookup = meta.tmdb_id || (await imdbToTmdb(meta.imdb_id, userTmdbKey))?.tmdbId;
   const dbOnlyMode = config.filters?.dbOnly === true; 
 
-  // --- FILTRO AGGRESSIVO CON FIX KNABEN E SEASON PACKS ---
+  // --- FILTRO AGGRESSIVO (NUOVO) ---
   const aggressiveFilter = (item) => {
       if (!item?.magnet) return false;
-      // EXTERNAL (FetchExternalResults) passa sempre
-      // Nota: LocalDB ora ha isExternal: false, quindi verrà controllato qui.
       if (item.isExternal) return true;
 
       const source = (item.source || "").toLowerCase();
+      // Filtri tecnici globali
       if (source.includes("comet") || source.includes("stremthru")) return false;
 
-      // ----------------------------------------------------
-      // LOGICA BLINDATA: LINGUA E KNABEN
-      // ----------------------------------------------------
+      // Analisi Titolo
+      const t = item.title; // Mantieni Case Sensitive per alcune regex, o usa 'i' flag
+      const tLower = t.toLowerCase();
+      
       const isCorsaro = /corsaro/i.test(source);
       const isKnaben = /knaben/i.test(source);
-      
-      // Controllo base: è un titolo italiano generico?
-      let isItalianTitle = isSafeForItalian(item) || isCorsaro;
+      const is1337x = /1337/i.test(source);
+      const isTgx = /tgx|torrentgalaxy/i.test(source);
 
-      // Se l'utente NON vuole l'inglese (allowEng = false)
+      // Check Match Italiano Potenziato
+      // Usa le nuove REGEX_ITA. Se una qualsiasi passa, è potenzialmente valido.
+      const matchesItalianRegex = REGEX_ITA.some(r => r.test(t));
+      
+      // Gestione Config "Solo ITA" (allowEng = false) o Provider Misti
       if (!config.filters?.allowEng) {
           
-          // CASO SPECIFICO KNABEN (Il "Maledetto"):
-          // Knaben è internazionale. Se il file ha "ITA" nel titolo, spesso sono solo SUB.
-          // Se siamo in modalità "Solo ITA", Knaben deve avere un tag AUDIO esplicito per passare.
-          if (isKnaben) {
-               // Cerca tag forti: AC3 ITA, AAC ITA, MP3 ITA, MD ITA, LD ITA, AUDIO ITA
-               const hasStrongAudioIta = /\b(AC-?3|AAC|DDP|DTS|MP3|MD|LD|AUDIO|LINGUA).*(ITA|IT)\b/i.test(item.title);
-               
-               // Se non ha un tag audio esplicito, SCARTALO, anche se isItalianTitle era true (perché magari era solo SUB)
-               if (!hasStrongAudioIta) {
-                   return false; 
-               }
+          // LOGICA KNABEN & 1337x & TGX (Provider Internazionali)
+          if (isKnaben || is1337x || isTgx) {
+              
+              if (!matchesItalianRegex) {
+                  // Se non c'è traccia di ITA nelle regex potenti -> VIA
+                  return false; 
+              }
+
+              // Controllo "Solo Sottotitoli" (Il problema classico di Knaben)
+              // Se matcha "SUB ITA" E NON matcha "AUDIO ITA" -> Scarta
+              const looksLikeSubOnly = REGEX_SUB_ONLY.test(t);
+              const hasConfirmedAudio = REGEX_AUDIO_CONFIRM.test(t);
+
+              if (looksLikeSubOnly && !hasConfirmedAudio) {
+                  // Esempio: "Movie (2024) 1080p Eng Sub Ita" -> SCARTA
+                  // Esempio: "Movie (2024) Ita Eng Sub Ita" -> TIENI (perché matchesItalianRegex ha beccato 'Ita Eng')
+                  
+                  // Doppio controllo: se REGEX_ITA ha matchato solo grazie al "SUB ITA", dobbiamo scartare.
+                  // Verifichiamo se c'è un match ITA che NON sia quello dei sub.
+                  const cleanTitleNoSub = t.replace(REGEX_SUB_ONLY, ""); 
+                  const stillHasIta = REGEX_ITA.some(r => r.test(cleanTitleNoSub));
+                  
+                  if (!stillHasIta) return false; 
+              }
           } 
-          // CASO GENERALE (Non Knaben)
+          // LOGICA GENERALE (Altri Provider)
           else {
-              // Se non è Italiano -> VIA
-              if (!isItalianTitle) return false;
+              // Se non è Italiano (match regex o isSafeForItalian vecchio) -> VIA
+              // Nota: isSafeForItalian usa le regex globali, qui usiamo quelle potenziate
+              if (!matchesItalianRegex && !isSafeForItalian(item) && !isCorsaro) {
+                  return false;
+              }
               
-              // FILTRO SUBTITLES-ONLY (Anti-Beffa per provider non-Knaben)
-              // Se il titolo contiene SUB/VOST ma NON ha tag Audio ITA espliciti, è probabilmente ENG audio -> VIA
-              const isSubbed = /\b(sub|subs|subbed|vost|vostit|sottotitoli)\b/i.test(item.title);
-              const hasExplicitAudio = /\b(AC-?3|AAC|DDP|DTS|MP3|MD|LD).*(ITA|IT)\b/i.test(item.title);
-              
-              if (isSubbed && !hasExplicitAudio && !isCorsaro) {
+              // Anti-Sub Generico
+              if (/\b(sub|subs|subbed|vost|vostit)\b/i.test(t) && !REGEX_AUDIO_CONFIRM.test(t) && !isCorsaro) {
                   return false;
               }
           }
       }
-      // ----------------------------------------------------
 
-      const t = item.title.toLowerCase();
+      // --- DA QUI IN GIU' LA LOGICA RESTA INVARIATA (Anno, Serie, etc.) ---
       const metaYear = parseInt(meta.year);
 
-      // --- FIX FRANKENSTEIN ---
+      // Fix Frankenstein 2025
       if (metaYear === 2025 && /frankenstein/i.test(meta.title)) {
            if (!item.title.includes("2025")) return false;
       }
 
-      // --- [MODIFICA 2] LOGICA SERIE TV BLINDATA ---
+      // LOGICA SERIE TV
       if (meta.isSeries) {
           const s = meta.season;
           const e = meta.episode;
           
-          // 1. Controllo Regex Esplicite Sbagliate (es. S04 trovato, cerco S01)
+          // 1. Check Stagione Sbagliata
           const wrongSeasonRegex = /(?:s|stagione|season)\s*0?(\d+)(?!\d)/gi;
           let match;
-          while ((match = wrongSeasonRegex.exec(t)) !== null) {
+          while ((match = wrongSeasonRegex.exec(tLower)) !== null) {
               const foundSeason = parseInt(match[1]);
               if (foundSeason !== s) return false; 
           }
 
-          // 2. Controllo formato "NxMM" (es. 1x05)
-          const xMatch = t.match(/(\d+)x(\d+)/i);
+          // 2. Check 1x05
+          const xMatch = tLower.match(/(\d+)x(\d+)/i);
           if (xMatch) {
-              const xS = parseInt(xMatch[1]);
-              const xE = parseInt(xMatch[2]);
-              if (xS !== s) return false;
-              if (xE !== e) return false;
-              return true; // Match perfetto 1x05
+              if (parseInt(xMatch[1]) !== s) return false;
+              if (parseInt(xMatch[2]) !== e) return false;
+              return true;
           }
 
-          // 3. Controllo standard Sxx Exx
-          const hasRightSeason = new RegExp(`(?:s|stagione|season|^)\\s*0?${s}(?!\\d)`, 'i').test(t);
-          const hasRightEpisode = new RegExp(`(?:e|x|ep|episode|^)\\s*0?${e}(?!\\d)`, 'i').test(t);
-          const hasAnyEpisodeTag = /(?:e|x|ep|episode)\s*0?\d+/i.test(t);
-          const isExplicitPack = /(?:complete|pack|stagione\s*\d+\s*$|season\s*\d+\s*$|tutta|completa)/i.test(t);
+          // 3. Standard Sxx Exx
+          const hasRightSeason = new RegExp(`(?:s|stagione|season|^)\\s*0?${s}(?!\\d)`, 'i').test(tLower);
+          const hasRightEpisode = new RegExp(`(?:e|x|ep|episode|^)\\s*0?${e}(?!\\d)`, 'i').test(tLower);
+          const hasAnyEpisodeTag = /(?:e|x|ep|episode)\s*0?\d+/i.test(tLower);
+          const isExplicitPack = /(?:complete|pack|stagione\s*\d+\s*$|season\s*\d+\s*$|tutta|completa)/i.test(tLower);
           
           if (hasRightSeason && hasRightEpisode) return true;
           if (hasRightSeason && (isExplicitPack || !hasAnyEpisodeTag)) {
               item._isPack = true; 
               return true;
           }
-          
-          // Se è una serie, e non ha matchato le regole sopra, È UN FALSO POSITIVO.
-          // NON permettere il fallback al controllo titolo generico.
           return false;
       }
 
-      // --- LOGICA FILM (Resta invariata) ---
-      if (source.includes("1337")) {
-          const hasIta = /\b(ita|italian)\b/i.test(item.title);
-          const isSubbed = /\b(sub|subs|subbed|vost|vostit)\b/i.test(item.title);
-          if (!hasIta || isSubbed) return false; 
-      }
-      if (source.includes("tgx") || source.includes("torrentgalaxy") || source.includes("yts")) {
-          const hasStrictIta = /\b(ita|italian)\b/i.test(item.title);
-          if (!hasStrictIta) return false; 
-      }
+      // LOGICA FILM (Anno)
       if (!isNaN(metaYear)) {
            const fileYearMatch = item.title.match(REGEX_YEAR);
            if (fileYearMatch) {
@@ -1122,8 +1133,8 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
            }
       }
 
-      // --- FIX MATCH TITOLO ---
-      const cleanFile = item.title.toLowerCase().replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
+      // CHECK MATCH TITOLO
+      const cleanFile = tLower.replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
       const cleanMeta = meta.title.toLowerCase().replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
       const metaTitleShort = meta.title.split(/ - |: /)[0].toLowerCase().trim();
       const metaOriginal = (meta.originalTitle || "").toLowerCase().trim();
@@ -1133,8 +1144,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           let searchKeyword = strToCheck.replace(/^(the|a|an|il|lo|la|i|gli|le)\s+/i, "").trim();
           if (searchKeyword === "rip") {
                const strictStartRegex = /^(the\s+|il\s+)?rip\b/i;
-               if (strictStartRegex.test(cleanFile)) return true;
-               return false;
+               return strictStartRegex.test(cleanFile);
           }
           if (searchKeyword.length <= 3) {
               const regexShort = new RegExp(`\\b${searchKeyword}\\b`, 'i');
@@ -1143,10 +1153,11 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           return cleanFile.includes(searchKeyword);
       };
 
-      if (checkMatch(cleanMeta)) return true;        
+      if (checkMatch(cleanMeta)) return true;         
       if (checkMatch(metaTitleShort)) return true;  
-      if (checkMatch(metaOriginal)) return true;    
+      if (checkMatch(metaOriginal)) return true;     
       if (smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode)) return true;
+      
       return false;
   };
 
