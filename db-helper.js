@@ -1,8 +1,8 @@
-// db-helper.js - IMPORT ONLY EDITION (FIXED DUPLICATE LOGS)
+// db-helper.js - FIXED COLUMN ERROR
 const { Pool } = require('pg');
 const axios = require('axios');
 
-console.log("📂 Caricamento modulo db-helper (SOLO SCRITTURA - STRICT MODE)...");
+console.log("📂 Caricamento modulo db-helper (FIXED COLUMN ERROR)...");
 
 // --- 1. GESTIONE TRACKER DINAMICI ---
 const TRACKERS_URL = 'https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_best.txt';
@@ -64,7 +64,7 @@ function initDatabase(config = {}) {
         connectionTimeoutMillis: 5000, 
     });
     
-    console.log(`✅ DB Pool Inizializzato (MODALITÀ WRITER - Target: ${poolConfig.host || 'Cloud'})`);
+    console.log(`✅ DB Pool Inizializzato (Target: ${poolConfig.host || 'Cloud'})`);
     return pool;
 }
 
@@ -91,14 +91,54 @@ function extractOriginalProvider(text) {
     return null;
 }
 
-// --- 4. FUNZIONI DI RICERCA (DISABILITATE) ---
+// --- 4. FUNZIONI DI RICERCA (CORRETTA) ---
 
-async function searchMovie(imdbId) { return []; }
-async function searchEpisodeFiles(imdbId, season, episode) { return []; }
-async function searchPacksByImdbId(imdbId, season) { return []; }
-async function searchSeriesWrapper(imdbId, season, episode) { return []; }
+async function getTorrents(imdbId, season, episode) {
+    if (!pool) return [];
+    
+    const client = await pool.connect();
+    try {
+        let query;
+        let params;
 
-// --- 5. FUNZIONI DI SCRITTURA (ATTIVE PER AUTO-LEARNING) ---
+        // [MODIFICATO] RIMOSSO 't.magnet' DALLA QUERY PERCHÉ NON ESISTE NEL DB
+        const selectFields = `
+            SELECT t.title, TRIM(t.info_hash) as info_hash, t.size, t.seeders, t.provider, t.file_index
+            FROM files f
+            JOIN torrents t ON f.info_hash = t.info_hash
+        `;
+
+        if (season && episode) {
+            // Logica Serie TV
+            query = `${selectFields} WHERE f.imdb_id = $1 AND f.imdb_season = $2 AND f.imdb_episode = $3`;
+            params = [imdbId, season, episode];
+        } else {
+            // Logica Film
+            query = `${selectFields} WHERE f.imdb_id = $1 AND (f.imdb_season IS NULL OR f.imdb_season = 0)`;
+            params = [imdbId];
+        }
+
+        const res = await client.query(query, params);
+        
+        return res.rows.map(row => ({
+            title: row.title,
+            info_hash: row.info_hash,
+            size: parseInt(row.size),
+            seeders: row.seeders,
+            provider: row.provider,
+            magnet: null, // Lasciamo null, addon.js lo ricostruirà dall'hash
+            file_index: row.file_index
+        }));
+
+    } catch (e) {
+        console.error(`❌ DB Read Error (${imdbId}): ${e.message}`);
+        return [];
+    } finally {
+        client.release();
+    }
+}
+
+// --- 5. FUNZIONI DI SCRITTURA (AUTO-LEARNING) ---
 
 async function insertTorrent(meta, torrent) {
     if (!pool) return false;
@@ -122,8 +162,6 @@ async function insertTorrent(meta, torrent) {
             providerName = 'External';
         }
 
-        // 🔥 QUERY CORRETTA: DO NOTHING se esiste già
-        // Questo impedisce di contare come "nuovo" un torrent che c'è già
         const queryTorrent = `
             INSERT INTO torrents (info_hash, provider, title, size, seeders)
             VALUES ($1, $2, $3, $4, $5)
@@ -132,7 +170,6 @@ async function insertTorrent(meta, torrent) {
         
         const res = await client.query(queryTorrent, [cleanHash, providerName, torrent.title, size, seeders]);
 
-        // Inseriamo comunque il link alla tabella files per sicurezza (non costa nulla)
         const queryFile = `
             INSERT INTO files (info_hash, imdb_id, imdb_season, imdb_episode, title)
             VALUES ($1, $2, $3, $4, $5)
@@ -146,9 +183,6 @@ async function insertTorrent(meta, torrent) {
 
         await client.query('COMMIT');
 
-        // ✅ LOGICA DI RITORNO
-        // res.rowCount sarà 1 se ha inserito, 0 se esisteva già.
-        // Restituisce true SOLO se è un nuovo inserimento.
         return (res.rowCount > 0);
 
     } catch (e) {
@@ -198,8 +232,7 @@ async function healthCheck() {
 module.exports = {
     initDatabase,
     healthCheck,
-    searchMovie,
-    searchSeries: searchSeriesWrapper,
+    getTorrents,
     insertTorrent,
     updateRdCacheStatus
 };
