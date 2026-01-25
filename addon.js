@@ -737,7 +737,7 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
     };
 }
 
-// [FIXED] Lettura DB con FILTRO LINGUA + KNABEN + BLOCCO RUSSI/ARABI
+// [FIXED] Lettura DB con FILTRO LINGUA + KNABEN + BLOCCO RUSSI/ARABI + STRICT SERIES
 async function queryLocalIndexer(meta, config) { 
     try {
         if (dbHelper && typeof dbHelper.getTorrents === 'function') {
@@ -775,7 +775,8 @@ async function queryLocalIndexer(meta, config) {
                         seeders: t.seeders || 0,
                         source: t.provider || 'External', 
                         fileIdx: t.file_index,
-                        isExternal: true 
+                        // [MODIFICA 1] DB Locale ora viene filtrato (isExternal: false)
+                        isExternal: false 
                     };
                 }).filter(item => {
                     // --- IL BUTTAFUORI (Gatekeeper) ---
@@ -811,6 +812,36 @@ async function queryLocalIndexer(meta, config) {
                         return false;
                     }
 
+                    // 3. [MODIFICA 3] LOGICA STRICT PREVENTIVA PER SERIE TV NEL DB
+                    if (meta.isSeries) {
+                        // Verifica che il numero stagione nel titolo corrisponda a quello richiesto
+                        const wrongSeasonRegex = /(?:s|stagione|season)\s*0?(\d+)(?!\d)/gi;
+                        let match;
+                        while ((match = wrongSeasonRegex.exec(cleanFile)) !== null) {
+                            const foundSeason = parseInt(match[1]);
+                            if (foundSeason !== s) return false; // Se trovo S04 e cerco S01 -> VIA
+                        }
+                        
+                        // Verifica presenza Episodio (o Pack)
+                        const hasRightSeason = new RegExp(`(?:s|stagione|season|^)\\s*0?${s}(?!\\d)`, 'i').test(cleanFile);
+                        // Supporto formato 1x05
+                        const hasXFormat = new RegExp(`\\b${s}x0?${e}\\b`, 'i').test(cleanFile);
+                        
+                        if (hasXFormat) return true;
+
+                        const isExplicitPack = /(?:complete|pack|stagione\s*\d+\s*$|season\s*\d+\s*$|tutta|completa)/i.test(cleanFile);
+                        const hasAnyEpisodeTag = /(?:e|x|ep|episode)\s*0?\d+/i.test(cleanFile);
+                        const hasRightEpisode = new RegExp(`(?:e|x|ep|episode|^)\\s*0?${e}(?!\\d)`, 'i').test(cleanFile);
+
+                        // Se è la stagione giusta E (episodio giusto O pack), ok. Altrimenti scarta qui.
+                        if (hasRightSeason && (hasRightEpisode || isExplicitPack || !hasAnyEpisodeTag)) {
+                            // OK passa
+                        } else {
+                            logger.warn(`🗑️ [DB SEASON FILTER] Rimosso risultato errato S/E: "${item.title}"`);
+                            return false; 
+                        }
+                    }
+
                     // 4. FILTRO TITOLO (Anti-Fake)
                     let searchKeyword = cleanMeta.replace(/^(the|a|an|il|lo|la|i|gli|le)\s+/i, "").trim();
                     if (searchKeyword === "rip") {
@@ -822,16 +853,6 @@ async function queryLocalIndexer(meta, config) {
                     // 5. Match Standard
                     if (cleanFile.includes(cleanMeta)) return true;
                     if (cleanFile.includes(metaTitleShort)) return true;
-
-                    // 6. Check Stagione
-                    if (meta.isSeries) {
-                        const wrongSeasonRegex = /(?:s|stagione|season)\s*0?(\d+)(?!\d)/gi;
-                        let match;
-                        while ((match = wrongSeasonRegex.exec(cleanFile)) !== null) {
-                            const foundSeason = parseInt(match[1]);
-                            if (foundSeason !== s) return false; 
-                        }
-                    }
 
                     logger.warn(`🗑️ [ANTI-FAKE] Rimosso intruso DB: "${item.title}"`);
                     return false;
@@ -987,6 +1008,8 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   // --- FILTRO AGGRESSIVO CON FIX KNABEN E SEASON PACKS ---
   const aggressiveFilter = (item) => {
       if (!item?.magnet) return false;
+      // EXTERNAL (FetchExternalResults) passa sempre
+      // Nota: LocalDB ora ha isExternal: false, quindi verrà controllato qui.
       if (item.isExternal) return true;
 
       const source = (item.source || "").toLowerCase();
@@ -1041,16 +1064,30 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
            if (!item.title.includes("2025")) return false;
       }
 
-      // --- LOGICA SERIE TV ---
+      // --- [MODIFICA 2] LOGICA SERIE TV BLINDATA ---
       if (meta.isSeries) {
           const s = meta.season;
           const e = meta.episode;
+          
+          // 1. Controllo Regex Esplicite Sbagliate (es. S04 trovato, cerco S01)
           const wrongSeasonRegex = /(?:s|stagione|season)\s*0?(\d+)(?!\d)/gi;
           let match;
           while ((match = wrongSeasonRegex.exec(t)) !== null) {
               const foundSeason = parseInt(match[1]);
               if (foundSeason !== s) return false; 
           }
+
+          // 2. Controllo formato "NxMM" (es. 1x05)
+          const xMatch = t.match(/(\d+)x(\d+)/i);
+          if (xMatch) {
+              const xS = parseInt(xMatch[1]);
+              const xE = parseInt(xMatch[2]);
+              if (xS !== s) return false;
+              if (xE !== e) return false;
+              return true; // Match perfetto 1x05
+          }
+
+          // 3. Controllo standard Sxx Exx
           const hasRightSeason = new RegExp(`(?:s|stagione|season|^)\\s*0?${s}(?!\\d)`, 'i').test(t);
           const hasRightEpisode = new RegExp(`(?:e|x|ep|episode|^)\\s*0?${e}(?!\\d)`, 'i').test(t);
           const hasAnyEpisodeTag = /(?:e|x|ep|episode)\s*0?\d+/i.test(t);
@@ -1061,10 +1098,13 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
               item._isPack = true; 
               return true;
           }
+          
+          // Se è una serie, e non ha matchato le regole sopra, È UN FALSO POSITIVO.
+          // NON permettere il fallback al controllo titolo generico.
           return false;
       }
 
-      // --- LOGICA FILM ---
+      // --- LOGICA FILM (Resta invariata) ---
       if (source.includes("1337")) {
           const hasIta = /\b(ita|italian)\b/i.test(item.title);
           const isSubbed = /\b(sub|subs|subbed|vost|vostit)\b/i.test(item.title);
