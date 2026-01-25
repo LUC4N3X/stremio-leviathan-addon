@@ -349,7 +349,7 @@ function extractStreamInfo(title, source) {
   else if (REGEX_QUALITY["720p"].test(t)) { q = "720p"; qIcon = "⚡"; }
   else if (REGEX_QUALITY["SD"].test(t)) { q = "SD"; qIcon = "📼"; }
   
-  // --- NUOVA LOGICA TAG VIDEO ESTETICI (High Tech B&W + Fix x264) ---
+  // --- NUOVA LOGICA TAG VIDEO ESTETICI (High Tech B&W + Fix x264/Fallback) ---
   const videoTags = [];
   
   // HDR: "🔥" (Fuoco richiesto) + Bold Text
@@ -361,12 +361,16 @@ function extractStreamInfo(title, source) {
   // IMAX: "🏟️" + Bold IMAX
   if (/imax/.test(t)) videoTags.push(`🏟️ ${toBold("IMAX")}`);
   
-  // HEVC: "⚙️" + Bold HEVC
-  if (/x265|h265|hevc/.test(t)) {
+  // HEVC / AVC / Fallback
+  if (/x265|h\.?265|hevc/i.test(t)) {
       videoTags.push(`⚙️ ${toBold("HEVC")}`);
   } 
-  // [NUOVO] Fallback per AVC/x264 (per evitare riga vuota e mostrare comunque il formato)
-  else if (/x264|h264|avc/.test(t)) {
+  else if (/x264|h\.?264|avc|mpeg-?4/i.test(t)) {
+      videoTags.push(`📼 ${toBold("AVC")}`);
+  }
+  else {
+      // [FIX RIGA MANCANTE] Se non è specificato nulla, assumiamo AVC (standard)
+      // Questo forza la comparsa della riga anche per file senza info codec
       videoTags.push(`📼 ${toBold("AVC")}`);
   }
   
