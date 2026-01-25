@@ -291,32 +291,48 @@ function getEpisodeTag(filename) {
 
 function extractAudioInfo(title) {
     const t = String(title).toLowerCase();
+
+    // Canali audio 
     const channelMatch = t.match(REGEX_AUDIO.channels);
-    let channels = channelMatch ? channelMatch[1] : "";
+    let channels = channelMatch?.[1] || "";
     if (channels === "2.0") channels = "";
-    let audioTag = "";
-    if (REGEX_AUDIO.atmos.test(t)) audioTag = "💣 Atmos";
-    else if (REGEX_AUDIO.dtsx.test(t)) audioTag = "💣 DTS:X";
-    else if (REGEX_AUDIO.truehd.test(t)) audioTag = "🔊 TrueHD";
-    else if (REGEX_AUDIO.dtshd.test(t)) audioTag = "🔊 DTS-HD";
-    else if (REGEX_AUDIO.ddp.test(t)) audioTag = "🔊 Dolby+";
-    else if (REGEX_AUDIO.dts.test(t)) audioTag = "🔊 DTS";
-    else if (REGEX_AUDIO.flac.test(t)) audioTag = "🎼 FLAC";
-    else if (REGEX_AUDIO.dolby.test(t)) audioTag = "🔈 Dolby";
-    else if (REGEX_AUDIO.aac.test(t)) audioTag = "🔈 AAC";
-    else if (/\bmp3\b/i.test(t)) audioTag = "🔈 MP3";
-    if (!audioTag && (channels === "5.1" || channels === "7.1")) audioTag = "🔊 Surround";
-    if (!audioTag) return "🔈 Stereo";
-    return channels ? `${audioTag} ${channels}` : audioTag;
+
+    // CONFIGURAZIONE "LEVIATHAN WAR MODE" ⚔️
+    const AUDIO_PRIORITY = [
+        { test: REGEX_AUDIO.atmos,  tag: "💥💣 Atmos" },   // Esplosivo
+        { test: REGEX_AUDIO.dtsx,   tag: "💥💣 DTS:X" },   // Esplosivo
+        { test: REGEX_AUDIO.truehd, tag: "🔊⚡ TrueHD" },  // Potenza pura
+        { test: REGEX_AUDIO.dtshd,  tag: "🔊⚡ DTS-HD" },  // Potenza pura
+        { test: REGEX_AUDIO.ddp,    tag: "🔊🔥 Dolby+" },  // Caldo
+        { test: REGEX_AUDIO.dts,    tag: "🔊🔥 DTS" },     // Caldo
+        { test: REGEX_AUDIO.flac,   tag: "🎼🌊 FLAC" },    // Fluido/Musicale
+        { test: REGEX_AUDIO.dolby,  tag: "🔈🌑 Dolby" },   // Dark
+        { test: REGEX_AUDIO.aac,    tag: "🔈✨ AAC" },     // Crisp
+        { test: /\bmp3\b/i,         tag: "🔈🎶 MP3" }      // Basic
+    ];
+
+    let audioTag = AUDIO_PRIORITY.find(c => c.test.test(t))?.tag || "";
+
+    // Fallback surround
+    if (!audioTag && (channels === "5.1" || channels === "7.1")) {
+        audioTag = "🔊🌌 Surround";
+    }
+
+    // Fallback stereo
+    if (!audioTag) return "🔈⚡ Stereo";
+
+    
+    return channels ? `${audioTag} ┃ ${channels}` : audioTag;
 }
 
 function extractStreamInfo(title, source) {
   const t = String(title).toLowerCase();
+  // DEFAULT
   let q = "HD"; let qIcon = "📺";
   if (REGEX_QUALITY["4K"].test(t)) { q = "4K"; qIcon = "🔥"; }
-  else if (REGEX_QUALITY["1080p"].test(t)) { q = "1080p"; qIcon = "✨"; }
-  else if (REGEX_QUALITY["720p"].test(t)) { q = "720p"; qIcon = "🎞️"; }
-  else if (REGEX_QUALITY["SD"].test(t)) { q = "SD"; qIcon = "🐢"; }
+  else if (REGEX_QUALITY["1080p"].test(t)) { q = "1080p"; qIcon = "👑"; }
+  else if (REGEX_QUALITY["720p"].test(t)) { q = "720p"; qIcon = "⚡"; }
+  else if (REGEX_QUALITY["SD"].test(t)) { q = "SD"; qIcon = "📼"; }
   const videoTags = [];
   if (/hdr/.test(t)) videoTags.push("HDR");
   if (/dolby|vision|\bdv\b/.test(t)) videoTags.push("DV");
@@ -450,11 +466,11 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     const finalServiceTag = serviceTag;
     
     const sourceLine = `⚡ [${finalServiceTag}] ${displaySource}`;
-   const name = `🦑 𝗟𝗘𝗩𝗜𝗔𝗧𝗛𝗔𝗡\n${qIcon} ${quality}`;
+   const name = `🦑 𝗟𝗘𝗩𝗜𝗔𝗧𝗛𝗔𝗡\n${qIcon} ┃ ${quality}`;
     const cleanName = cleanFilename(fileTitle)
-        .replace(/(s\d{1,2}e\d{1,2}|\d{1,2}x\d{1,2}|s\d{1,2})/ig, "")
-        .replace(/\s{2,}/g, " ")
-        .trim();
+    .replace(/(s\d{1,2}e\d{1,2}|\d{1,2}x\d{1,2}|s\d{1,2})/ig, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
     
     // Gestione Tag Episodio / Pack
     const epTag = getEpisodeTag(fileTitle);
@@ -748,7 +764,7 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
     };
 }
 
-// [FIXED] Lettura DB con FILTRO LINGUA + KNABEN + BLOCCO RUSSI/ARABI + STRICT SERIES
+// Lettura DB con FILTRO LINGUA + KNABEN + BLOCCO RUSSI/ARABI + STRICT SERIES
 async function queryLocalIndexer(meta, config) { 
     try {
         if (dbHelper && typeof dbHelper.getTorrents === 'function') {
@@ -786,7 +802,7 @@ async function queryLocalIndexer(meta, config) {
                         seeders: t.seeders || 0,
                         source: t.provider || 'External', 
                         fileIdx: t.file_index,
-                        // [MODIFICA 1] DB Locale ora viene filtrato (isExternal: false)
+                        // DB Locale ora viene filtrato (isExternal: false)
                         isExternal: false 
                     };
                 }).filter(item => {
@@ -823,14 +839,14 @@ async function queryLocalIndexer(meta, config) {
                         return false;
                     }
 
-                    // 3. [MODIFICA 3] LOGICA STRICT PREVENTIVA PER SERIE TV NEL DB
+                    // 3.  LOGICA STRICT PREVENTIVA PER SERIE TV NEL DB
                     if (meta.isSeries) {
                         // Verifica che il numero stagione nel titolo corrisponda a quello richiesto
                         const wrongSeasonRegex = /(?:s|stagione|season)\s*0?(\d+)(?!\d)/gi;
                         let match;
                         while ((match = wrongSeasonRegex.exec(cleanFile)) !== null) {
                             const foundSeason = parseInt(match[1]);
-                            if (foundSeason !== s) return false; // Se trovo S04 e cerco S01 -> VIA
+                            if (foundSeason !== s) return false; 
                         }
                         
                         // Verifica presenza Episodio (o Pack)
@@ -877,7 +893,7 @@ async function queryLocalIndexer(meta, config) {
     }
 }
 
-// [FIXED] Remote Indexer ora viene chiamato con config per futura espansione (ma il filtro avviene dopo)
+
 async function queryRemoteIndexer(tmdbId, type, season = null, episode = null, config) {
     if (!CONFIG.INDEXER_URL) return [];
     try {
@@ -1016,7 +1032,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   const tmdbIdLookup = meta.tmdb_id || (await imdbToTmdb(meta.imdb_id, userTmdbKey))?.tmdbId;
   const dbOnlyMode = config.filters?.dbOnly === true; 
 
-  // --- FILTRO AGGRESSIVO (NUOVO) ---
+  // --- FILTRO AGGRESSIVO ---
   const aggressiveFilter = (item) => {
       if (!item?.magnet) return false;
       if (item.isExternal) return true;
@@ -1026,7 +1042,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       if (source.includes("comet") || source.includes("stremthru")) return false;
 
       // Analisi Titolo
-      const t = item.title; // Mantieni Case Sensitive per alcune regex, o usa 'i' flag
+      const t = item.title; 
       const tLower = t.toLowerCase();
       
       const isCorsaro = /corsaro/i.test(source);
@@ -1035,7 +1051,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       const isTgx = /tgx|torrentgalaxy/i.test(source);
 
       // Check Match Italiano Potenziato
-      // Usa le nuove REGEX_ITA. Se una qualsiasi passa, è potenzialmente valido.
       const matchesItalianRegex = REGEX_ITA.some(r => r.test(t));
       
       // Gestione Config "Solo ITA" (allowEng = false) o Provider Misti
@@ -1049,17 +1064,13 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
                   return false; 
               }
 
-              // Controllo "Solo Sottotitoli" (Il problema classico di Knaben)
+              
               // Se matcha "SUB ITA" E NON matcha "AUDIO ITA" -> Scarta
               const looksLikeSubOnly = REGEX_SUB_ONLY.test(t);
               const hasConfirmedAudio = REGEX_AUDIO_CONFIRM.test(t);
 
               if (looksLikeSubOnly && !hasConfirmedAudio) {
-                  // Esempio: "Movie (2024) 1080p Eng Sub Ita" -> SCARTA
-                  // Esempio: "Movie (2024) Ita Eng Sub Ita" -> TIENI (perché matchesItalianRegex ha beccato 'Ita Eng')
-                  
-                  // Doppio controllo: se REGEX_ITA ha matchato solo grazie al "SUB ITA", dobbiamo scartare.
-                  // Verifichiamo se c'è un match ITA che NON sia quello dei sub.
+                   
                   const cleanTitleNoSub = t.replace(REGEX_SUB_ONLY, ""); 
                   const stillHasIta = REGEX_ITA.some(r => r.test(cleanTitleNoSub));
                   
@@ -1068,8 +1079,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           } 
           // LOGICA GENERALE (Altri Provider)
           else {
-              // Se non è Italiano (match regex o isSafeForItalian vecchio) -> VIA
-              // Nota: isSafeForItalian usa le regex globali, qui usiamo quelle potenziate
+
               if (!matchesItalianRegex && !isSafeForItalian(item) && !isCorsaro) {
                   return false;
               }
@@ -1081,7 +1091,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           }
       }
 
-      // --- DA QUI IN GIU' LA LOGICA RESTA INVARIATA (Anno, Serie, etc.) ---
+      
       const metaYear = parseInt(meta.year);
 
       // Fix Frankenstein 2025
@@ -1161,9 +1171,9 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       return false;
   };
 
-  // --- FASE 1: FONTI VELOCI ---
+  // --- FONTI VELOCI ---
   
-  // 1. Remote Indexer (Passiamo config per il filtro interno Knaben)
+  // 1. Remote Indexer 
   const remotePromise = withTimeout(
       queryRemoteIndexer(tmdbIdLookup, type, meta.season, meta.episode, config),
       CONFIG.TIMEOUTS.REMOTE_INDEXER,
@@ -1173,7 +1183,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       return [];
   });
 
-  // 2. DB Locale (Filtro Knaben già incluso internamente)
+  // 2. DB Locale 
   const localPromise = withTimeout(
       queryLocalIndexer(meta, config),
       CONFIG.TIMEOUTS.LOCAL_DB,
