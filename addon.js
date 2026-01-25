@@ -325,32 +325,64 @@ function extractAudioInfo(title) {
     return channels ? `${audioTag} ┃ ${channels}` : audioTag;
 }
 
+// --- NUOVA FUNZIONE HELPER PER IL GRASSETTO (Unicode) ---
+function toBold(text) {
+    const map = {
+        '0': '𝟬', '1': '𝟭', '2': '𝟮', '3': '𝟯', '4': '𝟰', '5': '𝟱', '6': '𝟲', '7': '𝟳', '8': '𝟴', '9': '𝟵',
+        'A': '𝗔', 'B': '𝗕', 'C': '𝗖', 'D': '𝗗', 'E': '𝗘', 'F': '𝗙', 'G': '𝗚', 'H': '𝗛', 'I': '𝗜', 'J': '𝗝',
+        'K': '𝗞', 'L': '𝗟', 'M': '𝗠', 'N': '𝗡', 'O': '𝗢', 'P': '𝗣', 'Q': '𝗤', 'R': '𝗥', 'S': '𝗦', 'T': '𝗧',
+        'U': '𝗨', 'V': '𝗩', 'W': '𝗪', 'X': '𝗫', 'Y': '𝗬', 'Z': '𝗭',
+        'a': '𝗮', 'b': '𝗯', 'c': '𝗰', 'd': '𝗱', 'e': '𝗲', 'f': '𝗳', 'g': '𝗴', 'h': '𝗵', 'i': '𝗶', 'j': '𝗷',
+        'k': '𝗸', 'l': '𝗹', 'm': '𝗺', 'n': '𝗻', 'o': '𝗼', 'p': '𝗽', 'q': '𝗾', 'r': '𝗿', 's': '𝘀', 't': '𝘁',
+        'u': '𝘂', 'v': '𝘃', 'w': '𝘄', 'x': '𝘅', 'y': '𝘆', 'z': '𝘇'
+    };
+    return text.split('').map(c => map[c] || c).join('');
+}
+
 function extractStreamInfo(title, source) {
   const t = String(title).toLowerCase();
+  
   // DEFAULT
   let q = "HD"; let qIcon = "📺";
   if (REGEX_QUALITY["4K"].test(t)) { q = "4K"; qIcon = "🔥"; }
   else if (REGEX_QUALITY["1080p"].test(t)) { q = "1080p"; qIcon = "👑"; }
   else if (REGEX_QUALITY["720p"].test(t)) { q = "720p"; qIcon = "⚡"; }
   else if (REGEX_QUALITY["SD"].test(t)) { q = "SD"; qIcon = "📼"; }
+  
+  // --- NUOVA LOGICA TAG VIDEO ESTETICI (High Tech B&W + Fix x264) ---
   const videoTags = [];
-  if (/hdr/.test(t)) videoTags.push("HDR");
-  if (/dolby|vision|\bdv\b/.test(t)) videoTags.push("DV");
-  if (/imax/.test(t)) videoTags.push("IMAX");
-  if (/x265|h265|hevc/.test(t)) videoTags.push("HEVC");
+  
+  // HDR: "🔥" (Fuoco richiesto) + Bold Text
+  if (/hdr/.test(t)) videoTags.push(`🔥 ${toBold("HDR")}`);
+  
+  // Dolby Vision: "👁️" + Bold DV
+  if (/dolby|vision|\bdv\b/.test(t)) videoTags.push(`👁️ ${toBold("DV")}`);
+  
+  // IMAX: "🏟️" + Bold IMAX
+  if (/imax/.test(t)) videoTags.push(`🏟️ ${toBold("IMAX")}`);
+  
+  // HEVC: "⚙️" + Bold HEVC
+  if (/x265|h265|hevc/.test(t)) {
+      videoTags.push(`⚙️ ${toBold("HEVC")}`);
+  } 
+  // [NUOVO] Fallback per AVC/x264 (per evitare riga vuota e mostrare comunque il formato)
+  else if (/x264|h264|avc/.test(t)) {
+      videoTags.push(`📼 ${toBold("AVC")}`);
+  }
   
   let lang = "🇬🇧 ENG";
-
   if (/corsaro/i.test(source) || isSafeForItalian({ title })) {
       lang = "🇮🇹 ITA";
       if (/multi|mui/i.test(t)) lang = "🇮🇹 MULTI";
   }
   
   const audioInfo = extractAudioInfo(title);
-  let detailsParts = [];
-  if (videoTags.length) detailsParts.push(`🖥️ ${videoTags.join(" ")}`);
   
-  return { quality: q, qIcon, info: detailsParts.join(" | "), lang, audioInfo, rawVideoTags: videoTags };
+  // Costruzione stringa info
+  let detailsParts = [];
+  if (videoTags.length) detailsParts.push(videoTags.join(" • "));
+  
+  return { quality: q, qIcon, info: detailsParts.join(" "), lang, audioInfo, rawVideoTags: videoTags };
 }
 
 function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag = "RD", config = {}, infoHash = null, isLazy = false, isPackItem = false) {
@@ -419,9 +451,17 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
         return { name, title, bingeGroup };
     }
 
+    // === MODIFICHE ESTETICHE "HIGH TECH" ===
+    
+    // 1. Qualità in Grassetto Unicode (es. 𝟰𝗞)
+    const qualityBold = toBold(quality);
+
     const sizeStr = `🧲 ${sizeString}`;
+    
+    // 2. Seeders: Icona Folla
     const seedersStr = seeders != null ? `👥 ${seeders}` : "";
 
+    // 3. Lingua: Omino + Bandiera
     let langStr = "🗣️ ❓";
     if (/multi/i.test(lang || "")) langStr = "🗣️ 🌐"; 
     else if (/ita|it\b|italiano/i.test(lang || "")) langStr = "🗣️ 🇮🇹";
@@ -430,21 +470,12 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     
     let displaySource = source || "P2P";
 
-    if (/1337/i.test(displaySource)) {
-        displaySource = "1337x"; 
-    } 
-    else if (/corsaro/i.test(displaySource)) {
-        displaySource = "ilCorSaRoNeRo";
-    } 
-    else if (/knaben/i.test(displaySource)) {
-        displaySource = "Knaben";
-    } 
-    else if (/comet|stremthru/i.test(displaySource)) {
-        displaySource = "StremThru";
-    } 
-    else if (/rarbg/i.test(displaySource)) {
-        displaySource = "RARBG";
-    }
+    // Normalizzazione nomi sorgenti
+    if (/1337/i.test(displaySource)) displaySource = "1337x"; 
+    else if (/corsaro/i.test(displaySource)) displaySource = "ilCorSaRoNeRo";
+    else if (/knaben/i.test(displaySource)) displaySource = "Knaben";
+    else if (/comet|stremthru/i.test(displaySource)) displaySource = "StremThru";
+    else if (/rarbg/i.test(displaySource)) displaySource = "RARBG";
     else if (/rd cache/i.test(displaySource)) {
         const groupMatch = fileTitle.match(/[-_]\s*([a-zA-Z0-9]+)(?:\.[a-z0-9]{2,4})?$/i);
         if (groupMatch && groupMatch[1] && groupMatch[1].length < 15 && !/mkv|mp4|avi/i.test(groupMatch[1])) {
@@ -465,33 +496,44 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     
     const finalServiceTag = serviceTag;
 
-    // --- GESTIONE ICONA SERVIZIO ---
-    let serviceIcon = "⚡"; // Fallback / P2P
-    if (finalServiceTag === "TB") serviceIcon = "📦";      // TorBox = Scatola
-    else if (finalServiceTag === "RD") serviceIcon = "☄️"; // RealDebrid = Cometa
-    else if (finalServiceTag === "AD") serviceIcon = "🦅"; // AllDebrid = Aquila
+    // --- ICONE SERVIZIO (Cometa confermata per RD) ---
+    let serviceIcon = "⚡"; 
+    if (finalServiceTag === "TB") serviceIcon = "📦";      
+    else if (finalServiceTag === "RD") serviceIcon = "☄️"; // Cometa per RD
+    else if (finalServiceTag === "AD") serviceIcon = "🦅"; 
     
     const sourceLine = `${serviceIcon} [${finalServiceTag}] ${displaySource}`;
 
-    const name = `🦑 𝗟𝗘𝗩𝗜𝗔𝗧𝗛𝗔𝗡\n${qIcon} ┃ ${quality}`;
+    // Nome in alto: Icona Qualità + Qualità in Grassetto
+    const name = `🦑 𝗟𝗘𝗩𝗜𝗔𝗧𝗛𝗔𝗡\n${qIcon} ┃ ${qualityBold}`;
+    
     const cleanName = cleanFilename(fileTitle)
     .replace(/(s\d{1,2}e\d{1,2}|\d{1,2}x\d{1,2}|s\d{1,2})/ig, "")
     .replace(/\s{2,}/g, " ")
     .trim();
     
-    // Gestione Tag Episodio / Pack
     const epTag = getEpisodeTag(fileTitle);
     const finalEpTag = isPackItem ? "📦 SEASON PACK" : epTag;
 
     const lines = [];
+    // Icona Film: ✨🎥
     lines.push(`✨🎥 ${cleanName}${finalEpTag ? ` ${finalEpTag}` : ""}`);
+    
+    // Lingua + Audio
     const audioLine = [langStr, audioInfo].filter(Boolean).join(" • ");
     if (audioLine) lines.push(audioLine);
+    
+    // Info Video (formattate con icone e bold in extractStreamInfo)
     const cleanInfo = info ? info.replace("🖥️ ", "") : "";
-    if (cleanInfo) lines.push(`🎞️ ${cleanInfo}`);
+    if (cleanInfo) lines.push(cleanInfo);
+    
+    // Tech: Size + Seeders (Folla)
     const techLine = [sizeStr, seedersStr].filter(Boolean).join(" • ");
     if (techLine) lines.push(techLine);
+    
+    // Sorgente
     if (sourceLine) lines.push(sourceLine);
+    
     return { name, title: lines.join("\n"), bingeGroup };
 }
 
