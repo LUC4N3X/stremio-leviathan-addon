@@ -328,14 +328,10 @@ function extractAudioInfo(title) {
     return channels ? `${audioTag} ┃ ${channels}` : audioTag;
 }
 
-// --- NUOVA FUNZIONE PER TESTO STILIZZATO (BOLD SANS per Testo, BOLD SERIF per Numeri) ---
+// --- NUOVA FUNZIONE PER TESTO STILIZZATO (BOLD SANS, SPACED, E NUOVO 'SUPER' PER QUALITÀ) ---
 function toStylized(text, type = 'std') {
-    // Mappa per numeri (Serif Bold - molto elegante per 4K/1080p)
-    const numbers = {
-        '0': '𝟎', '1': '𝟏', '2': '𝟐', '3': '𝟑', '4': '𝟒', '5': '𝟓', '6': '𝟔', '7': '𝟕', '8': '𝟖', '9': '𝟗'
-    };
-    
-    // Mappa per lettere (Sans-Serif Bold - molto leggibile per LEVIATHAN)
+    // Mappa per lettere e numeri standard
+    const numbers = { '0': '𝟎', '1': '𝟏', '2': '𝟐', '3': '𝟑', '4': '𝟒', '5': '𝟓', '6': '𝟔', '7': '𝟕', '8': '𝟖', '9': '𝟗' };
     const chars = {
         'A': '𝗔', 'B': '𝗕', 'C': '𝗖', 'D': '𝗗', 'E': '𝗘', 'F': '𝗙', 'G': '𝗚', 'H': '𝗛', 'I': '𝗜', 'J': '𝗝',
         'K': '𝗞', 'L': '𝗟', 'M': '𝗠', 'N': '𝗡', 'O': '𝗢', 'P': '𝗣', 'Q': '𝗤', 'R': '𝗥', 'S': '𝗦', 'T': '𝗧',
@@ -344,6 +340,21 @@ function toStylized(text, type = 'std') {
         'k': '𝗸', 'l': '𝗹', 'm': '𝗺', 'n': '𝗻', 'o': '𝗼', 'p': '𝗽', 'q': '𝗾', 'r': '𝗿', 's': '𝘀', 't': '𝘁',
         'u': '𝘂', 'v': '𝘃', 'w': '𝘄', 'x': '𝘅', 'y': '𝘆', 'z': '𝘇'
     };
+
+    // Mappa SUPER BOMBA (Sans-Serif Bold Italic) per 4K, 1080p, etc.
+    // Sembra veloce e potente.
+    const superNumbers = { '0': '𝟬', '1': '𝟭', '2': '𝟮', '3': '𝟯', '4': '𝟰', '5': '𝟱', '6': '𝟲', '7': '𝟳', '8': '𝟴', '9': '𝟵' };
+    const superChars = { 
+        'K': '𝙆', 'p': '𝙥', 'H': '𝙃', 'D': '𝘿', 'S': '𝙎', 'A': '𝘼', 'R': '𝙍',
+        'a': '𝙖', 'b': '𝙗', 'c': '𝙘', 'd': '𝙙', 'e': '𝙚', 'f': '𝙛', 'g': '𝙜', 'h': '𝙝', 'i': '𝙞' 
+    };
+
+    if (type === 'super') {
+        return text.split('').map(c => {
+             if (/[0-9]/.test(c)) return superNumbers[c] || c;
+             return superChars[c] || chars[c] || c; // Fallback a Bold se manca super
+        }).join('');
+    }
 
     if (type === 'spaced') {
         return text.split('').map(c => (chars[c] || numbers[c] || c) + ' ').join('').trim();
@@ -376,19 +387,26 @@ function extractStreamInfo(title, source) {
       q = "SD"; qIcon = "📼";
   }
   
-  // --- NUOVA LOGICA TAG VIDEO ESTETICI (High Tech B&W + Fix x264/Fallback) ---
+  // --- NUOVA LOGICA TAG VIDEO ESTETICI E DETTAGLIATI ---
   const videoTags = [];
   
-  // HDR: "🔥" (Fuoco richiesto) + Bold Text
+  // 1. ANALISI SORGENTE (Remux, Bluray, Web) - MOLTO IMPORTANTE
+  const isRemux = /remux/i.test(t);
+  const isBluRay = /\bbd\b|\bbluray\b|\bbdrip\b|\bbrrip\b/i.test(t) && !isRemux;
+  const isWeb = /\bweb-?dl\b|\bwebrip\b|\bweb\b|\bhdtv\b/i.test(t);
+  
+  if (isRemux) videoTags.push(`💎 ${toStylized("REMUX")}`);
+  else if (isBluRay) videoTags.push(`💿 ${toStylized("BluRay")}`);
+  else if (isWeb) videoTags.push(`☁️ ${toStylized("WEB")}`);
+
+  // 2. ANALISI TECNICA (HDR, DV, 10bit)
   if (/hdr/.test(t)) videoTags.push(`🔥 ${toStylized("HDR")}`);
-  
-  // Dolby Vision: "👁️" + Bold DV
   if (/dolby|vision|\bdv\b/.test(t)) videoTags.push(`👁️ ${toStylized("DV")}`);
-  
-  // IMAX: "🏟️" + Bold IMAX
   if (/imax/.test(t)) videoTags.push(`🏟️ ${toStylized("IMAX")}`);
-  
-  // HEVC / AVC / Fallback
+  if (/10bit|10-bit|hi10p/i.test(t)) videoTags.push(`🔟 ${toStylized("10bit")}`);
+  if (/\bsdr\b/i.test(t)) videoTags.push(`🌈 ${toStylized("SDR")}`);
+
+  // 3. CODEC (HEVC, AVC)
   if (/x265|h\.?265|hevc/i.test(t)) {
       videoTags.push(`⚙️ ${toStylized("HEVC")}`);
   } 
@@ -396,7 +414,8 @@ function extractStreamInfo(title, source) {
       videoTags.push(`📼 ${toStylized("AVC")}`);
   }
   else {
-      videoTags.push(`📼 ${toStylized("AVC")}`);
+      // Se non trovi codec specifici ma è un file recente, metti AVC come fallback generico
+      // videoTags.push(`📼 ${toStylized("AVC")}`);
   }
   
   let lang = "🇬🇧 ENG";
@@ -482,8 +501,8 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
 
     // === MODIFICHE ESTETICHE "HIGH TECH & FIGHE" ===
     
-    // 1. Qualità in Serif Bold (es. 𝟒𝐊, 𝟏𝟎𝟖𝟎𝐩) - Molto elegante
-    const qualityBold = toStylized(quality);
+    // 1. Qualità in FONT BOMBA (Super Style) - es. 𝟭𝟬𝟴𝟬𝗽, 𝟰𝗞
+    const qualityBold = toStylized(quality, 'super');
 
     // 2. Leviathan Spaziato (es. 𝗟 𝗘 𝗩 𝗜 𝗔 𝗧 𝗛 𝗔 𝗡)
     const leviathanStyled = toStylized("LEVIATHAN", "spaced");
@@ -536,7 +555,7 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     
     const sourceLine = `${serviceIcon} [${finalServiceTag}] ${displaySource}`;
 
-    // Nome in alto: LEVIATHAN Spaziato + Qualità Bold Serif
+    // Nome in alto: LEVIATHAN Spaziato + Qualità SUPER
     const name = `🦑 ${leviathanStyled}\n${qIcon} ┃ ${qualityBold}`;
     
     const cleanName = cleanFilename(fileTitle)
@@ -555,7 +574,7 @@ function formatStreamTitleCinePro(fileTitle, source, size, seeders, serviceTag =
     const audioLine = [langStr, audioInfo].filter(Boolean).join(" • ");
     if (audioLine) lines.push(audioLine);
     
-    // Info Video
+    // Info Video (TUTTE LE INFO TECNICHE DETTAGLIATE)
     const cleanInfo = info ? info.replace("🖥️ ", "") : "";
     if (cleanInfo) lines.push(cleanInfo);
     
