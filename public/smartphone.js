@@ -294,6 +294,59 @@ body::after {
 /* --- CARDS & GENERAL --- */
 .m-card { background: var(--m-surface); border: 1px solid var(--m-surface-border); border-radius: 18px; padding: 22px; margin-bottom: 18px; position: relative; box-shadow: var(--m-shadow-deep); backdrop-filter: blur(10px); }
 
+/* VISUAL CORE CARD (SKIN) */
+.m-card-visual {
+    background: linear-gradient(145deg, rgba(5, 10, 15, 0.9), rgba(0, 5, 5, 0.95));
+    border: 1px solid rgba(0, 242, 255, 0.25);
+    border-radius: 20px; padding: 25px 20px; margin-bottom: 20px;
+    position: relative; box-shadow: 0 0 25px rgba(0, 242, 255, 0.08);
+    overflow: hidden; backdrop-filter: blur(15px);
+}
+.m-card-visual::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--m-primary); box-shadow: 0 0 15px var(--m-primary); }
+
+.m-visual-header { 
+    display: flex; justify-content: space-between; align-items: center; 
+    margin-bottom: 15px; color: #fff; font-family: 'Rajdhani'; font-weight: 700; font-size: 1.1rem; 
+}
+
+/* PREVIEW TERMINAL MOBILE */
+.m-preview-box {
+    background: #050505; border: 1px solid #333; border-radius: 10px; padding: 12px; margin-bottom: 18px;
+    font-family: 'Roboto', sans-serif; position: relative; box-shadow: inset 0 0 15px rgba(0,0,0,0.6);
+}
+.m-prev-row { display: flex; gap: 10px; }
+.m-prev-poster { width: 35px; height: 52px; background: #252525; border-radius: 4px; flex-shrink: 0; display:flex; align-items:center; justify-content:center; color:#444; }
+.m-prev-content { flex: 1; display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
+.m-prev-title { color: #ececec; font-size: 0.85rem; line-height: 1.2; white-space: pre-wrap; }
+.m-prev-info { color: #888; font-size: 0.75rem; line-height: 1.3; white-space: pre-wrap; }
+
+/* SKIN GRID */
+.m-skin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+.m-skin-btn {
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+    color: var(--m-dim); padding: 10px 5px; border-radius: 8px; text-align: center;
+    font-family: 'Rajdhani'; font-weight: 700; font-size: 0.8rem; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 5px; transition: all 0.2s;
+}
+.m-skin-btn.active {
+    background: rgba(0, 242, 255, 0.1); border-color: var(--m-primary); color: #fff;
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.15);
+}
+.m-skin-icon { font-size: 1.2rem; margin-bottom: 2px; }
+
+/* AIO LOCK OVERLAY */
+.m-aio-lock {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 2, 5, 0.9); z-index: 20; display: none;
+    flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    backdrop-filter: blur(4px);
+}
+.m-aio-lock.active { display: flex; }
+.m-lock-icon { font-size: 2rem; color: var(--m-secondary); margin-bottom: 10px; }
+.m-lock-text { font-family: 'Rajdhani'; color: #fff; font-weight: 800; font-size: 1.1rem; }
+.m-lock-sub { font-size: 0.75rem; color: #888; margin-top: 5px; max-width: 80%; }
+
+
 /* Flux Card */
 .m-card-flux { background: linear-gradient(145deg, rgba(15, 20, 30, 0.9), rgba(0, 0, 5, 0.95)); border: 1px solid rgba(0, 242, 255, 0.3); border-radius: 20px; padding: 25px 22px; margin-bottom: 20px; position: relative; box-shadow: 0 0 30px rgba(0, 242, 255, 0.1), inset 0 0 50px rgba(0, 242, 255, 0.05); overflow: hidden; backdrop-filter: blur(15px); }
 .m-card-flux::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: linear-gradient(to bottom, var(--m-secondary), var(--m-primary)); box-shadow: 0 0 15px var(--m-primary); }
@@ -571,6 +624,58 @@ input:checked + .m-slider-pink:before { background-color: var(--m-cine); box-sha
 }
 .m-faq-item.open .m-faq-a { display: block; animation: fadeIn 0.3s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* --- VISUAL CORE SPECIFICS --- */
+.m-card-visual {
+    background: linear-gradient(145deg, rgba(5, 10, 15, 0.9), rgba(0, 5, 5, 0.95));
+    border: 1px solid rgba(0, 242, 255, 0.25);
+    border-radius: 20px; padding: 25px 20px; margin-bottom: 20px;
+    position: relative; box-shadow: 0 0 25px rgba(0, 242, 255, 0.08);
+    overflow: hidden; backdrop-filter: blur(15px);
+}
+.m-card-visual::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--m-primary); box-shadow: 0 0 15px var(--m-primary); }
+
+.m-visual-header { 
+    display: flex; justify-content: space-between; align-items: center; 
+    margin-bottom: 15px; color: #fff; font-family: 'Rajdhani'; font-weight: 700; font-size: 1.1rem; 
+}
+
+/* PREVIEW TERMINAL MOBILE */
+.m-preview-box {
+    background: #050505; border: 1px solid #333; border-radius: 10px; padding: 12px; margin-bottom: 18px;
+    font-family: 'Roboto', sans-serif; position: relative; box-shadow: inset 0 0 15px rgba(0,0,0,0.6);
+}
+.m-prev-row { display: flex; gap: 10px; }
+.m-prev-poster { width: 35px; height: 52px; background: #252525; border-radius: 4px; flex-shrink: 0; display:flex; align-items:center; justify-content:center; color:#444; }
+.m-prev-content { flex: 1; display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
+.m-prev-title { color: #ececec; font-size: 0.85rem; line-height: 1.2; white-space: pre-wrap; }
+.m-prev-info { color: #888; font-size: 0.75rem; line-height: 1.3; white-space: pre-wrap; }
+
+/* SKIN GRID */
+.m-skin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+.m-skin-btn {
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+    color: var(--m-dim); padding: 10px 5px; border-radius: 8px; text-align: center;
+    font-family: 'Rajdhani'; font-weight: 700; font-size: 0.8rem; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 5px; transition: all 0.2s;
+}
+.m-skin-btn.active {
+    background: rgba(0, 242, 255, 0.1); border-color: var(--m-primary); color: #fff;
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.15);
+}
+.m-skin-icon { font-size: 1.2rem; margin-bottom: 2px; }
+
+/* AIO LOCK OVERLAY */
+.m-aio-lock {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 2, 5, 0.9); z-index: 20; display: none;
+    flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    backdrop-filter: blur(4px);
+}
+.m-aio-lock.active { display: flex; }
+.m-lock-icon { font-size: 2rem; color: var(--m-secondary); margin-bottom: 10px; }
+.m-lock-text { font-family: 'Rajdhani'; color: #fff; font-weight: 800; font-size: 1.1rem; }
+.m-lock-sub { font-size: 0.75rem; color: #888; margin-top: 5px; max-width: 80%; }
 `;
 
 const mobileHTML = `
@@ -775,6 +880,45 @@ const mobileHTML = `
                     </div>
                 </div>
 
+                <div class="m-card-visual" id="m-visual-core">
+                    <div class="m-aio-lock" id="m-aio-lock-overlay">
+                        <i class="fas fa-lock m-lock-icon"></i>
+                        <div class="m-lock-text">OVERRIDDEN BY AIO CORE</div>
+                        <div class="m-lock-sub">Disabilita "Compatibilità AIO" per sbloccare le skin.</div>
+                    </div>
+
+                    <div class="m-visual-header">
+                        <span><i class="fas fa-palette" style="color:var(--m-primary)"></i> VISUAL CORE</span>
+                        <span style="font-size:0.8rem; opacity:0.7">SKIN SELECTOR</span>
+                    </div>
+
+                    <div class="m-preview-box">
+                        <div style="font-size:0.7rem; color:var(--m-primary); border-bottom:1px solid #222; margin-bottom:8px; padding-bottom:4px;">LIVE PREVIEW</div>
+                        <div class="m-prev-row">
+                            <div class="m-prev-poster"><i class="fas fa-image"></i></div>
+                            <div class="m-prev-content">
+                                <div class="m-prev-title" id="m-prev-title">🦑 𝗟 𝗘 𝗩 𝗜 𝗔 𝗧 𝗛 𝗔 𝗡</div>
+                                <div class="m-prev-info" id="m-prev-info">...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="m-skin-grid">
+                        <div class="m-skin-btn active" id="msk_leviathan" onclick="selectMobileSkin('leviathan')"><span class="m-skin-icon">🦑</span>Lev</div>
+                        <div class="m-skin-btn" id="msk_lev2" onclick="selectMobileSkin('lev2')"><span class="m-skin-icon">🧬</span>Arch</div>
+                        <div class="m-skin-btn" id="msk_fra" onclick="selectMobileSkin('fra')"><span class="m-skin-icon">⚡️</span>Hor</div>
+                        <div class="m-skin-btn" id="msk_dav" onclick="selectMobileSkin('dav')"><span class="m-skin-icon">📼</span>Data</div>
+                        <div class="m-skin-btn" id="msk_pri" onclick="selectMobileSkin('pri')"><span class="m-skin-icon">👑</span>Ecl</div>
+                        <div class="m-skin-btn" id="msk_and" onclick="selectMobileSkin('and')"><span class="m-skin-icon">🎬</span>Mtx</div>
+                        <div class="m-skin-btn" id="msk_lad" onclick="selectMobileSkin('lad')"><span class="m-skin-icon">🎟️</span>Cmp</div>
+                        <div class="m-skin-btn" id="msk_custom" onclick="selectMobileSkin('custom')"><span class="m-skin-icon">🛠️</span>Cust</div>
+                    </div>
+                    
+                    <div id="m-custom-skin-area" style="display:none; margin-top:10px;">
+                        <input type="text" class="m-input" id="m-customTemplate" placeholder="Lev {quality} ||| {title}" style="padding:10px; font-size:0.9rem;" oninput="updateMobilePreview()">
+                    </div>
+                </div>
+
                 <div class="m-card-quality">
                     <div class="m-card-header"><i class="fas fa-filter m-card-icon" style="color:var(--m-error)"></i> FILTRO QUALITÀ</div>
                     <p style="font-size:0.85rem; color:#fff; margin-bottom:10px; font-weight:300;">Tocca per <b>ESCLUDERE</b> le risoluzioni:</p>
@@ -955,6 +1099,7 @@ const mobileHTML = `
 let mCurrentService = 'rd';
 let mScQuality = 'all';
 let mSortMode = 'balanced';
+let mSkin = 'leviathan';
 
 // TEXT DICTIONARY FOR FLUX PRIORITY
 const fluxDescriptions = {
@@ -962,6 +1107,127 @@ const fluxDescriptions = {
     'resolution': "Gerarchia visiva rigida. I risultati 4K appariranno sempre per primi, seguiti dai 1080p e infine 720p.",
     'size': "Ordina per grandezza del file (dal più grande al più piccolo). Ideale per chi vuole il massimo bitrate possibile."
 };
+
+// --- VISUAL CORE HELPER FUNCTIONS ---
+const skinMaps = {
+    'bold': {
+        nums: {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵'},
+        chars: {'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭','a':'𝗮','b':'𝗯','c':'𝗰','d':'𝗱','e':'𝗲','f':'𝗳','g':'𝗴','h':'𝗵','i':'𝗶','j':'j','k':'𝗸','l':'𝗹','m':'𝗺','n':'𝗻','o':'𝗼','p':'𝗽','q':'𝗾','r':'𝗿','s':'𝘀','t':'𝘁','u':'𝘂','v':'𝘃','w':'𝘄','x':'𝘅','y':'𝘆','z':'𝘇'}
+    },
+    'spaced': {
+        nums: {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗'},
+        chars: {'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭'}
+    },
+    'small': {
+        nums: {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9'},
+        chars: {'A':'ᴀ','B':'ʙ','C':'ᴄ','D':'ᴅ','E':'ᴇ','F':'ꜰ','G':'ɢ','H':'ʜ','I':'ɪ','J':'ᴊ','K':'ᴋ','L':'ʟ','M':'ᴍ','N':'ɴ','O':'ᴏ','P':'ᴘ','Q':'ǫ','R':'ʀ','S':'ꜱ','T':'ᴛ','U':'ᴜ','V':'ᴠ','W':'ᴡ','X':'x','Y':'ʏ','Z':'ᴢ','a':'ᴀ','b':'ʙ','c':'ᴄ','d':'ᴅ','e':'ᴇ','f':'ꜰ','g':'ɢ','h':'ʜ','i':'ɪ','j':'ᴊ','k':'ᴋ','l':'ʟ','m':'ᴍ','n':'ɴ','o':'ᴏ','p':'ᴘ','q':'ǫ','r':'ʀ','s':'ꜱ','t':'ᴛ','u':'ᴜ','v':'ᴠ','w':'ᴡ','x':'x','y':'ʏ','z':'ᴢ'}
+    }
+};
+
+function toStylized(text, type = 'std') {
+    if (type === 'spaced') {
+        return text.split('').map(c => {
+            const map = skinMaps['bold'];
+            const char = (/[0-9]/.test(c) ? map.nums[c] : map.chars[c]) || c;
+            return char + ' ';
+        }).join('').trim();
+    }
+    const map = skinMaps[type] || skinMaps['bold'];
+    return text.split('').map(c => {
+        if (/[0-9]/.test(c)) return map.nums[c] || c;
+        return map.chars[c] || c;
+    }).join('');
+}
+
+function selectMobileSkin(skinId) {
+    mSkin = skinId;
+    document.querySelectorAll('.m-skin-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('msk_' + skinId).classList.add('active');
+    
+    const customArea = document.getElementById('m-custom-skin-area');
+    if(skinId === 'custom') customArea.style.display = 'block';
+    else customArea.style.display = 'none';
+    
+    updateMobilePreview();
+}
+
+function updateMobilePreview() {
+    const p = {
+        title: "Dune Part Two",
+        cleanName: "Dune Part Two (2024)",
+        quality: "4K",
+        sizeString: "64.20 GB",
+        source: "P2P",
+        displaySource: "P2P",
+        serviceTag: mCurrentService.toUpperCase(),
+        serviceIcon: mCurrentService === 'rd' ? "☄️" : (mCurrentService === 'tb' ? "📦" : "🦅"),
+        lang: "🇮🇹 ITA",
+        audioInfo: "🔊⚡ TrueHD ┃ 7.1",
+        info: "💎 ʀᴇᴍᴜx • 🔥 HDR • 👁️ DV",
+        seedersStr: "👥 1337"
+    };
+
+    let name = "", desc = "";
+
+    if (mSkin === 'leviathan') {
+        const qBold = toStylized("4K", "bold");
+        const lev = toStylized("LEVIATHAN", "spaced");
+        name = `🦑 ${lev}\n${p.serviceIcon} ┃ ${qBold}`;
+        desc = `🗂️ ${p.cleanName}\n🗣️ ${p.lang} • ${p.audioInfo}\n${p.info}\n🧲 ${p.sizeString} • ${p.seedersStr}\n${p.serviceIcon} [${p.serviceTag}] ${p.source}`;
+    } else if (mSkin === 'lev2') {
+        const levText = toStylized("LEVIATHAN", "small");
+        const qText = toStylized("4K", "bold");
+        const sizeSmall = toStylized("64.20", "bold") + " " + toStylized("GB", "small");
+        name = `🦑 ${levText} ${p.serviceIcon} │ ${qText}`;
+        const titleBold = toStylized(p.cleanName, "bold");
+        const audioSmall = toStylized("TrueHD 7.1", "small");
+        const langSmall = toStylized("ITA ENG", "small");
+        const srcSmall = toStylized(p.displaySource, "small");
+        let servSmall = "ᴘ𝟚ᴘ";
+        if(p.serviceTag === "RD") servSmall = "ʀᴇᴀʟ-ᴅᴇʙʀɪᴅ";
+        if(p.serviceTag === "AD") servSmall = "ᴀʟʟ-ᴅᴇʙʀɪᴅ";
+        desc = `🎬 ${titleBold}\n📦 ${sizeSmall} │ ʀᴇᴍᴜx │ ᴅᴏʟʙʏ ᴠɪsɪᴏɴ\n🔊 ${audioSmall} • 🇮🇹 ${langSmall}\n🔗 ${servSmall} │ ${srcSmall}`;
+    } else if (mSkin === 'fra') {
+        name = `⚡️ Leviathan 4K`;
+        desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ 🇮🇹 ITA • TrueHD\n✨ ❯ ${p.serviceTag} • ${p.source}\n🔥 ❯ 4K • Remux • HDR\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337`;
+    } else if (mSkin === 'dav') {
+        name = `🎥4K UHD HEVC`;
+        desc = `📺 ${p.cleanName}\n🎧 TrueHD 7.1 | 🎞️ HEVC\n🗣️ ITA | 📦 ${p.sizeString}\n⏱️ 1337 Seeds | 🏷️ ${p.source}\n${p.serviceIcon} Leviathan 📡 ${p.serviceTag}\n📂 ${p.title}`;
+    } else if (mSkin === 'and') {
+        name = `🎬 ${p.cleanName}`;
+        desc = `4K ⚡\n─ ─ ─ ─ ─ ─ ─ ─ ─ ─\nLingue: 🇮🇹\nSpecifiche: 4K | 📺 Remux HDR | 🔊 TrueHD\n─ ─ ─ ─ ─ ─ ─ ─ ─ ─\n📂 ${p.sizeString} | ☁️ ${p.serviceTag} | 🛰️ Leviathan`;
+    } else if (mSkin === 'lad') {
+        name = `🖥️ 4K ${p.serviceTag}`;
+        desc = `🎟️ ${p.cleanName}\n📜 Movie\n🎥 4K 🎞️ HEVC 🎧 TrueHD\n📦 ${p.sizeString} • 🔗 Leviathan\n🌐 🇮🇹`;
+    } else if (mSkin === 'pri') {
+        name = `[${p.serviceTag}]⚡️☁️\n4K🔥UHD\n[Leviathan]`;
+        desc = `🎬 ${toStylized(p.cleanName, 'bold')}\n💎 ʀᴇᴍᴜx 🔆 HDR\n🎧 TrueHD | 🔊 7.1 | 🗣️ ITA\n📁 ${p.sizeString} | 🏷️ ${p.source}\n📄 ▶️ ${p.title} ◀️`;
+    } else if (mSkin === 'custom') {
+        let tpl = document.getElementById('m-customTemplate').value || "Lev {quality} ||| {title} - {size}";
+        tpl = tpl.replace("{title}", p.cleanName).replace("{quality}", p.quality)
+                 .replace("{size}", p.sizeString).replace("{source}", p.source)
+                 .replace("{service}", p.serviceTag).replace("{lang}", "ITA")
+                 .replace("{audio}", p.audioInfo).replace(/\\n/g, "\n");
+        if (tpl.includes("|||")) {
+            const parts = tpl.split("|||");
+            name = parts[0].trim();
+            desc = parts[1].trim();
+        } else {
+            name = `Leviathan ${p.serviceTag}\n${p.quality}`;
+            desc = tpl;
+        }
+    }
+
+    document.getElementById('m-prev-title').innerText = name;
+    document.getElementById('m-prev-info').innerText = desc;
+}
+
+function toggleMobileAIOLock() {
+    const isAIO = document.getElementById('m-aioMode').checked;
+    const lock = document.getElementById('m-aio-lock-overlay');
+    if(isAIO) lock.classList.add('active');
+    else lock.classList.remove('active');
+}
 
 function createBubbles() {
     const container = document.getElementById('m-bubbles');
@@ -986,6 +1252,7 @@ function initMobileInterface() {
     // createBubbles removed since they belong to high-perf mode
     initPullToRefresh();
     loadMobileConfig();
+    updateMobilePreview(); // Init preview
 }
 
 function initPullToRefresh() {
@@ -1079,6 +1346,8 @@ function setMService(srv, btn, keepInput = false) {
     input.placeholder = placeholders[srv];
     const warn = document.getElementById('m-ad-warn');
     if(warn) warn.style.display = (srv === 'ad') ? 'block' : 'none';
+    
+    updateMobilePreview(); // Update skin preview with new service
 }
 
 function updateStatus(inputId, statusId) {
@@ -1091,6 +1360,7 @@ function updateStatus(inputId, statusId) {
     }
     
     if(inputId === 'm-enableVix') toggleScOptions();
+    if(inputId === 'm-aioMode') toggleMobileAIOLock();
     checkWebPriorityVisibility();
     if(navigator.vibrate) navigator.vibrate(10);
 }
@@ -1264,6 +1534,10 @@ function loadMobileConfig() {
             // LOAD SORT MODE
             if(config.sort) setSortMode(config.sort);
             else setSortMode('balanced');
+            
+            // LOAD SKIN
+            if(config.formatter) selectMobileSkin(config.formatter);
+            if(config.customTemplate) document.getElementById('m-customTemplate').value = config.customTemplate;
 
             if(config.mediaflow) {
                 document.getElementById('m-mfUrl').value = config.mediaflow.url || "";
@@ -1332,6 +1606,8 @@ function loadMobileConfig() {
 
             toggleScOptions();
             checkWebPriorityVisibility(); 
+            toggleMobileAIOLock(); // Init lock state
+            updateMobilePreview(); // Init preview
         }
     } catch(e) { console.log("No config loaded"); }
 }
@@ -1348,6 +1624,8 @@ function getMobileConfig() {
         key: document.getElementById('m-apiKey').value.trim(),
         tmdb: document.getElementById('m-tmdb').value.trim(),
         sort: mSortMode, 
+        formatter: mSkin, // SAVE SKIN
+        customTemplate: document.getElementById('m-customTemplate').value, // SAVE CUSTOM
         aiostreams_mode: document.getElementById('m-aioMode').checked,
         mediaflow: {
             url: document.getElementById('m-mfUrl').value.trim().replace(/\/$/, ""),
