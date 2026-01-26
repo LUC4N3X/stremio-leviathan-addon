@@ -487,44 +487,44 @@ async function resolveDebridLink(config, item, showFake, reqHost) {
             }
             hash = Math.abs(hash);
 
-            // Logica INTELLIGENTE: Dimensioni diverse per Film e Serie
+            // Logica INTELLIGENTE: 
             if (isSeries) {
                 // --- PROFILO SERIE TV (Episodi) ---
-                // 4K Episodio: 3 GB - 8 GB
+                // 4K Episodio: - 
                 if (/2160p|4k|uhd/i.test(safeTitle)) {
                     const variance = (hash % 500) / 100; // 0 - 5 GB
                     return (3 + variance) * 1024 * 1024 * 1024;
                 }
-                // 1080p Episodio: 1.2 GB - 3.5 GB
+                // 1080p Episodio: 
                 if (/1080p|fhd/i.test(safeTitle)) {
                     const variance = (hash % 230) / 100; // 0 - 2.3 GB
                     return (1.2 + variance) * 1024 * 1024 * 1024;
                 }
-                // 720p Episodio: 500 MB - 1.5 GB
+                // 720p Episodio: 
                 if (/720p|hd/i.test(safeTitle)) {
                     const variance = (hash % 100) / 100; 
                     return (0.5 + variance) * 1024 * 1024 * 1024;
                 }
             } else {
                 // --- PROFILO FILM (Movie) ---
-                // 4K Film: 12 GB - 35 GB
+                // 4K Film: 
                 if (/2160p|4k|uhd/i.test(safeTitle)) {
                     const variance = (hash % 2300) / 100; // 0 - 23 GB
                     return (12 + variance) * 1024 * 1024 * 1024;
                 }
-                // 1080p Film: 5 GB - 14 GB (Mai sotto i 5GB)
+                // 1080p Film: 
                 if (/1080p|fhd/i.test(safeTitle)) {
                     const variance = (hash % 900) / 100; // 0 - 9 GB
                     return (5 + variance) * 1024 * 1024 * 1024;
                 }
-                // 720p Film: 2.5 GB - 6 GB
+                // 720p Film: 
                 if (/720p|hd/i.test(safeTitle)) {
                     const variance = (hash % 350) / 100; 
                     return (2.5 + variance) * 1024 * 1024 * 1024;
                 }
             }
             
-            // Default SD (uguale per tutti): 700 MB - 1.5 GB
+            // Default SD 
             const variance = (hash % 80) / 100;
             return (0.7 + variance) * 1024 * 1024 * 1024;
         };
