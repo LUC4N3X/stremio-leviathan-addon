@@ -468,21 +468,79 @@ function saveResultsToDbBackground(meta, results) {
     })().catch(err => console.error("❌ Errore background save:", err.message));
 }
 
-// --- RISOLUZIONE DEBRID E FORMATTAZIONE (COLLEGATA AL NUOVO FORMATTER) ---
+// --- RISOLUZIONE DEBRID E FORMATTAZIONE (INTELLIGENT SIZE GENERATOR) ---
 async function resolveDebridLink(config, item, showFake, reqHost) {
     try {
         const service = config.service || 'rd';
         const apiKey = config.key || config.rd;
         if (!apiKey) return null;
 
+        // Funzione Helper: Genera dimensione INTELLIGENTE (Movie vs Series)
+        const ensureSize = (size, title, isSeries) => {
+            if (size && size > 0) return size;
+            
+            // Creiamo un hash deterministico dal titolo
+            let hash = 0;
+            const safeTitle = (title || "video").toLowerCase();
+            for (let i = 0; i < safeTitle.length; i++) {
+                hash = safeTitle.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            hash = Math.abs(hash);
+
+            // Logica INTELLIGENTE: Dimensioni diverse per Film e Serie
+            if (isSeries) {
+                // --- PROFILO SERIE TV (Episodi) ---
+                // 4K Episodio: 3 GB - 8 GB
+                if (/2160p|4k|uhd/i.test(safeTitle)) {
+                    const variance = (hash % 500) / 100; // 0 - 5 GB
+                    return (3 + variance) * 1024 * 1024 * 1024;
+                }
+                // 1080p Episodio: 1.2 GB - 3.5 GB
+                if (/1080p|fhd/i.test(safeTitle)) {
+                    const variance = (hash % 230) / 100; // 0 - 2.3 GB
+                    return (1.2 + variance) * 1024 * 1024 * 1024;
+                }
+                // 720p Episodio: 500 MB - 1.5 GB
+                if (/720p|hd/i.test(safeTitle)) {
+                    const variance = (hash % 100) / 100; 
+                    return (0.5 + variance) * 1024 * 1024 * 1024;
+                }
+            } else {
+                // --- PROFILO FILM (Movie) ---
+                // 4K Film: 12 GB - 35 GB
+                if (/2160p|4k|uhd/i.test(safeTitle)) {
+                    const variance = (hash % 2300) / 100; // 0 - 23 GB
+                    return (12 + variance) * 1024 * 1024 * 1024;
+                }
+                // 1080p Film: 5 GB - 14 GB (Mai sotto i 5GB)
+                if (/1080p|fhd/i.test(safeTitle)) {
+                    const variance = (hash % 900) / 100; // 0 - 9 GB
+                    return (5 + variance) * 1024 * 1024 * 1024;
+                }
+                // 720p Film: 2.5 GB - 6 GB
+                if (/720p|hd/i.test(safeTitle)) {
+                    const variance = (hash % 350) / 100; 
+                    return (2.5 + variance) * 1024 * 1024 * 1024;
+                }
+            }
+            
+            // Default SD (uguale per tutti): 700 MB - 1.5 GB
+            const variance = (hash % 80) / 100;
+            return (0.7 + variance) * 1024 * 1024 * 1024;
+        };
+
         if (service === 'tb') {
             if (item._tbCached) {
                 const serviceTag = "TB";
-                // >>> NUOVA CHIAMATA A FORMAT STREAM SELECTOR <<<
+                let realSize = item._size || item.sizeBytes || 0;
+                // Verifichiamo se è una serie (se ha stagione/episodio settati e > 0)
+                const isSeries = (item.season > 0 || item.episode > 0);
+                realSize = ensureSize(realSize, item.title, isSeries);
+
                 const { name, title, bingeGroup } = formatStreamSelector(
                     item.title, 
                     item.source, 
-                    item._size, 
+                    realSize, 
                     item.seeders, 
                     serviceTag, 
                     config, 
@@ -502,11 +560,18 @@ async function resolveDebridLink(config, item, showFake, reqHost) {
         if (!streamData || (streamData.type === "ready" && streamData.size < CONFIG.REAL_SIZE_FILTER)) return null;
 
         const serviceTag = service.toUpperCase();
-        // >>> NUOVA CHIAMATA A FORMAT STREAM SELECTOR <<<
+        
+        // 1. Prendi la dimensione reale se c'è
+        let finalSize = streamData.size || item._size || item.sizeBytes || 0;
+        
+        // 2. APPLICA IL FALLBACK INTELLIGENTE
+        const isSeries = (item.season > 0 || item.episode > 0);
+        finalSize = ensureSize(finalSize, streamData.filename || item.title, isSeries);
+
         const { name, title, bingeGroup } = formatStreamSelector(
             streamData.filename || item.title, 
             item.source, 
-            streamData.size || item.size, 
+            finalSize, 
             item.seeders, 
             serviceTag, 
             config, 
@@ -525,11 +590,58 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
     const service = config.service || 'rd';
     const serviceTag = service.toUpperCase();
     
+    // >>> FIX UNKNOWN GB INTELLIGENTE <<<
+    let realSize = item._size || item.sizeBytes || 0;
+
+    if (realSize === 0) {
+        let hash = 0;
+        const safeTitle = (item.title || "video").toLowerCase();
+        for (let i = 0; i < safeTitle.length; i++) {
+            hash = safeTitle.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        hash = Math.abs(hash);
+
+        // Capire se è serie o film dai metadati
+        const isSeries = (meta.season > 0 || meta.episode > 0 || (item.season > 0));
+
+        if (isSeries) {
+            // SERIE TV
+            if (/2160p|4k|uhd/i.test(safeTitle)) {
+                const v = (hash % 500) / 100; 
+                realSize = (3 + v) * 1024 * 1024 * 1024; // 3-8 GB
+            } 
+            else if (/1080p|fhd/i.test(safeTitle)) {
+                const v = (hash % 230) / 100;
+                realSize = (1.2 + v) * 1024 * 1024 * 1024; // 1.2-3.5 GB
+            } 
+            else if (/720p|hd/i.test(safeTitle)) {
+                const v = (hash % 100) / 100;
+                realSize = (0.5 + v) * 1024 * 1024 * 1024; // 0.5-1.5 GB
+            } 
+            else realSize = 400 * 1024 * 1024;
+        } else {
+            // FILM
+            if (/2160p|4k|uhd/i.test(safeTitle)) {
+                const v = (hash % 2300) / 100;
+                realSize = (12 + v) * 1024 * 1024 * 1024; // 12-35 GB
+            } 
+            else if (/1080p|fhd/i.test(safeTitle)) {
+                const v = (hash % 900) / 100;
+                realSize = (5 + v) * 1024 * 1024 * 1024; // 5-14 GB
+            } 
+            else if (/720p|hd/i.test(safeTitle)) {
+                const v = (hash % 350) / 100;
+                realSize = (2.5 + v) * 1024 * 1024 * 1024; // 2.5-6 GB
+            } 
+            else realSize = 1.2 * 1024 * 1024 * 1024;
+        }
+    }
+
     // >>> NUOVA CHIAMATA A FORMAT STREAM SELECTOR <<<
     const { name, title, bingeGroup } = formatStreamSelector(
         item.title,
         item.source,
-        item._size || item.sizeBytes || 0,
+        realSize, 
         item.seeders,
         serviceTag,
         config,
