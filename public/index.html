@@ -299,42 +299,45 @@
         .lock-icon { font-size: 3rem; color: var(--secondary); margin-bottom: 15px; filter: drop-shadow(0 0 10px var(--secondary)); }
         .lock-msg { font-family: 'Rajdhani', sans-serif; font-size: 1.5rem; font-weight: 800; color: #fff; letter-spacing: 2px; text-transform: uppercase; }
         
-        /* Quando il container è disabilitato */
         .disabled-core .skin-selector-container, .disabled-core .custom-area {
             opacity: 0.3; pointer-events: none; filter: grayscale(1);
         }
 
+        /* --- SUPER LEVIATHAN SKIN SELECTOR --- */
         .skin-selector-container {
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; /* Spaziatura aumentata */
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;
+            background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; border: 1px dashed rgba(255,255,255,0.05);
         }
         .skin-btn {
-            background: linear-gradient(145deg, rgba(0, 10, 20, 0.8), rgba(0, 242, 255, 0.02)); /* Gradiente subtle */
-            border: 1px solid rgba(0, 242, 255, 0.15); color: var(--text-dim);
-            padding: 18px 10px; border-radius: 12px; cursor: pointer; text-align: center; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            background: linear-gradient(145deg, #050a10, #000);
+            border: 1px solid rgba(255,255,255,0.1); color: var(--text-dim);
+            padding: 15px 10px; border-radius: 10px; cursor: pointer; text-align: center; 
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
         }
-        .skin-btn::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(180deg, rgba(0, 242, 255, 0.1), transparent);
-            opacity: 0; transition: 0.3s;
+        .skin-btn::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--primary);
+            transform: scaleX(0); transition: transform 0.3s ease;
         }
         .skin-btn:hover { 
-            background: rgba(0, 242, 255, 0.08); transform: translateY(-3px); 
-            border-color: rgba(0, 242, 255, 0.4); box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transform: translateY(-5px); border-color: rgba(0, 242, 255, 0.3); 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4), inset 0 0 10px rgba(0, 242, 255, 0.05);
+            color: #fff;
         }
-        .skin-btn:hover::before { opacity: 1; }
+        .skin-btn:hover::after { transform: scaleX(1); }
         
         .skin-btn.active {
-            background: linear-gradient(135deg, rgba(0, 242, 255, 0.15), rgba(112, 0, 255, 0.1));
+            background: linear-gradient(180deg, rgba(0, 242, 255, 0.05), rgba(0,0,0,0.8));
             border-color: var(--primary); color: #fff; 
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.15), inset 0 0 10px rgba(0, 242, 255, 0.05);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.1), inset 0 0 20px rgba(0, 242, 255, 0.05);
+            transform: scale(1.05); z-index: 2;
         }
-        .skin-btn.active .skin-icon { color: var(--primary); filter: drop-shadow(0 0 5px var(--primary)); }
+        .skin-btn.active::after { transform: scaleX(1); height: 4px; box-shadow: 0 0 10px var(--primary); }
+        .skin-btn.active .skin-icon { color: var(--primary); filter: drop-shadow(0 0 8px var(--primary)); transform: scale(1.2); }
         
-        .skin-icon { font-size: 1.6rem; transition: 0.3s; color: #666; }
-        .skin-btn:hover .skin-icon { color: #fff; transform: scale(1.1); }
-        
-        .skin-name { font-family: 'Rajdhani', sans-serif; font-weight: 800; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1.5px; z-index: 1; }
+        .skin-icon { font-size: 1.5rem; transition: 0.3s; color: #444; }
+        .skin-name { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; z-index: 1; }
 
         .preview-terminal {
             background: #050505; border: 1px solid #333; border-radius: 12px; padding: 20px; margin-bottom: 25px;
@@ -355,12 +358,32 @@
         .mock-title { color: #ececec; font-size: 1.05rem; font-weight: 500; white-space: pre-wrap; line-height: 1.25; }
         .mock-info { color: #aaaaaa; font-size: 0.9rem; white-space: pre-wrap; line-height: 1.35; }
         
+        /* --- SUPER COOL CUSTOM AREA --- */
         .custom-area {
-            display: none; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; border: 1px dashed rgba(255,255,255,0.1); margin-top: 15px; animation: fadeInRow 0.3s ease;
+            display: none; background: #0a0a0a; padding: 0; border-radius: 10px; 
+            border: 1px solid #333; margin-top: 15px; animation: fadeInRow 0.3s ease;
+            position: relative; overflow: hidden;
         }
+        .custom-area::before { content: 'TEMPLATE EDITOR // BASH'; position: absolute; top: 0; right: 0; background: #111; color: #555; padding: 2px 10px; font-size: 0.7rem; font-family: monospace; border-bottom-left-radius: 8px; }
         .custom-area.show { display: block; }
-        .custom-helper { font-size: 0.8rem; color: #888; margin-top: 8px; line-height: 1.4; }
-        .custom-helper code { background: rgba(255,255,255,0.1); padding: 2px 4px; border-radius: 3px; color: var(--primary); }
+        
+        .custom-input {
+            width: 100%; border: none; background: transparent !important; padding: 15px;
+            font-family: 'Consolas', 'Monaco', monospace; font-size: 0.95rem; color: var(--primary);
+            box-shadow: none !important;
+        }
+        .custom-input:focus { outline: none; border: none; }
+        
+        .custom-helper { 
+            background: #0f0f0f; border-top: 1px solid #222; padding: 10px 15px;
+            font-size: 0.8rem; color: #666; font-family: 'Rajdhani', sans-serif;
+            display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+        }
+        .var-tag { 
+            background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; 
+            color: #aaa; font-family: monospace; cursor: help; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .var-tag:hover { border-color: var(--primary); color: var(--primary); }
 
         .action-area { display: flex; gap: 15px; margin-top: 40px; flex-direction: column; }
         .btn-install { flex: 2; background: rgba(0, 242, 255, 0.05); color: var(--primary); border: 1px solid var(--primary); padding: 15px 20px; font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 3px; border-radius: 8px; cursor: pointer; transition: 0.3s ease; position: relative; overflow: hidden; box-shadow: 0 0 10px rgba(0, 242, 255, 0.05); display: flex; align-items: center; justify-content: center; gap: 10px; }
@@ -422,6 +445,7 @@
             .main-wrapper { max-width: 1400px; }
             .desktop-grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
             .action-area { flex-direction: row; }
+            .skin-selector-container { grid-template-columns: repeat(5, 1fr); }
         }
 
         @media (max-width: 768px) {
@@ -532,12 +556,12 @@
                     <div class="stremio-mock-row">
                         <div class="mock-poster"><i class="fas fa-image"></i></div>
                         <div class="mock-content">
-                            <div class="mock-title" id="prev-name">🦑 𝗟 𝗘 𝗩 𝗜 𝗔 𝗧 𝗛 𝗔 𝗡
-☄️ ┃ 𝟰𝗞</div>
-                            <div class="mock-info" id="prev-desc">🗂️ Dune Part Two (2024)
+                            <div class="mock-title" id="prev-name">🦑 𝗟 𝗘 𝗩 𝗜 𝗔 𝗧 𝗛 𝗔 𝗡 ☄️ ┃ 𝟰𝗞</div>
+
+                            <div class="mock-info" id="prev-desc">📁 Dune Part Two (2024)
 🗣️ 🇮🇹 • 🔊⚡ TrueHD ┃ 7.1
 💎 𝗥𝗘𝗠𝗨𝗫 • 🔥 𝗛𝗗𝗥 • 👁️ 𝗗𝗩
-🧲 64.20 GB • 👥 1337
+🧲 64.20 GB • 👥 1337x
 ☄️ [RD] P2P</div>
                         </div>
                     </div>
@@ -552,6 +576,12 @@
                     </div>
                     <div class="skin-btn" id="skin_fra" onclick="selectSkin('fra')">
                         <span class="skin-icon">⚡️</span><span class="skin-name">Horizon</span>
+                    </div>
+                    <div class="skin-btn" id="skin_comet" onclick="selectSkin('comet')">
+                        <span class="skin-icon">☄️</span><span class="skin-name">Comet</span>
+                    </div>
+                    <div class="skin-btn" id="skin_stremio_ita" onclick="selectSkin('stremio_ita')">
+                        <span class="skin-icon">🇮🇹</span><span class="skin-name">ITA Mod</span>
                     </div>
                     <div class="skin-btn" id="skin_dav" onclick="selectSkin('dav')">
                         <span class="skin-icon">📼</span><span class="skin-name">Datastream</span>
@@ -973,7 +1003,8 @@
                 serviceIcon: currentService === 'rd' ? "☄️" : (currentService === 'tb' ? "📦" : "🦅"),
                 lang: "🇮🇹 ITA",
                 audioInfo: "🔊⚡ TrueHD ┃ 7.1",
-                info: "💎 ʀᴇᴍᴜx • 🔥 HDR • 👁️ DV", // Uso caratteri normali per la preview generica
+                info: "💎 𝗥𝗘𝗠𝗨𝗫 • 🔥 𝗛𝗗𝗥 • 👁️ 𝗗𝗩", 
+                cleanInfo: "Remux • HDR • DV",
                 epTag: "",
                 seedersStr: "👥 1337"
             };
@@ -982,14 +1013,14 @@
 
             if (skin === 'leviathan') {
                 const qBold = toStylized("4K", "bold");
-                const lev = toStylized("LEVIATHAN", "spaced");
-                name = `🦑 ${lev}\n${p.serviceIcon} ┃ ${qBold}`;
-                desc = `🗂️ ${p.cleanName}\n🗣️ ${p.lang} • ${p.audioInfo}\n${p.info}\n🧲 ${p.sizeString} • ${p.seedersStr}\n${p.serviceIcon} [${p.serviceTag}] ${p.source}`;
+                const lev = toStylized("LEVIATHAN", "std"); // Niente spaced nel nuovo formatter, ma std chars
+                name = `🦑 𝗟𝗘𝗩𝗜𝗔𝗧𝗛𝗔𝗡\n${p.serviceIcon} ┃ ${qBold}`;
+                desc = `📁 ${p.cleanName}\n🗣️ ${p.lang} • ${p.audioInfo}\n${p.info}\n🧲 ${p.sizeString} • ${p.seedersStr}\n${p.serviceIcon} [${p.serviceTag}] ${p.source}`;
             } 
             else if (skin === 'lev2') {
                 // LEVIATHAN 2.0 PREVIEW
                 const levText = toStylized("LEVIATHAN", "small");
-                const qText = toStylized("4K", "bold");
+                const qText = p.quality;
                 const sizeSmall = toStylized("64.20", "bold") + " " + toStylized("GB", "small");
                 
                 name = `🦑 ${levText} ${p.serviceIcon} │ ${qText}`;
@@ -1006,15 +1037,25 @@
             }
             else if (skin === 'fra') {
                 name = `⚡️ Leviathan 4K`;
-                desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ 🇮🇹 ITA • TrueHD\n✨ ❯ ${p.serviceTag} • ${p.source}\n🔥 ❯ 4K • Remux • HDR\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337`;
+                desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ 🇮🇹 ITA • TrueHD\n✨ ❯ ${p.serviceTag} • ${p.source}\n🔥 ❯ 4K • ${p.cleanInfo}\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337`;
+            }
+            else if (skin === 'comet') {
+                // Comet Style Replica
+                name = `[${p.serviceTag} ⚡]\nLeviathan\n4K`;
+                desc = `📄 ${p.cleanName}\n📹 HEVC • ${p.cleanInfo} | TrueHD\n⭐ ${p.source}\n💾 ${p.sizeString} 👥 1337\n🌍 ITA`;
+            }
+            else if (skin === 'stremio_ita') {
+                // Stremio ITA Template Replica
+                name = `⚡️ Leviathan 4K`;
+                desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ ita • eng\n✨ ❯ ${p.serviceTag} • ${p.source}\n🔥 ❯ 4K • HEVC • ${p.cleanInfo}\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337\n🔉 ❯ TrueHD • 7.1`;
             }
             else if (skin === 'dav') {
-                name = `🎥4K UHD HEVC`;
+                name = `🎥 4K UHD HEVC`;
                 desc = `📺 ${p.cleanName}\n🎧 TrueHD 7.1 | 🎞️ HEVC\n🗣️ ITA | 📦 ${p.sizeString}\n⏱️ 1337 Seeds | 🏷️ ${p.source}\n${p.serviceIcon} Leviathan 📡 ${p.serviceTag}\n📂 ${p.title}`;
             }
             else if (skin === 'and') {
                 name = `🎬 ${p.cleanName}`;
-                desc = `4K ⚡\n─ ─ ─ ─ ─ ─ ─ ─ ─ ─\nLingue: 🇮🇹\nSpecifiche: 4K | 📺 Remux HDR | 🔊 TrueHD\n─ ─ ─ ─ ─ ─ ─ ─ ─ ─\n📂 ${p.sizeString} | ☁️ ${p.serviceTag} | 🛰️ Leviathan`;
+                desc = `4K ⚡\n─ ─ ─ ─ ─ ─ ─ ─ ─ ─\nLingue: 🇮🇹\nSpecifiche: 4K | 📺 ${p.cleanInfo} | 🔊 TrueHD\n─ ─ ─ ─ ─ ─ ─ ─ ─ ─\n📂 ${p.sizeString} | ☁️ ${p.serviceTag} | 🛰️ Leviathan`;
             }
             else if (skin === 'lad') {
                 name = `🖥️ 4K ${p.serviceTag}`;
@@ -1022,7 +1063,7 @@
             }
             else if (skin === 'pri') {
                 name = `[${p.serviceTag}]⚡️☁️\n4K🔥UHD\n[Leviathan]`;
-                desc = `🎬 ${toStylized(p.cleanName, 'bold')}\n💎 ʀᴇᴍᴜx 🔆 HDR\n🎧 TrueHD | 🔊 7.1 | 🗣️ ITA\n📁 ${p.sizeString} | 🏷️ ${p.source}\n📄 ▶️ ${p.title} ◀️`;
+                desc = `🎬 ${p.cleanName}\n${p.cleanInfo}\n🎧 TrueHD | 🔊 7.1 | 🗣️ ITA\n📁 ${p.sizeString} | 🏷️ ${p.source}\n📄 ▶️ ${p.title} ◀️`;
             }
             else if (skin === 'custom') {
                 // ... logica custom esistente ...
