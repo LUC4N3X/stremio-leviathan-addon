@@ -16,6 +16,9 @@ const PackResolver = require("./leviathan-pack-resolver");
 const aioFormatter = require("./aiostreams-formatter.cjs");
 const { searchWebStreamr } = require("./webstreamr_handler");
 
+// --- IMPORT NUOVO MODULO CACHE TORBOX ---
+const TbCache = require("./debrid/tb_cache.js");
+
 // --- IMPORT NUOVO FORMATTER (Skins & Logic) ---
 const { formatStreamSelector, cleanFilename, formatBytes } = require("./formatter");
 
@@ -260,53 +263,7 @@ function isSafeForItalian(item) {
   return false;
 }
 
-async function filterTorBoxCached(apiKey, items) {
-    if (!items || items.length === 0) return [];
-    const uniqueHashes = [...new Set(items.map(i => i.hash).filter(Boolean))];
-    if (uniqueHashes.length === 0) return [];
-    const checkChunk = async (hashes) => {
-        try {
-            const url = "https://api.torbox.app/v1/api/torrents/checkcached";
-            const { data: response } = await axios.get(url, {
-                params: { hash: hashes.join(','), format: 'object', list_files: false },
-                headers: { Authorization: `Bearer ${apiKey}` },
-                timeout: 6000 
-            });
-            if (!response || !response.success || !response.data) return []; 
-            const confirmed = [];
-            const data = response.data;
-            if (Array.isArray(data)) {
-                data.forEach(entry => {
-                    if (typeof entry === 'string') confirmed.push(entry.toLowerCase());
-                    else if (entry.hash) confirmed.push(entry.hash.toLowerCase());
-                });
-            } else {
-                Object.entries(data).forEach(([hash, val]) => {
-                    if (val && val !== false) confirmed.push(hash.toLowerCase());
-                });
-            }
-            return confirmed;
-        } catch (e) {
-            logger.warn(`⚠️ [TB CHUNK FAIL] Errore API: ${e.message}`);
-            return []; 
-        }
-    };
-    const chunkSize = 40;
-    const chunks = [];
-    for (let i = 0; i < uniqueHashes.length; i += chunkSize) {
-        chunks.push(uniqueHashes.slice(i, i + chunkSize));
-    }
-    logger.info(`🔍 [TB CHECK] Verifico ${uniqueHashes.length} hash in ${chunks.length} richieste...`);
-    const results = await Promise.all(chunks.map(chunk => checkChunk(chunk)));
-    const confirmedHashes = new Set(results.flat());
-    const cachedItems = items.filter(item => {
-        const isCached = item.hash && confirmedHashes.has(item.hash.toLowerCase());
-        if (isCached) item._tbCached = true;
-        return isCached;
-    });
-    logger.info(`✅ [TB CHECK] Risultato: ${items.length} totali -> ${cachedItems.length} confermati in cache.`);
-    return cachedItems;
-}
+// [RIMOSSO] La vecchia funzione filterTorBoxCached è stata rimossa. Usiamo il modulo TbCache.
 
 function validateStreamRequest(type, id) {
   const validTypes = ['movie', 'series'];
@@ -782,7 +739,7 @@ async function queryLocalIndexer(meta, config) {
     }
 }
 
-async function queryRemoteIndexer(tmdbId, type, season = null, episode = null, config) {
+async function queryRemoteIndexer(tmdbId, type, season = null, episode = null, config) { 
     if (!CONFIG.INDEXER_URL) return [];
     try {
         logger.info(`🌐 [REMOTE] Query VPS: ${CONFIG.INDEXER_URL} | ID: ${tmdbId} S:${season} E:${episode}`);
@@ -1163,19 +1120,53 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       rankedList = filterByQualityLimit(rankedList, config.filters.maxPerQuality);
   }
 
+  // =================================================================
+  // NUOVA LOGICA TORBOX CON TB-CACHE-CHECKER
+  // =================================================================
   if (config.service === 'tb' && hasDebridKey) {
       const apiKey = config.key || config.rd; 
-      const checkLimit = 300; 
-      const itemsToCheck = rankedList.slice(0, checkLimit);
-      if (itemsToCheck.length > 0) {
-          logger.info(`📦 [TB ONLY-CACHED] Verifico ${itemsToCheck.length} candidati...`);
-          const cachedOnly = await filterTorBoxCached(apiKey, itemsToCheck);
-          logger.info(`📦 [TB FILTER] ${itemsToCheck.length} -> ${cachedOnly.length} in cache.`);
+      
+      // Controllo Sincrono Veloce (Solo i primi 20 per non rallentare)
+      const checkLimit = 20; 
+      const topItems = rankedList.slice(0, checkLimit);
+      const remainingItems = rankedList.slice(checkLimit);
+
+      if (topItems.length > 0) {
+          logger.info(`📦 [TB SYNC] Verifico ${topItems.length} hash con dettagli file...`);
+          
+          // Usa il nuovo modulo per il controllo
+          const cacheResults = await TbCache.checkCacheSync(topItems, apiKey, checkLimit);
+          
+          const cachedOnly = topItems.filter(item => {
+              const hash = item.hash.toLowerCase();
+              const cacheData = cacheResults[hash];
+              
+              if (cacheData && cacheData.cached) {
+                  item._tbCached = true;
+                  // WOW FACTOR: Aggiorniamo la dimensione con quella del file reale se disponibile
+                  if (cacheData.file_size) {
+                      item._originalSize = item._size; // Backup
+                      item._size = cacheData.file_size; // Dimensione reale episodio
+                  }
+                  return true;
+              }
+              return false;
+          });
+
+          logger.info(`📦 [TB FILTER] ${topItems.length} -> ${cachedOnly.length} in cache.`);
+          
+          // I rimanenti li arricchiamo in background per il DB
+          if (remainingItems.length > 0) {
+              // Passiamo dbHelper per salvare i risultati futuri
+              TbCache.enrichCacheBackground(remainingItems, apiKey, dbHelper);
+          }
+
           rankedList = cachedOnly;
       } else {
           rankedList = [];
       }
   }
+  // =================================================================
 
   let finalRanked = rankedList.slice(0, CONFIG.MAX_RESULTS);
   const ranked = finalRanked;
@@ -1567,7 +1558,7 @@ app.listen(PORT, () => {
     console.log(`🛡️ GUARDA SERIE: Modulo Integrato e Pronto`);
     console.log(`🕷️ WEBSTREAMR: Fallback Attivo (Su 0 Risultati)`);
     console.log(`🎬 TRAILER: Attivabile da Config (Default: OFF, Primo Risultato se ON)`);
-    console.log(`📦 TORBOX: STRICT CACHE ENABLED (Solo Instant)`);
+    console.log(`📦 TORBOX: ADVANCED SMART CACHE ENABLED`);
     console.log(`🦑 LEVIATHAN CORE: Optimized for High Reliability`);
     console.log(`-----------------------------------------------------`);
 });
