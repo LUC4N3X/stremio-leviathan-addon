@@ -747,7 +747,7 @@ const mobileHTML = `
                 
                 <h1 class="m-brand-title">LEVIATHAN</h1>
                 <div class="m-brand-sub">SOVRANO DEGLI ABISSI</div>
-                <div class="m-version-tag"><div class="m-v-dot"></div>v2.2.0 STABLE</div>
+                <div class="m-version-tag"><div class="m-v-dot"></div>v2.3.0 STABLE</div>
             </div>
 
             <div id="page-setup" class="m-page active">
