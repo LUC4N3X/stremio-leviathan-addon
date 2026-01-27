@@ -959,6 +959,8 @@ const mobileHTML = `
                         <div class="m-skin-btn active" id="msk_leviathan" onclick="selectMobileSkin('leviathan')"><span class="m-skin-icon">🦑</span> LEVIATHAN</div>
                         <div class="m-skin-btn" id="msk_lev2" onclick="selectMobileSkin('lev2')"><span class="m-skin-icon">🧬</span> ARCHETYPE</div>
                         <div class="m-skin-btn" id="msk_fra" onclick="selectMobileSkin('fra')"><span class="m-skin-icon">⚡️</span> HORIZON</div>
+                        <div class="m-skin-btn" id="msk_comet" onclick="selectMobileSkin('comet')"><span class="m-skin-icon">☄️</span> COMET</div>
+                        <div class="m-skin-btn" id="msk_stremio_ita" onclick="selectMobileSkin('stremio_ita')"><span class="m-skin-icon">🇮🇹</span> ITA MOD</div>
                         <div class="m-skin-btn" id="msk_dav" onclick="selectMobileSkin('dav')"><span class="m-skin-icon">📼</span> DATABANK</div>
                         <div class="m-skin-btn" id="msk_pri" onclick="selectMobileSkin('pri')"><span class="m-skin-icon">👑</span> ECLIPSE</div>
                         <div class="m-skin-btn" id="msk_and" onclick="selectMobileSkin('and')"><span class="m-skin-icon">🎬</span> MATRIX</div>
@@ -1131,6 +1133,17 @@ const mobileHTML = `
         </div> 
     </div>
 
+    <div id="m-faq-modal" class="m-modal">
+        <div class="m-modal-header"><div class="m-modal-title">DATABASE FAQ</div><div class="m-close-icon" onclick="closeFaq()"><i class="fas fa-times"></i></div></div>
+        <div class="m-faq-content">
+            <div class="m-faq-item" onclick="toggleFaqItem(this)"><div class="m-faq-q">Come funziona? <i class="fas fa-chevron-down"></i></div><div class="m-faq-a">Leviathan scansiona le profondità del web per trovare Torrent e flussi StreamingCommunity ad alta velocità.</div></div>
+            <div class="m-faq-item" onclick="toggleFaqItem(this)"><div class="m-faq-q">WebStreamr Fallback <i class="fas fa-chevron-down"></i></div><div class="m-faq-a">È un sistema di emergenza. Se Leviathan non trova alcun risultato Torrent o Web normale, attiva WebStreamr per cercare flussi HTTP diretti gratuiti (non Debrid) da database di riserva.</div></div>
+            <div class="m-faq-item" onclick="toggleFaqItem(this)"><div class="m-faq-q">MediaFlow & GuardaHD/GS <i class="fas fa-chevron-down"></i></div><div class="m-faq-a">GuardaHD e GuardaSerie richiedono un Proxy. Inserisci URL e Password del tuo MediaFlow Server nel modulo "Network".</div></div>
+            <div class="m-faq-item" onclick="toggleFaqItem(this)"><div class="m-faq-q">Cos'è il Cache Builder? <i class="fas fa-chevron-down"></i></div><div class="m-faq-a">Mostra Torrent NON ancora scaricati su Debrid. Cliccandoli, avvierai il download.</div></div>
+             <div class="m-faq-item" onclick="toggleFaqItem(this)"><div class="m-faq-q">Debrid Ghost Mode <i class="fas fa-chevron-down"></i></div><div class="m-faq-a">Debrid Ghost instrada tutte le richieste Debrid tramite il proxy MediaFlow configurato, nascondendo il tuo IP domestico al provider Debrid.</div></div>
+        </div>
+    </div>
+
     <div class="m-dock-container">
         <div class="m-dock-actions">
             <button class="m-btn-install" onclick="mobileInstall()"><i class="fas fa-download"></i> INSTALLA ADDON</button>
@@ -1204,34 +1217,28 @@ function selectMobileSkin(skinId) {
 
 function updateMobilePreview() {
     const p = {
-        title: "The Rip",
-        cleanName: "The Rip (2026)", // From AISelect image
-        quality: "4K", // From AISelect image
-        sizeString: "17.32 GB", // From AISelect image
-        source: "ilCoRSaRoNeRo", // User request
-        displaySource: "ilCoRSaRoNeRo",
-        serviceTag: "RD",
+        title: "Dune Part Two",
+        cleanName: "Dune Part Two (2024)",
+        quality: "4K",
+        sizeString: "64.20 GB",
+        source: "P2P",
+        displaySource: "P2P",
+        serviceTag: mCurrentService.toUpperCase(),
         serviceIcon: mCurrentService === 'rd' ? "☄️" : (mCurrentService === 'tb' ? "📦" : "🦅"),
-        lang: "🇮🇹 ITA", // From AISelect image
-        audioInfo: "💥💣 Atmos", // From AISelect image (icons included here or in template)
-        codec: "HEVC",
-        videoTraits: "☁️ WEB • 🔥 HDR • 👁️ DV • ⚙️ HEVC", // Combined line from AISelect image
-        seedersStr: "318" // From AISelect image
+        lang: "🇮🇹 ITA",
+        audioInfo: "🔊⚡ TrueHD ┃ 7.1",
+        info: "💎 ʀᴇᴍᴜx • 🔥 HDR • 👁️ DV",
+        cleanInfo: "Remux • HDR • DV",
+        seedersStr: "👥 1337"
     };
 
     let name = "", desc = "";
 
     if (mSkin === 'leviathan') {
-        // Header: Icon + Name + ServiceIcon + | + Quality
-        name = `🦑 LEVIATHAN ${p.serviceIcon} | ${p.quality}`;
-        
-        // Rows based on AISelect image:
-        // 1. Folder + Title
-        // 2. Speaking Head + Flag + ITA + Audio Icons
-        // 3. Cloud/Video info
-        // 4. Magnet + Size + People + Seeds
-        // 5. Service Icon + [Tag] + Source
-        desc = `📂 ${p.cleanName}\n🗣️ ${p.lang} • ${p.audioInfo}\n${p.videoTraits}\n🧲 ${p.sizeString} • 👥 ${p.seedersStr}\n${p.serviceIcon} [${p.serviceTag}] ${p.source}`;
+        const qBold = toStylized("4K", "bold");
+        const lev = toStylized("LEVIATHAN", "spaced");
+        name = `🦑 ${lev}\n${p.serviceIcon} ┃ ${qBold}`;
+        desc = `🗂️ ${p.cleanName}\n🗣️ ${p.lang} • ${p.audioInfo}\n${p.info}\n🧲 ${p.sizeString} • ${p.seedersStr}\n${p.serviceIcon} [${p.serviceTag}] ${p.source}`;
     } else if (mSkin === 'lev2') {
         const levText = toStylized("LEVIATHAN", "small");
         const qText = toStylized("4K", "bold");
@@ -1248,6 +1255,14 @@ function updateMobilePreview() {
     } else if (mSkin === 'fra') {
         name = `⚡️ Leviathan 4K`;
         desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ 🇮🇹 ITA • TrueHD\n✨ ❯ ${p.serviceTag} • ${p.source}\n🔥 ❯ 4K • Remux • HDR\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337`;
+    } else if (mSkin === 'comet') {
+        // Comet Style Replica
+        name = `[${p.serviceTag} ⚡]\nLeviathan\n4K`;
+        desc = `📄 ${p.cleanName}\n📹 HEVC • ${p.cleanInfo} | TrueHD\n⭐ ${p.source}\n💾 ${p.sizeString} 👥 1337\n🌍 ITA`;
+    } else if (mSkin === 'stremio_ita') {
+        // Stremio ITA Template Replica
+        name = `⚡️ Leviathan 4K`;
+        desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ ita • eng\n✨ ❯ ${p.serviceTag} • ${p.source}\n🔥 ❯ 4K • HEVC • ${p.cleanInfo}\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337\n🔉 ❯ TrueHD • 7.1`;
     } else if (mSkin === 'dav') {
         name = `🎥4K UHD HEVC`;
         desc = `📺 ${p.cleanName}\n🎧 TrueHD 7.1 | 🎞️ HEVC\n🗣️ ITA | 📦 ${p.sizeString}\n⏱️ 1337 Seeds | 🏷️ ${p.source}\n${p.serviceIcon} Leviathan 📡 ${p.serviceTag}\n📂 ${p.title}`;
