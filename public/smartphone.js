@@ -1131,17 +1131,6 @@ const mobileHTML = `
         </div> 
     </div>
 
-    <div id="m-faq-modal" class="m-modal">
-        <div class="m-modal-header"><div class="m-modal-title">DATABASE FAQ</div><div class="m-close-icon" onclick="closeFaq()"><i class="fas fa-times"></i></div></div>
-        <div class="m-faq-content">
-            <div class="m-faq-item" onclick="toggleFaqItem(this)"><div class="m-faq-q">Come funziona? <i class="fas fa-chevron-down"></i></div><div class="m-faq-a">Leviathan scansiona le profondità del web per trovare Torrent e flussi StreamingCommunity ad alta velocità.</div></div>
-            <div class="m-faq-item" onclick="toggleFaqItem(this)"><div class="m-faq-q">WebStreamr Fallback <i class="fas fa-chevron-down"></i></div><div class="m-faq-a">È un sistema di emergenza. Se Leviathan non trova alcun risultato Torrent o Web normale, attiva WebStreamr per cercare flussi HTTP diretti gratuiti (non Debrid) da database di riserva.</div></div>
-            <div class="m-faq-item" onclick="toggleFaqItem(this)"><div class="m-faq-q">MediaFlow & GuardaHD/GS <i class="fas fa-chevron-down"></i></div><div class="m-faq-a">GuardaHD e GuardaSerie richiedono un Proxy. Inserisci URL e Password del tuo MediaFlow Server nel modulo "Network".</div></div>
-            <div class="m-faq-item" onclick="toggleFaqItem(this)"><div class="m-faq-q">Cos'è il Cache Builder? <i class="fas fa-chevron-down"></i></div><div class="m-faq-a">Mostra Torrent NON ancora scaricati su Debrid. Cliccandoli, avvierai il download.</div></div>
-             <div class="m-faq-item" onclick="toggleFaqItem(this)"><div class="m-faq-q">Debrid Ghost Mode <i class="fas fa-chevron-down"></i></div><div class="m-faq-a">Debrid Ghost instrada tutte le richieste Debrid tramite il proxy MediaFlow configurato, nascondendo il tuo IP domestico al provider Debrid.</div></div>
-        </div>
-    </div>
-
     <div class="m-dock-container">
         <div class="m-dock-actions">
             <button class="m-btn-install" onclick="mobileInstall()"><i class="fas fa-download"></i> INSTALLA ADDON</button>
@@ -1215,27 +1204,34 @@ function selectMobileSkin(skinId) {
 
 function updateMobilePreview() {
     const p = {
-        title: "Dune Part Two",
-        cleanName: "Dune Part Two (2024)",
-        quality: "4K",
-        sizeString: "64.20 GB",
-        source: "P2P",
-        displaySource: "P2P",
-        serviceTag: mCurrentService.toUpperCase(),
+        title: "The Rip",
+        cleanName: "The Rip (2026)", // From AISelect image
+        quality: "4K", // From AISelect image
+        sizeString: "17.32 GB", // From AISelect image
+        source: "ilCoRSaRoNeRo", // User request
+        displaySource: "ilCoRSaRoNeRo",
+        serviceTag: "RD",
         serviceIcon: mCurrentService === 'rd' ? "☄️" : (mCurrentService === 'tb' ? "📦" : "🦅"),
-        lang: "🇮🇹 ITA",
-        audioInfo: "🔊⚡ TrueHD ┃ 7.1",
-        info: "💎 ʀᴇᴍᴜx • 🔥 HDR • 👁️ DV",
-        seedersStr: "👥 1337"
+        lang: "🇮🇹 ITA", // From AISelect image
+        audioInfo: "💥💣 Atmos", // From AISelect image (icons included here or in template)
+        codec: "HEVC",
+        videoTraits: "☁️ WEB • 🔥 HDR • 👁️ DV • ⚙️ HEVC", // Combined line from AISelect image
+        seedersStr: "318" // From AISelect image
     };
 
     let name = "", desc = "";
 
     if (mSkin === 'leviathan') {
-        const qBold = toStylized("4K", "bold");
-        const lev = toStylized("LEVIATHAN", "spaced");
-        name = `🦑 ${lev}\n${p.serviceIcon} ┃ ${qBold}`;
-        desc = `🗂️ ${p.cleanName}\n🗣️ ${p.lang} • ${p.audioInfo}\n${p.info}\n🧲 ${p.sizeString} • ${p.seedersStr}\n${p.serviceIcon} [${p.serviceTag}] ${p.source}`;
+        // Header: Icon + Name + ServiceIcon + | + Quality
+        name = `🦑 LEVIATHAN ${p.serviceIcon} | ${p.quality}`;
+        
+        // Rows based on AISelect image:
+        // 1. Folder + Title
+        // 2. Speaking Head + Flag + ITA + Audio Icons
+        // 3. Cloud/Video info
+        // 4. Magnet + Size + People + Seeds
+        // 5. Service Icon + [Tag] + Source
+        desc = `📂 ${p.cleanName}\n🗣️ ${p.lang} • ${p.audioInfo}\n${p.videoTraits}\n🧲 ${p.sizeString} • 👥 ${p.seedersStr}\n${p.serviceIcon} [${p.serviceTag}] ${p.source}`;
     } else if (mSkin === 'lev2') {
         const levText = toStylized("LEVIATHAN", "small");
         const qText = toStylized("4K", "bold");
