@@ -17,7 +17,6 @@ const aioFormatter = require("./aiostreams-formatter.cjs");
 const { searchWebStreamr } = require("./webstreamr_handler");
 
 // --- IMPORT NUOVO FORMATTER (Skins & Logic) ---
-// NOTA: formatBytes viene importato qui, quindi NON deve essere ridefinito sotto
 const { formatStreamSelector, cleanFilename, formatBytes } = require("./formatter");
 
 // --- IMPORT GESTORE TRAILER (YouTube/Invidious) ---
@@ -43,7 +42,6 @@ const logger = winston.createLogger({
 });
 
 // --- CACHE OTTIMIZZATA (NODE-CACHE) ---
-// stdTTL: 1800 secondi (30 minuti). 
 const myCache = new NodeCache({ stdTTL: 1800, checkperiod: 120, maxKeys: 5000 });
 
 const Cache = {
@@ -95,7 +93,6 @@ const CONFIG = {
 
 const REGEX_YEAR = /(19|20)\d{2}/;
 
-// Regex Qualità semplificata per filtri logici
 const REGEX_QUALITY_FILTER = {
     "4K": /\b(?:2160p|4k|uhd|ultra[-.\s]?hd|2160i)\b/i,
     "1080p": /\b(?:1080p|1080i|fhd|full[-.\s]?hd|blu[-.\s]?ray|bd[-.\s]?rip)\b/i,
@@ -103,31 +100,38 @@ const REGEX_QUALITY_FILTER = {
     "SD": /\b(?:480p|576p|sd|dvd|dvd[-.\s]?rip|dvd[-.\s]?scr|cd)\b/i
 };
 
-// NUOVA REGEX ITA POTENZIATA PER KNABEN/1337X (Serve per isSafeForItalian)
-const REGEX_ITA = [
-    // 1. Espliciti: Audio ITA, Lingua ITA
-    /\b(AUDIO|LINGUA|LANG|VO)\s*[:.\-_]?\s*(ITA|IT|ITALIAN)\b/i,
-    
-    // 2. Codec o Qualità + ITA (es. "AC3 ITA", "1080p ITA", "WebRip.ITA")
-    /\b(AC-?3|AAC|DDP?|DTS|PCM|TRUEHD|ATMOS|MP3|FLAC|MD|LD|DD\+?|5\.1|H\.?264|H\.?265|X264|X265|HEVC|AVC|DIVX|XVID|BLURAY|BD|BDRIP|WEBRIP|WEB-?DL|HDTV|1080[pi]|720[pi]|480[pi]|4K|2160[pi])[\s.\-_]+(ITA|IT|ITALIAN)\b/i,
-    
-    // 3. Multi/Dual che include ITA
-    /\b(MULTI|DUAL|TRIPLE).*ITA\b/i,
-    
-    // 4. ITA seguito da altro (es. "ITA-ENG", "ITA.AC3")
-    /\b(ITA|IT|ITALIAN)[\s.\-_]+(ENG|EN|ENGLISH|FRA|GER|SPA|RUS|AC3|AAC|DDP|DTS|H264|H265)\b/i,
-    
-    // 5. ITA Isolato tra separatori (es. "[ITA]", ".ITA.", "-ITA-", " ITA ")
-    /(?:^|[_\-. \[(\/])(ITA|ITALIAN|ITALY)(?:$|[_\-. \])\/])/i,
-    
-    // 6. Release Groups noti (Aggiungine altri se ne trovi)
-    /\b(iDN_CreW|CORSARO|MUX|WMS|TRIDIM|SPEEDVIDEO|EAGLE|TRL|MEA|LUX|DNA|LEST|GHIZZO|USAbit|Bric|Dtone|Gaiage|BlackBit|Pantry|Vics|Papeete|Lidri|MirCrew)\b/i
-];
+// =========================================================================
+// 🔥 NUOVO SISTEMA DI RICONOSCIMENTO LINGUA (STRICT MODE) 🔥
+// =========================================================================
+
+// 1. ITA/ITALIAN: Sicuri al 100% (3 lettere o più)
+const REGEX_STRONG_ITA = /\b(ITA|ITALIAN|ITALIANO)\b/i;
+
+// 2. CONTEXT IT: "IT" (2 lettere) accettato SOLO se preceduto da keyword audio
+//    Es: "Audio IT", "AC3 IT", "Lang: IT". NON accetta "Web-DL IT" o "1080p IT" genericamente.
+const REGEX_CONTEXT_IT = /\b(AUDIO|LINGUA|LANG|VO|AC-?3|AAC|MP3|DDP|DTS|TRUEHD)\W+(IT)\b/i;
+
+// 3. ISOLATED IT: "IT" accettato SOLO se tra delimitatori molto specifici
+//    Es: ".IT." o "-IT-". 
+//    NON accetta "10bit" o "Visit" o "Wit".
+const REGEX_ISOLATED_IT = /(?:^|[_\-.])(IT)(?:$|[_\-.])/;
+
+// 4. MULTI/DUAL: Se dice Multi/Dual, controlliamo che ci sia ITA dentro
+const REGEX_MULTI_ITA = /\b(MULTI|DUAL|TRIPLE).*(ITA|ITALIAN)\b/i;
+
+// 5. RELEASE GROUPS NOTI ITALIANI (Passpartout)
+const REGEX_TRUSTED_GROUPS = /\b(iDN_CreW|CORSARO|MUX|WMS|TRIDIM|SPEEDVIDEO|EAGLE|TRL|MEA|LUX|DNA|LEST|GHIZZO|USAbit|Bric|Dtone|Gaiage|BlackBit|Pantry|Vics|Papeete|Lidri|MirCrew)\b/i;
+
+// 6. FALSE POSITIVE CHECK (Da scartare se matcha "IT")
+//    Se il titolo contiene "10bit", "With", "Bit", "Hit", "Fit", "Web-DL" (senza separatore netto)
+//    la regex ISOLATED_IT dovrebbe proteggere, ma questo è un layer in più.
+const REGEX_FALSE_IT = /\b(10BIT|BIT|WIT|HIT|FIT|KIT|SIT|LIT|PIT)\b/i;
 
 // Regex specifica per escludere i soli sottotitoli (False Positives)
 const REGEX_SUB_ONLY = /\b(SUB|SUBS|SUBBED|SOTTOTITOLI|VOST|VOSTIT)\s*[:.\-_]?\s*(ITA|IT|ITALIAN)\b/i;
 // Regex per confermare che, anche se c'è scritto SUB, c'è pure l'audio (es. "Audio ITA - Sub ITA")
 const REGEX_AUDIO_CONFIRM = /\b(AUDIO|AC3|AAC|DTS|MD|LD|DDP|MP3|LINGUA)[\s.\-_]+(ITA|IT)\b/i;
+
 
 function base32ToHex(base32) {
     const base32chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
@@ -199,8 +203,6 @@ function parseSize(sizeStr) {
   return val * (mult[unit] || 1);
 }
 
-// REMOVED DUPLICATE formatBytes HERE because it is imported from ./formatter
-
 function deduplicateResults(results) {
   const hashMap = new Map();
   for (const item of results) {
@@ -221,21 +223,16 @@ function deduplicateResults(results) {
 
 function filterByQualityLimit(results, limit) {
     if (!limit || limit === 0 || limit === "0") return results;
-    
     const limitNum = parseInt(limit);
     if (isNaN(limitNum)) return results;
-
     const counts = { "4K": 0, "1080p": 0, "720p": 0, "SD": 0 };
     const filtered = [];
-
     for (const item of results) {
         const t = (item.title || "").toLowerCase();
         let q = "SD";
-        
         if (REGEX_QUALITY_FILTER["4K"].test(t)) q = "4K";
         else if (REGEX_QUALITY_FILTER["1080p"].test(t)) q = "1080p";
         else if (REGEX_QUALITY_FILTER["720p"].test(t)) q = "720p";
-
         if (counts[q] < limitNum) {
             filtered.push(item);
             counts[q]++;
@@ -244,90 +241,69 @@ function filterByQualityLimit(results, limit) {
     return filtered;
 }
 
+// Funzione helper per determinare se è italiano (usata nei database locali)
 function isSafeForItalian(item) {
   if (!item || !item.title) return false;
-  return REGEX_ITA.some(p => p.test(item.title));
-}
-
-// FORMATTAZIONE VIX MANUALE (RIMANE QUI PERCHÉ SPECIFICA)
-function formatVixStream(meta, vixData) {
-    const isFHD = vixData.isFHD;
-    const quality = isFHD ? "1080p" : "720p";
-    const lines = [];
-    lines.push(`🎬 ${meta.title}`);
-    lines.push(`🇮🇹 ITA • 🔊 AAC`);
-    lines.push(`🎞️ HLS • Bitrate Variabile`);
-    lines.push(`☁️ Web Stream • ⚡ Instant`);
-    lines.push(`🍝 StreamingCommunity`);
-    const bingeGroup = `Leviathan|${quality}|Web|SC`;
-
-    return {
-        name: `🌪️ StreamingCommunity\n${quality}`,
-        title: lines.join("\n"),
-        url: vixData.url,
-        behaviorHints: { notWebReady: false, bingieGroup: bingeGroup }
-    };
+  const t = item.title;
+  
+  if (REGEX_TRUSTED_GROUPS.test(t)) return true;
+  if (REGEX_STRONG_ITA.test(t)) return true;
+  if (REGEX_MULTI_ITA.test(t)) return true;
+  if (REGEX_CONTEXT_IT.test(t)) return true;
+  
+  // Per l'isolated IT, facciamo un check extra sui falsi positivi
+  if (REGEX_ISOLATED_IT.test(t)) {
+      if (REGEX_FALSE_IT.test(t)) return false;
+      return true;
+  }
+  
+  return false;
 }
 
 async function filterTorBoxCached(apiKey, items) {
     if (!items || items.length === 0) return [];
-    
     const uniqueHashes = [...new Set(items.map(i => i.hash).filter(Boolean))];
     if (uniqueHashes.length === 0) return [];
-
     const checkChunk = async (hashes) => {
         try {
             const url = "https://api.torbox.app/v1/api/torrents/checkcached";
-            
             const { data: response } = await axios.get(url, {
-                params: { 
-                    hash: hashes.join(','), 
-                    format: 'object', 
-                    list_files: false 
-                },
+                params: { hash: hashes.join(','), format: 'object', list_files: false },
                 headers: { Authorization: `Bearer ${apiKey}` },
                 timeout: 6000 
             });
-
-            if (!response || !response.success || !response.data) {
-                return []; 
-            }
-            
+            if (!response || !response.success || !response.data) return []; 
             const confirmed = [];
             const data = response.data;
-            
             if (Array.isArray(data)) {
                 data.forEach(entry => {
                     if (typeof entry === 'string') confirmed.push(entry.toLowerCase());
                     else if (entry.hash) confirmed.push(entry.hash.toLowerCase());
                 });
             } else {
-                Object.keys(data).forEach(h => confirmed.push(h.toLowerCase()));
+                Object.entries(data).forEach(([hash, val]) => {
+                    if (val && val !== false) confirmed.push(hash.toLowerCase());
+                });
             }
-            
             return confirmed;
         } catch (e) {
             logger.warn(`⚠️ [TB CHUNK FAIL] Errore API: ${e.message}`);
             return []; 
         }
     };
-
     const chunkSize = 40;
     const chunks = [];
     for (let i = 0; i < uniqueHashes.length; i += chunkSize) {
         chunks.push(uniqueHashes.slice(i, i + chunkSize));
     }
-
     logger.info(`🔍 [TB CHECK] Verifico ${uniqueHashes.length} hash in ${chunks.length} richieste...`);
     const results = await Promise.all(chunks.map(chunk => checkChunk(chunk)));
     const confirmedHashes = new Set(results.flat());
-
     const cachedItems = items.filter(item => {
         const isCached = item.hash && confirmedHashes.has(item.hash.toLowerCase());
         if (isCached) item._tbCached = true;
         return isCached;
     });
-
     logger.info(`✅ [TB CHECK] Risultato: ${items.length} totali -> ${cachedItems.length} confermati in cache.`);
     return cachedItems;
 }
@@ -399,15 +375,12 @@ async function getMetadata(id, type, config = {}) {
 
         if (tmdbId) {
             const tmdbData = await fetchTmdbMeta(tmdbId, type, userTmdbKey);
-            
             if (tmdbData) {
                 const title = tmdbData.title || tmdbData.name;
                 const originalTitle = tmdbData.original_title || tmdbData.original_name;
                 const releaseDate = tmdbData.release_date || tmdbData.first_air_date;
                 const year = releaseDate ? releaseDate.split("-")[0] : "";
-
                 logger.info(`✅ [META] Usato TMDB (UserKey: ${!!userTmdbKey}): ${title} (${year}) [ID: ${tmdbId}] Orig: ${originalTitle}`);
-
                 return {
                     title: title,
                     originalTitle: originalTitle, 
@@ -465,31 +438,26 @@ function saveResultsToDbBackground(meta, results) {
     })().catch(err => console.error("❌ Errore background save:", err.message));
 }
 
-// --- RISOLUZIONE DEBRID E FORMATTAZIONE (INTELLIGENT SIZE GENERATOR) ---
+// --- RISOLUZIONE DEBRID E FORMATTAZIONE ---
 async function resolveDebridLink(config, item, showFake, reqHost, meta) {
     try {
         const service = config.service || 'rd';
         const apiKey = config.key || config.rd;
         if (!apiKey) return null;
 
-        // CHECK AIO MODE
         const isAIOActive = aioFormatter.isAIOStreamsEnabled(config);
 
-        // --- GESTIONE TITOLO E DIMENSIONE (PACK vs EPISODIO) ---
         let displayTitle = item.title;
         let isPack = item._isPack || /(?:complete|pack|season|stagione|tutta)/i.test(item.title);
         const isSeries = (meta?.season > 0 || meta?.episode > 0);
 
-        // SE AIO Attivo, rinomina i Pack in SxxExx
         if (isAIOActive && isPack && isSeries && meta) {
              const s = meta.season < 10 ? `0${meta.season}` : meta.season;
              const e = meta.episode < 10 ? `0${meta.episode}` : meta.episode;
              displayTitle = `${meta.title} S${s}E${e}`;
         }
 
-        // Helper per la dimensione intelligente
         const ensureSize = (size, title, isSeries, isPack) => {
-            // Se AIO è attivo ed è un Pack Serie, forziamo ricalcolo per singolo episodio
             if (isAIOActive && isPack && isSeries) return 0;
             if (size && size > 0) return size;
             
@@ -531,7 +499,6 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta) {
             return (0.7 + variance) * 1024 * 1024 * 1024;
         };
 
-        // --- GESTIONE TORBOX (TB) ---
         if (service === 'tb') {
             if (item._tbCached) {
                 let realSize = item._size || item.sizeBytes || 0;
@@ -548,7 +515,7 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta) {
 
                     return {
                         name: aioFormatter.formatStreamName({
-                            service: 'torbox', // FIX: Passa nome completo per visualizzare [TB
+                            service: 'torbox',
                             cached: true,
                             quality: quality
                         }),
@@ -558,11 +525,11 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta) {
                             language: "🇮🇹/🇬🇧",
                             source: item.source,
                             seeders: item.seeders,
-                            infoHash: item.hash, // FIX: Passa infoHash per evitare duplicati
+                            infoHash: item.hash, 
                             techInfo: `🎞️ ${quality}`
                         }),
                         url: proxyUrl,
-                        infoHash: item.hash, // FIX: Ritorna infoHash nell'oggetto
+                        infoHash: item.hash,
                         behaviorHints: { notWebReady: false, bingieGroup: `Leviathan|${quality}|TB|${item.hash}` }
                     };
                 } else {
@@ -574,7 +541,6 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta) {
             } else { return null; }
         }
 
-        // --- GESTIONE RD / AD ---
         let streamData = null;
         if (service === 'rd') streamData = await RD.getStreamLink(apiKey, item.magnet, item.season, item.episode);
         else if (service === 'ad') streamData = await AD.getStreamLink(apiKey, item.magnet, item.season, item.episode);
@@ -591,7 +557,6 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta) {
              else if (/1080p/i.test(item.title)) quality = "1080p";
              else if (/720p/i.test(item.title)) quality = "720p";
              
-             // Mappatura nome servizio completo per il formatter
              let fullService = 'p2p';
              if (service === 'rd') fullService = 'realdebrid';
              if (service === 'ad') fullService = 'alldebrid';
@@ -599,7 +564,7 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta) {
 
              return {
                 name: aioFormatter.formatStreamName({
-                    service: fullService, // FIX: Nome completo
+                    service: fullService,
                     cached: true,
                     quality: quality
                 }),
@@ -609,11 +574,11 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta) {
                     language: "🇮🇹/🇬🇧",
                     source: item.source,
                     seeders: item.seeders,
-                    infoHash: item.hash, // FIX: Passa infoHash
+                    infoHash: item.hash,
                     techInfo: `🎞️ ${quality}`
                 }),
                 url: streamData.url,
-                infoHash: item.hash, // FIX: Ritorna infoHash
+                infoHash: item.hash,
                 behaviorHints: { notWebReady: false, bingieGroup: `Leviathan|${quality}|${service}|${item.hash}` }
             };
         } else {
@@ -632,25 +597,15 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta) {
 function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = false) {
     const service = config.service || 'rd';
     const serviceTag = service.toUpperCase();
-    
-    // Controlliamo se la modalità AIO è attiva usando la funzione del formatter
     const isAIOActive = aioFormatter.isAIOStreamsEnabled(config); 
-
-    // --- RILEVAMENTO PACK ---
     const isPack = item._isPack || /(?:complete|pack|season|stagione|tutta)/i.test(item.title);
     const isSeries = (meta.season > 0 || meta.episode > 0);
 
-    // Variabili per Titolo e Dimensione (Default: Valori Originali)
     let displayTitle = item.title;
     let realSize = item._size || item.sizeBytes || 0;
 
-    // --- LOGICA ESCLUSIVA PER MODALITÀ AIO ---
     if (isAIOActive) {
-        // Se è un Pack Serie, forza dimensione a 0 per ricalcolo
-        if (isPack && isSeries) {
-             realSize = 0; 
-        }
-        // Se è un Pack Serie, rinomina in SxxExx
+        if (isPack && isSeries) realSize = 0; 
         if (isPack && isSeries) {
             const s = meta.season < 10 ? `0${meta.season}` : meta.season;
             const e = meta.episode < 10 ? `0${meta.episode}` : meta.episode;
@@ -658,7 +613,6 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
         }
     }
 
-    // Ricalcolo dimensione se 0 (Stima intelligente)
     if (realSize === 0) {
         let hash = 0;
         const safeTitle = (displayTitle || "video").toLowerCase();
@@ -681,7 +635,6 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
                 realSize = 400 * 1024 * 1024;
             }
         } else {
-            // Logica Film
             realSize = 1.5 * 1024 * 1024 * 1024;
         }
     }
@@ -692,7 +645,6 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
         else if (/1080p/i.test(item.title)) quality = "1080p";
         else if (/720p/i.test(item.title)) quality = "720p";
 
-        // Mappatura nome servizio completo per il formatter
         let fullService = 'p2p';
         if (service === 'rd') fullService = 'realdebrid';
         if (service === 'ad') fullService = 'alldebrid';
@@ -700,7 +652,7 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
 
         const nameStr = aioFormatter.formatStreamName({
             addonName: "Leviathan", 
-            service: fullService, // FIX: Nome completo
+            service: fullService,
             cached: true,
             quality: quality
         });
@@ -711,7 +663,7 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
             language: "🇮🇹/🇬🇧", 
             source: item.source,
             seeders: item.seeders,
-            infoHash: item.hash, // FIX: Passa infoHash
+            infoHash: item.hash,
             techInfo: `🎞️ ${quality}`
         });
 
@@ -722,7 +674,7 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
             name: nameStr,
             title: titleStr,
             url: lazyUrl,
-            infoHash: item.hash, // FIX: InfoHash presente
+            infoHash: item.hash,
             behaviorHints: { 
                 notWebReady: false, 
                 bingieGroup: `Leviathan|${quality}|${service}|${item.hash}` 
@@ -731,20 +683,10 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
     } 
     else {
         const { name, title, bingeGroup } = formatStreamSelector(
-            item.title,
-            item.source,
-            realSize, 
-            item.seeders,
-            serviceTag,
-            config,
-            item.hash,
-            isLazy,
-            item._isPack 
+            item.title, item.source, realSize, item.seeders, serviceTag, config, item.hash, isLazy, item._isPack 
         );
-
         const fileIdxParam = item.fileIdx !== undefined ? item.fileIdx : -1;
         const lazyUrl = `${reqHost}/${userConfStr}/play_lazy/${service}/${item.hash}/${fileIdxParam}?s=${meta.season || 0}&e=${meta.episode || 0}`;
-
         return {
             name,
             title,
@@ -755,37 +697,30 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
     }
 }
 
-// Lettura DB con FILTRO LINGUA + KNABEN + BLOCCO RUSSI/ARABI + STRICT SERIES
 async function queryLocalIndexer(meta, config) { 
     try {
         if (dbHelper && typeof dbHelper.getTorrents === 'function') {
             const s = parseInt(meta.season) || 0;
             const e = parseInt(meta.episode) || 0;
-
             const results = await dbHelper.getTorrents(meta.imdb_id, s, e);
-            
             if (results && Array.isArray(results) && results.length > 0) {
                 const cleanMeta = meta.title.toLowerCase().replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
                 const metaTitleShort = meta.title.split(/ - |: /)[0].toLowerCase().trim();
-                
                 const allowEng = config && config.filters && config.filters.allowEng === true;
-
                 return results.map(t => {
                     let finalHash = t.info_hash ? t.info_hash.trim().toUpperCase() : "";
                     if ((!finalHash || finalHash.length !== 40) && t.magnet) {
                           const extracted = extractInfoHash(t.magnet);
                           if (extracted) finalHash = extracted.toUpperCase();
                     }
-
                     let magnetLink = t.magnet;
                     if (!magnetLink && finalHash && finalHash.length === 40) {
                         magnetLink = `magnet:?xt=urn:btih:${finalHash}&dn=${encodeURIComponent(t.title || 'video')}`;
                     }
-
                     return {
                         title: t.title || t.name || "Unknown Title",
                         magnet: magnetLink,
-                        hash: finalHash,      
+                        hash: finalHash,       
                         infoHash: finalHash,  
                         size: "💾 DB", 
                         sizeBytes: parseInt(t.size) || 0,
@@ -797,18 +732,14 @@ async function queryLocalIndexer(meta, config) {
                 }).filter(item => {
                     if (!item.hash || item.hash.length !== 40) return false;
                     const cleanFile = item.title.toLowerCase().replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
-
                     const isKnaben = /knaben/i.test(item.source);
                     const isCorsaro = /corsaro/i.test(item.source);
                     
                     if (!allowEng) {
-                        if (isKnaben) {
-                            const hasStrongAudioIta = /\b(AC-?3|AAC|DDP|DTS|MP3|MD|LD|AUDIO|LINGUA).*(ITA|IT)\b/i.test(item.title);
-                            if (!hasStrongAudioIta) return false;
-                        } else {
-                            const isItalianTitle = isSafeForItalian(item);
-                            if (!isItalianTitle && !isCorsaro) return false;
-                        }
+                        const isItalianTitle = isSafeForItalian(item);
+                        // Logica Draconiana anche qui: Se ENG è OFF, deve essere ITA o Corsaro.
+                        // Knaben non ha più salvacondotti speciali se non ha tag ITA.
+                        if (!isItalianTitle && !isCorsaro) return false;
                     }
 
                     if (/[а-яА-ЯёЁ]/.test(item.title)) return false;
@@ -820,33 +751,26 @@ async function queryLocalIndexer(meta, config) {
                             const foundSeason = parseInt(match[1]);
                             if (foundSeason !== s) return false; 
                         }
-                        
                         const hasRightSeason = new RegExp(`(?:s|stagione|season|^)\\s*0?${s}(?!\\d)`, 'i').test(cleanFile);
                         const hasXFormat = new RegExp(`\\b${s}x0?${e}\\b`, 'i').test(cleanFile);
-                        
                         if (hasXFormat) return true;
-
                         const isExplicitPack = /(?:complete|pack|stagione\s*\d+\s*$|season\s*\d+\s*$|tutta|completa)/i.test(cleanFile);
                         const hasAnyEpisodeTag = /(?:e|x|ep|episode)\s*0?\d+/i.test(cleanFile);
                         const hasRightEpisode = new RegExp(`(?:e|x|ep|episode|^)\\s*0?${e}(?!\\d)`, 'i').test(cleanFile);
-
                         if (hasRightSeason && (hasRightEpisode || isExplicitPack || !hasAnyEpisodeTag)) {
                             // OK
                         } else {
                             return false; 
                         }
                     }
-
                     let searchKeyword = cleanMeta.replace(/^(the|a|an|il|lo|la|i|gli|le)\s+/i, "").trim();
                     if (searchKeyword === "rip") {
                           const strictStartRegex = /^(the\s+|il\s+)?rip\b/i;
                           if (!strictStartRegex.test(cleanFile)) return false; 
                           return true; 
                     }
-
                     if (cleanFile.includes(cleanMeta)) return true;
                     if (cleanFile.includes(metaTitleShort)) return true;
-
                     return false;
                 });
             }
@@ -857,7 +781,6 @@ async function queryLocalIndexer(meta, config) {
         return [];
     }
 }
-
 
 async function queryRemoteIndexer(tmdbId, type, season = null, episode = null, config) {
     if (!CONFIG.INDEXER_URL) return [];
@@ -877,11 +800,12 @@ async function queryRemoteIndexer(tmdbId, type, season = null, episode = null, c
             let providerName = t.provider || 'P2P';
             providerName = providerName.replace(/LeviathanDB/i, '').replace(/[()]/g, '').trim();
             if(!providerName) providerName = 'P2P';
-            
+            const finalHash = t.info_hash ? t.info_hash.toUpperCase() : extractInfoHash(magnet);
             return {
                 title: t.title,
                 magnet: magnet,
-                hash: t.info_hash ? t.info_hash.toUpperCase() : null,
+                hash: finalHash,
+                infoHash: finalHash,
                 size: "💾 DB",
                 sizeBytes: parseInt(t.size),
                 seeders: t.seeders,
@@ -892,21 +816,13 @@ async function queryRemoteIndexer(tmdbId, type, season = null, episode = null, c
 
         const allowEng = config && config.filters && config.filters.allowEng === true;
         return mapped.filter(item => {
-             const isKnaben = /knaben/i.test(item.source);
              const isCorsaro = /corsaro/i.test(item.source);
-
              if (!allowEng) {
-                 if (isKnaben) {
-                     const hasStrongAudioIta = /\b(AC-?3|AAC|DDP|DTS|MP3|MD|LD|AUDIO|LINGUA).*(ITA|IT)\b/i.test(item.title);
-                     if (!hasStrongAudioIta) return false;
-                 } else {
-                     const isItalian = isSafeForItalian(item);
-                     if (!isItalian && !isCorsaro) return false;
-                 }
+                 const isItalian = isSafeForItalian(item);
+                 if (!isItalian && !isCorsaro) return false;
              }
              return true;
         });
-
     } catch (e) {
         logger.error("Err Remote Indexer:", { error: e.message });
         return [];
@@ -925,7 +841,8 @@ async function fetchExternalResults(type, finalId) {
                     sizeBytes: i.mainFileSize,
                     seeders: i.seeders,
                     source: i.externalProvider || i.source.replace(/\[EXT\]\s*/, ''),
-                    hash: i.infoHash,
+                    hash: i.infoHash || extractInfoHash(i.magnetLink),
+                    infoHash: i.infoHash || extractInfoHash(i.magnetLink),
                     fileIdx: i.fileIdx,
                     isExternal: true
                 }));
@@ -993,46 +910,76 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   const tmdbIdLookup = meta.tmdb_id || (await imdbToTmdb(meta.imdb_id, userTmdbKey))?.tmdbId;
   const dbOnlyMode = config.filters?.dbOnly === true; 
 
-  // --- FILTRO AGGRESSIVO ---
+  // --- FILTRO AGGRESSIVO (COMPLETAMENTE RIFATTO e DRACONIANO) ---
   const aggressiveFilter = (item) => {
       if (!item?.magnet) return false;
-      if (item.isExternal) return true;
-
+      
       const source = (item.source || "").toLowerCase();
+      // Filtro globale per fonti indesiderate
       if (source.includes("comet") || source.includes("stremthru")) return false;
 
       const t = item.title; 
       const tLower = t.toLowerCase();
-      
-      const isCorsaro = /corsaro/i.test(source);
-      const isKnaben = /knaben/i.test(source);
-      const is1337x = /1337/i.test(source);
-      const isTgx = /tgx|torrentgalaxy/i.test(source);
+      const allowEng = config.filters?.allowEng === true;
 
-      const matchesItalianRegex = REGEX_ITA.some(r => r.test(t));
-      
-      if (!config.filters?.allowEng) {
-          if (isKnaben || is1337x || isTgx) {
-              if (!matchesItalianRegex) return false; 
-              const looksLikeSubOnly = REGEX_SUB_ONLY.test(t);
-              const hasConfirmedAudio = REGEX_AUDIO_CONFIRM.test(t);
-              if (looksLikeSubOnly && !hasConfirmedAudio) {
-                  const cleanTitleNoSub = t.replace(REGEX_SUB_ONLY, ""); 
-                  const stillHasIta = REGEX_ITA.some(r => r.test(cleanTitleNoSub));
-                  if (!stillHasIta) return false; 
-              }
-          } 
-          else {
-              if (!matchesItalianRegex && !isSafeForItalian(item) && !isCorsaro) return false;
-              if (/\b(sub|subs|subbed|vost|vostit)\b/i.test(t) && !REGEX_AUDIO_CONFIRM.test(t) && !isCorsaro) return false;
-          }
+      // =========================================================
+      // REGOLA AUREA: SE ENG È OFF (!allowEng), SOLO ITA PASSA
+      // =========================================================
+      if (!allowEng) {
+           // 1. "Corsaro" e altri gruppi noti italiani sono fidati a priori
+           const isTrustedGroup = REGEX_TRUSTED_GROUPS.test(t) || /\bcorsaro\b/i.test(source);
+           
+           if (!isTrustedGroup) {
+               // 2. Controllo ITA Strong: 3 lettere (ITA/ITALIAN)
+               const hasStrongIta = REGEX_STRONG_ITA.test(t) || REGEX_MULTI_ITA.test(t);
+
+               // 3. Controllo IT Context: 2 lettere (Audio IT, Lang IT)
+               const hasContextIt = REGEX_CONTEXT_IT.test(t);
+
+               // 4. Controllo IT Isolated (Rischioso, ma filtrato dai falsi positivi)
+               let hasIsolatedIt = false;
+               if (REGEX_ISOLATED_IT.test(t)) {
+                   if (!REGEX_FALSE_IT.test(t)) {
+                        hasIsolatedIt = true; 
+                   }
+               }
+
+               // SE NESSUNO DEI TRE CONTROLLI PASSA -> SCARTA IMMEDIATAMENTE
+               if (!hasStrongIta && !hasContextIt && !hasIsolatedIt) return false;
+
+               // 5. Controllo Anti-Falsi Positivi per "Sub Only"
+               //    Se matchava SOLO perché c'era "SUB ITA" ma NON c'è "AUDIO ITA", scarta.
+               const looksLikeSubOnly = REGEX_SUB_ONLY.test(t);
+               const hasConfirmedAudio = REGEX_AUDIO_CONFIRM.test(t);
+
+               if (looksLikeSubOnly && !hasConfirmedAudio) {
+                   // Ultimo controllo: Se tolgo "SUB ITA", rimane un altro tag ITA valido?
+                   const cleanTitleNoSub = t.replace(REGEX_SUB_ONLY, ""); 
+                   
+                   // Ricontrolliamo se nel titolo pulito c'è ancora traccia di ITA/IT vero
+                   const stillHasStrong = REGEX_STRONG_ITA.test(cleanTitleNoSub);
+                   const stillHasContext = REGEX_CONTEXT_IT.test(cleanTitleNoSub);
+                   
+                   if (!stillHasStrong && !stillHasContext) return false; // Era SOLO sottotitolato. SCARTA.
+               }
+           }
       }
-
+      
+      // --- FILTRO ANNO ---
       const metaYear = parseInt(meta.year);
       if (metaYear === 2025 && /frankenstein/i.test(meta.title)) {
            if (!item.title.includes("2025")) return false;
       }
 
+      if (!isNaN(metaYear)) {
+           const fileYearMatch = item.title.match(REGEX_YEAR);
+           if (fileYearMatch) {
+               const fileYear = parseInt(fileYearMatch[0]);
+               if (Math.abs(fileYear - metaYear) > 1) return false; 
+           }
+      }
+
+      // --- FILTRO SERIE TV ---
       if (meta.isSeries) {
           const s = meta.season;
           const e = meta.episode;
@@ -1053,6 +1000,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
 
           const hasRightSeason = new RegExp(`(?:s|stagione|season|^)\\s*0?${s}(?!\\d)`, 'i').test(tLower);
           const hasRightEpisode = new RegExp(`(?:e|x|ep|episode|^)\\s*0?${e}(?!\\d)`, 'i').test(tLower);
+          
           const hasAnyEpisodeTag = /(?:e|x|ep|episode)\s*0?\d+/i.test(tLower);
           const isExplicitPack = /(?:complete|pack|stagione\s*\d+\s*$|season\s*\d+\s*$|tutta|completa)/i.test(tLower);
           
@@ -1064,14 +1012,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           return false;
       }
 
-      if (!isNaN(metaYear)) {
-           const fileYearMatch = item.title.match(REGEX_YEAR);
-           if (fileYearMatch) {
-               const fileYear = parseInt(fileYearMatch[0]);
-               if (Math.abs(fileYear - metaYear) > 1) return false; 
-           }
-      }
-
+      // --- FILTRO NOME (MATCHING) ---
       const cleanFile = tLower.replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
       const cleanMeta = meta.title.toLowerCase().replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
       const metaTitleShort = meta.title.split(/ - |: /)[0].toLowerCase().trim();
@@ -1091,16 +1032,15 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           return cleanFile.includes(searchKeyword);
       };
 
-      if (checkMatch(cleanMeta)) return true;         
+      if (checkMatch(cleanMeta)) return true;          
       if (checkMatch(metaTitleShort)) return true;  
-      if (checkMatch(metaOriginal)) return true;     
+      if (checkMatch(metaOriginal)) return true;      
       if (smartMatch(meta.title, item.title, meta.isSeries, meta.season, meta.episode)) return true;
       
       return false;
   };
 
   // --- FONTI VELOCI ---
-  
   const remotePromise = withTimeout(
       queryRemoteIndexer(tmdbIdLookup, type, meta.season, meta.episode, config),
       CONFIG.TIMEOUTS.REMOTE_INDEXER,
@@ -1125,13 +1065,11 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   }
 
   const [remoteResults, localResults, externalResults] = await Promise.all([remotePromise, localPromise, externalPromise]);
-  
   logger.info(`📊 [STATS] Remote: ${remoteResults.length} | Local: ${localResults.length} | External: ${externalResults.length}`);
 
   let fastResults = [...remoteResults, ...localResults, ...externalResults].filter(aggressiveFilter);
   let cleanResults = deduplicateResults(fastResults);
   const validFastCount = cleanResults.length;
-
   logger.info(`⚡ [FAST CHECK] Trovati ${validFastCount} risultati validi da fonti veloci (Remote+Local+Ext).`);
 
   if (!dbOnlyMode && validFastCount < 3) {
@@ -1188,8 +1126,8 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           if (config.filters.no1080 && REGEX_QUALITY_FILTER["1080p"].test(t)) return false;
           if (config.filters.no720 && REGEX_QUALITY_FILTER["720p"].test(t)) return false;
           if (config.filters.noScr) {
-               if (REGEX_QUALITY_FILTER["SD"].test(t)) return false;
-               if (/cam|hdcam|ts|telesync|screener|scr\b/i.test(t)) return false;
+                if (REGEX_QUALITY_FILTER["SD"].test(t)) return false;
+                if (/cam|hdcam|ts|telesync|screener|scr\b/i.test(t)) return false;
           }
           if (config.filters.noCam && /cam|hdcam|ts|telesync|screener|scr\b/i.test(t)) return false;
           return true;
@@ -1225,23 +1163,29 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       rankedList = filterByQualityLimit(rankedList, config.filters.maxPerQuality);
   }
 
-  let finalRanked = rankedList.slice(0, CONFIG.MAX_RESULTS);
-
   if (config.service === 'tb' && hasDebridKey) {
       const apiKey = config.key || config.rd; 
-      finalRanked = await filterTorBoxCached(apiKey, finalRanked);
+      const checkLimit = 300; 
+      const itemsToCheck = rankedList.slice(0, checkLimit);
+      if (itemsToCheck.length > 0) {
+          logger.info(`📦 [TB ONLY-CACHED] Verifico ${itemsToCheck.length} candidati...`);
+          const cachedOnly = await filterTorBoxCached(apiKey, itemsToCheck);
+          logger.info(`📦 [TB FILTER] ${itemsToCheck.length} -> ${cachedOnly.length} in cache.`);
+          rankedList = cachedOnly;
+      } else {
+          rankedList = [];
+      }
   }
 
+  let finalRanked = rankedList.slice(0, CONFIG.MAX_RESULTS);
   const ranked = finalRanked;
 
   let debridStreams = [];
   if (ranked.length > 0 && hasDebridKey) {
-      const isTorBox = config.service === 'tb';
       let TOP_LIMIT = 0; 
       if (type === 'series') {
           TOP_LIMIT = 3;
       }
-
       const topItems = ranked.slice(0, TOP_LIMIT);
       const lazyItems = ranked.slice(TOP_LIMIT);
 
@@ -1249,7 +1193,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           item.season = meta.season;
           item.episode = meta.episode;
           config.rawConf = userConfStr; 
-          // FIX: Passato oggetto meta a resolveDebridLink
           return LIMITERS.rd.schedule(() => resolveDebridLink(config, item, config.filters?.showFake, reqHost, meta));
       });
 
@@ -1261,7 +1204,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       debridStreams = [...resolvedInstant, ...lazyStreams];
   }
 
-  // === WEB PROVIDERS ===
   let rawVix = [], formattedGhd = [], formattedGs = [], formattedVix = [];
 
   if (!dbOnlyMode) {
@@ -1300,7 +1242,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
                    const regex1080 = /\b(1080P|FHD|FULLHD)\b/;
                    const regex720 = /\b(720P|HD)\b/;
                    const regexSD = /\b(480P|SD)\b/;
-
                    if (regex4k.test(textToCheck)) { quality = "4K"; qIcon = "🔥"; }
                    else if (regex1080.test(textToCheck)) { quality = "1080p"; qIcon = "🔥"; }
                    else if (regex720.test(textToCheck)) { quality = "720p"; qIcon = "🔥"; }
@@ -1381,7 +1322,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
                  meta.tmdb_id,
                  'it-IT'
              );
-
              if (trailerStreams && trailerStreams.length > 0) {
                  finalStreams.unshift(...trailerStreams);
                  logger.info(`🎬 [TRAILER] Aggiunto trailer in testa per: ${meta.title}`);
@@ -1393,12 +1333,10 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   }
   
   const resultObj = { streams: finalStreams };
-
   if (finalStreams.length > 0) {
       await Cache.cacheStream(cacheKey, resultObj, 1800);
       logger.info(`💾 SAVED TO CACHE: ${cacheKey}`);
   }
-
   return resultObj;
 }
 
@@ -1562,7 +1500,6 @@ app.get("/:conf/manifest.json", (req, res) => {
         const hasTBKey = (config.service === 'tb' && config.key) || config.torbox;
         const hasADKey = (config.service === 'ad' && config.key) || config.alldebrid;
         if (hasRDKey) {
-            // [MODIFICATO] ICONA COMETA PER IL NOME ADDON
             manifest.name = "Leviathan ☄️ RD";
             manifest.id += ".rd"; 
         } 
@@ -1630,7 +1567,7 @@ app.listen(PORT, () => {
     console.log(`🛡️ GUARDA SERIE: Modulo Integrato e Pronto`);
     console.log(`🕷️ WEBSTREAMR: Fallback Attivo (Su 0 Risultati)`);
     console.log(`🎬 TRAILER: Attivabile da Config (Default: OFF, Primo Risultato se ON)`);
-    console.log(`📦 TORBOX: True Cache Check Enabled`);
+    console.log(`📦 TORBOX: STRICT CACHE ENABLED (Solo Instant)`);
     console.log(`🦑 LEVIATHAN CORE: Optimized for High Reliability`);
     console.log(`-----------------------------------------------------`);
 });
