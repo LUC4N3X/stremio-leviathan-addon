@@ -321,18 +321,44 @@ body::after {
 .m-prev-info { color: #888; font-size: 0.75rem; line-height: 1.3; white-space: pre-wrap; }
 
 /* SKIN GRID */
-.m-skin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+.m-skin-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px; }
 .m-skin-btn {
     background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
-    color: var(--m-dim); padding: 10px 5px; border-radius: 8px; text-align: center;
-    font-family: 'Rajdhani'; font-weight: 700; font-size: 0.8rem; cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; gap: 5px; transition: all 0.2s;
+    color: var(--m-dim); padding: 12px 8px; border-radius: 10px; text-align: center;
+    font-family: 'Rajdhani'; font-weight: 800; font-size: 0.85rem; cursor: pointer;
+    display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;
+    letter-spacing: 1px; text-transform: uppercase;
 }
 .m-skin-btn.active {
     background: rgba(0, 242, 255, 0.1); border-color: var(--m-primary); color: #fff;
     box-shadow: 0 0 10px rgba(0, 242, 255, 0.15);
 }
-.m-skin-icon { font-size: 1.2rem; margin-bottom: 2px; }
+.m-skin-icon { font-size: 1.1rem; }
+
+/* CUSTOM DASHBOARD AREA */
+.m-custom-dash {
+    margin-top: 15px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px dashed rgba(0, 242, 255, 0.3);
+    border-radius: 12px;
+    padding: 15px;
+    animation: slideDown 0.3s ease;
+    display: none;
+}
+.m-custom-desc {
+    font-size: 0.75rem; color: var(--m-dim); margin-bottom: 12px;
+    font-family: 'Outfit', sans-serif; line-height: 1.4;
+    border-left: 2px solid var(--m-primary); padding-left: 8px;
+}
+.m-tag-list {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
+}
+.m-tag-item {
+    font-family: 'Rajdhani', monospace; font-size: 0.7rem; font-weight: 700;
+    background: rgba(255, 255, 255, 0.08); padding: 3px 6px; border-radius: 4px;
+    color: #fff; border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: default;
+}
 
 /* AIO LOCK OVERLAY */
 .m-aio-lock {
@@ -652,18 +678,44 @@ input:checked + .m-slider-pink:before { background-color: var(--m-cine); box-sha
 .m-prev-info { color: #888; font-size: 0.75rem; line-height: 1.3; white-space: pre-wrap; }
 
 /* SKIN GRID */
-.m-skin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+.m-skin-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px; }
 .m-skin-btn {
     background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
-    color: var(--m-dim); padding: 10px 5px; border-radius: 8px; text-align: center;
-    font-family: 'Rajdhani'; font-weight: 700; font-size: 0.8rem; cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; gap: 5px; transition: all 0.2s;
+    color: var(--m-dim); padding: 12px 8px; border-radius: 10px; text-align: center;
+    font-family: 'Rajdhani'; font-weight: 800; font-size: 0.85rem; cursor: pointer;
+    display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;
+    letter-spacing: 1px; text-transform: uppercase;
 }
 .m-skin-btn.active {
     background: rgba(0, 242, 255, 0.1); border-color: var(--m-primary); color: #fff;
     box-shadow: 0 0 10px rgba(0, 242, 255, 0.15);
 }
-.m-skin-icon { font-size: 1.2rem; margin-bottom: 2px; }
+.m-skin-icon { font-size: 1.1rem; }
+
+/* CUSTOM DASHBOARD AREA */
+.m-custom-dash {
+    margin-top: 15px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px dashed rgba(0, 242, 255, 0.3);
+    border-radius: 12px;
+    padding: 15px;
+    animation: slideDown 0.3s ease;
+    display: none;
+}
+.m-custom-desc {
+    font-size: 0.75rem; color: var(--m-dim); margin-bottom: 12px;
+    font-family: 'Outfit', sans-serif; line-height: 1.4;
+    border-left: 2px solid var(--m-primary); padding-left: 8px;
+}
+.m-tag-list {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
+}
+.m-tag-item {
+    font-family: 'Rajdhani', monospace; font-size: 0.7rem; font-weight: 700;
+    background: rgba(255, 255, 255, 0.08); padding: 3px 6px; border-radius: 4px;
+    color: #fff; border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: default;
+}
 
 /* AIO LOCK OVERLAY */
 .m-aio-lock {
@@ -904,18 +956,28 @@ const mobileHTML = `
                     </div>
 
                     <div class="m-skin-grid">
-                        <div class="m-skin-btn active" id="msk_leviathan" onclick="selectMobileSkin('leviathan')"><span class="m-skin-icon">🦑</span>Lev</div>
-                        <div class="m-skin-btn" id="msk_lev2" onclick="selectMobileSkin('lev2')"><span class="m-skin-icon">🧬</span>Arch</div>
-                        <div class="m-skin-btn" id="msk_fra" onclick="selectMobileSkin('fra')"><span class="m-skin-icon">⚡️</span>Hor</div>
-                        <div class="m-skin-btn" id="msk_dav" onclick="selectMobileSkin('dav')"><span class="m-skin-icon">📼</span>Data</div>
-                        <div class="m-skin-btn" id="msk_pri" onclick="selectMobileSkin('pri')"><span class="m-skin-icon">👑</span>Ecl</div>
-                        <div class="m-skin-btn" id="msk_and" onclick="selectMobileSkin('and')"><span class="m-skin-icon">🎬</span>Mtx</div>
-                        <div class="m-skin-btn" id="msk_lad" onclick="selectMobileSkin('lad')"><span class="m-skin-icon">🎟️</span>Cmp</div>
-                        <div class="m-skin-btn" id="msk_custom" onclick="selectMobileSkin('custom')"><span class="m-skin-icon">🛠️</span>Cust</div>
+                        <div class="m-skin-btn active" id="msk_leviathan" onclick="selectMobileSkin('leviathan')"><span class="m-skin-icon">🦑</span> LEVIATHAN</div>
+                        <div class="m-skin-btn" id="msk_lev2" onclick="selectMobileSkin('lev2')"><span class="m-skin-icon">🧬</span> ARCHETYPE</div>
+                        <div class="m-skin-btn" id="msk_fra" onclick="selectMobileSkin('fra')"><span class="m-skin-icon">⚡️</span> HORIZON</div>
+                        <div class="m-skin-btn" id="msk_dav" onclick="selectMobileSkin('dav')"><span class="m-skin-icon">📼</span> DATABANK</div>
+                        <div class="m-skin-btn" id="msk_pri" onclick="selectMobileSkin('pri')"><span class="m-skin-icon">👑</span> ECLIPSE</div>
+                        <div class="m-skin-btn" id="msk_and" onclick="selectMobileSkin('and')"><span class="m-skin-icon">🎬</span> MATRIX</div>
+                        <div class="m-skin-btn" id="msk_lad" onclick="selectMobileSkin('lad')"><span class="m-skin-icon">🎟️</span> COMPACT</div>
+                        <div class="m-skin-btn" id="msk_custom" onclick="selectMobileSkin('custom')"><span class="m-skin-icon">🛠️</span> CUSTOM</div>
                     </div>
                     
-                    <div id="m-custom-skin-area" style="display:none; margin-top:10px;">
-                        <input type="text" class="m-input" id="m-customTemplate" placeholder="Lev {quality} ||| {title}" style="padding:10px; font-size:0.9rem;" oninput="updateMobilePreview()">
+                    <div id="m-custom-skin-area" class="m-custom-dash">
+                        <div class="m-custom-desc">
+                            Usa i tag dinamici per costruire il tuo formato. Incolla il template qui sotto:
+                        </div>
+                        <div class="m-tag-list">
+                            <div class="m-tag-item">{title}</div>
+                            <div class="m-tag-item">{quality}</div>
+                            <div class="m-tag-item">{size}</div>
+                            <div class="m-tag-item">{source}</div>
+                            <div class="m-tag-item">{service}</div>
+                        </div>
+                        <input type="text" class="m-input" id="m-customTemplate" placeholder="Es: Lev {quality} ||| {title}" style="padding:10px; font-size:0.9rem; border:1px solid rgba(255,255,255,0.3);" oninput="updateMobilePreview()">
                     </div>
                 </div>
 
