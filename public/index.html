@@ -440,6 +440,69 @@
         .fuel-data span { font-size: 0.8rem; color: rgba(255, 255, 255, 0.6); letter-spacing: 2px; text-transform: uppercase; }
         .fuel-card:hover .fuel-data span { color: #fff; text-shadow: 0 0 3px var(--primary); }
         .signature { font-family: 'Rajdhani', sans-serif; color: rgba(255, 255, 255, 0.2); font-size: 0.8rem; letter-spacing: 3px; text-transform: uppercase; }
+        
+        /* --- NEW FLUX TERMINAL STYLES --- */
+        .flux-terminal {
+            margin-top: 30px;
+            background: #000;
+            border: 1px solid var(--primary-dim);
+            border-left: 4px solid var(--primary);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+        }
+        .flux-header {
+            background: rgba(0, 242, 255, 0.05);
+            padding: 10px 20px;
+            border-bottom: 1px solid rgba(0, 242, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .flux-title {
+            font-family: 'Rajdhani', monospace;
+            color: var(--primary);
+            font-weight: 700;
+            letter-spacing: 2px;
+            font-size: 0.9rem;
+        }
+        .live-dot {
+            width: 8px; height: 8px; background: #333; border-radius: 50%; display: inline-block; margin-right: 8px;
+            transition: 0.3s;
+        }
+        .flux-terminal.online .live-dot { background: var(--primary); box-shadow: 0 0 8px var(--primary); animation: blinkLive 1s infinite; }
+        .flux-terminal.offline .live-dot { background: var(--error); box-shadow: 0 0 5px var(--error); }
+        @keyframes blinkLive { 50% { opacity: 0.4; } }
+        
+        .flux-content { position: relative; }
+        .flux-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
+            padding: 20px;
+            padding-right: 60px;
+            min-height: 85px;
+            resize: none;
+            line-height: 1.5;
+        }
+        .flux-input::selection { background: var(--primary); color: #000; }
+        .flux-copy-btn {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #aaa;
+            width: 35px; height: 35px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: 0.3s;
+        }
+        .flux-copy-btn:hover { background: var(--primary); color: #000; box-shadow: 0 0 10px var(--primary); }
 
         @media (min-width: 1024px) {
             .main-wrapper { max-width: 1400px; }
@@ -629,7 +692,7 @@
                         </div>
                     </div>
                     <div class="input-group">
-                        <input type="text" id="apiKey" class="custom-input" placeholder="INSERIRE CHIAVE DEBRID..." oninput="clearError(this)">
+                        <input type="text" id="apiKey" class="custom-input" placeholder="INSERIRE CHIAVE DEBRID..." oninput="clearError(this); updateFluxStream()">
                         <a href="https://real-debrid.com/apitoken" target="_blank" id="apiLink" class="input-action">
                             <i class="fas fa-key"></i> PRELEVA KEY
                         </a>
@@ -637,7 +700,7 @@
                         <div id="ad-warning" class="ad-warning-msg">⚠️ Funziona solo con Self-Hosting Casalingo</div>
                     </div>
                     <div class="input-group">
-                        <input type="text" id="tmdbKey" class="custom-input" placeholder="CHIAVE TMDB (OPZIONALE)" oninput="clearError(this)">
+                        <input type="text" id="tmdbKey" class="custom-input" placeholder="CHIAVE TMDB (OPZIONALE)" oninput="clearError(this); updateFluxStream()">
                         <a href="https://www.themoviedb.org/settings/api" target="_blank" class="input-action">
                             <i class="fas fa-database"></i> PRELEVA KEY
                         </a>
@@ -650,7 +713,7 @@
                                 <div class="control-title notranslate" translate="no"><i class="fas fa-play-circle" style="color: var(--secondary)"></i> StreamingCommunity</div>
                                 <span class="control-desc">Scraper web alta velocità.</span>
                             </div>
-                            <label class="switch mf-switch"><input type="checkbox" id="enableVix" onchange="checkWebVisibility()"><span class="slider"></span></label>
+                            <label class="switch mf-switch"><input type="checkbox" id="enableVix" onchange="checkWebVisibility(); updateFluxStream()"><span class="slider"></span></label>
                         </div>
                         <div class="sc-quality-container" id="scQualityContainer">
                            <div class="quality-label">Seleziona Qualità Flusso</div>
@@ -665,21 +728,21 @@
                                 <div class="control-title notranslate" translate="no"><i class="fas fa-film" style="color: #ff9900"></i> GuardaHD</div>
                                 <span class="control-desc">Richiede <strong>OBBLIGATORIAMENTE</strong> MediaFlow Proxy.</span>
                             </div>
-                            <label class="switch mf-switch"><input type="checkbox" id="enableGhd" onchange="checkWebVisibility()"><span class="slider"></span></label>
+                            <label class="switch mf-switch"><input type="checkbox" id="enableGhd" onchange="checkWebVisibility(); updateFluxStream()"><span class="slider"></span></label>
                         </div>
                         <div class="control-row">
                             <div class="control-info">
                                 <div class="control-title notranslate" translate="no"><i class="fas fa-tv" style="color: #aa00ff"></i> GuardaSerie</div>
                                 <span class="control-desc">Richiede <strong>OBBLIGATORIAMENTE</strong> MediaFlow Proxy.</span>
                             </div>
-                            <label class="switch mf-switch"><input type="checkbox" id="enableGs" onchange="checkWebVisibility()"><span class="slider"></span></label>
+                            <label class="switch mf-switch"><input type="checkbox" id="enableGs" onchange="checkWebVisibility(); updateFluxStream()"><span class="slider"></span></label>
                         </div>
                         <div class="control-row sub-row" id="webPriorityRow" style="display:none; margin-top:15px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top:10px;">
                              <div class="control-info">
                                  <div class="control-title"><i class="fas fa-sort-amount-down"></i> Gerarchia Sorgenti</div>
                                  <span class="control-desc">Sposta i risultati Web (SC, GHD, GS) dopo i Torrent.</span>
                              </div>
-                             <label class="switch mf-switch"><input type="checkbox" id="vixLast"><span class="slider"></span></label>
+                             <label class="switch mf-switch"><input type="checkbox" id="vixLast" onchange="updateFluxStream()"><span class="slider"></span></label>
                          </div>
                          
                       <div class="control-row" style="margin-top:15px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top:15px;">
@@ -691,15 +754,15 @@
                                     <strong>Protocollo di Emergenza.</strong> Si attiva in automatico quando non si trovano risultati Debrid.
                                 </span>
                             </div>
-                            <label class="switch"><input type="checkbox" id="enableWebStreamr" checked><span class="slider"></span></label>
+                            <label class="switch"><input type="checkbox" id="enableWebStreamr" checked onchange="updateFluxStream()"><span class="slider"></span></label>
                         </div>
                     </div>
 
                     <div class="module-box" id="netModule" style="border-color: rgba(0, 242, 255, 0.3);">
                         <div class="module-label" style="border-color: rgba(0, 242, 255, 0.4); color: var(--primary);">NETWORK BRIDGE</div>
                         <div class="mf-group" style="margin-top:0; border:none; padding:0; background:transparent;">
-                            <input type="text" id="mfUrl" class="mf-input" placeholder="URL MediaFlow Proxy">
-                            <input type="password" id="mfPass" class="mf-input" style="margin-top: 10px;" placeholder="Password Proxy (Opzionale)">
+                            <input type="text" id="mfUrl" class="mf-input" placeholder="URL MediaFlow Proxy" oninput="updateFluxStream()">
+                            <input type="password" id="mfPass" class="mf-input" style="margin-top: 10px;" placeholder="Password Proxy (Opzionale)" oninput="updateFluxStream()">
                         </div>
                         <div class="control-row" style="margin-top:15px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top:15px;">
                             <div class="control-info">
@@ -708,7 +771,7 @@
                                 </div>
                                 <span class="control-desc">Maschera IP a Debrid. Richiede URL sopra.</span>
                             </div>
-                            <label class="switch"><input type="checkbox" id="proxyDebrid"><span class="slider"></span></label>
+                            <label class="switch"><input type="checkbox" id="proxyDebrid" onchange="updateFluxStream()"><span class="slider"></span></label>
                         </div>
                     </div>
                 </div>
@@ -746,7 +809,7 @@
                                     <p>Escludi file superiori a <span id="sizeDisplay" style="color: var(--limit-neon); font-weight:800; font-size: 1.2rem;">∞</span> GB</p>
                                 </div>
                                 <div class="gate-controls" style="opacity: 1; pointer-events: auto; filter: none; margin-left: 15px;">
-                                    <input type="range" min="0" max="100" step="1" value="0" class="limit-slider" id="maxSizeSlider" oninput="updateSizeVal(this.value)" style="width: 130px;">
+                                    <input type="range" min="0" max="100" step="1" value="0" class="limit-slider" id="maxSizeSlider" oninput="updateSizeVal(this.value); updateFluxStream()" style="width: 130px;">
                                 </div>
                             </div>
                         </div>
@@ -771,10 +834,10 @@
                                     <h4>SIGNAL GATE</h4>
                                     <p>Limita risultati per qualità</p>
                                 </div>
-                                <label class="switch gate-switch"><input type="checkbox" id="gateActive" onchange="toggleGate()"><span class="slider"></span></label>
+                                <label class="switch gate-switch"><input type="checkbox" id="gateActive" onchange="toggleGate(); updateFluxStream()"><span class="slider"></span></label>
                             </div>
                             <div class="gate-controls" id="gateControls">
-                                <input type="range" min="1" max="10" value="3" class="gate-slider" id="gateSlider" oninput="updateGateVal(this.value)">
+                                <input type="range" min="1" max="10" value="3" class="gate-slider" id="gateSlider" oninput="updateGateVal(this.value); updateFluxStream()">
                                 <span class="digital-val" id="gateDisplay">∞</span>
                             </div>
                         </div>
@@ -786,7 +849,7 @@
                                 </div>
                                 <div class="aux-desc">Cerca file in <strong>Inglese</strong> oltre a quelli in Italiano.</div>
                                 <label class="cyber-toggle">
-                                    <input type="checkbox" id="allowEng" onchange="toggleAuxCard('card_audio')">
+                                    <input type="checkbox" id="allowEng" onchange="toggleAuxCard('card_audio'); updateFluxStream()">
                                     <span class="toggle-track"><span class="toggle-knob"></span><span class="label-off">SOLO ITA</span><span class="label-on">ITA + ENG</span></span>
                                 </label>
                             </div>
@@ -796,7 +859,7 @@
                                 </div>
                                 <div class="aux-desc">Ottimizza lista risultati per <strong>AIOStreams</strong>.</div>
                                 <label class="cyber-toggle aio-toggle">
-                                    <input type="checkbox" id="aiostreams_mode" onchange="toggleAuxCard('card_aio'); toggleAIOLock();">
+                                    <input type="checkbox" id="aiostreams_mode" onchange="toggleAuxCard('card_aio'); toggleAIOLock(); updateFluxStream()">
                                     <span class="toggle-track"><span class="toggle-knob"></span><span class="label-off">DISABILITA</span><span class="label-on">ABILITA</span></span>
                                 </label>
                             </div>
@@ -806,7 +869,7 @@
                                 </div>
                                 <div class="aux-desc">Visualizza anteprima video prima dello streaming.</div>
                                 <label class="cyber-toggle">
-                                    <input type="checkbox" id="enableTrailers" onchange="toggleAuxCard('card_trailer')">
+                                    <input type="checkbox" id="enableTrailers" onchange="toggleAuxCard('card_trailer'); updateFluxStream()">
                                     <span class="toggle-track"><span class="toggle-knob"></span><span class="label-off">OFF</span><span class="label-on">CINE ON</span></span>
                                 </label>
                             </div>
@@ -822,6 +885,16 @@
                 <button class="btn-copy" onclick="copyLink()"><i class="fas fa-copy"></i><span id="copyText">COPIA LINK</span></button>
             </div>
             
+            <div id="fluxTerminal" class="flux-terminal offline">
+                <div class="flux-header">
+                    <span class="flux-title"><span class="live-dot"></span>FLUX DATA STREAM // LINK GENERATOR</span>
+                </div>
+                <div class="flux-content">
+                    <textarea id="generatedUrlBox" class="flux-input" readonly spellcheck="false">/// SYSTEM OFFLINE: WAITING FOR CONFIGURATION DATA ///</textarea>
+                    <button class="flux-copy-btn" onclick="copyLink()" title="Copia Manuale"><i class="fas fa-copy"></i></button>
+                </div>
+            </div>
+
             <div class="footer-hub">
                 <div class="hub-grid">
                     <a href="https://github.com/LUC4N3X/stremio-leviathan-addon" target="_blank" class="hub-card cmd-card">
@@ -942,10 +1015,8 @@
         let currentSCQuality = 'all';
 
         // --- SKINS LOGIC (PREVIEW) ---
-        // JS version of the formatter logic for live preview
         function toStylized(text, type = 'std') {
             const maps = {
-                // Sans-Serif Bold (Aggiornato con Numeri Sans)
                 'bold': {
                     nums: {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵'},
                     chars: {'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭','a':'𝗮','b':'𝗯','c':'𝗰','d':'𝗱','e':'𝗲','f':'𝗳','g':'𝗴','h':'𝗵','i':'𝗶','j':'j','k':'𝗸','l':'𝗹','m':'𝗺','n':'𝗻','o':'𝗼','p':'𝗽','q':'𝗾','r':'𝗿','s':'𝘀','t':'𝘁','u':'𝘂','v':'𝘃','w':'𝘄','x':'𝘅','y':'𝘆','z':'𝘇'}
@@ -954,13 +1025,11 @@
                     nums: {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗'},
                     chars: {'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭'}
                 },
-                // Small Caps (Aggiunto per Lev 2)
                 'small': {
                     nums: {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9'},
                     chars: {'A':'ᴀ','B':'ʙ','C':'ᴄ','D':'ᴅ','E':'ᴇ','F':'ꜰ','G':'ɢ','H':'ʜ','I':'ɪ','J':'ᴊ','K':'ᴋ','L':'ʟ','M':'ᴍ','N':'ɴ','O':'ᴏ','P':'ᴘ','Q':'ǫ','R':'ʀ','S':'ꜱ','T':'ᴛ','U':'ᴜ','V':'ᴠ','W':'ᴡ','X':'x','Y':'ʏ','Z':'ᴢ','a':'ᴀ','b':'ʙ','c':'ᴄ','d':'ᴅ','e':'ᴇ','f':'ꜰ','g':'ɢ','h':'ʜ','i':'ɪ','j':'ᴊ','k':'ᴋ','l':'ʟ','m':'ᴍ','n':'ɴ','o':'ᴏ','p':'ᴘ','q':'ǫ','r':'ʀ','s':'ꜱ','t':'ᴛ','u':'ᴜ','v':'ᴠ','w':'ᴡ','x':'x','y':'ʏ','z':'ᴢ'}
                 }
             };
-
             if (type === 'spaced') {
                 return text.split('').map(c => {
                     const map = maps['bold'];
@@ -968,7 +1037,6 @@
                     return char + ' ';
                 }).join('').trim();
             }
-
             const map = maps[type] || maps['bold'];
             return text.split('').map(c => {
                 if (/[0-9]/.test(c)) return map.nums[c] || c;
@@ -987,9 +1055,10 @@
             else customArea.classList.remove('show');
             
             updatePreview(skinId);
+            updateFluxStream();
         }
 
-        function updateCustomPreview() { updatePreview('custom'); }
+        function updateCustomPreview() { updatePreview('custom'); updateFluxStream(); }
 
         function updatePreview(skin) {
             const p = {
@@ -1013,18 +1082,15 @@
 
             if (skin === 'leviathan') {
                 const qBold = toStylized("4K", "bold");
-                const lev = toStylized("LEVIATHAN", "std"); // Niente spaced nel nuovo formatter, ma std chars
+                const lev = toStylized("LEVIATHAN", "std"); 
                 name = `🦑 𝗟𝗘𝗩𝗜𝗔𝗧𝗛𝗔𝗡\n${p.serviceIcon} ┃ ${qBold}`;
                 desc = `📁 ${p.cleanName}\n🗣️ ${p.lang} • ${p.audioInfo}\n${p.info}\n🧲 ${p.sizeString} • ${p.seedersStr}\n${p.serviceIcon} [${p.serviceTag}] ${p.source}`;
             } 
             else if (skin === 'lev2') {
-                // LEVIATHAN 2.0 PREVIEW
                 const levText = toStylized("LEVIATHAN", "small");
                 const qText = p.quality;
                 const sizeSmall = toStylized("64.20", "bold") + " " + toStylized("GB", "small");
-                
                 name = `🦑 ${levText} ${p.serviceIcon} │ ${qText}`;
-                
                 const titleBold = toStylized(p.cleanName, "bold");
                 const audioSmall = toStylized("TrueHD 7.1", "small");
                 const langSmall = toStylized("ITA ENG", "small");
@@ -1032,7 +1098,6 @@
                 let servSmall = "ᴘ𝟚ᴘ";
                 if(p.serviceTag === "RD") servSmall = "ʀᴇᴀʟ-ᴅᴇʙʀɪᴅ";
                 if(p.serviceTag === "AD") servSmall = "ᴀʟʟ-ᴅᴇʙʀɪᴅ";
-                
                 desc = `🎬 ${titleBold}\n📦 ${sizeSmall} │ ʀᴇᴍᴜx │ ᴅᴏʟʙʏ ᴠɪsɪᴏɴ\n🔊 ${audioSmall} • 🇮🇹 ${langSmall}\n🔗 ${servSmall} │ ${srcSmall}`;
             }
             else if (skin === 'fra') {
@@ -1040,12 +1105,10 @@
                 desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ 🇮🇹 ITA • TrueHD\n✨ ❯ ${p.serviceTag} • ${p.source}\n🔥 ❯ 4K • ${p.cleanInfo}\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337`;
             }
             else if (skin === 'comet') {
-                // Comet Style Replica
                 name = `[${p.serviceTag} ⚡]\nLeviathan\n4K`;
                 desc = `📄 ${p.cleanName}\n📹 HEVC • ${p.cleanInfo} | TrueHD\n⭐ ${p.source}\n💾 ${p.sizeString} 👥 1337\n🌍 ITA`;
             }
             else if (skin === 'stremio_ita') {
-                // Stremio ITA Template Replica
                 name = `⚡️ Leviathan 4K`;
                 desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ ita • eng\n✨ ❯ ${p.serviceTag} • ${p.source}\n🔥 ❯ 4K • HEVC • ${p.cleanInfo}\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337\n🔉 ❯ TrueHD • 7.1`;
             }
@@ -1066,7 +1129,6 @@
                 desc = `🎬 ${p.cleanName}\n${p.cleanInfo}\n🎧 TrueHD | 🔊 7.1 | 🗣️ ITA\n📁 ${p.sizeString} | 🏷️ ${p.source}\n📄 ▶️ ${p.title} ◀️`;
             }
             else if (skin === 'custom') {
-                // ... logica custom esistente ...
                 let tpl = document.getElementById('customTemplate').value || "Lev {quality} ||| {title} - {size}";
                 tpl = tpl.replace("{title}", p.cleanName).replace("{quality}", p.quality)
                          .replace("{size}", p.sizeString).replace("{source}", p.source)
@@ -1082,23 +1144,19 @@
                     desc = tpl;
                 }
             }
-
             document.getElementById('prev-name').innerText = name;
             document.getElementById('prev-desc').innerText = desc;
         }
 
-        // --- FUNZIONE PER GESTIRE IL BLOCCO AIO ---
         function toggleAIOLock() {
             const isAIO = document.getElementById('aiostreams_mode').checked;
             const skinContainer = document.getElementById('visualCoreContainer');
             const customArea = document.getElementById('customSkinArea');
             const overlay = document.getElementById('aioLockOverlay');
-
             if (isAIO) {
                 skinContainer.classList.add('disabled-core');
                 customArea.classList.add('disabled-core');
                 overlay.style.display = 'flex';
-                // Facoltativo: mostra preview AIO fittizia o disabilita preview
             } else {
                 skinContainer.classList.remove('disabled-core');
                 customArea.classList.remove('disabled-core');
@@ -1131,12 +1189,14 @@
                     infoBox.style.opacity = '1';
                 }, 150);
             }
+            updateFluxStream();
         }
 
         function toggleSpectrum(id) {
             const el = document.getElementById(id);
             if (el.classList.contains('excluded')) { el.classList.remove('excluded'); el.classList.add('active'); } 
             else { el.classList.remove('active'); el.classList.add('excluded'); }
+            updateFluxStream();
         }
         
         function setSpecState(btnId, isExcluded) {
@@ -1162,6 +1222,7 @@
             currentSCQuality = val;
             document.querySelectorAll('.q-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById('btnQ_' + val).classList.add('active');
+            updateFluxStream();
         }
 
         function toggleGate() {
@@ -1196,12 +1257,12 @@
                     if (config.key) document.getElementById('apiKey').value = config.key;
                     if (config.tmdb) document.getElementById('tmdbKey').value = config.tmdb;
                     if (config.service) selectService(config.service, true);
-                    if (config.formatter) selectSkin(config.formatter); // LOAD SKIN
+                    if (config.formatter) selectSkin(config.formatter); 
                     if (config.customTemplate) document.getElementById('customTemplate').value = config.customTemplate;
                     if (config.aiostreams_mode) {
                         document.getElementById('aiostreams_mode').checked = true;
-                        document.getElementById('card_aio').classList.add('active'); // Activate visual
-                        toggleAIOLock(); // Activate lock on load
+                        document.getElementById('card_aio').classList.add('active');
+                        toggleAIOLock();
                     }
                     if (config.mediaflow) {
                         document.getElementById('mfUrl').value = config.mediaflow.url || "";
@@ -1232,12 +1293,12 @@
                             updateSizeVal(config.filters.maxSizeGB);
                         }
                         if (document.getElementById('allowEng').checked) document.getElementById('card_audio').classList.add('active');
-                        // AIO logic moved above
                         if (document.getElementById('enableTrailers').checked) document.getElementById('card_trailer').classList.add('active');
                         if (config.sort) setSortMode(config.sort); else setSortMode('balanced');
                     }
                     checkWebVisibility();
                     updatePreview(document.getElementById('selectedSkin').value);
+                    updateFluxStream();
                 }
             } catch (e) {}
         };
@@ -1254,7 +1315,8 @@
             document.getElementById('apiLink').href = links[service][0];
             document.getElementById('apiKey').placeholder = links[service][1];
             document.getElementById('ad-warning').style.display = service === 'ad' ? 'block' : 'none';
-            updatePreview(document.getElementById('selectedSkin').value); // Update preview when service changes
+            updatePreview(document.getElementById('selectedSkin').value);
+            updateFluxStream();
         }
 
         function validateInputs() {
@@ -1279,8 +1341,8 @@
                 key: document.getElementById('apiKey').value.trim(),
                 tmdb: document.getElementById('tmdbKey').value.trim(),
                 sort: document.getElementById('sortMode').value,
-                formatter: document.getElementById('selectedSkin').value, // SAVED SKIN
-                customTemplate: document.getElementById('customTemplate').value, // SAVED CUSTOM
+                formatter: document.getElementById('selectedSkin').value,
+                customTemplate: document.getElementById('customTemplate').value,
                 aiostreams_mode: document.getElementById('aiostreams_mode').checked,
                 mediaflow: {
                     url: document.getElementById('mfUrl').value.trim().replace(/\/$/, ""),
@@ -1310,6 +1372,26 @@
         function getBaseManifestUrl() {
             if(!validateInputs()) return null;
             return `${window.location.host}/${btoa(JSON.stringify(getConfigObject()))}/manifest.json`;
+        }
+        
+        // --- NEW FLUX LINK LOGIC ---
+        function updateFluxStream() {
+            const terminal = document.getElementById('fluxTerminal');
+            const box = document.getElementById('generatedUrlBox');
+            const url = getBaseManifestUrl();
+            
+            if(url) {
+                const fullUrl = `${window.location.protocol}//${url}`;
+                box.value = fullUrl;
+                box.style.color = "var(--primary)";
+                terminal.classList.remove('offline');
+                terminal.classList.add('online');
+            } else {
+                box.value = "/// SYSTEM OFFLINE: WAITING FOR CONFIGURATION DATA ///\n[!] Inserisci API Key o Attiva Sorgenti Web";
+                box.style.color = "var(--error)";
+                terminal.classList.remove('online');
+                terminal.classList.add('offline');
+            }
         }
 
         function openFaqModal() { const m = document.getElementById('faqModal'); m.style.display = 'flex'; setTimeout(() => m.classList.add('show'), 10); }
@@ -1365,17 +1447,50 @@
 
         window.onclick = function(e) { if (e.target.classList.contains('modal-backdrop')) closeModal(e.target.id); }
 
-        function proceedToInstall() { const url = getBaseManifestUrl(); if(url) window.location.href = `stremio://${url}`; }
+        function proceedToInstall() { 
+            const url = getBaseManifestUrl(); 
+            if(url) {
+                window.location.href = `stremio://${url}`; 
+            }
+        }
 
-        function copyLink() {
+        async function copyLink() {
+            if(!validateInputs()) { 
+                document.querySelector('.main-wrapper').scrollIntoView({ behavior: 'smooth' }); 
+                return; 
+            }
+
             const url = getBaseManifestUrl();
             if(url) {
                 const fullUrl = `${window.location.protocol}//${url}`;
-                const dummy = document.createElement("input");
-                document.body.appendChild(dummy); dummy.value = fullUrl; dummy.select(); document.execCommand("copy"); document.body.removeChild(dummy);
-                const t = document.getElementById('copyText'); const old = t.innerText; t.innerText = "COPIATO!"; t.style.color = "#00f2ff";
-                setTimeout(() => { t.innerText = old; t.style.color = ""; }, 2000);
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    try {
+                        await navigator.clipboard.writeText(fullUrl);
+                        triggerCopyAnimation();
+                    } catch (err) { fallbackCopy(fullUrl); }
+                } else { fallbackCopy(fullUrl); }
             }
+        }
+
+        function fallbackCopy(text) {
+            try {
+                const dummy = document.createElement("textarea");
+                document.body.appendChild(dummy);
+                dummy.value = text;
+                dummy.select();
+                dummy.setSelectionRange(0, 99999);
+                document.execCommand("copy");
+                document.body.removeChild(dummy);
+                triggerCopyAnimation();
+            } catch (e) { console.error("Copia automatica fallita.", e); }
+        }
+
+        function triggerCopyAnimation() {
+            const t = document.getElementById('copyText');
+            const old = t.innerText;
+            t.innerText = "COPIATO!";
+            t.style.color = "#00f2ff";
+            setTimeout(() => { t.innerText = old; t.style.color = ""; }, 2000);
         }
     </script>
 </body>
