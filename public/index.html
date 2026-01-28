@@ -14,12 +14,11 @@
             --primary-dim: rgba(0, 242, 255, 0.15);
             --secondary: #7000ff; /* Viola Abisso */
             --accent: #00457C;
+            --gold: #ffcc00; /* Per i trailer */
             --bg-deep: #000205; /* Nero quasi assoluto */
             --text-main: #e0f7fa;
             --text-dim: #8baac2;
             --error: #ff3366;
-            --warning: #ffcc00;
-            --limit-neon: #00f2ff; 
             --glow-strong: 0 0 10px rgba(0, 242, 255, 0.3);
             --glow-intense: 0 0 20px rgba(0, 242, 255, 0.4);
         }
@@ -153,16 +152,34 @@
         .tab-icon { font-size: 2rem; display: block; transition: transform 0.4s ease; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
         .service-tab:hover .tab-icon { transform: scale(1.1); filter: drop-shadow(0 0 8px var(--primary)); }
         
+        /* --- NEW INPUT STYLE (TECH GRID) --- */
         .input-group { position: relative; margin-bottom: 30px; }
         .custom-input {
-            width: 100%; background: rgba(2, 6, 10, 0.8) !important; border: 1px solid rgba(0, 242, 255, 0.2); padding: 22px; padding-right: 170px;
-            border-radius: 12px; color: var(--primary); font-family: 'Rajdhani', monospace; font-size: 1.2rem; font-weight: 700; letter-spacing: 2px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: inset 0 0 15px rgba(0,0,0,0.4);
+            width: 100%; 
+            /* Sfondo griglia tech leggero */
+            background-color: rgba(2, 6, 10, 0.6) !important;
+            background-image: 
+                linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+            
+            border: 1px solid rgba(0, 242, 255, 0.2); 
+            padding: 22px; padding-right: 170px;
+            border-radius: 12px; color: var(--primary); 
+            font-family: 'Rajdhani', monospace; font-size: 1.2rem; font-weight: 700; letter-spacing: 2px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
         }
         .custom-input:focus, .custom-input:not(:placeholder-shown) {
-            border-color: var(--primary); background: rgba(0, 10, 20, 0.95) !important; color: #fff;
-            text-shadow: 0 0 5px rgba(0, 242, 255, 0.3); box-shadow: 0 0 15px rgba(0, 242, 255, 0.1), inset 0 0 10px rgba(0, 242, 255, 0.03); transform: translateY(-1px);
+            border-color: var(--primary); 
+            background-color: rgba(0, 10, 20, 0.9) !important;
+            color: #fff;
+            text-shadow: 0 0 5px rgba(0, 242, 255, 0.3); 
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.1), inset 0 0 30px rgba(0, 242, 255, 0.05); 
+            transform: translateY(-1px);
         }
+        .custom-input::placeholder { color: rgba(139, 170, 194, 0.3); font-weight: 500; letter-spacing: 1px; }
+
         .custom-input.input-error { border-color: var(--error); box-shadow: 0 0 10px rgba(255, 51, 102, 0.2); color: var(--error); }
         .input-action {
             position: absolute; right: 8px; top: 8px; bottom: 8px; background: linear-gradient(135deg, rgba(0, 242, 255, 0.1), rgba(112, 0, 255, 0.1));
@@ -288,64 +305,119 @@
         .limiter-style .gate-slider-new::-webkit-slider-thumb { border-color: var(--primary); box-shadow: 0 0 10px var(--primary); }
         .limiter-style:hover .gate-slider-new::-webkit-slider-thumb { background: var(--primary); }
 
-        /* --- REDESIGNED AUX CARDS --- */
-        .aux-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
-        
+        /* --- REDESIGNED AUX CARDS "FIOGHISSIMI" --- */
+        .aux-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); /* FORZA 3 COLONNE SU DESKTOP PER NO BUCHI */
+            gap: 20px; 
+            margin-top: 30px; 
+        }
+
+        /* NUOVA STRUTTURA CARD */
         .aux-card {
-            background: linear-gradient(160deg, rgba(10, 15, 20, 0.9), rgba(5, 5, 5, 0.95));
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 14px; padding: 25px;
-            display: flex; flex-direction: column; justify-content: space-between;
-            position: relative; overflow: hidden; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            background: rgba(5, 5, 5, 0.8);
+            border: 1px solid #333;
+            border-radius: 8px; /* Meno arrotondati, più tech */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            transition: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%); /* Taglio angolo */
         }
         
-        /* Scanline effect */
-        .aux-card::after {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.3) 3px);
-            opacity: 0.2; pointer-events: none;
+        /* Bordo superiore colorato diverso per tipo */
+        .aux-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: var(--text-dim); transition: 0.3s;
+        }
+        .aux-card.active::before { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
+        .aio-card.active::before { background: var(--secondary); box-shadow: 0 0 10px var(--secondary); }
+        .cine-card.active::before { background: var(--gold); box-shadow: 0 0 10px var(--gold); }
+
+        .aux-card:hover { transform: translateY(-3px); background: rgba(20, 20, 20, 0.9); border-color: #555; }
+        
+        .aux-header { 
+            display: flex; align-items: center; margin-bottom: 10px; 
+            font-family: 'Rajdhani', sans-serif; font-size: 1rem; font-weight: 800; 
+            color: #fff; text-transform: uppercase; letter-spacing: 1px; 
+        }
+        .aux-icon { font-size: 1.1rem; margin-right: 10px; color: #555; transition: 0.4s; }
+        .aux-card.active .aux-icon { color: var(--primary); text-shadow: 0 0 8px var(--primary); }
+        .aio-card.active .aux-icon { color: var(--secondary); text-shadow: 0 0 8px var(--secondary); }
+        .cine-card.active .aux-icon { color: var(--gold); text-shadow: 0 0 8px var(--gold); }
+
+        .aux-desc { font-size: 0.8rem; color: #888; line-height: 1.4; margin-bottom: 20px; flex-grow: 1; }
+        
+        /* --- NUOVO CYBER SWITCH (CON AGGIORNAMENTI VISIVI RICHIESTI) --- */
+        .cyber-switch-container {
+            position: relative; width: 100%; height: 40px;
+            background: #000; border: 1px solid #333;
+            display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; overflow: hidden;
+            border-radius: 4px; /* Tech square */
+            transition: 0.3s ease;
+        }
+        .cyber-switch-container input { display: none; }
+        
+        /* Etichette dentro lo switch */
+        .cs-label {
+            flex: 1; text-align: center; font-family: 'Rajdhani', sans-serif; 
+            font-weight: 700; font-size: 0.8rem; color: #444; z-index: 2; transition: 0.3s;
+            text-transform: uppercase; letter-spacing: 1px;
+            display: flex; align-items: center; justify-content: center; height: 100%;
+        }
+        
+        /* Il divisore centrale evidente */
+        .cs-separator {
+            width: 2px; height: 20px; background: #333; z-index: 2;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5); transition: 0.3s;
         }
 
-        .aux-card:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.2); }
-        
-        .aux-card.active { border-color: var(--primary); box-shadow: 0 0 20px rgba(0, 242, 255, 0.15), inset 0 0 20px rgba(0, 242, 255, 0.05); }
-        .aio-card.active { border-color: var(--secondary); box-shadow: 0 0 20px rgba(112, 0, 255, 0.15), inset 0 0 20px rgba(112, 0, 255, 0.05); }
-
-        .aux-header { display: flex; align-items: center; margin-bottom: 12px; font-family: 'Rajdhani', sans-serif; font-size: 1.15rem; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 1.5px; z-index: 2; }
-        .aux-icon { font-size: 1.3rem; margin-right: 12px; color: #555; transition: 0.4s; }
-        .aux-card.active .aux-icon { color: var(--primary); text-shadow: 0 0 10px var(--primary); transform: scale(1.1); }
-        .aio-card.active .aux-icon { color: var(--secondary); text-shadow: 0 0 10px var(--secondary); }
-
-        .aux-desc { font-size: 0.85rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 25px; flex-grow: 1; z-index: 2; opacity: 0.8; font-weight: 300; }
-        
-        /* New Cyber Toggle */
-        .cyber-toggle { position: relative; display: block; width: 100%; height: 42px; cursor: pointer; z-index: 2; }
-        .cyber-toggle input { display: none; }
-        
-        .toggle-track {
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: #050a10; border: 1px solid #333; border-radius: 6px;
-            transition: 0.3s; display: flex; align-items: center; justify-content: space-between; padding: 0;
-            font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.9rem; color: #555;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+        /* Effetto di riempimento e pattern */
+        .cs-fill {
+            position: absolute; top: 0; left: 0; width: 50%; height: 100%;
+            background: transparent; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1;
+            /* Pattern strisce diagonali quando attivo */
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(0,0,0,0.2) 5px, rgba(0,0,0,0.2) 10px);
+            opacity: 0.8;
         }
         
-        .toggle-knob {
-            position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 6px);
-            background: #252525; border-radius: 4px; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 1; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+        /* Stati Attivi */
+        .cyber-switch-container:hover { border-color: #555; }
+        
+        /* STANDARD (Ciano) */
+        .aux-card input:checked + .cyber-switch-container .cs-fill {
+            left: 50%; background-color: rgba(0, 242, 255, 0.25);
+            border-left: 3px solid var(--primary);
+            box-shadow: inset 0 0 15px rgba(0, 242, 255, 0.1);
         }
-        
-        .cyber-toggle input:checked + .toggle-track { border-color: var(--primary); }
-        .cyber-toggle input:checked + .toggle-track .toggle-knob { left: 50%; background: var(--primary); box-shadow: 0 0 15px var(--primary); border-color: #fff; }
-        
-        .aio-toggle input:checked + .toggle-track { border-color: var(--secondary); }
-        .aio-toggle input:checked + .toggle-track .toggle-knob { background: var(--secondary); box-shadow: 0 0 15px var(--secondary); }
+        .aux-card input:checked + .cyber-switch-container .cs-label-on { color: var(--primary); text-shadow: 0 0 10px var(--primary); font-weight: 800; transform: scale(1.1); }
+        .aux-card input:checked + .cyber-switch-container { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); }
+        .aux-card input:checked + .cyber-switch-container .cs-separator { background: var(--primary); box-shadow: 0 0 8px var(--primary); opacity: 0.8; height: 30px; }
 
-        .label-on, .label-off { z-index: 2; transition: 0.3s; width: 50%; text-align: center; pointer-events: none; }
-        .cyber-toggle input:checked + .toggle-track .label-on { color: #000; font-weight: 800; }
-        .cyber-toggle input:checked + .toggle-track .label-off { color: #333; }
+        /* AIO (Viola) */
+        .aio-card input:checked + .cyber-switch-container .cs-fill {
+            background-color: rgba(112, 0, 255, 0.25);
+            border-left: 3px solid var(--secondary);
+            box-shadow: inset 0 0 15px rgba(112, 0, 255, 0.1);
+        }
+        .aio-card input:checked + .cyber-switch-container .cs-label-on { color: var(--secondary); text-shadow: 0 0 10px var(--secondary); font-weight: 800; transform: scale(1.1); }
+        .aio-card input:checked + .cyber-switch-container { border-color: var(--secondary); box-shadow: 0 0 15px rgba(112, 0, 255, 0.2); }
+        .aio-card input:checked + .cyber-switch-container .cs-separator { background: var(--secondary); box-shadow: 0 0 8px var(--secondary); opacity: 0.8; height: 30px; }
+
+        /* CINEMA (Oro) */
+        .cine-card input:checked + .cyber-switch-container .cs-fill {
+            background-color: rgba(255, 204, 0, 0.25);
+            border-left: 3px solid var(--gold);
+            box-shadow: inset 0 0 15px rgba(255, 204, 0, 0.1);
+        }
+        .cine-card input:checked + .cyber-switch-container .cs-label-on { color: var(--gold); text-shadow: 0 0 10px var(--gold); font-weight: 800; transform: scale(1.1); }
+        .cine-card input:checked + .cyber-switch-container { border-color: var(--gold); box-shadow: 0 0 15px rgba(255, 204, 0, 0.2); }
+        .cine-card input:checked + .cyber-switch-container .cs-separator { background: var(--gold); box-shadow: 0 0 8px var(--gold); opacity: 0.8; height: 30px; }
+
         
         /* --- VISUAL CORE STYLES (HERO LAYOUT) --- */
         .visual-core-hero { margin-bottom: 40px; border-bottom: 1px solid rgba(0, 242, 255, 0.1); padding-bottom: 20px; position: relative; }
@@ -429,11 +501,6 @@
         .custom-area::before { content: 'TEMPLATE EDITOR // BASH'; position: absolute; top: 0; right: 0; background: #111; color: #555; padding: 2px 10px; font-size: 0.7rem; font-family: monospace; border-bottom-left-radius: 8px; }
         .custom-area.show { display: block; }
         
-        .custom-input {
-            width: 100%; border: none; background: transparent !important; padding: 15px;
-            font-family: 'Consolas', 'Monaco', monospace; font-size: 0.95rem; color: var(--primary);
-            box-shadow: none !important;
-        }
         .custom-input:focus { outline: none; border: none; }
         
         .custom-helper { 
@@ -455,9 +522,8 @@
         .btn-copy { flex: 1; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px; cursor: pointer; font-family: 'Rajdhani', sans-serif; font-weight: 700; transition: 0.3s ease; display: flex; justify-content: center; align-items: center; gap: 10px; }
         .btn-copy:hover { border-color: #fff; background: rgba(255,255,255,0.1); transform: translateY(-2px); }
 
-        .faq-area { margin-top: 40px; text-align: center; }
-        .btn-faq { background: transparent; border: 1px dashed rgba(255,255,255,0.25); padding: 18px 35px; color: var(--text-dim); font-family: 'Rajdhani', sans-serif; font-weight: 600; cursor: pointer; border-radius: 35px; transition: 0.3s ease; font-size: 1rem; letter-spacing: 1.5px; }
-        .btn-faq:hover { border-color: var(--primary); color: var(--primary); box-shadow: 0 0 10px rgba(0,242,255,0.1); transform: scale(1.03); }
+        /* FAQ AREA REMOVED AS REQUESTED */
+        /* .faq-area { margin-top: 40px; text-align: center; } */
 
         .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
         .modal-backdrop.show { opacity: 1; }
@@ -568,15 +634,31 @@
 
         @media (min-width: 1024px) {
             .main-wrapper { max-width: 1400px; }
-            /* -- CYBER DIVIDER LOGIC -- */
-            .desktop-grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; position: relative; }
-            .desktop-grid-container::after {
-                content: ''; position: absolute; top: 0; bottom: 0; left: 50%; width: 1px;
-                background: linear-gradient(to bottom, transparent, rgba(0, 242, 255, 0.1), var(--secondary), rgba(0, 242, 255, 0.1), transparent);
-                box-shadow: 0 0 10px rgba(112, 0, 255, 0.3); transform: translateX(-50%);
+            /* -- CYBER DIVIDER LOGIC (IMPROVED FOR ORDER) -- */
+            .desktop-grid-container { 
+                display: grid; 
+                grid-template-columns: 1fr 1fr; 
+                gap: 80px; /* AUMENTATO SPAZIO TRA LE COLONNE */
+                align-items: start; 
+                position: relative; 
             }
+            .desktop-grid-container::after {
+                content: ''; position: absolute; top: 20px; bottom: 20px; left: 50%; width: 2px;
+                /* DIVISORE TIPO LASER */
+                background: linear-gradient(to bottom, transparent, var(--primary), var(--secondary), var(--primary), transparent);
+                box-shadow: 0 0 15px rgba(0, 242, 255, 0.4); 
+                transform: translateX(-50%);
+                opacity: 0.8;
+                animation: pulseLaser 4s infinite alternate;
+            }
+            @keyframes pulseLaser { 0% { opacity: 0.5; box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); } 100% { opacity: 1; box-shadow: 0 0 20px rgba(0, 242, 255, 0.6); } }
+            
             .action-area { flex-direction: row; }
             .skin-selector-container { grid-template-columns: repeat(5, 1fr); }
+            
+            /* Padding extra per allontanare il contenuto dalla riga centrale */
+            .col-left { padding-right: 20px; }
+            .col-right { padding-left: 20px; }
         }
 
         @media (max-width: 768px) {
@@ -921,41 +1003,50 @@
                         <div class="aux-grid">
                             <div class="aux-card" id="card_audio">
                                 <div class="aux-header">
-                                    <i class="fas fa-globe-americas aux-icon"></i><span>ESTENSIONE LINGUA</span>
+                                    <i class="fas fa-globe-americas aux-icon"></i><span>Multilingua</span>
                                 </div>
-                                <div class="aux-desc">Cerca file in <strong>Inglese</strong> oltre a quelli in Italiano per aumentare i risultati.</div>
-                                <label class="cyber-toggle">
+                                <div class="aux-desc">Estende la ricerca includendo i file in lingua <strong>Inglese</strong>.</div>
+                                <label class="cyber-switch-container">
                                     <input type="checkbox" id="allowEng" onchange="toggleAuxCard('card_audio'); updateFluxStream()">
-                                    <span class="toggle-track"><span class="toggle-knob"></span><span class="label-off">SOLO ITA</span><span class="label-on">ITA + ENG</span></span>
+                                    <span class="cs-fill"></span>
+                                    <span class="cs-label cs-label-off">SOLO ITA</span>
+                                    <span class="cs-separator"></span>
+                                    <span class="cs-label cs-label-on">ITA + ENG</span>
                                 </label>
                             </div>
+                        
                             <div class="aux-card aio-card" id="card_aio">
                                 <div class="aux-header">
-                                    <i class="fas fa-stream aux-icon"></i><span>COMPATIBILITÀ AIO</span>
+                                    <i class="fas fa-microchip aux-icon"></i><span>Core AIO</span>
                                 </div>
                                 <div class="aux-desc">Ottimizza la lista risultati specificamente per l'addon <strong>AIOStreams</strong>.</div>
-                                <label class="cyber-toggle aio-toggle">
+                                <label class="cyber-switch-container">
                                     <input type="checkbox" id="aiostreams_mode" onchange="toggleAuxCard('card_aio'); toggleAIOLock(); updateFluxStream()">
-                                    <span class="toggle-track"><span class="toggle-knob"></span><span class="label-off">DISABILITA</span><span class="label-on">ABILITA</span></span>
+                                    <span class="cs-fill"></span>
+                                    <span class="cs-label cs-label-off">STANDBY</span>
+                                    <span class="cs-separator"></span>
+                                    <span class="cs-label cs-label-on">ACTIVE</span>
                                 </label>
                             </div>
-                            <div class="aux-card" id="card_trailer">
+                        
+                            <div class="aux-card cine-card" id="card_trailer">
                                 <div class="aux-header">
-                                    <i class="fas fa-film aux-icon"></i><span>TRAILER PROTOCOL</span>
+                                    <i class="fas fa-film aux-icon"></i><span>Cine Mode</span>
                                 </div>
                                 <div class="aux-desc">Avvia automaticamente un trailer cinematografico prima dello streaming.</div>
-                                <label class="cyber-toggle">
+                                <label class="cyber-switch-container">
                                     <input type="checkbox" id="enableTrailers" onchange="toggleAuxCard('card_trailer'); updateFluxStream()">
-                                    <span class="toggle-track"><span class="toggle-knob"></span><span class="label-off">OFF</span><span class="label-on">CINE ON</span></span>
+                                    <span class="cs-fill"></span>
+                                    <span class="cs-label cs-label-off">OFF</span>
+                                    <span class="cs-separator"></span>
+                                    <span class="cs-label cs-label-on">TRAILER</span>
                                 </label>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="faq-area">
-                <button class="btn-faq" onclick="openFaqModal()"><i class="fas fa-book-medical"></i> FAQ DATABASE</button>
-            </div>
+
             <div class="action-area">
                 <button class="btn-install" onclick="confirmInstall()">INIZIALIZZA SISTEMA <i class="fas fa-radiation"></i></button>
                 <button class="btn-copy" onclick="copyLink()"><i class="fas fa-copy"></i><span id="copyText">COPIA LINK</span></button>
