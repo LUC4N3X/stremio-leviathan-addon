@@ -663,7 +663,10 @@ async function queryLocalIndexer(meta, config) {
             if (results && Array.isArray(results) && results.length > 0) {
                 const cleanMeta = meta.title.toLowerCase().replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
                 const metaTitleShort = meta.title.split(/ - |: /)[0].toLowerCase().trim();
-                const allowEng = config && config.filters && config.filters.allowEng === true;
+                
+                // DETERMINE LANGUAGE MODE (Default: 'ita')
+                const langMode = config && config.filters ? (config.filters.language || (config.filters.allowEng ? "all" : "ita")) : "ita";
+                
                 return results.map(t => {
                     let finalHash = t.info_hash ? t.info_hash.trim().toUpperCase() : "";
                     if ((!finalHash || finalHash.length !== 40) && t.magnet) {
@@ -692,12 +695,17 @@ async function queryLocalIndexer(meta, config) {
                     const isKnaben = /knaben/i.test(item.source);
                     const isCorsaro = /corsaro/i.test(item.source);
                     
-                    if (!allowEng) {
-                        const isItalianTitle = isSafeForItalian(item);
-                        // Logica Draconiana anche qui: Se ENG è OFF, deve essere ITA o Corsaro.
-                        // Knaben non ha più salvacondotti speciali se non ha tag ITA.
-                        if (!isItalianTitle && !isCorsaro) return false;
+                    const isItalianTitle = isSafeForItalian(item);
+                    
+                    // --- DB FILTER LOGIC ---
+                    if (langMode === 'ita') {
+                         if (!isItalianTitle && !isCorsaro) return false;
                     }
+                    else if (langMode === 'eng') {
+                         // Se è palesemente italiano, lo escludiamo
+                         if (isItalianTitle) return false;
+                    }
+                    // else 'all': accept everything
 
                     if (/[а-яА-ЯёЁ]/.test(item.title)) return false;
 
@@ -771,13 +779,18 @@ async function queryRemoteIndexer(tmdbId, type, season = null, episode = null, c
             };
         });
 
-        const allowEng = config && config.filters && config.filters.allowEng === true;
+        const langMode = config && config.filters ? (config.filters.language || (config.filters.allowEng ? "all" : "ita")) : "ita";
+        
         return mapped.filter(item => {
              const isCorsaro = /corsaro/i.test(item.source);
-             if (!allowEng) {
-                 const isItalian = isSafeForItalian(item);
+             const isItalian = isSafeForItalian(item);
+
+             if (langMode === 'ita') {
                  if (!isItalian && !isCorsaro) return false;
+             } else if (langMode === 'eng') {
+                 if (isItalian) return false;
              }
+             // 'all' accepts everything
              return true;
         });
     } catch (e) {
@@ -867,7 +880,12 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   const tmdbIdLookup = meta.tmdb_id || (await imdbToTmdb(meta.imdb_id, userTmdbKey))?.tmdbId;
   const dbOnlyMode = config.filters?.dbOnly === true; 
 
-  // --- FILTRO AGGRESSIVO (COMPLETAMENTE RIFATTO e DRACONIANO) ---
+  // =========================================================
+  // LOGICA LINGUA UNIFICATA (ITA / ENG / ALL)
+  // =========================================================
+  const langMode = config.filters?.language || (config.filters?.allowEng ? "all" : "ita");
+
+  // --- FILTRO AGGRESSIVO (LOGICA A 3 VIE: ITA / ALL / ENG) ---
   const aggressiveFilter = (item) => {
       if (!item?.magnet) return false;
       
@@ -877,50 +895,53 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
 
       const t = item.title; 
       const tLower = t.toLowerCase();
-      const allowEng = config.filters?.allowEng === true;
-
+      
       // =========================================================
-      // REGOLA AUREA: SE ENG È OFF (!allowEng), SOLO ITA PASSA
+      // CASO 1: SOLO ITALIANO (Comportamento Classico)
       // =========================================================
-      if (!allowEng) {
-           // 1. "Corsaro" e altri gruppi noti italiani sono fidati a priori
+      if (langMode === "ita") {
            const isTrustedGroup = REGEX_TRUSTED_GROUPS.test(t) || /\bcorsaro\b/i.test(source);
            
            if (!isTrustedGroup) {
-               // 2. Controllo ITA Strong: 3 lettere (ITA/ITALIAN)
                const hasStrongIta = REGEX_STRONG_ITA.test(t) || REGEX_MULTI_ITA.test(t);
-
-               // 3. Controllo IT Context: 2 lettere (Audio IT, Lang IT)
                const hasContextIt = REGEX_CONTEXT_IT.test(t);
-
-               // 4. Controllo IT Isolated (Rischioso, ma filtrato dai falsi positivi)
                let hasIsolatedIt = false;
                if (REGEX_ISOLATED_IT.test(t)) {
-                   if (!REGEX_FALSE_IT.test(t)) {
-                        hasIsolatedIt = true; 
-                   }
+                   if (!REGEX_FALSE_IT.test(t)) hasIsolatedIt = true; 
                }
 
-               // SE NESSUNO DEI TRE CONTROLLI PASSA -> SCARTA IMMEDIATAMENTE
                if (!hasStrongIta && !hasContextIt && !hasIsolatedIt) return false;
 
-               // 5. Controllo Anti-Falsi Positivi per "Sub Only"
-               //    Se matchava SOLO perché c'era "SUB ITA" ma NON c'è "AUDIO ITA", scarta.
+               // Controllo Anti-Falsi Positivi (Sub Only)
                const looksLikeSubOnly = REGEX_SUB_ONLY.test(t);
                const hasConfirmedAudio = REGEX_AUDIO_CONFIRM.test(t);
-
                if (looksLikeSubOnly && !hasConfirmedAudio) {
-                   // Ultimo controllo: Se tolgo "SUB ITA", rimane un altro tag ITA valido?
                    const cleanTitleNoSub = t.replace(REGEX_SUB_ONLY, ""); 
-                   
-                   // Ricontrolliamo se nel titolo pulito c'è ancora traccia di ITA/IT vero
                    const stillHasStrong = REGEX_STRONG_ITA.test(cleanTitleNoSub);
                    const stillHasContext = REGEX_CONTEXT_IT.test(cleanTitleNoSub);
-                   
-                   if (!stillHasStrong && !stillHasContext) return false; // Era SOLO sottotitolato. SCARTA.
+                   if (!stillHasStrong && !stillHasContext) return false; 
                }
            }
       }
+      
+      // =========================================================
+      // CASO 2: SOLO INGLESE (Escludi attivamente l'Italiano)
+      // =========================================================
+      else if (langMode === "eng") {
+           // Se troviamo tag espliciti ITA, scartiamo il risultato.
+           
+           const hasStrongIta = REGEX_STRONG_ITA.test(t) || REGEX_MULTI_ITA.test(t);
+           const hasContextIt = REGEX_CONTEXT_IT.test(t);
+           const isTrustedItaGroup = REGEX_TRUSTED_GROUPS.test(t); // Es: Mux, Corsaro
+
+           // Se è palesemente italiano, via!
+           if (hasStrongIta || hasContextIt || isTrustedItaGroup) return false;
+      }
+
+      // =========================================================
+      // CASO 3: ITALIANO + INGLESE ("all")
+      // =========================================================
+      // Passiamo direttamente ai filtri successivi (Anno, Serie, Titolo).
       
       // --- FILTRO ANNO ---
       const metaYear = parseInt(meta.year);
@@ -1035,8 +1056,10 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       try {
           if (tmdbIdLookup) dynamicTitles = await getTmdbAltTitles(tmdbIdLookup, type, userTmdbKey);
       } catch (e) {}
-      const allowEng = config.filters?.allowEng === true;
-      const queries = generateSmartQueries(meta, dynamicTitles, allowEng);
+      
+      // Gli scraper devono cercare in inglese se la modalità è 'all' o 'eng'
+      const allowEngScraper = (langMode === "all" || langMode === "eng");
+      const queries = generateSmartQueries(meta, dynamicTitles, allowEngScraper);
       
       let scrapedResults = [];
       if (queries.length > 0) {
@@ -1044,7 +1067,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           queries.forEach(q => {
               SCRAPER_MODULES.forEach(scraper => {
                   if (scraper.searchMagnet) {
-                      const searchOptions = { allowEng };
+                      const searchOptions = { allowEng: allowEngScraper };
                       allScraperTasks.push(
                           LIMITERS.scraper.schedule(() => 
                               withTimeout(
