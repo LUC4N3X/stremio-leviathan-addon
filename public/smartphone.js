@@ -242,6 +242,11 @@ input:checked + .m-slider-pink:before { background-color: var(--m-cine); box-sha
 #m-sizeVal::-webkit-slider-thumb { background: var(--m-amber); box-shadow: 0 0 10px var(--m-amber); }
 .m-range-desc { font-size: 0.7rem; color: var(--m-dim); margin: 8px 0 0 5px; line-height: 1.4; border-left: 2px solid var(--m-dim); padding-left: 8px; }
 
+/* FIX FOR SIGNAL GATE & SIZE ROW ALIGNMENT */
+.m-row { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+.m-label { flex: 1; padding-right: 15px; }
+.m-label h4 { margin: 0; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #fff; font-family: 'Rajdhani'; font-weight: 700; }
+
 /* --- ACTIONS MODAL (NEW FOR COPY) --- */
 .m-action-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 5, 10, 0.95); z-index: 200; display: none; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(10px); padding: 20px; animation: fadeInModal 0.2s ease-out; }
 .m-action-modal.show { display: flex; }
