@@ -146,6 +146,11 @@ body::before {
 #sort-resolution.active i { color: var(--m-secondary); filter: drop-shadow(0 0 8px var(--m-secondary)); }
 #sort-size.active i { color: var(--m-amber); filter: drop-shadow(0 0 8px var(--m-amber)); }
 
+/* LANGUAGES COLORS */
+#lang-ita.active i { color: var(--m-success); filter: drop-shadow(0 0 8px var(--m-success)); }
+#lang-ita-eng.active i { color: var(--m-primary); filter: drop-shadow(0 0 8px var(--m-primary)); }
+#lang-eng.active i { color: var(--m-cine); filter: drop-shadow(0 0 8px var(--m-cine)); }
+
 /* QUALITY CHIPS */
 .m-hyp-label { font-size: 0.7rem; color: var(--m-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-family: 'Rajdhani'; font-weight: 700; }
 .m-chip-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 25px; }
@@ -567,7 +572,23 @@ const mobileHTML = `
                         </p>
                     </div>
 
-                    <div class="m-hyp-label">Resolution Filter (Exclude)</div>
+                    <div class="m-hyp-header" style="margin-top:15px; border-top:1px dashed rgba(255,255,255,0.1); padding-top:10px; margin-bottom:10px;">
+                         <span>AUDIO PRIORITY</span>
+                         <i class="fas fa-globe-americas m-hyp-icon"></i>
+                    </div>
+                    <div class="m-flux-group">
+                        <div class="m-tab-btn active" id="lang-ita" onclick="setLangMode('ita')">
+                            <i class="fas fa-flag"></i> ITA
+                        </div>
+                         <div class="m-tab-btn" id="lang-ita-eng" onclick="setLangMode('ita-eng')">
+                            <i class="fas fa-comments"></i> ITA+ENG
+                        </div>
+                         <div class="m-tab-btn" id="lang-eng" onclick="setLangMode('eng')">
+                            <i class="fas fa-flag-usa"></i> ENG
+                        </div>
+                    </div>
+
+                    <div class="m-hyp-label" style="margin-top:20px;">Resolution Filter (Exclude)</div>
                     <div class="m-chip-grid">
                         <div class="m-qual-chip" id="mq-4k" onclick="toggleFilter('mq-4k')">4K UHD</div>
                         <div class="m-qual-chip" id="mq-1080" onclick="toggleFilter('mq-1080')">1080p</div>
@@ -576,10 +597,6 @@ const mobileHTML = `
                     </div>
 
                     <div class="m-sys-grid">
-                        <div class="m-sys-row">
-                            <div class="m-sys-info"><h4><i class="fas fa-globe-americas" style="color:var(--m-primary)"></i> ENG Audio <span class="m-status-text" id="st-eng">OFF</span></h4><p>Include audio Inglese</p></div>
-                            <label class="m-switch"><input type="checkbox" id="m-allowEng" onchange="updateStatus('m-allowEng','st-eng')"><span class="m-slider"></span></label>
-                        </div>
                         <div class="m-sys-row">
                             <div class="m-sys-info"><h4><i class="fas fa-layer-group" style="color:var(--m-accent)"></i> AIO Mode <span class="m-status-text" id="st-aio">OFF</span></h4><p>Formatta per AIOStreams</p></div>
                             <label class="m-switch"><input type="checkbox" id="m-aioMode" onchange="updateStatus('m-aioMode','st-aio')"><span class="m-slider m-slider-purple"></span></label>
@@ -719,6 +736,7 @@ let mCurrentService = 'rd';
 let mScQuality = 'all';
 let mSortMode = 'balanced';
 let mSkin = 'leviathan';
+let mLangMode = 'ita';
 
 const fluxDescriptions = {
     'balanced': "L'algoritmo standard di Leviathan. Cerca il bilanciamento perfetto tra qualità, popolarità del file e velocità. Ideale per l'uso quotidiano.",
@@ -777,6 +795,10 @@ function selectMobileSkin(skinId) {
 }
 
 function updateMobilePreview() {
+    let langStr = "🇮🇹 ITA";
+    if(mLangMode === 'ita-eng') langStr = "🇮🇹 ITA 🇺🇸 ENG";
+    if(mLangMode === 'eng') langStr = "🇺🇸 ENG";
+
     const p = {
         title: "Dune Parte Due",
         cleanName: "Dune Parte Due (2024)",
@@ -786,7 +808,7 @@ function updateMobilePreview() {
         displaySource: "ilCorSaRoNeRo",
         serviceTag: mCurrentService.toUpperCase(),
         serviceIcon: mCurrentService === 'rd' ? "☄️" : (mCurrentService === 'tb' ? "📦" : "🦅"),
-        lang: "🇮🇹 ITA",
+        lang: langStr,
         audioInfo: "🔊 ⚡ Stereo",
         info: "💎 𝗥𝗘𝗠𝗨𝗫 • 🔥 𝗛𝗗𝗥 • 👁️ 𝗗𝗩 • ⚙️ 𝗛𝗘𝗩𝗖", 
         cleanInfo: "Remux • HDR • DV",
@@ -815,30 +837,30 @@ function updateMobilePreview() {
         desc = `🎬 ${titleBold}\n📦 ${sizeSmall} │ ʀᴇᴍᴜx │ ᴅᴏʟʙʏ ᴠɪsɪᴏɴ\n🔊 ${audioSmall} • 🇮🇹 ${langSmall}\n🔗 ${servSmall} │ ${srcSmall}`;
     } else if (mSkin === 'fra') {
         name = `⚡️ Leviathan 4K`;
-        desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ 🇮🇹 ITA • TrueHD\n✨ ❯ ${p.serviceTag} • ${p.source}\n🔥 ❯ 4K • Remux • HDR\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337`;
+        desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ ${p.lang} • TrueHD\n✨ ❯ ${p.serviceTag} • ${p.source}\n🔥 ❯ 4K • Remux • HDR\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337`;
     } else if (mSkin === 'comet') {
         name = `[${p.serviceTag} ⚡]\nLeviathan\n4K`;
-        desc = `📄 ${p.cleanName}\n📹 HEVC • ${p.cleanInfo} | TrueHD\n⭐ ${p.source}\n💾 ${p.sizeString} 👥 1337\n🌍 ITA`;
+        desc = `📄 ${p.cleanName}\n📹 HEVC • ${p.cleanInfo} | TrueHD\n⭐ ${p.source}\n💾 ${p.sizeString} 👥 1337\n🌍 ${p.lang}`;
     } else if (mSkin === 'stremio_ita') {
         name = `⚡️ Leviathan 4K`;
-        desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ ita • eng\n✨ ❯ ${p.serviceTag} • ${p.source}\n🔥 ❯ 4K • HEVC • ${p.cleanInfo}\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337\n🔉 ❯ TrueHD • 7.1`;
+        desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ ${p.lang}\n✨ ❯ ${p.serviceTag} • ${p.source}\n🔥 ❯ 4K • HEVC • ${p.cleanInfo}\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337\n🔉 ❯ TrueHD • 7.1`;
     } else if (mSkin === 'dav') {
         name = `🎥4K UHD HEVC`;
-        desc = `📺 ${p.cleanName}\n🎧 TrueHD 7.1 | 🎞️ HEVC\n🗣️ ITA | 📦 ${p.sizeString}\n⏱️ 1337 Seeds | 🏷️ ${p.source}\n${p.serviceIcon} Leviathan 📡 ${p.serviceTag}\n📂 ${p.title}`;
+        desc = `📺 ${p.cleanName}\n🎧 TrueHD 7.1 | 🎞️ HEVC\n🗣️ ${p.lang} | 📦 ${p.sizeString}\n⏱️ 1337 Seeds | 🏷️ ${p.source}\n${p.serviceIcon} Leviathan 📡 ${p.serviceTag}\n📂 ${p.title}`;
     } else if (mSkin === 'and') {
         name = `🎬 ${p.cleanName}`;
-        desc = `4K ⚡\n─ ─ ─ ─ ─ ─ ─ ─ ─ ─\nLingue: 🇮🇹\nSpecifiche: 4K | 📺 Remux HDR | 🔊 TrueHD\n─ ─ ─ ─ ─ ─ ─ ─ ─ ─\n📂 ${p.sizeString} | ☁️ ${p.serviceTag} | 🛰️ Leviathan`;
+        desc = `4K ⚡\n─ ─ ─ ─ ─ ─ ─ ─ ─ ─\nLingue: ${p.lang}\nSpecifiche: 4K | 📺 Remux HDR | 🔊 TrueHD\n─ ─ ─ ─ ─ ─ ─ ─ ─ ─\n📂 ${p.sizeString} | ☁️ ${p.serviceTag} | 🛰️ Leviathan`;
     } else if (mSkin === 'lad') {
         name = `🖥️ 4K ${p.serviceTag}`;
-        desc = `🎟️ ${p.cleanName}\n📜 Movie\n🎥 4K 🎞️ HEVC 🎧 TrueHD\n📦 ${p.sizeString} • 🔗 Leviathan\n🌐 🇮🇹`;
+        desc = `🎟️ ${p.cleanName}\n📜 Movie\n🎥 4K 🎞️ HEVC 🎧 TrueHD\n📦 ${p.sizeString} • 🔗 Leviathan\n🌐 ${p.lang}`;
     } else if (mSkin === 'pri') {
         name = `[${p.serviceTag}]⚡️☁️\n4K🔥UHD\n[Leviathan]`;
-        desc = `🎬 ${toStylized(p.cleanName, 'bold')}\n💎 ʀᴇᴍᴜx 🔆 HDR\n🎧 TrueHD | 🔊 7.1 | 🗣️ ITA\n📁 ${p.sizeString} | 🏷️ ${p.source}\n📄 ▶️ ${p.title} ◀️`;
+        desc = `🎬 ${toStylized(p.cleanName, 'bold')}\n💎 ʀᴇᴍᴜx 🔆 HDR\n🎧 TrueHD | 🔊 7.1 | 🗣️ ${p.lang}\n📁 ${p.sizeString} | 🏷️ ${p.source}\n📄 ▶️ ${p.title} ◀️`;
     } else if (mSkin === 'custom') {
         let tpl = document.getElementById('m-customTemplate').value || "Lev {quality} ||| {title} - {size}";
         tpl = tpl.replace("{title}", p.cleanName).replace("{quality}", p.quality)
                  .replace("{size}", p.sizeString).replace("{source}", p.source)
-                 .replace("{service}", p.serviceTag).replace("{lang}", "ITA")
+                 .replace("{service}", p.serviceTag).replace("{lang}", p.lang)
                  .replace("{audio}", p.audioInfo).replace(/\\n/g, "\n");
         if (tpl.includes("|||")) {
             const parts = tpl.split("|||");
@@ -988,6 +1010,20 @@ function updateStatus(inputId, statusId) {
     if(inputId === 'm-enableVix') toggleScOptions();
     if(inputId === 'm-aioMode') toggleMobileAIOLock();
     checkWebPriorityVisibility();
+    updateLinkModalContent();
+    if(navigator.vibrate) navigator.vibrate(10);
+}
+
+function setLangMode(mode) {
+    mLangMode = mode;
+    ['ita', 'ita-eng', 'eng'].forEach(m => {
+        const btn = document.getElementById('lang-' + m);
+        if(btn) {
+            if(m === mode) btn.classList.add('active');
+            else btn.classList.remove('active');
+        }
+    });
+    updateMobilePreview();
     updateLinkModalContent();
     if(navigator.vibrate) navigator.vibrate(10);
 }
@@ -1194,7 +1230,14 @@ function loadMobileConfig() {
                 document.getElementById('m-enableWebStreamr').checked = config.filters.enableWebStreamr !== false;
                 toggleModuleStyle('m-enableWebStreamr', 'mod-webstr');
 
-                document.getElementById('m-allowEng').checked = config.filters.allowEng || false;
+                // NEW LANGUAGE LOGIC
+                if(config.filters.language) {
+                    setLangMode(config.filters.language);
+                } else {
+                    // Fallback to legacy
+                    setLangMode(config.filters.allowEng ? 'ita-eng' : 'ita');
+                }
+
                 document.getElementById('m-enableTrailers').checked = config.filters.enableTrailers || false;
                 
                 if(config.filters.vixLast) {
@@ -1232,7 +1275,6 @@ function loadMobileConfig() {
             updateStatus('m-enableVix', 'st-vix');
             updateStatus('m-enableGhd', 'st-ghd');
             updateStatus('m-enableGs', 'st-gs');
-            updateStatus('m-allowEng', 'st-eng');
             updateStatus('m-aioMode', 'st-aio');
             updateStatus('m-enableTrailers', 'st-trailer');
             updateGhostVisuals();
@@ -1266,7 +1308,8 @@ function getMobileConfig() {
             proxyDebrid: document.getElementById('m-proxyDebrid').checked
         },
         filters: {
-            allowEng: document.getElementById('m-allowEng').checked,
+            language: mLangMode,
+            allowEng: (mLangMode === 'ita-eng' || mLangMode === 'eng'), // Compatibilità retroattiva
             no4k: document.getElementById('mq-4k').classList.contains('excluded'),
             no1080: document.getElementById('mq-1080').classList.contains('excluded'),
             no720: document.getElementById('mq-720').classList.contains('excluded'),
