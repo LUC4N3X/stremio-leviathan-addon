@@ -19,7 +19,7 @@
             --text-dim: #8baac2;
             --error: #ff3366;
             --warning: #ffcc00;
-            --limit-neon: #ff0055; 
+            --limit-neon: #00f2ff; 
             --glow-strong: 0 0 10px rgba(0, 242, 255, 0.3);
             --glow-intense: 0 0 20px rgba(0, 242, 255, 0.4);
         }
@@ -59,7 +59,7 @@
             100% { transform: translateY(-20vh) scale(1.2) rotate(360deg); opacity: 0; }
         }
         
-        .main-wrapper { width: 100%; max-width: 900px; padding: 30px; position: relative; z-index: 1; margin: 60px 0; }
+        .main-wrapper { width: 100%; max-width: 1400px; padding: 30px; position: relative; z-index: 1; margin: 60px 0; }
         
         header { text-align: center; margin-bottom: 60px; position: relative; }
         
@@ -213,23 +213,14 @@
         .q-btn:hover { background: rgba(255,255,255,0.1); }
         .q-btn.active { background: rgba(112, 0, 255, 0.2); border-color: var(--secondary); color: #fff; box-shadow: 0 0 5px rgba(112, 0, 255, 0.2); }
 
-        .gate-card { background: rgba(10, 0, 20, 0.6); border: 1px solid rgba(112, 0, 255, 0.2); border-radius: 12px; padding: 15px 25px; display: flex; align-items: center; justify-content: space-between; transition: 0.3s ease; position: relative; overflow: hidden; margin-bottom: 20px; }
-        .gate-card::before { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 4px; background: #444; transition: 0.3s; }
-        .gate-card.active { background: linear-gradient(90deg, rgba(112, 0, 255, 0.1), rgba(0, 0, 0, 0)); border-color: var(--secondary); box-shadow: 0 0 10px rgba(112, 0, 255, 0.1); }
-        .gate-card.active::before { background: var(--secondary); box-shadow: 0 0 5px var(--secondary); }
-        .gate-left { display: flex; align-items: center; gap: 15px; }
-        .gate-icon { font-size: 1.5rem; color: #666; transition: 0.3s; }
-        .gate-card.active .gate-icon { color: var(--secondary); filter: drop-shadow(0 0 5px var(--secondary)); }
-        .gate-info h4 { margin: 0; font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; text-transform: uppercase; color: #ccc; }
-        .gate-info p { margin: 3px 0 0; font-size: 0.8rem; color: #888; }
-        .gate-controls { display: flex; align-items: center; gap: 20px; opacity: 0.5; pointer-events: none; transition: 0.3s; filter: grayscale(1); }
-        .gate-card.active .gate-controls { opacity: 1; pointer-events: auto; filter: grayscale(0); }
-        .digital-val { font-family: 'Rajdhani', sans-serif; font-weight: 800; font-size: 1.8rem; color: var(--secondary); min-width: 40px; text-align: center; text-shadow: 0 0 10px var(--secondary); }
-        .gate-slider { -webkit-appearance: none; width: 120px; height: 6px; background: #333; border-radius: 5px; outline: none; }
-        .gate-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #888; cursor: pointer; transition: 0.2s; }
-        .gate-card.active .gate-slider { background: linear-gradient(90deg, var(--secondary), #333); }
-        .gate-card.active .gate-slider::-webkit-slider-thumb { background: var(--secondary); box-shadow: 0 0 5px var(--secondary); transform: scale(1.1); }
-        
+        /* --- PROXY BADGE --- */
+        .proxy-tag {
+            display: inline-block; padding: 2px 8px; margin-left: 10px;
+            border: 1px solid var(--text-dim); border-radius: 4px; color: var(--text-dim);
+            font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.75rem; letter-spacing: 1px;
+            text-transform: uppercase; background: rgba(255,255,255,0.05);
+        }
+
         .section-header { margin: 50px 0 25px; font-family: 'Rajdhani', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 4px; border-left: 4px solid var(--primary); padding-left: 20px; text-shadow: 0 0 10px var(--primary-dim); }
         
         .spectrum-container { background: rgba(0, 5, 10, 0.6); border: 1px solid rgba(0, 242, 255, 0.15); border-radius: 15px; padding: 20px; position: relative; overflow: hidden; margin-bottom: 20px; }
@@ -243,48 +234,119 @@
         #flux-info-box { transition: opacity 0.2s ease-in-out; }
         .spec-btn i { margin-right: 8px; }
 
-        .limit-card {
-            background: linear-gradient(145deg, rgba(20, 0, 10, 0.6), rgba(0, 0, 0, 0.8)); border: 1px solid rgba(255, 0, 85, 0.3);
-            border-radius: 12px; padding: 20px; display: flex; align-items: center; margin-bottom: 20px;
-            position: relative; overflow: hidden; transition: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            box-shadow: inset 0 0 10px rgba(255, 0, 85, 0.03);
+        /* --- UNIFIED FILTER BLOCK --- */
+        .filter-unit {
+            background: linear-gradient(145deg, rgba(5, 10, 20, 0.9), rgba(0, 0, 0, 0.95));
+            border: 1px solid rgba(112, 0, 255, 0.25); border-radius: 16px; padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(112, 0, 255, 0.05);
+            position: relative; margin-bottom: 25px; overflow: hidden;
         }
-        .limit-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--limit-neon); box-shadow: 0 0 10px var(--limit-neon); }
-        .limit-card:hover { border-color: var(--limit-neon); box-shadow: 0 0 15px rgba(255, 0, 85, 0.1), inset 0 0 15px rgba(255, 0, 85, 0.05); transform: scale(1.01); }
-        .limit-icon { font-size: 1.8rem; color: var(--limit-neon); margin-right: 20px; filter: drop-shadow(0 0 5px var(--limit-neon)); animation: pulseLimit 4s infinite; }
-        @keyframes pulseLimit { 0% { opacity: 0.8; } 50% { opacity: 1; filter: drop-shadow(0 0 10px var(--limit-neon)); } 100% { opacity: 0.8; } }
-        .limit-info h4 { margin: 0; font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; text-transform: uppercase; color: #fff; text-shadow: 0 0 5px rgba(255, 0, 85, 0.3); }
-        .limit-info p { margin: 4px 0 0; color: #aaa; font-size: 0.85rem; }
-        .limit-slider { -webkit-appearance: none; width: 100%; height: 6px; background: #2a0a15; border-radius: 10px; outline: none; border: 1px solid rgba(255, 0, 85, 0.2); }
-        .limit-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #000; border: 2px solid var(--limit-neon); box-shadow: 0 0 10px var(--limit-neon), inset 0 0 3px var(--limit-neon); cursor: pointer; transition: 0.2s; transform: translateY(-1px); }
-        .limit-slider::-webkit-slider-thumb:hover { transform: scale(1.1); background: var(--limit-neon); box-shadow: 0 0 15px var(--limit-neon); }
+        .filter-unit::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary));
+            animation: borderFlow 5s infinite linear; background-size: 200% 100%;
+        }
+        @keyframes borderFlow { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+        
+        .unit-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .unit-title {
+            font-family: 'Rajdhani', sans-serif; font-size: 1.3rem; font-weight: 800; color: #fff; letter-spacing: 2px;
+            text-transform: uppercase; display: flex; align-items: center; gap: 10px;
+        }
+        .filter-row { margin-bottom: 35px; } /* More space between rows */
+        .filter-row:last-child { margin-bottom: 0; }
+        
+        .header-with-desc { margin-bottom: 15px; }
+        .f-label {
+            font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; color: var(--secondary); font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px; display: block;
+        }
+        .f-desc-mini {
+            display: block; font-size: 0.8rem; color: var(--text-dim); margin-top: 3px;
+        }
 
+        /* GATE & LIMITER SLIDERS */
+        .gate-integrated { display: flex; align-items: center; gap: 15px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
+        .gate-val-box {
+            min-width: 50px; text-align: center; font-family: 'Rajdhani', sans-serif; font-weight: 800; font-size: 1.3rem;
+            color: var(--secondary); text-shadow: 0 0 5px rgba(112, 0, 255, 0.3);
+        }
+        .gate-slider-new {
+            -webkit-appearance: none; width: 100%; height: 6px; background: #222; border-radius: 5px; outline: none; flex-grow: 1; border: 1px solid #333;
+        }
+        .gate-slider-new::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #111; cursor: pointer; transition: 0.2s;
+            border: 2px solid var(--secondary); box-shadow: 0 0 10px var(--secondary);
+        }
+        .gate-integrated:hover .gate-slider-new::-webkit-slider-thumb { transform: scale(1.1); background: var(--secondary); }
+        
+        /* Limiter specific colors (Cyan) */
+        .limiter-style .gate-val-box { color: var(--primary); text-shadow: 0 0 5px rgba(0, 242, 255, 0.3); }
+        .limiter-style .gate-slider-new::-webkit-slider-thumb { border-color: var(--primary); box-shadow: 0 0 10px var(--primary); }
+        .limiter-style:hover .gate-slider-new::-webkit-slider-thumb { background: var(--primary); }
+
+        /* --- REDESIGNED AUX CARDS --- */
         .aux-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
-        .aux-card { background: linear-gradient(145deg, rgba(5, 15, 25, 0.8), rgba(0, 0, 0, 0.9)); border: 1px solid rgba(0, 242, 255, 0.15); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; transition: 0.3s ease; display: flex; flex-direction: column; justify-content: space-between; }
-        .aux-card:hover { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 242, 255, 0.05); transform: translateY(-2px); }
-        .status-led { width: 8px; height: 8px; background-color: #333; border-radius: 50%; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1); margin-right: 10px; transition: 0.3s ease; }
-        .aux-card.active .status-led { background-color: var(--primary); box-shadow: 0 0 5px var(--primary); }
-        .aux-header { display: flex; align-items: center; margin-bottom: 10px; font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 1px; }
-        .aux-icon { font-size: 1.4rem; margin-right: 12px; color: var(--text-dim); transition: 0.3s; }
-        .aux-card.active .aux-icon { color: var(--primary); filter: drop-shadow(0 0 5px var(--primary)); }
-        .aux-desc { font-size: 0.85rem; color: var(--text-dim); line-height: 1.4; margin-bottom: 20px; flex-grow: 1; }
         
-        .cyber-toggle { position: relative; display: block; width: 100%; height: 40px; cursor: pointer; }
-        .cyber-toggle input { display: none; }
-        .toggle-track { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; transition: 0.3s; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.9rem; color: var(--text-dim); }
-        .toggle-knob { position: absolute; top: 3px; bottom: 3px; left: 3px; width: 50%; background: #333; border-radius: 4px; transition: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 1; }
-        .cyber-toggle input:checked + .toggle-track { border-color: var(--primary); background: rgba(0, 242, 255, 0.05); }
-        .cyber-toggle input:checked + .toggle-track .toggle-knob { left: calc(50% - 3px); background: var(--primary); box-shadow: 0 0 10px var(--primary); }
-        .label-on, .label-off { z-index: 2; transition: 0.3s; width: 50%; text-align: center; }
-        .cyber-toggle input:checked + .toggle-track .label-on { color: #000; text-shadow: none; }
-        .cyber-toggle input:checked + .toggle-track .label-off { color: var(--text-dim); }
+        .aux-card {
+            background: linear-gradient(160deg, rgba(10, 15, 20, 0.9), rgba(5, 5, 5, 0.95));
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px; padding: 25px;
+            display: flex; flex-direction: column; justify-content: space-between;
+            position: relative; overflow: hidden; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
         
-        .aio-card.active .status-led { background-color: var(--secondary); box-shadow: 0 0 5px var(--secondary); }
-        .aio-card.active .aux-icon { color: var(--secondary); filter: drop-shadow(0 0 5px var(--secondary)); }
-        .aio-card:hover { border-color: var(--secondary); }
-        .aio-toggle input:checked + .toggle-track { border-color: var(--secondary); background: rgba(112, 0, 255, 0.05); }
-        .aio-toggle input:checked + .toggle-track .toggle-knob { background: var(--secondary); box-shadow: 0 0 10px var(--secondary); }
+        /* Scanline effect */
+        .aux-card::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.3) 3px);
+            opacity: 0.2; pointer-events: none;
+        }
 
+        .aux-card:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.2); }
+        
+        .aux-card.active { border-color: var(--primary); box-shadow: 0 0 20px rgba(0, 242, 255, 0.15), inset 0 0 20px rgba(0, 242, 255, 0.05); }
+        .aio-card.active { border-color: var(--secondary); box-shadow: 0 0 20px rgba(112, 0, 255, 0.15), inset 0 0 20px rgba(112, 0, 255, 0.05); }
+
+        .aux-header { display: flex; align-items: center; margin-bottom: 12px; font-family: 'Rajdhani', sans-serif; font-size: 1.15rem; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 1.5px; z-index: 2; }
+        .aux-icon { font-size: 1.3rem; margin-right: 12px; color: #555; transition: 0.4s; }
+        .aux-card.active .aux-icon { color: var(--primary); text-shadow: 0 0 10px var(--primary); transform: scale(1.1); }
+        .aio-card.active .aux-icon { color: var(--secondary); text-shadow: 0 0 10px var(--secondary); }
+
+        .aux-desc { font-size: 0.85rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 25px; flex-grow: 1; z-index: 2; opacity: 0.8; font-weight: 300; }
+        
+        /* New Cyber Toggle */
+        .cyber-toggle { position: relative; display: block; width: 100%; height: 42px; cursor: pointer; z-index: 2; }
+        .cyber-toggle input { display: none; }
+        
+        .toggle-track {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: #050a10; border: 1px solid #333; border-radius: 6px;
+            transition: 0.3s; display: flex; align-items: center; justify-content: space-between; padding: 0;
+            font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.9rem; color: #555;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+        }
+        
+        .toggle-knob {
+            position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 6px);
+            background: #252525; border-radius: 4px; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .cyber-toggle input:checked + .toggle-track { border-color: var(--primary); }
+        .cyber-toggle input:checked + .toggle-track .toggle-knob { left: 50%; background: var(--primary); box-shadow: 0 0 15px var(--primary); border-color: #fff; }
+        
+        .aio-toggle input:checked + .toggle-track { border-color: var(--secondary); }
+        .aio-toggle input:checked + .toggle-track .toggle-knob { background: var(--secondary); box-shadow: 0 0 15px var(--secondary); }
+
+        .label-on, .label-off { z-index: 2; transition: 0.3s; width: 50%; text-align: center; pointer-events: none; }
+        .cyber-toggle input:checked + .toggle-track .label-on { color: #000; font-weight: 800; }
+        .cyber-toggle input:checked + .toggle-track .label-off { color: #333; }
+        
         /* --- VISUAL CORE STYLES (HERO LAYOUT) --- */
         .visual-core-hero { margin-bottom: 40px; border-bottom: 1px solid rgba(0, 242, 255, 0.1); padding-bottom: 20px; position: relative; }
         
@@ -506,7 +568,13 @@
 
         @media (min-width: 1024px) {
             .main-wrapper { max-width: 1400px; }
-            .desktop-grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+            /* -- CYBER DIVIDER LOGIC -- */
+            .desktop-grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; position: relative; }
+            .desktop-grid-container::after {
+                content: ''; position: absolute; top: 0; bottom: 0; left: 50%; width: 1px;
+                background: linear-gradient(to bottom, transparent, rgba(0, 242, 255, 0.1), var(--secondary), rgba(0, 242, 255, 0.1), transparent);
+                box-shadow: 0 0 10px rgba(112, 0, 255, 0.3); transform: translateX(-50%);
+            }
             .action-area { flex-direction: row; }
             .skin-selector-container { grid-template-columns: repeat(5, 1fr); }
         }
@@ -528,10 +596,6 @@
             .glass-panel, .logo-container, .modal-backdrop { background: rgba(0, 5, 10, 0.98) !important; }
             .particles { display: none !important; } 
             .action-area { flex-direction: column; }
-            .gate-card { flex-direction: column; gap: 15px; align-items: stretch; text-align: center; padding: 20px !important; }
-            .gate-left { flex-direction: column; gap: 10px; width: 100%; justify-content: center; }
-            .gate-controls { justify-content: center; width: 100%; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
-            .gate-slider { width: 100% !important; margin-right: 0; flex-grow: 1; }
             .service-tabs { display: grid !important; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 8px; }
             .service-tab { padding: 10px 4px; min-width: 0; }
             .hub-grid { flex-direction: column; align-items: stretch; }
@@ -711,7 +775,7 @@
                         <div class="control-row">
                             <div class="control-info">
                                 <div class="control-title notranslate" translate="no"><i class="fas fa-play-circle" style="color: var(--secondary)"></i> StreamingCommunity</div>
-                                <span class="control-desc">Scraper web alta velocità.</span>
+                                <span class="control-desc">Accesso diretto ai server di StreamingCommunity. Massima priorità e velocità.</span>
                             </div>
                             <label class="switch mf-switch"><input type="checkbox" id="enableVix" onchange="checkWebVisibility(); updateFluxStream()"><span class="slider"></span></label>
                         </div>
@@ -723,20 +787,29 @@
                                 <div class="q-btn" id="btnQ_720" onclick="setSCQuality('720')">Solo 720p</div>
                             </div>
                         </div>
+                        
                         <div class="control-row">
                             <div class="control-info">
-                                <div class="control-title notranslate" translate="no"><i class="fas fa-film" style="color: #ff9900"></i> GuardaHD</div>
-                                <span class="control-desc">Richiede <strong>OBBLIGATORIAMENTE</strong> MediaFlow Proxy.</span>
+                                <div class="control-title notranslate" translate="no">
+                                    <i class="fas fa-film" style="color: #ff9900"></i> GuardaHD 
+                                    <span class="proxy-tag">PROXY</span>
+                                </div>
+                                <span class="control-desc">Scraper ibrido Film & Serie TV. Ideale per contenuti in alta definizione.</span>
                             </div>
                             <label class="switch mf-switch"><input type="checkbox" id="enableGhd" onchange="checkWebVisibility(); updateFluxStream()"><span class="slider"></span></label>
                         </div>
+
                         <div class="control-row">
                             <div class="control-info">
-                                <div class="control-title notranslate" translate="no"><i class="fas fa-tv" style="color: #aa00ff"></i> GuardaSerie</div>
-                                <span class="control-desc">Richiede <strong>OBBLIGATORIAMENTE</strong> MediaFlow Proxy.</span>
+                                <div class="control-title notranslate" translate="no">
+                                    <i class="fas fa-tv" style="color: #aa00ff"></i> GuardaSerie
+                                    <span class="proxy-tag">PROXY</span>
+                                </div>
+                                <span class="control-desc">Tracker dedicato per Serie TV. Aggiornamento rapido nuovi episodi.</span>
                             </div>
                             <label class="switch mf-switch"><input type="checkbox" id="enableGs" onchange="checkWebVisibility(); updateFluxStream()"><span class="slider"></span></label>
                         </div>
+
                         <div class="control-row sub-row" id="webPriorityRow" style="display:none; margin-top:15px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top:10px;">
                              <div class="control-info">
                                  <div class="control-title"><i class="fas fa-sort-amount-down"></i> Gerarchia Sorgenti</div>
@@ -801,53 +874,56 @@
                             <input type="hidden" id="sortMode" value="balanced">
                         </div>
                         
-                        <div class="limit-card" id="sizeModule">
-                            <div class="gate-left" style="width: 100%;">
-                                <i class="fas fa-weight-hanging limit-icon"></i>
-                                <div class="limit-info" style="flex: 1;">
-                                    <h4>LIMITATORE PESO (GB)</h4>
-                                    <p>Escludi file superiori a <span id="sizeDisplay" style="color: var(--limit-neon); font-weight:800; font-size: 1.2rem;">∞</span> GB</p>
-                                </div>
-                                <div class="gate-controls" style="opacity: 1; pointer-events: auto; filter: none; margin-left: 15px;">
-                                    <input type="range" min="0" max="100" step="1" value="0" class="limit-slider" id="maxSizeSlider" oninput="updateSizeVal(this.value); updateFluxStream()" style="width: 130px;">
-                                </div>
+                        <div class="filter-unit">
+                            <div class="unit-header">
+                                <div class="unit-title"><i class="fas fa-layer-group" style="color:var(--primary)"></i> UNITÀ ELABORAZIONE SEGNALE</div>
                             </div>
-                        </div>
 
-                        <div class="spectrum-container">
-                            <div class="spectrum-header" style="align-items: flex-start; flex-direction: column; gap: 5px;">
-                                <span style="display: flex; align-items: center; gap: 10px;"><i class="fas fa-filter"></i> FILTRO QUALITÀ VIDEO</span>
-                                <span class="spectrum-desc">Clicca per <strong>escludere</strong> risoluzioni.</span>
-                            </div>
-                            <div class="spectrum-grid">
-                                <div class="spec-btn active" id="btn_4k" onclick="toggleSpectrum('btn_4k')">4K UHD</div>
-                                <div class="spec-btn active" id="btn_1080" onclick="toggleSpectrum('btn_1080')">1080p</div>
-                                <div class="spec-btn active" id="btn_720" onclick="toggleSpectrum('btn_720')">720p</div>
-                                <div class="spec-btn active" id="btn_sd" onclick="toggleSpectrum('btn_sd')">SD / CAM</div>
-                            </div>
-                        </div>
-
-                        <div class="gate-card" id="gateCard">
-                            <div class="gate-left">
-                                <i class="fas fa-compress-arrows-alt gate-icon"></i>
-                                <div class="gate-info">
-                                    <h4>SIGNAL GATE</h4>
-                                    <p>Limita risultati per qualità</p>
+                            <div class="filter-row">
+                                <div class="header-with-desc">
+                                    <span class="f-label">FILTRO RISOLUZIONE (Escludi)</span>
+                                    <span class="f-desc-mini">Rimuove le qualità selezionate dai risultati.</span>
                                 </div>
-                                <label class="switch gate-switch"><input type="checkbox" id="gateActive" onchange="toggleGate(); updateFluxStream()"><span class="slider"></span></label>
+                                <div class="spectrum-grid">
+                                    <div class="spec-btn active" id="btn_4k" onclick="toggleSpectrum('btn_4k')">4K UHD</div>
+                                    <div class="spec-btn active" id="btn_1080" onclick="toggleSpectrum('btn_1080')">1080p</div>
+                                    <div class="spec-btn active" id="btn_720" onclick="toggleSpectrum('btn_720')">720p</div>
+                                    <div class="spec-btn active" id="btn_sd" onclick="toggleSpectrum('btn_sd')">SD/CAM</div>
+                                </div>
                             </div>
-                            <div class="gate-controls" id="gateControls">
-                                <input type="range" min="1" max="10" value="3" class="gate-slider" id="gateSlider" oninput="updateGateVal(this.value); updateFluxStream()">
-                                <span class="digital-val" id="gateDisplay">∞</span>
+
+                            <div class="filter-row">
+                                <div class="header-with-desc">
+                                    <span class="f-label">LIMITATORE PESO (Max GB)</span>
+                                    <span class="f-desc-mini">Filtra i file che superano la dimensione impostata.</span>
+                                </div>
+                                <div class="gate-integrated limiter-style" id="sizeWrapper">
+                                    <div class="gate-val-box" id="sizeDisplay">∞</div>
+                                    <input type="range" min="0" max="100" step="1" value="0" class="gate-slider-new" id="maxSizeSlider" oninput="updateSizeVal(this.value); updateFluxStream()">
+                                </div>
+                            </div>
+
+                            <div class="filter-row">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:5px;">
+                                    <div class="header-with-desc" style="margin-bottom:0;">
+                                        <span class="f-label" style="margin:0;">SIGNAL GATE</span>
+                                        <span class="f-desc-mini">Imposta un tetto massimo di risultati per ogni risoluzione.</span>
+                                    </div>
+                                    <label class="switch" style="transform:scale(0.8); margin:0;"><input type="checkbox" id="gateActive" onchange="toggleGate(); updateFluxStream()"><span class="slider"></span></label>
+                                </div>
+                                <div class="gate-integrated" id="gateWrapper">
+                                    <div class="gate-val-box" id="gateDisplay">∞</div>
+                                    <input type="range" min="1" max="20" value="5" class="gate-slider-new" id="gateSlider" oninput="updateGateVal(this.value); updateFluxStream()">
+                                </div>
                             </div>
                         </div>
 
                         <div class="aux-grid">
                             <div class="aux-card" id="card_audio">
                                 <div class="aux-header">
-                                    <div class="status-led"></div><i class="fas fa-globe-americas aux-icon"></i><span>ESTENSIONE LINGUA</span>
+                                    <i class="fas fa-globe-americas aux-icon"></i><span>ESTENSIONE LINGUA</span>
                                 </div>
-                                <div class="aux-desc">Cerca file in <strong>Inglese</strong> oltre a quelli in Italiano.</div>
+                                <div class="aux-desc">Cerca file in <strong>Inglese</strong> oltre a quelli in Italiano per aumentare i risultati.</div>
                                 <label class="cyber-toggle">
                                     <input type="checkbox" id="allowEng" onchange="toggleAuxCard('card_audio'); updateFluxStream()">
                                     <span class="toggle-track"><span class="toggle-knob"></span><span class="label-off">SOLO ITA</span><span class="label-on">ITA + ENG</span></span>
@@ -855,9 +931,9 @@
                             </div>
                             <div class="aux-card aio-card" id="card_aio">
                                 <div class="aux-header">
-                                    <div class="status-led"></div><i class="fas fa-stream aux-icon"></i><span>COMPATIBILITÀ AIO</span>
+                                    <i class="fas fa-stream aux-icon"></i><span>COMPATIBILITÀ AIO</span>
                                 </div>
-                                <div class="aux-desc">Ottimizza lista risultati per <strong>AIOStreams</strong>.</div>
+                                <div class="aux-desc">Ottimizza la lista risultati specificamente per l'addon <strong>AIOStreams</strong>.</div>
                                 <label class="cyber-toggle aio-toggle">
                                     <input type="checkbox" id="aiostreams_mode" onchange="toggleAuxCard('card_aio'); toggleAIOLock(); updateFluxStream()">
                                     <span class="toggle-track"><span class="toggle-knob"></span><span class="label-off">DISABILITA</span><span class="label-on">ABILITA</span></span>
@@ -865,9 +941,9 @@
                             </div>
                             <div class="aux-card" id="card_trailer">
                                 <div class="aux-header">
-                                    <div class="status-led"></div><i class="fas fa-film aux-icon"></i><span>TRAILER PROTOCOL</span>
+                                    <i class="fas fa-film aux-icon"></i><span>TRAILER PROTOCOL</span>
                                 </div>
-                                <div class="aux-desc">Visualizza anteprima video prima dello streaming.</div>
+                                <div class="aux-desc">Avvia automaticamente un trailer cinematografico prima dello streaming.</div>
                                 <label class="cyber-toggle">
                                     <input type="checkbox" id="enableTrailers" onchange="toggleAuxCard('card_trailer'); updateFluxStream()">
                                     <span class="toggle-track"><span class="toggle-knob"></span><span class="label-off">OFF</span><span class="label-on">CINE ON</span></span>
@@ -1227,15 +1303,19 @@
 
         function toggleGate() {
             const active = document.getElementById('gateActive').checked;
-            const card = document.getElementById('gateCard');
+            const wrap = document.getElementById('gateWrapper');
             const display = document.getElementById('gateDisplay');
             const slider = document.getElementById('gateSlider');
-            if (active) { card.classList.add('active'); display.innerText = slider.value; } 
-            else { card.classList.remove('active'); display.innerText = "∞"; }
+            if (active) { wrap.classList.add('active'); display.innerText = slider.value; } 
+            else { wrap.classList.remove('active'); display.innerText = "∞"; }
         }
 
         function updateGateVal(val) { document.getElementById('gateDisplay').innerText = val; }
-        function updateSizeVal(val) { document.getElementById('sizeDisplay').innerText = (val == 0) ? "∞" : val; }
+        
+        function updateSizeVal(val) { 
+            const display = document.getElementById('sizeDisplay');
+            display.innerText = (val == 0) ? "∞" : val;
+        }
 
         function toggleAuxCard(cardId) {
             const card = document.getElementById(cardId);
@@ -1291,6 +1371,9 @@
                         if (config.filters.maxSizeGB) {
                             document.getElementById('maxSizeSlider').value = config.filters.maxSizeGB;
                             updateSizeVal(config.filters.maxSizeGB);
+                        } else {
+                            document.getElementById('maxSizeSlider').value = 0;
+                            updateSizeVal(0);
                         }
                         if (document.getElementById('allowEng').checked) document.getElementById('card_audio').classList.add('active');
                         if (document.getElementById('enableTrailers').checked) document.getElementById('card_trailer').classList.add('active');
