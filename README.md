@@ -366,11 +366,4 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
   <sub style="color: grey;">Leviathan Project © 2025 • Evolution Guaranteed</sub>
 </div>
 <br>
-<div align="center">
-  <sub style="color: grey;">Leviathan Project © 2025 • Evolution Guaranteed</sub>
-</div>
 
-<br>
-<div align="center">
-  <sub style="color: grey;">Leviathan Project © 2025 • Evolution Guaranteed</sub>
-</div>
