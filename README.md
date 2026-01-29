@@ -379,55 +379,59 @@ Supportare Leviathan significa investire in un Protocollo <b>libero, curato e se
 
 <h3 align="center"><span class="notranslate">🧬 PROTOCOL ARCHITECTURE & ENGINEERING</span></h3>
 
-<table width="100%" align="center" style="border: none;">
+<table style="border: none; width: 100%;">
   <tr>
-
-  !-- LEFT -->
-    <td align="center" width="25%" valign="bottom">
+    <td align="center" style="width: 25%; vertical-align: bottom; padding-bottom: 20px;">
       <a href="https://github.com/qwertyuiop8899">
-        <img src="https://github.com/qwertyuiop8899.png" width="60" style="border-radius:50%; opacity:0.9;" />
+        <img src="https://github.com/qwertyuiop8899.png" width="60" style="border-radius:50%; filter: grayscale(20%); opacity: 0.9;" alt="qwerty"/>
         <br>
-        <b style="font-size:12px; color:#8b949e;">qwertyuiop8899</b>
+        <b style="font-size: 12px; color: #8b949e;">qwertyuiop8899</b>
       </a>
-      <div style="font-size:11px; color:#6e7681; margin-top:6px; line-height:1.4;">
-        ✨ <b>Special Thanks</b><br>
-        Formatter Logic<br>
-        Web Modules<br>
-        Trailer Engine
+      <br>
+      <div style="font-size: 11px; color: #6e7681; line-height: 1.3; margin-top: 5px;">
+        <b>✨ Ringraziamenti speciali</b><br>
+        per il contributo su:<br>
+        • Logica di formatter.js<br>
+        • Moduli Web(SC-GuardaHD-GuardaSerie)<br>
+        • Trailer.js
       </div>
     </td>
-    <!-- CENTER -->
-    <td align="center" width="50%">
+
+  <td align="center" style="width: 50%; vertical-align: top;">
       <a href="https://github.com/LUC4N3X">
-        <img src="https://github.com/LUC4N3X.png" width="130"
-          style="border-radius:50%; border:4px solid #00E0FF;
-          box-shadow:0 0 25px rgba(0,224,255,.6);" />
+        <img src="https://github.com/LUC4N3X.png" width="130" style="border-radius:50%; border: 4px solid #00E0FF; box-shadow: 0 0 25px rgba(0, 224, 255, 0.6);" alt="LUC4N3X"/>
         <br><br>
-        <b style="font-size:24px; color:#ffffff; text-shadow:0 0 10px #00E0FF;">
-          LUC4N3X
-        </b>
+        <b style="font-size: 24px; color: #ffffff; text-shadow: 0 0 10px #00E0FF;">LUC4N3X</b>
       </a>
-  <div style="margin-top:10px; font-size:16px; color:#00E0FF; font-weight:bold;">
+      <br><br>
+      <div style="font-size: 16px; color: #00E0FF; font-weight: bold; letter-spacing: 1px;">
         👑 ARCHITECT & CORE
       </div>
-      <div style="font-size:13px; color:#c9d1d9;">
-        Founder · Protocol Owner
-      </div>
-    </td>
-    <!-- RIGHT -->
-    <td align="center" width="25%" valign="bottom">
-      <a href="https://github.com/diogomiguel93">
-        <img src="https://github.com/diogomiguel93.png" width="60" style="border-radius:50%; opacity:0.9;" />
-        <br>
-        <b style="font-size:12px; color:#8b949e;">diogomiguel93</b>
-      </a>
-      <div style="font-size:11px; color:#6e7681; margin-top:6px; line-height:1.4;">
-        Base Integration<br>
-        Torrentio ITA<br>
-        Inspiration
+      <div style="font-size: 13px; color: #ffffff; margin-top: 5px;">
+        Fondatore del Protocollo
       </div>
     </td>
 
+   <td align="center" style="width: 25%; vertical-align: bottom; padding-bottom: 20px;">
+      <a href="https://github.com/diogomiguel93">
+        <img src="https://github.com/diogomiguel93.png" width="60" style="border-radius:50%; filter: grayscale(20%); opacity: 0.9;" alt="diogo"/>
+        <br>
+        <b style="font-size: 12px; color: #8b949e;">diogomiguel93</b>
+      </a>
+      <br>
+      <div style="font-size: 11px; color: #6e7681; line-height: 1.3; margin-top: 5px;">
+        <b>Base Integration</b><br>
+        Ispirazione e base per<br>
+        l'addon Torrentio (ITA)<br>
+        &nbsp;
+      </div>
+    </td>
   </tr>
 </table>
 
+<br>
+<div align="center">
+  <sub style="color: #444;">Leviathan Project © 2025 • Evolution Guaranteed</sub>
+</div>
+
+<br>
