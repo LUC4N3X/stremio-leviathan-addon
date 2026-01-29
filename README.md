@@ -279,9 +279,9 @@ Definisci i confini della tua ricerca.
 Eseguire la seguente catena di comandi per il provisioning immediato del container:
 ```bash
 
-center "git clone https://github.com/LUC4N3X/stremio-leviathan-addon"
-center "cd stremio-leviathan-addon"
-center "docker compose up -d --build"
+           git clone https://github.com/LUC4N3X/stremio-leviathan-addon
+             cd stremio-leviathan-addon
+                docker compose up -d --build
 
 ```
 ✅ Fatto! Leviathan sarà raggiungibile su:
