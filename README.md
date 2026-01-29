@@ -92,18 +92,18 @@
 
 Il core, sviluppato in **Node.js**, orchestra scansioni parallele sui principali index mondiali e italiani. Utilizza una logica proprietaria per distinguere le sorgenti in base alla latenza di risposta, applicando timeout dinamici e tecniche di evasione anti-bot.
 
-### 🔥 Release 2.1 Highlights
+### 🔥 Release 2.5 Highlights
 
 * 🚀 **Core Refactoring:** Motore riscritto per massimizzare stabilità e concorrenza.
-* 🧠 **Proprietary DB:** Implementazione di un database di proprietà per indicizzazione istantanea e indipendente.
-* 📱 **Mobile UX:** Implementazione di `smartphone.js` per una GUI completamente ridisegnata e ottimizzata per dispositivi mobili.
-* 🌪️ **VIX Hybrid Module:** Integrazione diretta con **StreamingCommunity**, **GuardaHD** e **GuardaSerie** per flussi istantanei (No-P2P).
+* 🕷️ **WebStreams Fallback:** Attivazione automatica intelligente delle sorgenti Web se il P2P non ha risultati (Disattivabile).
+* 🎨 **Polymorphic Formatter:** Engine di formattazione avanzato. Scegli tra preset grafici o inietta il tuo stile custom.
+* 🗣️ **Tri-Scope Language:** Selettore di perimetro: Solo ITA, ITA+ENG (Hybrid) o Solo ENG.
+* 🎬 **Trailer Bridge:** Reindirizzamento nativo verso YouTube per anteprime istantanee.
+* 🌪️ **VIX Hybrid Module:** Integrazione diretta con **StreamingCommunity**, **GuardaHD** e **GuardaSerie**.
+* 📱 **Mobile UX:** Implementazione di `smartphone.js` per una GUI ottimizzata mobile.
 * 👻 **Ghost Proxying:** Supporto nativo a **MediaFlow** per l'uso sicuro di Account Debrid condivisi.
-* 🔗 **AIOStreams:** Supporto nativo per flussi AIOStreams, integrato nel motore Leviathan.
-* 🏎️ **Fast Lane Mode:** Gestione intelligente dei timeout per API ad alta velocità.
-* 🇮🇹 **Strict ITA Validation:** Filtri regex chirurgici per l'eliminazione dei falsi positivi.
+* 🔗 **AIOStreams:** Supporto nativo per flussi AIOStreams integrato nel motore.
 * 🛡️ **Cloudscraper Integration:** Ottimizzazione avanzata per il superamento dei controlli Cloudflare.
-* 💉 **Magnet Injection:** Arricchimento automatico dei metadati con tracker UDP Tier-1.
 
 
 
@@ -163,6 +163,34 @@ Progettato per l'elusione dei blocchi IP e la gestione di account Multi-Utente.
 * **IP Masking:** Tutto il traffico verso Real-Debrid viene tunnelizzato tramite **MediaFlow Proxy**.
 * **Shared Account Support:** Permette l'utilizzo dello stesso account Debrid su più IP contemporaneamente senza rischiare il ban, poiché il provider vede solo l'IP del Proxy.
 * **Anti-Throttling:** Bypassa i blocchi imposti dagli ISP sui domini dei servizi Debrid.
+
+### 9. 🕷️ WebStreams Auto-Failover
+Il sistema non accetta vicoli ciechi.
+* **Smart Switch:** Se la scansione Torrent restituisce 0 risultati validi, Leviathan innesca automaticamente i moduli Web (StreamingCommunity/GuardaHD).
+* **Configurable Logic:** Funzione attivata di default, ma disabilitabile dalla dashboard per gli utenti che desiderano un'esperienza rigorosamente P2P.
+
+### 10. 🎨 Polymorphic Formatter Engine
+Il controllo totale sulla presentazione visiva dei risultati.
+* **Preset Selection:** Seleziona tra diversi stili di visualizzazione pre-codificati per adattare l'output ai tuoi gusti.
+* **Custom Syntax:** Possibilità di definire un formatter personalizzato per strutturare i metadati (Risoluzione, Codec, Audio) esattamente come vuoi tu.
+
+### 11. 🗣️ Linguistic Scope Control
+Definisci i confini della tua ricerca.
+* **🇮🇹 ITA Strict:** Filtro chirurgico solo per contenuti in lingua italiana.
+* **🌍 Global (ENG):** Accesso diretto ai tracker internazionali senza filtri linguistici.
+* **🧬 Hybrid (ITA+ENG):** La fusione perfetta. Priorità ai contenuti italiani, con fallback immediato sulle release internazionali ad alta qualità.
+
+### 12. 🎬 Visual Pre-Fetch (Trailer Integration)
+* **Instant Preview:** Integrazione diretta con le API di YouTube.
+* **Context Aware:** Recupera automaticamente il trailer corretto basandosi sui metadati IMDB/TMDB del contenuto selezionato.
+
+<br>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/⚙️_Auto--WebStreams-ACTIVE-FF0000?style=for-the-badge&labelColor=black" />
+  <img src="https://img.shields.io/badge/🎨_Custom--UI-FORMATTER-FFD700?style=for-the-badge&labelColor=black" />
+  <img src="https://img.shields.io/badge/🗣️_Lang--Scope-ITA%2FENG-00eaff?style=for-the-badge&labelColor=black" />
+</p>
 
 ---
 
