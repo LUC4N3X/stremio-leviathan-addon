@@ -375,4 +375,59 @@ Ogni forma di supporto contribuisce a mantenerlo <b>indipendente, stabile e in c
 <p align="center" style="font-size:12px; color:#6e7681; margin-top:18px;">
 Supportare Leviathan significa investire in un Protocollo <b>libero, curato e senza compromessi</b>.
 </p>
+---
+
+<h3 align="center"><span class="notranslate">🧬 PROTOCOL ARCHITECTURE & ENGINEERING</span></h3>
+
+<table width="100%" align="center" style="border: none;">
+  <tr>
+
+  !-- LEFT -->
+    <td align="center" width="25%" valign="bottom">
+      <a href="https://github.com/qwertyuiop8899">
+        <img src="https://github.com/qwertyuiop8899.png" width="60" style="border-radius:50%; opacity:0.9;" />
+        <br>
+        <b style="font-size:12px; color:#8b949e;">qwertyuiop8899</b>
+      </a>
+      <div style="font-size:11px; color:#6e7681; margin-top:6px; line-height:1.4;">
+        ✨ <b>Special Thanks</b><br>
+        Formatter Logic<br>
+        Web Modules<br>
+        Trailer Engine
+      </div>
+    </td>
+    <!-- CENTER -->
+    <td align="center" width="50%">
+      <a href="https://github.com/LUC4N3X">
+        <img src="https://github.com/LUC4N3X.png" width="130"
+          style="border-radius:50%; border:4px solid #00E0FF;
+          box-shadow:0 0 25px rgba(0,224,255,.6);" />
+        <br><br>
+        <b style="font-size:24px; color:#ffffff; text-shadow:0 0 10px #00E0FF;">
+          LUC4N3X
+        </b>
+      </a>
+  <div style="margin-top:10px; font-size:16px; color:#00E0FF; font-weight:bold;">
+        👑 ARCHITECT & CORE
+      </div>
+      <div style="font-size:13px; color:#c9d1d9;">
+        Founder · Protocol Owner
+      </div>
+    </td>
+    <!-- RIGHT -->
+    <td align="center" width="25%" valign="bottom">
+      <a href="https://github.com/diogomiguel93">
+        <img src="https://github.com/diogomiguel93.png" width="60" style="border-radius:50%; opacity:0.9;" />
+        <br>
+        <b style="font-size:12px; color:#8b949e;">diogomiguel93</b>
+      </a>
+      <div style="font-size:11px; color:#6e7681; margin-top:6px; line-height:1.4;">
+        Base Integration<br>
+        Torrentio ITA<br>
+        Inspiration
+      </div>
+    </td>
+
+  </tr>
+</table>
 
