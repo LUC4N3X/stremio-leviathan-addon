@@ -315,16 +315,17 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
   <tr>
     <td align="center" style="width: 25%; vertical-align: bottom; padding-bottom: 20px;">
       <a href="https://github.com/qwertyuiop8899">
-        <img src="https://github.com/qwertyuiop8899.png" width="50" style="border-radius:50%; filter: grayscale(40%); opacity: 0.8;" alt="qwerty"/>
+        <img src="https://github.com/qwertyuiop8899.png" width="60" style="border-radius:50%; filter: grayscale(20%); opacity: 0.9;" alt="qwerty"/>
         <br>
         <b style="font-size: 12px; color: #8b949e;">qwertyuiop8899</b>
       </a>
       <br>
-      <div style="font-size: 10px; color: #6e7681; line-height: 1.2; margin-top: 5px;">
-        <i>Special Thanks:</i><br>
-        Formatter logic,<br>
-        Web modules,<br>
-        Trailer & Addons JS
+      <div style="font-size: 11px; color: #6e7681; line-height: 1.3; margin-top: 5px;">
+        <b>✨ Ringraziamenti speciali</b><br>
+        per il contributo su:<br>
+        • Logica di formattazione<br>
+        • Moduli Web<br>
+        • Trailer & Addons JS
       </div>
     </td>
 
@@ -345,15 +346,16 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 
    <td align="center" style="width: 25%; vertical-align: bottom; padding-bottom: 20px;">
       <a href="https://github.com/diogomiguel93">
-        <img src="https://github.com/diogomiguel93.png" width="50" style="border-radius:50%; filter: grayscale(40%); opacity: 0.8;" alt="diogo"/>
+        <img src="https://github.com/diogomiguel93.png" width="60" style="border-radius:50%; filter: grayscale(20%); opacity: 0.9;" alt="diogo"/>
         <br>
         <b style="font-size: 12px; color: #8b949e;">diogomiguel93</b>
       </a>
       <br>
-      <div style="font-size: 10px; color: #6e7681; line-height: 1.2; margin-top: 5px;">
-        <i>Base Integration:</i><br>
-        Ispirazione addon<br>
-        Torrentio (ITA)
+      <div style="font-size: 11px; color: #6e7681; line-height: 1.3; margin-top: 5px;">
+        <b>Base Integration</b><br>
+        Ispirazione e base per<br>
+        l'addon Torrentio (ITA)<br>
+        &nbsp;
       </div>
     </td>
   </tr>
