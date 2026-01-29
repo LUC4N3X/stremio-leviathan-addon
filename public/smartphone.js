@@ -592,7 +592,7 @@ const mobileHTML = `
                     <div class="m-chip-grid">
                         <div class="m-qual-chip" id="mq-4k" onclick="toggleFilter('mq-4k')">4K UHD</div>
                         <div class="m-qual-chip" id="mq-1080" onclick="toggleFilter('mq-1080')">1080p</div>
-                        <div class="m-qual-chip" id="mq-720" onclick="toggleFilter('mq-720')">720p</div>
+                        <div class="m-qual-chip" id="mq-720" onclick="toggleFilter('mq-720')">720p / HD</div>
                         <div class="m-qual-chip" id="mq-sd" onclick="toggleFilter('mq-sd')">CAM/SD</div>
                     </div>
 
