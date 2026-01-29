@@ -246,20 +246,42 @@ Definisci i confini della tua ricerca.
 
 <div align="center">
 
-Il modo più veloce e pulito per eseguire Leviathan in locale o in produzione.
+<p style="font-size: 1.1rem; color: #cbd5e1;">
+  Procedura standardizzata per il deploy di infrastrutture <b>Leviathan Standalone</b>.
+</p>
 
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker&logoColor=white)](https://www.docker.com/)
 [![Stremio Addon](https://img.shields.io/badge/Stremio-Addon-green?logo=stremio&logoColor=white)](https://www.stremio.com/)
 
-### 💠 Sequenza di Avvio Rapido
-
-Copia l'intera sequenza e incollala nel terminale per l'inizializzazione immediata:
 </div>
 
+<br>
+
+<div align="center">
+  <div style="background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.4); border-radius: 8px; padding: 20px; width: 90%; max-width: 800px; text-align: left;">
+    <strong style="color: #ff453a; font-size: 1rem; display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+      ⚠️ LIMITAZIONE ARCHITETTURALE: SELF-HOSTING
+    </strong>
+    <span style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.6;">
+      L'architettura <b>Leviathan</b> è composta da due layer. Eseguendo il deploy locale (Self-Hosting), opererai in modalità <b>"Decentralized Computation"</b>.
+      <br><br>
+      ❌ <b>Esclusione Database Proprietario:</b> Il database di indicizzazione istantanea e caching predittivo è un asset privato lato server dell'istanza pubblica. Non è incluso nel codice sorgente open-source.
+      <br>
+      🔄 <b>Conseguenza Operativa:</b> La tua istanza locale eseguirà lo <b>scraping in tempo reale</b> per ogni singola richiesta, senza attingere alla cache centrale. Le prestazioni dipenderanno esclusivamente dalla potenza della tua CPU e dalla latenza della tua rete.
+    </span>
+  </div>
+</div>
+
+<br>
+
+### 💠 Sequenza di Inizializzazione (Docker)
+
+Eseguire la seguente catena di comandi per il provisioning immediato del container:
+
 ```bash
-                         git clone https://github.com/LUC4N3X/stremio-leviathan-addon
-                  cd stremio-leviathan-addon
-                  docker compose up -d --build 
+git clone [https://github.com/LUC4N3X/stremio-leviathan-addon](https://github.com/LUC4N3X/stremio-leviathan-addon)
+cd stremio-leviathan-addon
+docker compose up -d --build
 ```
 ✅ Fatto! Leviathan sarà raggiungibile su:
 http://localhost:7000
