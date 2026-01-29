@@ -339,33 +339,32 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 👁‍🗨 BENVENUTO NELL'ABISSO.
 ---
 
-
 <hr>
 
-<h3 align="center">⭐ SUPPORT THE PROTOCOL</h3>
+<h3 align="center">⭐ SUPPORTO & DONAZIONI</h3>
 
-<p align="center" style="color:#8b949e; font-size:14px;">
+<p align="center" style="color:#8b949e; font-size:14px; max-width:700px;">
 Leviathan è un progetto <b>open-source</b>, gratuito e in continua evoluzione.<br>
-Se il Protocollo ti è utile, puoi supportarne lo sviluppo.
+Ogni forma di supporto contribuisce a mantenerlo <b>indipendente, stabile e in costante evoluzione</b>.
 </p>
 
 <table align="center" width="100%" style="border:none;">
   <tr>
-  <!-- PAYPAL -->
+<!-- PAYPAL -->
     <td align="center" width="50%">
-      <h4>💙 PayPal</h4>
-      <p style="font-size:13px; color:#c9d1d9;">
-        Supporto diretto allo sviluppo del Protocollo
+      <h4 style="margin-bottom:6px;">💙 Supporto Diretto</h4>
+      <p style="font-size:13px; color:#c9d1d9; margin-top:0;">
+        Dona tramite PayPal per sostenere lo sviluppo del Protocollo
       </p>
       <a href="INSERISCI_QUI_IL_LINK_PAYPAL_DI_PRIMA">
         <img src="https://img.shields.io/badge/Donate-PayPal-blue?style=for-the-badge&logo=paypal">
       </a>
     </td>
- <!-- GITHUB STAR -->
+  <!-- GITHUB -->
     <td align="center" width="50%">
-      <h4>⭐ GitHub</h4>
-      <p style="font-size:13px; color:#c9d1d9;">
-        Supporto gratuito ma fondamentale
+      <h4 style="margin-bottom:6px;">⭐ Supporto GitHub</h4>
+      <p style="font-size:13px; color:#c9d1d9; margin-top:0;">
+        Supporto gratuito ma fondamentale per la visibilità del progetto
       </p>
       <b>Lascia una ⭐ al repository</b>
     </td>
@@ -373,61 +372,7 @@ Se il Protocollo ti è utile, puoi supportarne lo sviluppo.
   </tr>
 </table>
 
-<p align="center" style="font-size:12px; color:#6e7681; margin-top:15px;">
-Il tuo supporto aiuta Leviathan a rimanere <b>indipendente, veloce e in continua evoluzione</b>.
+<p align="center" style="font-size:12px; color:#6e7681; margin-top:18px;">
+Supportare Leviathan significa investire in un Protocollo <b>libero, curato e senza compromessi</b>.
 </p>
-
----
-<h3 align="center"><span class="notranslate">🧬 PROTOCOL ARCHITECTURE & ENGINEERING</span></h3>
-
-<table width="100%" align="center" style="border: none;">
-  <tr>
- <!-- LEFT -->
-    <td align="center" width="25%" valign="bottom">
-      <a href="https://github.com/qwertyuiop8899">
-        <img src="https://github.com/qwertyuiop8899.png" width="60" style="border-radius:50%; opacity:0.9;" />
-        <br>
-        <b style="font-size:12px; color:#8b949e;">qwertyuiop8899</b>
-      </a>
-      <div style="font-size:11px; color:#6e7681; margin-top:6px; line-height:1.4;">
-        ✨ <b>Special Thanks</b><br>
-        Formatter Logic<br>
-        Web Modules<br>
-        Trailer Engine
-      </div>
-    </td>
-<!-- CENTER -->
-    <td align="center" width="50%">
-      <a href="https://github.com/LUC4N3X">
-        <img src="https://github.com/LUC4N3X.png" width="130"
-          style="border-radius:50%; border:4px solid #00E0FF;
-          box-shadow:0 0 25px rgba(0,224,255,.6);" />
-        <br><br>
-        <b style="font-size:24px; color:#ffffff; text-shadow:0 0 10px #00E0FF;">
-          LUC4N3X
-        </b>
-      </a>
-      <div style="margin-top:10px; font-size:16px; color:#00E0FF; font-weight:bold;">
-        👑 ARCHITECT & CORE
-      </div>
-      <div style="font-size:13px; color:#c9d1d9;">
-        Founder · Protocol Owner
-      </div>
-    </td>
-<!-- RIGHT -->
-    <td align="center" width="25%" valign="bottom">
-      <a href="https://github.com/diogomiguel93">
-        <img src="https://github.com/diogomiguel93.png" width="60" style="border-radius:50%; opacity:0.9;" />
-        <br>
-        <b style="font-size:12px; color:#8b949e;">diogomiguel93</b>
-      </a>
-      <div style="font-size:11px; color:#6e7681; margin-top:6px; line-height:1.4;">
-        Base Integration<br>
-        Torrentio ITA<br>
-        Inspiration
-      </div>
-    </td>
-
-  </tr>
-</table>
 
