@@ -1,4 +1,4 @@
-const titleParser = require('parse-torrent-title'); // RICHIESTO: npm install parse-torrent-title
+const titleParser = require('parse-torrent-title'); 
 
 const UNITS = ["B", "KB", "MB", "GB", "TB"];
 
