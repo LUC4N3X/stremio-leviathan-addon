@@ -309,51 +309,55 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 
 
 
-<h3><span class="notranslate">🧬 PROJECT CORE & NEURAL NETWORK</span></h3>
-  
-  <table style="border: none;">
-    <tr>
-      <td align="center" width="200px" style="border: none; vertical-align: top;">
-        <a href="https://github.com/LUC4N3X">
-          <img src="https://github.com/LUC4N3X.png" width="70" style="border-radius:50%; border: 2px solid #00E0FF;" alt="LUC4N3X"/>
-          <br><b>LUC4N3X</b>
-        </a>
-        <br><br>
-        <sub style="color: #8b949e;">
-          <b>Architect & Core</b><br>
-          Fondatore del protocollo
-        </sub>
-      </td>
-      
-  <td align="center" width="200px" style="border: none; vertical-align: top;">
-        <a href="https://github.com/qwertyuiop8899">
-          <img src="https://github.com/qwertyuiop8899.png" width="70" style="border-radius:50%;" alt="qwerty"/>
-          <br><b>qwertyuiop8899</b>
-        </a>
-        <br><br>
-        <sub style="color: #8b949e; line-height: 1.4;">
-          <b>✨ Special Thanks</b><br>
-          Per il contributo fondamentale su:<br>
-          • Logica Formatter e Web<br>
-          • Funzione Trailer (YouTube)<br>
-          • Logica external-addons.js
-        </sub>
-      </td>
-      
-  <td align="center" width="200px" style="border: none; vertical-align: top;">
-        <a href="https://github.com/diogomiguel93">
-          <img src="https://github.com/diogomiguel93.png" width="70" style="border-radius:50%;" alt="diogo"/>
-          <br><b>diogomiguel93</b>
-        </a>
-        <br><br>
-        <sub style="color: #8b949e;">
-          <b>Base Integration</b><br>
-          Ispirazione addon Torrentio (ITA)
-        </sub>
-      </td>
-    </tr>
-  </table>
-  
-  <br>
+<h3 align="center"><span class="notranslate">🧬 PROJECT CORE & NEURAL NETWORK</span></h3>
+
+<table style="border: none; width: 100%;">
+  <tr>
+    <td align="center" style="width: 33%; border: none; vertical-align: top;">
+      <a href="https://github.com/LUC4N3X">
+        <img src="https://github.com/LUC4N3X.png" width="75" style="border-radius:50%; border: 2px solid #00E0FF;" alt="LUC4N3X"/>
+        <br><b>LUC4N3X</b>
+      </a>
+      <br><br>
+      <sub style="color: #8b949e;">
+        <b>Architect & Core</b><br>
+        Fondatore del protocollo<br>
+        &nbsp;
+      </sub>
+    </td>
+
+   <td align="center" style="width: 33%; border: none; vertical-align: top;">
+      <a href="https://github.com/qwertyuiop8899">
+        <img src="https://github.com/qwertyuiop8899.png" width="75" style="border-radius:50%;" alt="qwerty"/>
+        <br><b>qwertyuiop8899</b>
+      </a>
+      <br><br>
+      <sub style="color: #8b949e;">
+        <b>✨ Special Thanks</b><br>
+        <i>Contributo fondamentale su:</i><br>
+        • Logica Formatter & Web<br>
+        • Funzione Trailer (YouTube)<br>
+        • Logica external-addons.js
+      </sub>
+    </td>
+
+  <td align="center" style="width: 33%; border: none; vertical-align: top;">
+      <a href="https://github.com/diogomiguel93">
+        <img src="https://github.com/diogomiguel93.png" width="75" style="border-radius:50%;" alt="diogo"/>
+        <br><b>diogomiguel93</b>
+      </a>
+      <br><br>
+      <sub style="color: #8b949e;">
+        <b>Base Integration</b><br>
+        Ispirazione e base per<br>
+        l'addon Torrentio (ITA)<br>
+        &nbsp;
+      </sub>
+    </td>
+  </tr>
+</table>
+
+<br>
+<div align="center">
   <sub style="color: grey;">Leviathan Project © 2025 • Evolution Guaranteed</sub>
 </div>
