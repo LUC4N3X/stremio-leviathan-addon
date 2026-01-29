@@ -339,42 +339,45 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 👁‍🗨 BENVENUTO NELL'ABISSO.
 ---
 
-<hr>
-
 <h3 align="center">⭐ SUPPORTO & DONAZIONI</h3>
 
-<p align="center" style="color:#8b949e; font-size:14px; max-width:700px;">
-Leviathan è un progetto <b>open-source</b>, gratuito e in continua evoluzione.<br>
-Ogni forma di supporto contribuisce a mantenerlo <b>indipendente, stabile e in costante evoluzione</b>.
+<p align="center" style="color:#8b949e; font-size:14px; max-width:720px;">
+<b>Leviathan</b> è un progetto <b>open-source</b>, gratuito e in continua evoluzione.<br>
+Ogni forma di supporto aiuta a mantenerlo <b>indipendente, stabile e senza compromessi</b>.
 </p>
 
-<table align="center" width="100%" style="border:none;">
-  <tr>
-<!-- PAYPAL -->
-    <td align="center" width="50%">
-      <h4 style="margin-bottom:6px;">💙 Supporto Diretto</h4>
-      <p style="font-size:13px; color:#c9d1d9; margin-top:0;">
-        Dona tramite PayPal per sostenere lo sviluppo del Protocollo
-      </p>
-      <a href="https://www.paypal.me/luc4nex">
-        <img src="https://img.shields.io/badge/Donate-PayPal-blue?style=for-the-badge&logo=paypal">
-      </a>
-    </td>
-  <!-- GITHUB -->
-    <td align="center" width="50%">
-      <h4 style="margin-bottom:6px;">⭐ Supporto GitHub</h4>
-      <p style="font-size:13px; color:#c9d1d9; margin-top:0;">
-        Supporto gratuito ma fondamentale per la visibilità del progetto
-      </p>
-      <b>Lascia una ⭐ al repository</b>
-    </td>
+<br>
 
-  </tr>
-</table>
+<div align="center">
 
-<p align="center" style="font-size:12px; color:#6e7681; margin-top:18px;">
-Supportare Leviathan significa investire in un Protocollo <b>libero, curato e senza compromessi</b>.
+<h4>💙 Supporto Diretto</h4>
+<p style="font-size:13px; color:#c9d1d9; max-width:520px;">
+Sostieni attivamente lo sviluppo del Protocollo con una donazione volontaria
 </p>
+
+<a href="https://www.paypal.me/luc4nex">
+  <img src="https://img.shields.io/badge/Donate-PayPal-blue?style=for-the-badge&logo=paypal">
+</a>
+
+<br><br>
+
+<h4>⭐ Supporto Gratuito</h4>
+<p style="font-size:13px; color:#c9d1d9; max-width:520px;">
+Un gesto semplice ma fondamentale per la visibilità del progetto
+</p>
+
+<a href="https://stremio-addons.net/addons/leviathan">
+  <img src="https://img.shields.io/badge/Lascia%20una%20⭐%20qui-Leviathan-2ea043?style=for-the-badge&logo=github">
+</a>
+
+</div>
+
+<br>
+
+<p align="center" style="font-size:12px; color:#6e7681;">
+Supportare Leviathan significa investire in un Protocollo <b>libero, curato e orientato alla qualità</b>.
+</p>
+
 
 ---
 
