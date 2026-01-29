@@ -313,49 +313,47 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 
 <table style="border: none; width: 100%;">
   <tr>
-    <td align="center" style="width: 34%; border: none; vertical-align: top;">
-      <a href="https://github.com/LUC4N3X">
-        <img src="https://github.com/LUC4N3X.png" width="95" style="border-radius:50%; border: 3px solid #00E0FF; box-shadow: 0 0 15px #00E0FF;" alt="LUC4N3X"/>
-        <br><br>
-        <b style="font-size: 18px;">LUC4N3X</b>
-      </a>
-      <br><br>
-      <div style="color: #ffffff;">
-        <b>👑 ARCHITECT & CORE</b><br>
-        <sub style="color: #8b949e;">Fondatore del protocollo</sub>
-      </div>
-    </td>
-
-   <td align="center" style="width: 33%; border: none; vertical-align: top;">
+    <td align="center" style="width: 25%; vertical-align: bottom; padding-bottom: 20px;">
       <a href="https://github.com/qwertyuiop8899">
-        <img src="https://github.com/qwertyuiop8899.png" width="70" style="border-radius:50%; opacity: 0.9;" alt="qwerty"/>
-        <br><br>
-        <b>qwertyuiop8899</b>
-      </a>
-      <br><br>
-      <div style="font-size: 11px; line-height: 1.3; color: #8b949e;">
-        <b>✨ Special Thanks</b><br>
+        <img src="https://github.com/qwertyuiop8899.png" width="50" style="border-radius:50%; filter: grayscale(40%); opacity: 0.8;" alt="qwerty"/>
         <br>
-        Contributo su:<br>
-        • Logica Formatter & Web<br>
-        • Funzione Trailer (YouTube)<br>
-        • Logica external-addons.js
+        <b style="font-size: 12px; color: #8b949e;">qwertyuiop8899</b>
+      </a>
+      <br>
+      <div style="font-size: 10px; color: #6e7681; line-height: 1.2; margin-top: 5px;">
+        <i>Special Thanks:</i><br>
+        Formatter logic,<br>
+        Web modules,<br>
+        Trailer & Addons JS
       </div>
     </td>
 
-  <td align="center" style="width: 33%; border: none; vertical-align: top;">
-      <a href="https://github.com/diogomiguel93">
-        <img src="https://github.com/diogomiguel93.png" width="70" style="border-radius:50%; opacity: 0.9;" alt="diogo"/>
+  <td align="center" style="width: 50%; vertical-align: top;">
+      <a href="https://github.com/LUC4N3X">
+        <img src="https://github.com/LUC4N3X.png" width="130" style="border-radius:50%; border: 4px solid #00E0FF; box-shadow: 0 0 25px rgba(0, 224, 255, 0.6);" alt="LUC4N3X"/>
         <br><br>
-        <b>diogomiguel93</b>
+        <b style="font-size: 24px; color: #ffffff; text-shadow: 0 0 10px #00E0FF;">LUC4N3X</b>
       </a>
       <br><br>
-      <div style="font-size: 11px; line-height: 1.3; color: #8b949e;">
-        <b>Base Integration</b><br>
+      <div style="font-size: 16px; color: #00E0FF; font-weight: bold; letter-spacing: 1px;">
+        👑 ARCHITECT & CORE
+      </div>
+      <div style="font-size: 13px; color: #ffffff; margin-top: 5px;">
+        Fondatore del Protocollo
+      </div>
+    </td>
+
+   <td align="center" style="width: 25%; vertical-align: bottom; padding-bottom: 20px;">
+      <a href="https://github.com/diogomiguel93">
+        <img src="https://github.com/diogomiguel93.png" width="50" style="border-radius:50%; filter: grayscale(40%); opacity: 0.8;" alt="diogo"/>
         <br>
-        Ispirazione e base per<br>
-        l'addon Torrentio (ITA)<br>
-        &nbsp;
+        <b style="font-size: 12px; color: #8b949e;">diogomiguel93</b>
+      </a>
+      <br>
+      <div style="font-size: 10px; color: #6e7681; line-height: 1.2; margin-top: 5px;">
+        <i>Base Integration:</i><br>
+        Ispirazione addon<br>
+        Torrentio (ITA)
       </div>
     </td>
   </tr>
@@ -363,7 +361,9 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 
 <br>
 <div align="center">
-  <sub style="color: grey;">Leviathan Project © 2025 • Evolution Guaranteed</sub>
+  <sub style="color: #444;">Leviathan Project © 2025 • Evolution Guaranteed</sub>
 </div>
+
 <br>
+
 
