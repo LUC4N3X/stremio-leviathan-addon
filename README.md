@@ -356,7 +356,7 @@ Ogni forma di supporto contribuisce a mantenerlo <b>indipendente, stabile e in c
       <p style="font-size:13px; color:#c9d1d9; margin-top:0;">
         Dona tramite PayPal per sostenere lo sviluppo del Protocollo
       </p>
-      <a href="INSERISCI_QUI_IL_LINK_PAYPAL_DI_PRIMA">
+      <a href="https://www.paypal.me/luc4nex">
         <img src="https://img.shields.io/badge/Donate-PayPal-blue?style=for-the-badge&logo=paypal">
       </a>
     </td>
@@ -375,6 +375,7 @@ Ogni forma di supporto contribuisce a mantenerlo <b>indipendente, stabile e in c
 <p align="center" style="font-size:12px; color:#6e7681; margin-top:18px;">
 Supportare Leviathan significa investire in un Protocollo <b>libero, curato e senza compromessi</b>.
 </p>
+
 ---
 
 <h3 align="center"><span class="notranslate">🧬 PROTOCOL ARCHITECTURE & ENGINEERING</span></h3>
