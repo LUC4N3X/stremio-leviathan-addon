@@ -378,50 +378,55 @@ Supportare Leviathan significa investire in un Protocollo <b>libero, curato e se
 
 ---
 
-<h3 align="center"><span class="notranslate">🧬 PROTOCOL ARCHITECTURE & ENGINEERING</span></h3>
+<h3 align="center" style="letter-spacing: 2px; text-transform: uppercase; color: #ffffff;">
+  <span class="notranslate">🧬 PROTOCOL ARCHITECTURE & ENGINEERING</span>
+</h3>
 
-<table style="border: none; width: 100%;">
+<table style="border: none; width: 100%; border-collapse: collapse;">
   <tr>
-    <td align="center" style="width: 25%; vertical-align: bottom; padding-bottom: 20px;">
+    <td align="center" style="width: 25%; vertical-align: middle; padding: 10px;">
       <a href="https://github.com/qwertyuiop8899">
-        <img src="https://github.com/qwertyuiop8899.png" width="60" style="border-radius:50%; filter: grayscale(20%); opacity: 0.9;" alt="qwerty"/>
+        <img src="https://github.com/qwertyuiop8899.png" width="50" style="border-radius: 50%; border: 2px solid #30363d; opacity: 0.8;" alt="qwerty"/>
         <br>
-        <b style="font-size: 12px; color: #8b949e;">qwertyuiop8899</b>
+        <b style="font-size: 10px; color: #8b949e; font-family: monospace;">qwertyuiop8899</b>
       </a>
-      <br>
-      <div style="font-size: 11px; color: #6e7681; line-height: 1.3; margin-top: 5px;">
-        <b>✨ Ringraziamenti speciali</b><br>
+      <div style="font-size: 10px; color: #6e7681; line-height: 1.4; margin-top: 8px; text-align: center;">
+        <b style="color: #c9d1d9;">✨ Ringraziamenti speciali</b><br>
         per il contributo su:<br>
         • Logica di formatter.js<br>
-        • Moduli Web(SC-GuardaHD-GuardaSerie)<br>
+        • Moduli Web<br>
         • Trailer.js
       </div>
     </td>
 
-  <td align="center" style="width: 50%; vertical-align: top;">
+  <td align="center" style="width: 50%; vertical-align: middle; background: radial-gradient(circle, rgba(0,224,255,0.05) 0%, rgba(0,0,0,0) 70%);">
+      <div style="margin-bottom: 10px;">
+         <span style="background-color: #0d1117; border: 1px solid #00E0FF; border-radius: 20px; padding: 4px 12px; font-size: 10px; color: #00E0FF; letter-spacing: 1px; font-weight: bold;">
+            PROJECT LEAD
+         </span>
+      </div>
       <a href="https://github.com/LUC4N3X">
-        <img src="https://github.com/LUC4N3X.png" width="130" style="border-radius:50%; border: 4px solid #00E0FF; box-shadow: 0 0 25px rgba(0, 224, 255, 0.6);" alt="LUC4N3X"/>
-        <br><br>
-        <b style="font-size: 24px; color: #ffffff; text-shadow: 0 0 10px #00E0FF;">LUC4N3X</b>
+        <img src="https://github.com/LUC4N3X.png" width="145" style="border-radius: 50%; border: 4px solid #00E0FF; box-shadow: 0 0 35px rgba(0, 224, 255, 0.5), 0 0 10px rgba(0, 224, 255, 0.8);" alt="LUC4N3X"/>
+        <br>
+        <h2 style="margin: 10px 0 0 0; font-size: 26px; color: #ffffff; text-shadow: 0 0 15px rgba(0, 224, 255, 0.6);">LUC4N3X</h2>
       </a>
-      <br><br>
-      <div style="font-size: 16px; color: #00E0FF; font-weight: bold; letter-spacing: 1px;">
+      
+   <div style="font-size: 14px; color: #00E0FF; font-weight: 800; letter-spacing: 2px; margin-top: 5px;">
         👑 ARCHITECT & CORE
       </div>
-      <div style="font-size: 13px; color: #ffffff; margin-top: 5px;">
+      <div style="font-size: 12px; color: #8b949e; margin-top: 5px; font-style: italic;">
         Fondatore del Protocollo
       </div>
     </td>
 
-   <td align="center" style="width: 25%; vertical-align: bottom; padding-bottom: 20px;">
+  <td align="center" style="width: 25%; vertical-align: middle; padding: 10px;">
       <a href="https://github.com/diogomiguel93">
-        <img src="https://github.com/diogomiguel93.png" width="60" style="border-radius:50%; filter: grayscale(20%); opacity: 0.9;" alt="diogo"/>
+        <img src="https://github.com/diogomiguel93.png" width="50" style="border-radius: 50%; border: 2px solid #30363d; opacity: 0.8;" alt="diogo"/>
         <br>
-        <b style="font-size: 12px; color: #8b949e;">diogomiguel93</b>
+        <b style="font-size: 10px; color: #8b949e; font-family: monospace;">diogomiguel93</b>
       </a>
-      <br>
-      <div style="font-size: 11px; color: #6e7681; line-height: 1.3; margin-top: 5px;">
-        <b>Base Integration</b><br>
+      <div style="font-size: 10px; color: #6e7681; line-height: 1.4; margin-top: 8px; text-align: center;">
+        <b style="color: #c9d1d9;">Base Integration</b><br>
         Ispirazione e base per<br>
         l'addon Torrentio (ITA)<br>
         &nbsp;
@@ -432,7 +437,7 @@ Supportare Leviathan significa investire in un Protocollo <b>libero, curato e se
 
 <br>
 <div align="center">
-  <sub style="color: #444;">Leviathan Project © 2025 • Evolution Guaranteed</sub>
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=00E0FF&height=50&section=footer&animation=fadeIn" width="100%" style="opacity: 0.5;">
+  <br>
+  <sub style="color: #6e7681; font-family: monospace;">Leviathan Project © 2025 • <span style="color: #00E0FF;">Evolution Guaranteed</span></sub>
 </div>
-
-<br>
