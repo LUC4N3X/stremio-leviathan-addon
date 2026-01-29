@@ -9,6 +9,7 @@ const Bottleneck = require("bottleneck");
 const rateLimit = require("express-rate-limit");
 const winston = require('winston');
 const NodeCache = require("node-cache");
+const ptt = require('parse-torrent-title'); 
 
 // --- IMPORT ESTERNI ---
 const { fetchExternalAddonsFlat } = require("./external-addons");
@@ -134,6 +135,46 @@ const REGEX_FALSE_IT = /\b(10BIT|BIT|WIT|HIT|FIT|KIT|SIT|LIT|PIT)\b/i;
 const REGEX_SUB_ONLY = /\b(SUB|SUBS|SUBBED|SOTTOTITOLI|VOST|VOSTIT)\s*[:.\-_]?\s*(ITA|IT|ITALIAN)\b/i;
 // Regex per confermare che, anche se c'è scritto SUB, c'è pure l'audio (es. "Audio ITA - Sub ITA")
 const REGEX_AUDIO_CONFIRM = /\b(AUDIO|AC3|AAC|DTS|MD|LD|DDP|MP3|LINGUA)[\s.\-_]+(ITA|IT)\b/i;
+
+// =========================================================================
+// 🆕 PARSER HELPER (INTEGRATO)
+// =========================================================================
+const languageMapping = {
+  'english': '🇬🇧 ENG',
+  'japanese': '🇯🇵 JPN',
+  'italian': '🇮🇹 ITA',
+  'french': '🇫🇷 FRA',
+  'german': '🇩🇪 GER',
+  'spanish': '🇪🇸 ESP',
+  'russian': '🇷🇺 RUS',
+  'multi audio': '🌍 MULTI'
+};
+
+function parseTitleDetails(filename) {
+    if (!filename) return { quality: 'SD', tags: '', languages: [] };
+    try {
+        const info = ptt.parse(filename);
+        const codec = info.codec ? info.codec.toUpperCase() : '';
+        const audio = info.audio ? info.audio.toUpperCase() : '';
+        const source = info.source ? info.source.toUpperCase() : '';
+        
+        // Mappatura Lingue
+        let languages = [];
+        if (info.languages && Array.isArray(info.languages)) {
+            languages = info.languages.map(l => languageMapping[l] || l.substring(0,3).toUpperCase());
+        }
+
+        return {
+            quality: info.resolution || 'SD',
+            tags: [source, codec, audio].filter(x => x).join(' '),
+            languages: languages,
+            cleanTitle: info.title
+        };
+    } catch (e) {
+        return { quality: 'SD', tags: '', languages: [] };
+    }
+}
+// =========================================================================
 
 
 function base32ToHex(base32) {
@@ -262,8 +303,6 @@ function isSafeForItalian(item) {
   
   return false;
 }
-
-// [RIMOSSO] La vecchia funzione filterTorBoxCached è stata rimossa. Usiamo il modulo TbCache.
 
 function validateStreamRequest(type, id) {
   const validTypes = ['movie', 'series'];
@@ -456,6 +495,9 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta) {
             return (0.7 + variance) * 1024 * 1024 * 1024;
         };
 
+        // ANALISI DETTAGLI PER TORBOX (e fallback)
+        const details = parseTitleDetails(item.title);
+
         if (service === 'tb') {
             if (item._tbCached) {
                 let realSize = item._size || item.sizeBytes || 0;
@@ -465,11 +507,9 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta) {
                 const proxyUrl = `${reqHost}/${config.rawConf}/play_tb/${item.hash}?s=${item.season || 0}&e=${item.episode || 0}`;
 
                 if (isAIOActive) {
-                    let quality = "SD";
-                    if (/4k|2160p/i.test(item.title)) quality = "4K";
-                    else if (/1080p/i.test(item.title)) quality = "1080p";
-                    else if (/720p/i.test(item.title)) quality = "720p";
-
+                    let quality = details.quality || "SD";
+                    if (/4k|2160p/i.test(item.title)) quality = "4K"; 
+                    
                     return {
                         name: aioFormatter.formatStreamName({
                             service: 'torbox',
@@ -479,11 +519,11 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta) {
                         title: aioFormatter.formatStreamTitle({
                             title: displayTitle,
                             size: formatBytes(realSize),
-                            language: "🇮🇹/🇬🇧",
+                            language: isSafeForItalian(item) ? "🇮🇹 ITA" : (details.languages.join('/') || "🇬🇧/Unknown"),
                             source: item.source,
                             seeders: item.seeders,
                             infoHash: item.hash, 
-                            techInfo: `🎞️ ${quality}`
+                            techInfo: `🎞️ ${quality} ${details.tags}`
                         }),
                         url: proxyUrl,
                         infoHash: item.hash,
@@ -508,11 +548,12 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta) {
         finalSize = ensureSize(finalSize, streamData.filename || item.title, isSeries, isPack);
         if (finalSize === 0) finalSize = ensureSize(0, item.title, isSeries, false);
 
+        // USIAMO IL NUOVO PARSER SUL FILE EFFETTIVO (SE DISPONIBILE) O SUL TITOLO
+        const fileDetails = parseTitleDetails(streamData.filename || item.title);
+
         if (isAIOActive) {
-             let quality = "SD";
+             let quality = fileDetails.quality || "SD";
              if (/4k|2160p/i.test(item.title)) quality = "4K";
-             else if (/1080p/i.test(item.title)) quality = "1080p";
-             else if (/720p/i.test(item.title)) quality = "720p";
              
              let fullService = 'p2p';
              if (service === 'rd') fullService = 'realdebrid';
@@ -528,11 +569,11 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta) {
                 title: aioFormatter.formatStreamTitle({
                     title: displayTitle,
                     size: formatBytes(finalSize),
-                    language: "🇮🇹/🇬🇧",
+                    language: isSafeForItalian(item) ? "🇮🇹 ITA" : (fileDetails.languages.join('/') || "🇬🇧/Unknown"),
                     source: item.source,
                     seeders: item.seeders,
                     infoHash: item.hash,
-                    techInfo: `🎞️ ${quality}`
+                    techInfo: `🎞️ ${quality} ${fileDetails.tags}`
                 }),
                 url: streamData.url,
                 infoHash: item.hash,
@@ -597,11 +638,12 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
     }
 
     if (isAIOActive) {
-        let quality = "SD";
+        // PARSER INTEGRATION
+        const details = parseTitleDetails(item.title);
+        let quality = details.quality || "SD";
+        
         if (/4k|2160p/i.test(item.title)) quality = "4K";
-        else if (/1080p/i.test(item.title)) quality = "1080p";
-        else if (/720p/i.test(item.title)) quality = "720p";
-
+        
         let fullService = 'p2p';
         if (service === 'rd') fullService = 'realdebrid';
         if (service === 'ad') fullService = 'alldebrid';
@@ -617,11 +659,11 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
         const titleStr = aioFormatter.formatStreamTitle({
             title: displayTitle, 
             size: formatBytes(realSize),
-            language: "🇮🇹/🇬🇧", 
+            language: isSafeForItalian(item) ? "🇮🇹 ITA" : (details.languages.join('/') || "🇬🇧/Unknown"), 
             source: item.source,
             seeders: item.seeders,
             infoHash: item.hash,
-            techInfo: `🎞️ ${quality}`
+            techInfo: `🎞️ ${quality} ${details.tags}`
         });
 
         const fileIdxParam = item.fileIdx !== undefined ? item.fileIdx : -1;
@@ -1582,6 +1624,7 @@ app.listen(PORT, () => {
     console.log(`🕷️ WEBSTREAMR: Fallback Attivo (Su 0 Risultati)`);
     console.log(`🎬 TRAILER: Attivabile da Config (Default: OFF, Primo Risultato se ON)`);
     console.log(`📦 TORBOX: ADVANCED SMART CACHE ENABLED`);
+    console.log(`📝 PARSER: INTEGRATED (Enhanced Title Logic)`); 
     console.log(`🦑 LEVIATHAN CORE: Optimized for High Reliability`);
     console.log(`-----------------------------------------------------`);
 });
