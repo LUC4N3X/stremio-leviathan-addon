@@ -2,7 +2,7 @@ const mobileCSS = `
 :root {
     --m-bg: #000000;
     --m-primary: #00f2ff;     /* Ciano Leviathan */
-    --m-secondary: #7000ff;   /* Viola Abisso (Match Desktop) */
+    --m-secondary: #7000ff;   /* Viola Abisso */
     --m-accent: #b026ff;      
     --m-amber: #ff9900;       
     --m-cine: #ff0055;        
@@ -66,7 +66,7 @@ body::before {
 .m-page.active { display: block; animation: fadeFast 0.35s ease-out; }
 @keyframes fadeFast { from { opacity: 0; transform: translate3d(0, 15px, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
 
-/* --- HERO SECTION & LOGO (CERCHIO FIGO) --- */
+/* --- HERO SECTION & LOGO --- */
 .m-hero { text-align: center; padding: 30px 10px 20px 10px; display: flex; flex-direction: column; align-items: center; width: 100%; position: relative; overflow:hidden; } 
 
 .logo-container {
@@ -106,10 +106,18 @@ body::before {
 .m-v-dot { width: 5px; height: 5px; background: var(--m-success); border-radius: 50%; box-shadow: 0 0 5px var(--m-success); animation: blinkBase 2s infinite; }
 @keyframes blinkBase { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
 
-/* --- PLASMA RAIL (Service Selector) --- */
-.m-plasma-rail { display: flex; position: relative; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50px; padding: 4px; margin-bottom: 25px; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); backdrop-filter: blur(10px); }
-.m-rail-btn { flex: 1; text-align: center; padding: 12px 0; font-family: 'Rajdhani', sans-serif; font-weight: 800; font-size: 1rem; color: var(--m-dim); z-index: 2; cursor: pointer; transition: all 0.3s ease; border-radius: 40px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-.m-rail-btn.active { color: #000; text-shadow: none; background: var(--m-primary); box-shadow: 0 0 15px var(--m-primary); }
+/* --- PLASMA RAIL (Cooler Service Selector) --- */
+.m-srv-rail { display: flex; gap: 8px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 6px; margin-bottom: 25px; backdrop-filter: blur(5px); }
+.m-srv-btn { flex: 1; text-align: center; padding: 14px 0; font-family: 'Rajdhani', sans-serif; font-weight: 800; font-size: 1.1rem; color: var(--m-dim); border-radius: 12px; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(255,255,255,0.03); border: 1px solid transparent; }
+
+/* RD COOL */
+.m-srv-btn[onclick*="'rd'"].active { background: linear-gradient(135deg, rgba(0, 242, 255, 0.15), rgba(0,0,0,0)); border-color: var(--m-primary); color: #fff; box-shadow: 0 0 20px rgba(0, 242, 255, 0.2), inset 0 0 10px rgba(0, 242, 255, 0.05); text-shadow: 0 0 10px var(--m-primary); }
+/* AD COOL */
+.m-srv-btn[onclick*="'ad'"].active { background: linear-gradient(135deg, rgba(0, 255, 157, 0.15), rgba(0,0,0,0)); border-color: var(--m-success); color: #fff; box-shadow: 0 0 20px rgba(0, 255, 157, 0.2), inset 0 0 10px rgba(0, 255, 157, 0.05); text-shadow: 0 0 10px var(--m-success); }
+/* TB COOL */
+.m-srv-btn[onclick*="'tb'"].active { background: linear-gradient(135deg, rgba(176, 38, 255, 0.15), rgba(0,0,0,0)); border-color: var(--m-accent); color: #fff; box-shadow: 0 0 20px rgba(176, 38, 255, 0.2), inset 0 0 10px rgba(176, 38, 255, 0.05); text-shadow: 0 0 10px var(--m-accent); }
+
+.m-rail-icon { font-size: 1.2rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
 
 .m-sc-subpanel { grid-column: 1 / -1; background: rgba(0,0,0,0.4); border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; display: none; animation: slideDown 0.3s ease; margin: 10px 15px 15px 15px; }
 @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
@@ -153,6 +161,8 @@ body::before {
 
 /* QUALITY CHIPS */
 .m-hyp-label { font-size: 0.7rem; color: var(--m-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-family: 'Rajdhani'; font-weight: 700; }
+.m-hyp-desc { font-size: 0.7rem; color: #666; margin-bottom: 12px; margin-top: -5px; line-height: 1.3; font-family: 'Outfit'; }
+
 .m-chip-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 25px; }
 .m-qual-chip { font-family: 'Rajdhani'; font-weight: 800; font-size: 0.8rem; text-align: center; padding: 10px 4px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); color: #fff; transition: all 0.2s; cursor: pointer; }
 .m-qual-chip.excluded { opacity: 0.4; background: rgba(255, 51, 102, 0.1); border-color: rgba(255, 51, 102, 0.3); color: var(--m-error); text-decoration: line-through; }
@@ -186,14 +196,7 @@ body::before {
 .m-cortex-chip.active .m-chip-icon { transform: scale(1.1); text-shadow: 0 0 10px var(--m-primary); }
 .m-chip-label { font-family: 'Rajdhani', monospace; font-size: 0.7rem; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 2px var(--m-primary); }
 
-/* SERVICE & INPUTS */
-.m-srv-rail { display: flex; gap: 6px; background: #0a0e14; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 5px; margin-bottom: 25px; }
-.m-srv-btn { flex: 1; text-align: center; padding: 12px 0; font-family: 'Rajdhani', sans-serif; font-weight: 800; font-size: 1rem; color: var(--m-dim); border-radius: 8px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-.m-srv-btn.active { background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)); border: 1px solid rgba(255,255,255,0.2); color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-.m-srv-btn[onclick*="'rd'"].active { border-color: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.2); }
-.m-srv-btn[onclick*="'ad'"].active { border-color: var(--m-primary); box-shadow: 0 0 10px var(--m-primary); color: var(--m-primary); }
-.m-srv-btn[onclick*="'tb'"].active { border-color: var(--m-accent); box-shadow: 0 0 10px var(--m-accent); color: var(--m-accent); }
-
+/* INPUTS */
 .m-field-group { margin-bottom: 20px; }
 .m-field-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 0 2px; }
 .m-field-label { font-family: 'Rajdhani'; font-weight: 700; font-size: 0.75rem; color: var(--m-dim); letter-spacing: 1px; }
@@ -588,11 +591,19 @@ const mobileHTML = `
                         </div>
                     </div>
 
-                    <div class="m-hyp-label" style="margin-top:20px;">Resolution Filter (Exclude)</div>
+                    <div id="lang-desc-container" style="min-height: 40px; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; margin-bottom: 25px; border: 1px dashed rgba(255,255,255,0.1);">
+                        <p id="lang-description" style="margin:0; font-size: 0.75rem; color: var(--m-dim); line-height: 1.4; transition: opacity 0.2s ease;">
+                             Cerca solo contenuti in Italiano.
+                        </p>
+                    </div>
+
+                    <div class="m-hyp-label">Resolution Filter (Exclude)</div>
+                    <p class="m-hyp-desc">Tocca per escludere risoluzioni specifiche.</p>
+                    
                     <div class="m-chip-grid">
                         <div class="m-qual-chip" id="mq-4k" onclick="toggleFilter('mq-4k')">4K UHD</div>
                         <div class="m-qual-chip" id="mq-1080" onclick="toggleFilter('mq-1080')">1080p</div>
-                        <div class="m-qual-chip" id="mq-720" onclick="toggleFilter('mq-720')">720p / HD</div>
+                        <div class="m-qual-chip" id="mq-720" onclick="toggleFilter('mq-720')">720p</div>
                         <div class="m-qual-chip" id="mq-sd" onclick="toggleFilter('mq-sd')">CAM/SD</div>
                     </div>
 
@@ -742,6 +753,12 @@ const fluxDescriptions = {
     'balanced': "L'algoritmo standard di Leviathan. Cerca il bilanciamento perfetto tra qualità, popolarità del file e velocità. Ideale per l'uso quotidiano.",
     'resolution': "Gerarchia visiva rigida. I risultati 4K appariranno sempre per primi, seguiti dai 1080p e infine 720p.",
     'size': "Ordina per grandezza del file (dal più grande al più piccolo). Ideale per chi vuole il massimo bitrate possibile."
+};
+
+const langDescriptions = {
+    'ita': "Solo contenuti in Italiano. Ignora tutto il resto.",
+    'ita-eng': "Cerca prima in Italiano. Se non trova nulla, mostra i risultati in Inglese.",
+    'eng': "Solo contenuti in Inglese."
 };
 
 const skinMaps = {
@@ -1023,6 +1040,16 @@ function setLangMode(mode) {
             else btn.classList.remove('active');
         }
     });
+
+    const descEl = document.getElementById('lang-description');
+    if(descEl) {
+        descEl.style.opacity = 0;
+        setTimeout(() => {
+            descEl.innerText = langDescriptions[mode];
+            descEl.style.opacity = 1;
+        }, 200);
+    }
+
     updateMobilePreview();
     updateLinkModalContent();
     if(navigator.vibrate) navigator.vibrate(10);
