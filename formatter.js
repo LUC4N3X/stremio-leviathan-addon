@@ -157,18 +157,29 @@ function extractStreamInfo(title, source) {
       cleanTags.push(codec);
   }
 
-  // HDR / DV
-  if (info.hdr) {
-      const hdrTags = Array.isArray(info.hdr) ? info.hdr : [info.hdr];
-      hdrTags.forEach(tag => {
-          if (/dolby/i.test(tag) || /vision/i.test(tag)) {
-              videoTags.push(`👁️ ${toStylized("DV")}`);
-              cleanTags.push("DV");
-          } else {
-              videoTags.push(`🔥 ${toStylized("HDR")}`);
-              cleanTags.push("HDR");
-          }
-      });
+  // --- NUOVA LOGICA HDR / DV INTELLIGENTE ---
+  // Analizziamo il titolo grezzo per trovare le combinazioni, 
+  // dato che a volte il parser separa i tag.
+  const rawT = String(title).toUpperCase();
+  
+  // Rilevamento Flag
+  const hasDV = /\b(DV|DOLBY\s*VISION|DOVI)\b/.test(rawT) || (info.hdr && (/dolby|vision/i.test(info.hdr.toString())));
+  const hasHDR = /\b(HDR|HDR10|HDR10\+|UHD\s*HDR)\b/.test(rawT) || (info.hdr && (/hdr/i.test(info.hdr.toString())));
+
+  if (hasDV && hasHDR) {
+      // CASO 1: IBRIDO (Sicuro per tutti gli schermi)
+      // Indica che il file ha metadati Dolby Vision MA anche il fallback HDR
+      videoTags.push(`👁️🔥 ${toStylized("DV+HDR")}`);
+      cleanTags.push("DV+HDR");
+  } else if (hasDV) {
+      // CASO 2: DOLBY VISION PURO (Attenzione)
+      // Indica che è SOLO DV. Su schermi non compatibili si vedrà viola/verde.
+      videoTags.push(`👁️ ${toStylized("DV")}`);
+      cleanTags.push("DV");
+  } else if (hasHDR) {
+      // CASO 3: HDR STANDARD
+      videoTags.push(`🔥 ${toStylized("HDR")}`);
+      cleanTags.push("HDR");
   }
 
   // Audio
@@ -203,14 +214,14 @@ function extractStreamInfo(title, source) {
   
   return { 
       quality: q, 
-      qDetails: qDetails,
+      qDetails: qDetails, 
       qIcon: qIcon, 
       videoTags, 
       cleanTags, 
       lang, 
       codec: info.codec || "",
-      audioTag: audioTag,
-      audioChannels: audioChannels,
+      audioTag: audioTag, 
+      audioChannels: audioChannels, 
       rawInfo: info 
   };
 }
