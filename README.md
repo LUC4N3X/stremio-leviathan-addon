@@ -323,9 +323,9 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
       <div style="font-size: 11px; color: #6e7681; line-height: 1.3; margin-top: 5px;">
         <b>✨ Ringraziamenti speciali</b><br>
         per il contributo su:<br>
-        • Logica di formattazione<br>
+        • Logica di formatter.js<br>
         • Moduli Web<br>
-        • Trailer & Addons JS
+        • Trailer.js
       </div>
     </td>
 
