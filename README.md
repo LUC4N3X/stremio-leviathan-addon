@@ -279,7 +279,7 @@ Definisci i confini della tua ricerca.
 Eseguire la seguente catena di comandi per il provisioning immediato del container:
 
 ```bash
-git clone [https://github.com/LUC4N3X/stremio-leviathan-addon](https://github.com/LUC4N3X/stremio-leviathan-addon)
+git clone https://github.com/LUC4N3X/stremio-leviathan-addon
 cd stremio-leviathan-addon
 docker compose up -d --build
 ```
