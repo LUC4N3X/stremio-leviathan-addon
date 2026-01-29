@@ -112,28 +112,23 @@ const REGEX_QUALITY_FILTER = {
 const REGEX_STRONG_ITA = /\b(ITA|ITALIAN|ITALIANO)\b/i;
 
 // 2. CONTEXT IT: "IT" (2 lettere) accettato SOLO se preceduto da keyword audio
-//    Es: "Audio IT", "AC3 IT", "Lang: IT". NON accetta "Web-DL IT" o "1080p IT" genericamente.
 const REGEX_CONTEXT_IT = /\b(AUDIO|LINGUA|LANG|VO|AC-?3|AAC|MP3|DDP|DTS|TRUEHD)\W+(IT)\b/i;
 
 // 3. ISOLATED IT: "IT" accettato SOLO se tra delimitatori molto specifici
-//    Es: ".IT." o "-IT-". 
-//    NON accetta "10bit" o "Visit" o "Wit".
 const REGEX_ISOLATED_IT = /(?:^|[_\-.])(IT)(?:$|[_\-.])/;
 
 // 4. MULTI/DUAL: Se dice Multi/Dual, controlliamo che ci sia ITA dentro
 const REGEX_MULTI_ITA = /\b(MULTI|DUAL|TRIPLE).*(ITA|ITALIAN)\b/i;
 
-// 5. RELEASE GROUPS NOTI ITALIANI (Passpartout)
+// 5. RELEASE GROUPS NOTI ITALIANI
 const REGEX_TRUSTED_GROUPS = /\b(iDN_CreW|CORSARO|MUX|WMS|TRIDIM|SPEEDVIDEO|EAGLE|TRL|MEA|LUX|DNA|LEST|GHIZZO|USAbit|Bric|Dtone|Gaiage|BlackBit|Pantry|Vics|Papeete|Lidri|MirCrew)\b/i;
 
-// 6. FALSE POSITIVE CHECK (Da scartare se matcha "IT")
-//    Se il titolo contiene "10bit", "With", "Bit", "Hit", "Fit", "Web-DL" (senza separatore netto)
-//    la regex ISOLATED_IT dovrebbe proteggere, ma questo è un layer in più.
+// 6. FALSE POSITIVE CHECK
 const REGEX_FALSE_IT = /\b(10BIT|BIT|WIT|HIT|FIT|KIT|SIT|LIT|PIT)\b/i;
 
 // Regex specifica per escludere i soli sottotitoli (False Positives)
 const REGEX_SUB_ONLY = /\b(SUB|SUBS|SUBBED|SOTTOTITOLI|VOST|VOSTIT)\s*[:.\-_]?\s*(ITA|IT|ITALIAN)\b/i;
-// Regex per confermare che, anche se c'è scritto SUB, c'è pure l'audio (es. "Audio ITA - Sub ITA")
+// Regex per confermare che, anche se c'è scritto SUB, c'è pure l'audio
 const REGEX_AUDIO_CONFIRM = /\b(AUDIO|AC3|AAC|DTS|MD|LD|DDP|MP3|LINGUA)[\s.\-_]+(ITA|IT)\b/i;
 
 // =========================================================================
@@ -158,7 +153,6 @@ function parseTitleDetails(filename) {
         const audio = info.audio ? info.audio.toUpperCase() : '';
         const source = info.source ? info.source.toUpperCase() : '';
         
-        // Mappatura Lingue
         let languages = [];
         if (info.languages && Array.isArray(info.languages)) {
             languages = info.languages.map(l => languageMapping[l] || l.substring(0,3).toUpperCase());
@@ -234,17 +228,53 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-// --- HELPER FUNZIONALI ---
+// --- HELPER FUNZIONALI POTENZIATI ---
 
-function parseSize(sizeStr) {
-  if (!sizeStr) return 0;
-  if (typeof sizeStr === "number") return sizeStr;
-  const m = sizeStr.toString().match(/([\d.]+)\s*([KMGTP]?B)/i);
-  if (!m) return 0;
-  const val = parseFloat(m[1]);
-  const unit = m[2].toUpperCase();
-  const mult = { TB: 1099511627776, GB: 1073741824, MB: 1048576, KB: 1024, B: 1 };
-  return val * (mult[unit] || 1);
+// Nuova parseSize robusta (Gestisce virgole e formati sporchi)
+function parseSize(sizeText) {
+  if (!sizeText) return 0;
+  if (typeof sizeText === 'number') return sizeText;
+  
+  const str = sizeText.toString();
+  let scale = 1;
+  
+  if (str.match(/TB/i)) {
+    scale = 1024 * 1024 * 1024 * 1024;
+  } else if (str.match(/GB/i)) {
+    scale = 1024 * 1024 * 1024;
+  } else if (str.match(/MB/i)) {
+    scale = 1024 * 1024;
+  } else if (str.match(/KB/i) || str.match(/kB/i)) {
+    scale = 1024;
+  } else if (str.match(/B/i) && !str.match(/GB|MB|KB|TB/i)) {
+    scale = 1;
+  }
+  
+  // Rimuove virgole e caratteri non numerici (lascia il punto)
+  // Nota: sostituiamo la virgola con punto se è un decimale italiano, oppure rimuoviamo se è migliaia
+  // Per sicurezza rimuoviamo virgole come separatori migliaia o decimali in stile IT convertendo in dot
+  const cleanStr = str.replace(/,/g, '.').replace(/[^\d.]/g, '');
+  const num = parseFloat(cleanStr);
+  return isNaN(num) ? 0 : Math.floor(num * scale);
+}
+
+// Estrae seeders da stringhe formattate con icone (stile Leviathan)
+function extractSeeders(title) {
+  // Cerca sia l'icona singola 👤 che quella di gruppo 👥
+  const seedersMatch = title.match(/(?:👤|👥)\s*(\d+)/);
+  return seedersMatch && parseInt(seedersMatch[1]) || 0;
+}
+
+// Estrae dimensione da stringhe formattate con icone
+function extractSize(title) {
+  const sizeMatch = title.match(/(?:💾|🧲|📦)\s*([\d.,]+\s*\w+)/i);
+  return sizeMatch && parseSize(sizeMatch[1]) || 0;
+}
+
+// Estrae provider da tag nel titolo (es. [RD])
+function extractProvider(title) {
+  const match = title.match(/\[([A-Z]{2,3})\]/);
+  return match?.[1] || "P2P";
 }
 
 function deduplicateResults(results) {
@@ -256,9 +286,12 @@ function deduplicateResults(results) {
     if (!finalHash || finalHash.length !== 40) continue;
     item.hash = finalHash;
     item.infoHash = finalHash;
+    
+    // Assicuriamoci che la dimensione sia parsata correttamente
+    item._size = parseSize(item.sizeBytes || item.size);
+
     const existing = hashMap.get(finalHash);
     if (!existing || (item.seeders || 0) > (existing.seeders || 0)) {
-      item._size = parseSize(item.sizeBytes || item.size);
       hashMap.set(finalHash, item);
     }
   }
@@ -285,7 +318,6 @@ function filterByQualityLimit(results, limit) {
     return filtered;
 }
 
-// Funzione helper per determinare se è italiano (usata nei database locali)
 function isSafeForItalian(item) {
   if (!item || !item.title) return false;
   const t = item.title;
@@ -295,7 +327,6 @@ function isSafeForItalian(item) {
   if (REGEX_MULTI_ITA.test(t)) return true;
   if (REGEX_CONTEXT_IT.test(t)) return true;
   
-  // Per l'isolated IT, facciamo un check extra sui falsi positivi
   if (REGEX_ISOLATED_IT.test(t)) {
       if (REGEX_FALSE_IT.test(t)) return false;
       return true;
@@ -706,7 +737,6 @@ async function queryLocalIndexer(meta, config) {
                 const cleanMeta = meta.title.toLowerCase().replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
                 const metaTitleShort = meta.title.split(/ - |: /)[0].toLowerCase().trim();
                 
-                // DETERMINE LANGUAGE MODE (Default: 'ita')
                 const langMode = config && config.filters ? (config.filters.language || (config.filters.allowEng ? "all" : "ita")) : "ita";
                 
                 return results.map(t => {
@@ -734,20 +764,16 @@ async function queryLocalIndexer(meta, config) {
                 }).filter(item => {
                     if (!item.hash || item.hash.length !== 40) return false;
                     const cleanFile = item.title.toLowerCase().replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
-                    const isKnaben = /knaben/i.test(item.source);
                     const isCorsaro = /corsaro/i.test(item.source);
                     
                     const isItalianTitle = isSafeForItalian(item);
                     
-                    // --- DB FILTER LOGIC ---
                     if (langMode === 'ita') {
                          if (!isItalianTitle && !isCorsaro) return false;
                     }
                     else if (langMode === 'eng') {
-                         // Se è palesemente italiano, lo escludiamo
                          if (isItalianTitle) return false;
                     }
-                    // else 'all': accept everything
 
                     if (/[а-яА-ЯёЁ]/.test(item.title)) return false;
 
@@ -832,7 +858,6 @@ async function queryRemoteIndexer(tmdbId, type, season = null, episode = null, c
              } else if (langMode === 'eng') {
                  if (isItalian) return false;
              }
-             // 'all' accepts everything
              return true;
         });
     } catch (e) {
@@ -846,18 +871,32 @@ async function fetchExternalResults(type, finalId) {
     try {
         const externalResults = await withTimeout(
             fetchExternalAddonsFlat(type, finalId).then(items => {
-                return items.map(i => ({
-                    title: i.title || i.filename,
-                    magnet: i.magnetLink,
-                    size: i.size,             
-                    sizeBytes: i.mainFileSize,
-                    seeders: i.seeders,
-                    source: i.externalProvider || i.source.replace(/\[EXT\]\s*/, ''),
-                    hash: i.infoHash || extractInfoHash(i.magnetLink),
-                    infoHash: i.infoHash || extractInfoHash(i.magnetLink),
-                    fileIdx: i.fileIdx,
-                    isExternal: true
-                }));
+                return items.map(i => {
+                    const title = i.title || i.filename;
+                    // Recupero dati mancanti usando il nuovo parser
+                    let finalSeeders = i.seeders;
+                    if (!finalSeeders && title) finalSeeders = extractSeeders(title);
+                    
+                    let finalSize = i.mainFileSize;
+                    if ((!finalSize || finalSize === 0) && title) finalSize = extractSize(title);
+                    
+                    // Fallback per visualizzazione stringa
+                    let displaySize = i.size;
+                    if (!displaySize && finalSize > 0) displaySize = formatBytes(finalSize);
+
+                    return {
+                        title: title,
+                        magnet: i.magnetLink,
+                        size: displaySize,             
+                        sizeBytes: finalSize,
+                        seeders: finalSeeders,
+                        source: i.externalProvider || i.source.replace(/\[EXT\]\s*/, ''),
+                        hash: i.infoHash || extractInfoHash(i.magnetLink),
+                        infoHash: i.infoHash || extractInfoHash(i.magnetLink),
+                        fileIdx: i.fileIdx,
+                        isExternal: true
+                    };
+                });
             }),
             CONFIG.TIMEOUTS.EXTERNAL,
             'External Addons'
@@ -1624,7 +1663,7 @@ app.listen(PORT, () => {
     console.log(`🕷️ WEBSTREAMR: Fallback Attivo (Su 0 Risultati)`);
     console.log(`🎬 TRAILER: Attivabile da Config (Default: OFF, Primo Risultato se ON)`);
     console.log(`📦 TORBOX: ADVANCED SMART CACHE ENABLED`);
-    console.log(`📝 PARSER: INTEGRATED (Enhanced Title Logic)`); 
+    console.log(`📝 PARSER: ENHANCED (Smart Extraction Active)`); 
     console.log(`🦑 LEVIATHAN CORE: Optimized for High Reliability`);
     console.log(`-----------------------------------------------------`);
 });
