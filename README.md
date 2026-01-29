@@ -309,7 +309,7 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 
 
 
-<h3 align="center"><span class="notranslate">⚡ PROTOCOL ARCHITECTURE & ENGINEERING</span></h3>
+<h3 align="center"><span class="notranslate">🧬 PROTOCOL ARCHITECTURE & ENGINEERING</span></h3>
 
 <table style="border: none; width: 100%;">
   <tr>
