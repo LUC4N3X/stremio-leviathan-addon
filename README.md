@@ -339,44 +339,51 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 👁‍🗨 BENVENUTO NELL'ABISSO.
 ---
 
-<h3 align="center">⭐ SUPPORTO & DONAZIONI</h3>
+<h3 align="center">🜂 LEVIATHAN · SUPPORTO & CORE SIGNALS</h3>
 
-<p align="center" style="color:#8b949e; font-size:14px; max-width:720px;">
-<b>Leviathan</b> è un progetto <b>open-source</b>, gratuito e in continua evoluzione.<br>
-Ogni forma di supporto aiuta a mantenerlo <b>indipendente, stabile e senza compromessi</b>.
+<p align="center" style="color:#8b949e; font-size:14px; max-width:740px;">
+<b>Leviathan</b> è un <b>Protocollo open-source</b> progettato per essere <b>preciso, indipendente e scalabile</b>.<br>
+Ogni forma di supporto rafforza la sua <b>stabilità, visibilità e continuità evolutiva</b>.
 </p>
 
 <br>
 
 <div align="center">
 
-<h4>💙 Supporto Diretto</h4>
-<p style="font-size:13px; color:#c9d1d9; max-width:520px;">
-Sostieni attivamente lo sviluppo del Protocollo con una donazione volontaria
+<h4>💠 CORE SUPPORT · Donazione Diretta</h4>
+<p style="font-size:13px; color:#c9d1d9; max-width:540px;">
+Il supporto diretto accelera lo sviluppo, mantiene il Protocollo libero<br>
+e consente iterazioni rapide senza compromessi
 </p>
 
 <a href="https://www.paypal.me/luc4nex">
-  <img src="https://img.shields.io/badge/Donate-PayPal-blue?style=for-the-badge&logo=paypal">
+  <img src="https://img.shields.io/badge/Core%20Support-PayPal-1f6feb?style=for-the-badge&logo=paypal">
 </a>
 
 <br><br>
 
-<h4>⭐ Supporto Gratuito</h4>
-<p style="font-size:13px; color:#c9d1d9; max-width:520px;">
-Un gesto semplice ma fondamentale per la visibilità del progetto
+<h4>⭐ VISIBILITY SIGNAL · Supporto Gratuito</h4>
+<p style="font-size:13px; color:#c9d1d9; max-width:560px;">
+Lasciare una ⭐ è il segnale più potente:<br>
+aumenta la visibilità del Protocollo e ne rafforza l’autorevolezza
 </p>
 
 <a href="https://stremio-addons.net/addons/leviathan">
-  <img src="https://img.shields.io/badge/Lascia%20una%20⭐%20qui-Leviathan-2ea043?style=for-the-badge&logo=github">
+  <img src="https://img.shields.io/badge/Attiva%20il%20Segnale-⭐%20Lascia%20una%20Stella-2ea043?style=for-the-badge&logo=github">
 </a>
+
+<p style="font-size:11px; color:#6e7681; margin-top:8px;">
+⏱️ Richiede meno di 5 secondi · impatto reale sul progetto
+</p>
 
 </div>
 
 <br>
 
 <p align="center" style="font-size:12px; color:#6e7681;">
-Supportare Leviathan significa investire in un Protocollo <b>libero, curato e orientato alla qualità</b>.
+Supportare Leviathan significa rafforzare un Protocollo <b>libero, curato e orientato alla qualità</b>.
 </p>
+
 
 
 ---
