@@ -278,11 +278,6 @@ Definisci i confini della tua ricerca.
 
 Eseguire la seguente catena di comandi per il provisioning immediato del container:
 ```bash
-center() {
-  local text="$1"
-  local width=$(tput cols)
-  printf "%*s\n" $(((${#text} + width) / 2)) "$text"
-}
 
 center "git clone https://github.com/LUC4N3X/stremio-leviathan-addon"
 center "cd stremio-leviathan-addon"
