@@ -315,8 +315,9 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
   <tr>
     <td align="center" style="width: 33%; border: none; vertical-align: top;">
       <a href="https://github.com/LUC4N3X">
-        <img src="https://github.com/LUC4N3X.png" width="75" style="border-radius:50%; border: 2px solid #00E0FF;" alt="LUC4N3X"/>
-        <br><b>LUC4N3X</b>
+        <img src="https://github.com/LUC4N3X.png" width="80" style="border-radius:50%; border: 2px solid #00E0FF;" alt="LUC4N3X"/>
+        <br>
+        <b>LUC4N3X</b>
       </a>
       <br><br>
       <sub style="color: #8b949e;">
@@ -328,8 +329,9 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 
    <td align="center" style="width: 33%; border: none; vertical-align: top;">
       <a href="https://github.com/qwertyuiop8899">
-        <img src="https://github.com/qwertyuiop8899.png" width="75" style="border-radius:50%;" alt="qwerty"/>
-        <br><b>qwertyuiop8899</b>
+        <img src="https://github.com/qwertyuiop8899.png" width="80" style="border-radius:50%;" alt="qwerty"/>
+        <br>
+        <b>qwertyuiop8899</b>
       </a>
       <br><br>
       <sub style="color: #8b949e;">
@@ -343,8 +345,9 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 
   <td align="center" style="width: 33%; border: none; vertical-align: top;">
       <a href="https://github.com/diogomiguel93">
-        <img src="https://github.com/diogomiguel93.png" width="75" style="border-radius:50%;" alt="diogo"/>
-        <br><b>diogomiguel93</b>
+        <img src="https://github.com/diogomiguel93.png" width="80" style="border-radius:50%;" alt="diogo"/>
+        <br>
+        <b>diogomiguel93</b>
       </a>
       <br><br>
       <sub style="color: #8b949e;">
@@ -356,6 +359,11 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
     </td>
   </tr>
 </table>
+
+<br>
+<div align="center">
+  <sub style="color: grey;">Leviathan Project © 2025 • Evolution Guaranteed</sub>
+</div>
 
 <br>
 <div align="center">
