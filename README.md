@@ -324,7 +324,7 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
         <b>✨ Ringraziamenti speciali</b><br>
         per il contributo su:<br>
         • Logica di formatter.js<br>
-        • Moduli Web(SC-GuardaHd-GuardaSerie)<br>
+        • Moduli Web(SC-GuardaHD-GuardaSerie)<br>
         • Trailer.js
       </div>
     </td>
