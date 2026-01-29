@@ -286,8 +286,8 @@ git clone https://github.com/LUC4N3X/stremio-leviathan-addon
 cd stremio-leviathan-addon
 docker compose up -d --build
 ```
- </div> ```
-
+ </div> 
+```
 ```
 ✅ Fatto! Leviathan sarà raggiungibile su:
 http://localhost:7000
