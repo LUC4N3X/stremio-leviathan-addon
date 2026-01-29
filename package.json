@@ -1,6 +1,6 @@
 {
   "name": "leviathan",
-  "version": "32.0.5",
+  "version": "32.0.6",
   "description": "Leviathan Edition - AI Core + NLP Parser + Debrid (God Tier)",
   "main": "addon.js",
   "scripts": {
@@ -27,6 +27,7 @@
     "https-proxy-agent": "^7.0.0",
     "ioredis": "^5.4.1",
     "node-cache": "^5.1.2",
+    "parse-torrent-title": "^1.4.0",
     "p-limit": "^3.1.0",
     "pg": "^8.11.5",
     "request": "^2.88.2",
