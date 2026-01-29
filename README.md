@@ -351,29 +351,21 @@ Se il Protocollo ti è utile, puoi supportarne lo sviluppo.
 
 <table align="center" width="100%" style="border:none;">
   <tr>
-
-  <td align="center" width="33%">
-      <h4>☕ Ko-fi</h4>
+  <!-- PAYPAL -->
+    <td align="center" width="50%">
+      <h4>💙 PayPal</h4>
       <p style="font-size:13px; color:#c9d1d9;">
-        Supporto rapido e diretto
+        Supporto diretto allo sviluppo del Protocollo
       </p>
-      <a href="https://ko-fi.com/USERNAME">
-        <img src="https://img.shields.io/badge/Support-Ko--fi-red?style=for-the-badge&logo=ko-fi">
+      <a href="INSERISCI_QUI_IL_LINK_PAYPAL_DI_PRIMA">
+        <img src="https://img.shields.io/badge/Donate-PayPal-blue?style=for-the-badge&logo=paypal">
       </a>
     </td>
-
-  <td align="center" width="33%">
-      <h4>💎 Crypto</h4>
-      <p style="font-size:13px; color:#c9d1d9;">
-        BTC · ETH · USDT
-      </p>
-      <code style="font-size:12px;">YOUR_WALLET_ADDRESS</code>
-    </td>
-
-   <td align="center" width="33%">
+ <!-- GITHUB STAR -->
+    <td align="center" width="50%">
       <h4>⭐ GitHub</h4>
       <p style="font-size:13px; color:#c9d1d9;">
-        Supporto gratuito ma potente
+        Supporto gratuito ma fondamentale
       </p>
       <b>Lascia una ⭐ al repository</b>
     </td>
@@ -382,7 +374,5 @@ Se il Protocollo ti è utile, puoi supportarne lo sviluppo.
 </table>
 
 <p align="center" style="font-size:12px; color:#6e7681; margin-top:15px;">
-Ogni supporto contribuisce a mantenere Leviathan <b>vivo, veloce e indipendente</b>.
+Il tuo supporto aiuta Leviathan a rimanere <b>indipendente, veloce e in continua evoluzione</b>.
 </p>
-
-
