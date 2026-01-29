@@ -19,6 +19,7 @@
             --text-main: #e0f7fa;
             --text-dim: #8baac2;
             --error: #ff3366;
+            --success: #00ff9d;
             --glow-strong: 0 0 10px rgba(0, 242, 255, 0.3);
             --glow-intense: 0 0 20px rgba(0, 242, 255, 0.4);
         }
@@ -462,12 +463,14 @@
             z-index: 10; display: none; 
             flex-direction: column; align-items: center; justify-content: center;
             border-radius: 15px; border: 1px solid var(--secondary);
+            cursor: pointer; /* Click to shake */
         }
         .lock-icon { font-size: 3rem; color: var(--secondary); margin-bottom: 15px; filter: drop-shadow(0 0 10px var(--secondary)); }
         .lock-msg { font-family: 'Rajdhani', sans-serif; font-size: 1.5rem; font-weight: 800; color: #fff; letter-spacing: 2px; text-transform: uppercase; }
         
+        /* Updated: No pointer-events: none so clicks work for shake effect */
         .disabled-core .skin-selector-container, .disabled-core .custom-area {
-            opacity: 0.3; pointer-events: none; filter: grayscale(1);
+            opacity: 0.3; filter: grayscale(1);
         }
 
         .skin-selector-container {
@@ -657,6 +660,65 @@
         }
         .flux-copy-btn:hover { background: var(--primary); color: #000; box-shadow: 0 0 10px var(--primary); }
 
+        /* --- NEW MICRO-INTERACTIONS & TOASTS --- */
+        
+        /* 1. AIO DENIED ANIMATION */
+        @keyframes shakeGlow {
+            0%, 100% { transform: translateX(0); border-color: rgba(112,0,255,0.2); box-shadow: none; }
+            20% { transform: translateX(-5px); border-color: var(--secondary); box-shadow: 0 0 20px var(--secondary), inset 0 0 10px var(--secondary); }
+            40% { transform: translateX(5px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+        }
+        .denied-anim {
+            animation: shakeGlow 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        /* 2. RECALCULATION OVERLAY */
+        .recalc-overlay {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.8);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10; opacity: 0; pointer-events: none;
+            transition: opacity 0.2s;
+            backdrop-filter: blur(2px); border-radius: 12px;
+        }
+        .recalc-overlay.visible { opacity: 1; }
+        .recalc-text {
+            font-family: 'Rajdhani'; font-weight: 800; color: var(--primary);
+            letter-spacing: 2px; text-transform: uppercase; font-size: 1rem;
+            display: flex; align-items: center; gap: 10px;
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        /* 3. SCI-FI TOAST */
+        .sys-toast-container {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            z-index: 9999; pointer-events: none; width: 90%; max-width: 400px;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .sys-toast {
+            background: rgba(5, 10, 15, 0.95);
+            border: 1px solid var(--primary);
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+            color: #fff; padding: 15px 20px; border-radius: 8px;
+            font-family: 'Rajdhani'; font-size: 1rem; font-weight: 700;
+            display: flex; align-items: center; gap: 15px;
+            animation: slideUpFade 0.3s ease-out forwards;
+            backdrop-filter: blur(5px);
+        }
+        .sys-toast.warning { border-color: var(--gold); border-left-color: var(--gold); color: var(--gold); }
+        .sys-toast.error { border-color: var(--error); border-left-color: var(--error); color: var(--error); }
+        .sys-toast.success { border-color: var(--success); border-left-color: var(--success); color: var(--success); }
+        
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .sys-toast.out { animation: fadeOut 0.3s ease-out forwards; }
+        @keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
+
         @media (min-width: 1024px) {
             .main-wrapper { max-width: 1400px; }
             .desktop-grid-container { 
@@ -766,7 +828,7 @@
             
             <div class="visual-core-hero spectrum-container" style="background: rgba(0, 5, 10, 0.8);">
                 
-                <div class="aio-lock-overlay" id="aioLockOverlay">
+                <div class="aio-lock-overlay" id="aioLockOverlay" onclick="triggerAIODenied()">
                     <i class="fas fa-lock lock-icon"></i>
                     <div class="lock-msg">OVERRIDDEN BY AIO CORE</div>
                     <div style="color:#aaa; font-size:0.9rem; margin-top:5px;">Disabilita "Compatibilità AIO" per sbloccare le skin.</div>
@@ -779,7 +841,11 @@
                     <span class="spectrum-desc" style="text-align:right;">Personalizza l'aspetto dei risultati.</span>
                 </div>
 
-                <div class="preview-terminal">
+                <div class="preview-terminal" id="prevTerminal">
+                    <div class="recalc-overlay" id="recalcLayer">
+                        <div class="recalc-text"><i class="fas fa-cog fa-spin"></i> UPDATING CORE...</div>
+                    </div>
+
                     <div class="preview-header">
                         <span>LIVE SIGNAL PREVIEW</span>
                         <span id="prev-mode-label" style="color:var(--primary)">LEVIATHAN</span>
@@ -1117,6 +1183,8 @@
         </div>
     </div>
     
+    <div class="sys-toast-container" id="toastArea"></div>
+
     <div class="modal-backdrop" id="installModal">
         <div class="modal-content">
             <div class="modal-title">CONFERMA PROTOCOLLO</div>
@@ -1207,12 +1275,50 @@
         let currentService = 'rd';
         let currentSCQuality = 'all';
 
+        // --- NEW TOAST SYSTEM ---
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toastArea');
+            if(!container) return;
+            const el = document.createElement('div');
+            el.className = `sys-toast ${type}`;
+            
+            let icon = 'fa-info-circle';
+            if(type === 'warning') icon = 'fa-exclamation-triangle';
+            if(type === 'error') icon = 'fa-bug';
+            if(type === 'success') icon = 'fa-check-circle';
+            
+            el.innerHTML = `<i class="fas ${icon}"></i> <span>${msg}</span>`;
+            container.appendChild(el);
+            
+            setTimeout(() => {
+                el.classList.add('out');
+                setTimeout(() => el.remove(), 300);
+            }, 3000);
+        }
+
+        function triggerPreviewEffect() {
+            const layer = document.getElementById('recalcLayer');
+            if(!layer) return;
+            layer.classList.add('visible');
+            setTimeout(() => { layer.classList.remove('visible'); }, 400); 
+        }
+
+        function triggerAIODenied() {
+            const overlay = document.getElementById('aioLockOverlay');
+            if (overlay) {
+                overlay.classList.remove('denied-anim');
+                void overlay.offsetWidth;
+                overlay.classList.add('denied-anim');
+                showToast("AZIONE BLOCCATA DA AIO MODE", "warning");
+            }
+        }
+
         // --- SKINS LOGIC (PREVIEW) ---
         function toStylized(text, type = 'std') {
             const maps = {
                 'bold': {
                     nums: {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵'},
-                    chars: {'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭','a':'𝗮','b':'𝗯','c':'𝗰','d':'𝗱','e':'𝗲','f':'𝗳','g':'𝗴','h':'𝗵','i':'𝗶','j':'j','k':'𝗸','l':'𝗹','m':'𝗺','n':'𝗻','o':'ᴏ','p':'ᴘ','q':'𝗾','r':'𝗿','s':'𝘀','t':'𝘁','u':'𝘂','v':'𝘃','w':'𝘄','x':'𝘅','y':'𝘆','z':'𝘇'}
+                    chars: {'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭','a':'𝗮','b':'𝗯','c':'𝗰','d':'𝗱','e':'𝗲','f':'𝗳','g':'𝗴','h':'𝗵','i':'𝗶','j':'j','k':'𝗸','l':'𝗹','m':'𝗺','n':'𝗻','o':'ᴏ','p':'ᴘ','q':'𝗾','r':'𝗿','s':'𝘀','t':'𝘁','u':'𝘂','v':'𝘃','w':'𝘄','x':'𝘅','y':'𝘆','z':'ᴢ'}
                 },
                 'spaced': {
                     nums: {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗'},
@@ -1238,6 +1344,13 @@
         }
 
         function selectSkin(skinId) {
+            // CHECK AIO LOCK
+            const isAIO = document.getElementById('aiostreams_mode').checked;
+            if (isAIO && skinId !== 'leviathan') {
+                triggerAIODenied();
+                return;
+            }
+
             document.querySelectorAll('.skin-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('skin_' + skinId).classList.add('active');
             document.getElementById('selectedSkin').value = skinId;
@@ -1255,6 +1368,7 @@
                 customInput.disabled = true; // DISABILITA SCRITTURA
             }
             
+            // NO EFFECT - INSTANT UPDATE FOR SKINS
             updatePreview(skinId);
             updateFluxStream();
         }
@@ -1360,6 +1474,8 @@
                 skinContainer.classList.add('disabled-core');
                 customArea.classList.add('disabled-core');
                 overlay.style.display = 'flex';
+                selectSkin('leviathan'); // Force revert
+                showToast("AIO MODE ATTIVO: SKIN RESETTATE", "info");
             } else {
                 skinContainer.classList.remove('disabled-core');
                 customArea.classList.remove('disabled-core');
@@ -1397,8 +1513,14 @@
 
         function toggleSpectrum(id) {
             const el = document.getElementById(id);
-            if (el.classList.contains('excluded')) { el.classList.remove('excluded'); el.classList.add('active'); } 
-            else { el.classList.remove('active'); el.classList.add('excluded'); }
+            const isExcluded = el.classList.contains('excluded');
+            
+            if (isExcluded) { 
+                el.classList.remove('excluded'); el.classList.add('active'); 
+            } else { 
+                el.classList.remove('active'); el.classList.add('excluded'); 
+                triggerPreviewEffect(); // Effect only when filtering out
+            }
             updateFluxStream();
         }
         
@@ -1433,8 +1555,12 @@
             const wrap = document.getElementById('gateWrapper');
             const display = document.getElementById('gateDisplay');
             const slider = document.getElementById('gateSlider');
-            if (active) { wrap.classList.add('active'); display.innerText = slider.value; } 
+            if (active) { 
+                wrap.classList.add('active'); display.innerText = slider.value; 
+                showToast("SIGNAL GATE ATTIVO", "warning");
+            } 
             else { wrap.classList.remove('active'); display.innerText = "∞"; }
+            updateLinkModalContent();
         }
 
         function updateGateVal(val) { document.getElementById('gateDisplay').innerText = val; }
@@ -1613,7 +1739,10 @@
         function openFaqModal() { const m = document.getElementById('faqModal'); m.style.display = 'flex'; setTimeout(() => m.classList.add('show'), 10); }
 
         function confirmInstall() {
-            if(!validateInputs()) { document.querySelector('.main-wrapper').scrollIntoView({ behavior: 'smooth' }); return; }
+            if(!validateInputs()) { 
+                showToast("ERRORE: API KEY MANCANTE", "error");
+                document.querySelector('.main-wrapper').scrollIntoView({ behavior: 'smooth' }); return; 
+            }
             const c = getConfigObject();
             const list = document.getElementById('modalSummary');
             let scText = c.filters.enableVix ? 'ATTIVO' : 'NO';
@@ -1677,6 +1806,7 @@
 
         async function copyLink() {
             if(!validateInputs()) { 
+                showToast("ERRORE: CONFIGURAZIONE INCOMPLETA", "error");
                 document.querySelector('.main-wrapper').scrollIntoView({ behavior: 'smooth' }); 
                 return; 
             }
@@ -1711,6 +1841,7 @@
             const old = t.innerText;
             t.innerText = "COPIATO!";
             t.style.color = "#00f2ff";
+            showToast("LINK COPIATO NEGLI APPUNTI", "success");
             setTimeout(() => { t.innerText = old; t.style.color = ""; }, 2000);
         }
     </script>
