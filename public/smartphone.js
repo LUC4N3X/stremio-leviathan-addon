@@ -164,9 +164,11 @@ body::before {
 .m-hyp-desc { font-size: 0.7rem; color: #666; margin-bottom: 12px; margin-top: -5px; line-height: 1.3; font-family: 'Outfit'; }
 
 .m-chip-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 25px; }
-.m-qual-chip { font-family: 'Rajdhani'; font-weight: 800; font-size: 0.8rem; text-align: center; padding: 10px 4px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); color: #fff; transition: all 0.2s; cursor: pointer; }
+.m-qual-chip { font-family: 'Rajdhani'; font-weight: 800; font-size: 0.8rem; text-align: center; padding: 10px 4px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); color: #fff; transition: all 0.2s; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .m-qual-chip.excluded { opacity: 0.4; background: rgba(255, 51, 102, 0.1); border-color: rgba(255, 51, 102, 0.3); color: var(--m-error); text-decoration: line-through; }
 .m-qual-chip:not(.excluded):active { transform: scale(0.95); }
+.mini-tag { font-size: 0.6rem; opacity: 0.7; margin-top: -2px; font-weight: 700; letter-spacing: 1px; color: var(--m-primary); }
+.m-qual-chip.excluded .mini-tag { color: var(--m-error); }
 
 /* SYSTEM GRID */
 .m-sys-grid { display: grid; grid-template-columns: 1fr; gap: 0; background: rgba(0,0,0,0.2); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; margin-bottom: 20px; }
@@ -272,17 +274,18 @@ input:checked + .m-slider-pink:before { background-color: var(--m-cine); box-sha
 .m-flux-header { background: rgba(0, 242, 255, 0.05); padding: 8px 15px; font-size: 0.7rem; color: var(--m-primary); letter-spacing: 1px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0, 242, 255, 0.1); }
 .m-flux-input { width: 100%; background: transparent; border: none; color: #fff; padding: 15px; font-size: 0.75rem; resize: none; min-height: 80px; line-height: 1.4; outline: none; font-family: 'Consolas', monospace; white-space: pre-wrap; word-break: break-all; }
 
+/* CREDITS UPDATED */
 .m-credits-section { margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 15px; }
-.m-faq-btn { width: 100%; padding: 12px; background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.2); color: var(--m-dim); border-radius: 10px; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.85rem; letter-spacing: 1px; display: flex; justify-content: center; align-items: center; gap: 10px; transition: all 0.3s ease; }
-.m-dev-hub { display: flex; gap: 12px; height: 55px; }
-.m-cmd-tag { flex: 1; text-decoration: none; background: linear-gradient(90deg, rgba(0, 242, 255, 0.05), rgba(0,0,0,0.4)); border: 1px solid rgba(0, 242, 255, 0.25); border-radius: 12px; display: flex; align-items: center; padding: 0 12px; gap: 12px; transition: all 0.3s ease; position: relative; overflow: hidden; }
-.m-cmd-tag::before { content: ''; position: absolute; top:0; left:0; width: 3px; height: 100%; background: var(--m-primary); box-shadow: 0 0 8px var(--m-primary); }
-.m-cmd-avatar-mini { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--m-primary); object-fit: cover; box-shadow: 0 0 8px rgba(0, 242, 255, 0.4); }
+.m-dev-hub { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+.m-cmd-tag { width: 100%; height: 60px; text-decoration: none; background: linear-gradient(90deg, rgba(0, 242, 255, 0.05), rgba(0,0,0,0.4)); border: 1px solid rgba(0, 242, 255, 0.25); border-radius: 12px; display: flex; align-items: center; padding: 0 15px; gap: 15px; transition: all 0.3s ease; position: relative; overflow: hidden; }
+.m-cmd-tag::before { content: ''; position: absolute; top:0; left:0; width: 4px; height: 100%; background: var(--m-primary); box-shadow: 0 0 10px var(--m-primary); }
+.m-cmd-avatar-mini { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--m-primary); object-fit: cover; box-shadow: 0 0 10px rgba(0, 242, 255, 0.4); }
 .m-cmd-details { display: flex; flex-direction: column; justify-content: center; }
-.m-cmd-role { font-size: 0.65rem; color: var(--m-primary); letter-spacing: 2px; text-transform: uppercase; font-weight: 800; opacity: 0.8; }
-.m-cmd-nick { font-family: 'Rajdhani', sans-serif; font-size: 1.05rem; color: #fff; font-weight: 800; line-height: 1; display: flex; align-items: center; gap: 8px; }
-.m-coffee-btn { text-decoration: none; padding: 0 15px; display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(10, 15, 25, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; font-size: 1rem; color: var(--m-dim); transition: all 0.3s; position: relative; font-family: 'Rajdhani', sans-serif; font-weight: 700; }
-.m-coffee-text { font-size: 0.8rem; letter-spacing: 1px; color: var(--m-dim); transition: color 0.3s; }
+.m-cmd-role { font-size: 0.7rem; color: var(--m-primary); letter-spacing: 2px; text-transform: uppercase; font-weight: 800; opacity: 0.8; }
+.m-cmd-nick { font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; color: #fff; font-weight: 800; line-height: 1; display: flex; align-items: center; gap: 8px; }
+.m-coffee-btn { width: 100%; height: 60px; text-decoration: none; padding: 0 15px; display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(112, 0, 255, 0.1); border: 1px solid rgba(112, 0, 255, 0.3); border-radius: 12px; font-size: 1.1rem; color: #fff; transition: all 0.3s; position: relative; font-family: 'Rajdhani', sans-serif; font-weight: 800; box-shadow: 0 0 15px rgba(112, 0, 255, 0.1); }
+.m-coffee-text { font-size: 0.9rem; letter-spacing: 2px; color: #fff; transition: color 0.3s; }
+.m-coffee-btn:active { transform: scale(0.98); background: rgba(112, 0, 255, 0.2); }
 
 .m-dock-container { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(2, 5, 10, 0.97); border-top: 1px solid rgba(0,242,255,0.15); z-index: 100; display: flex; flex-direction: column; padding-bottom: var(--safe-bottom); box-shadow: 0 -12px 35px rgba(0,0,0,0.85); backdrop-filter: blur(12px); }
 .m-dock-actions { display: flex; gap: 12px; padding: 12px 18px 6px 18px; }
@@ -445,10 +448,6 @@ const mobileHTML = `
                 </div>
 
                 <div class="m-credits-section">
-                    <button class="m-faq-btn" onclick="openFaq()">
-                        <i class="fas fa-terminal"></i> SYSTEM FAQ & MANUAL
-                    </button>
-
                     <div class="m-dev-hub">
                         <a href="https://github.com/LUC4N3X/stremio-leviathan-addon" target="_blank" class="m-cmd-tag">
                             <img src="https://i.ibb.co/gLkrjxXT/Whats-App-Image-2026-01-12-at-20-15-37.jpg" alt="Dev" class="m-cmd-avatar-mini">
@@ -462,7 +461,7 @@ const mobileHTML = `
 
                         <a href="https://www.paypal.me/luc4nex" target="_blank" class="m-coffee-btn" title="Offri un Caffè">
                             <i class="fas fa-mug-hot"></i>
-                            <span class="m-coffee-text">DONATE</span>
+                            <span class="m-coffee-text">OFFRI UN CAFFÈ</span>
                         </a>
                     </div>
                     <div style="height:30px;"></div> 
@@ -603,7 +602,7 @@ const mobileHTML = `
                     <div class="m-chip-grid">
                         <div class="m-qual-chip" id="mq-4k" onclick="toggleFilter('mq-4k')">4K UHD</div>
                         <div class="m-qual-chip" id="mq-1080" onclick="toggleFilter('mq-1080')">1080p</div>
-                        <div class="m-qual-chip" id="mq-720" onclick="toggleFilter('mq-720')">720p</div>
+                        <div class="m-qual-chip" id="mq-720" onclick="toggleFilter('mq-720')">720p <span class="mini-tag">HD</span></div>
                         <div class="m-qual-chip" id="mq-sd" onclick="toggleFilter('mq-sd')">CAM/SD</div>
                     </div>
 
@@ -1195,10 +1194,6 @@ function toggleFilter(id) {
     document.getElementById(id).classList.toggle('excluded'); 
     updateLinkModalContent();
 }
-
-function openFaq() { const m = document.getElementById('m-faq-modal'); m.classList.add('show'); }
-function closeFaq() { document.getElementById('m-faq-modal').classList.remove('show'); }
-function toggleFaqItem(item) { item.classList.toggle('open'); }
 
 async function pasteTo(id) {
     try {
