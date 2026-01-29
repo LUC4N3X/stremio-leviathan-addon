@@ -332,14 +332,15 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
         </a>
         <br><br>
         <sub style="color: #8b949e; line-height: 1.4;">
-          <b>🛠️ Master Engineer</b><br>
-          • Logica Formatter & Web Modules<br>
+          <b>✨ Special Thanks</b><br>
+          Per il contributo fondamentale su:<br>
+          • Logica Formatter e Web<br>
           • Funzione Trailer (YouTube)<br>
-          • Core logic external-addons.js
+          • Logica external-addons.js
         </sub>
       </td>
       
-   <td align="center" width="200px" style="border: none; vertical-align: top;">
+  <td align="center" width="200px" style="border: none; vertical-align: top;">
         <a href="https://github.com/diogomiguel93">
           <img src="https://github.com/diogomiguel93.png" width="70" style="border-radius:50%;" alt="diogo"/>
           <br><b>diogomiguel93</b>
@@ -355,4 +356,4 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
   
   <br>
   <sub style="color: grey;">Leviathan Project © 2025 • Evolution Guaranteed</sub>
-</div>>
+</div>
