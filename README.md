@@ -359,63 +359,124 @@ Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico
 
 
 
-<h3 align="center"><span class="notranslate">🧬 PROTOCOL ARCHITECTURE & ENGINEERING</span></h3>
+<div align="center"> <div style=" background: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(0, 0, 0, 0.4) 100%); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 12px; padding: 25px; max-width: 600px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.05); "> <h3 style="margin: 0; color: #FFD700; font-family: sans-serif; text-transform: uppercase; letter-spacing: 2px; font-size: 1.2rem;"> ⚡ System Fuel Required </h3> <p style="color: #cbd5e1; font-size: 0.9rem; margin: 10px 0 20px 0;"> Leviathan è un progetto open-source mantenuto nel tempo libero.
 
-<table style="border: none; width: 100%;">
-  <tr>
-    <td align="center" style="width: 25%; vertical-align: bottom; padding-bottom: 20px;">
-      <a href="https://github.com/qwertyuiop8899">
-        <img src="https://github.com/qwertyuiop8899.png" width="60" style="border-radius:50%; filter: grayscale(20%); opacity: 0.9;" alt="qwerty"/>
-        <br>
-        <b style="font-size: 12px; color: #8b949e;">qwertyuiop8899</b>
-      </a>
-      <br>
-      <div style="font-size: 11px; color: #6e7681; line-height: 1.3; margin-top: 5px;">
-        <b>✨ Ringraziamenti speciali</b><br>
-        per il contributo su:<br>
-        • Logica di formatter.js<br>
-        • Moduli Web(SC-GuardaHD-GuardaSerie)<br>
-        • Trailer.js
-      </div>
-    </td>
 
-  <td align="center" style="width: 50%; vertical-align: top;">
-      <a href="https://github.com/LUC4N3X">
-        <img src="https://github.com/LUC4N3X.png" width="130" style="border-radius:50%; border: 4px solid #00E0FF; box-shadow: 0 0 25px rgba(0, 224, 255, 0.6);" alt="LUC4N3X"/>
-        <br><br>
-        <b style="font-size: 24px; color: #ffffff; text-shadow: 0 0 10px #00E0FF;">LUC4N3X</b>
-      </a>
-      <br><br>
-      <div style="font-size: 16px; color: #00E0FF; font-weight: bold; letter-spacing: 1px;">
-        👑 ARCHITECT & CORE
-      </div>
-      <div style="font-size: 13px; color: #ffffff; margin-top: 5px;">
-        Fondatore del Protocollo
-      </div>
-    </td>
+Se il protocollo ha migliorato la tua esperienza, offri energia al sistema. </p>
 
-   <td align="center" style="width: 25%; vertical-align: bottom; padding-bottom: 20px;">
-      <a href="https://github.com/diogomiguel93">
-        <img src="https://github.com/diogomiguel93.png" width="60" style="border-radius:50%; filter: grayscale(20%); opacity: 0.9;" alt="diogo"/>
-        <br>
-        <b style="font-size: 12px; color: #8b949e;">diogomiguel93</b>
-      </a>
-      <br>
-      <div style="font-size: 11px; color: #6e7681; line-height: 1.3; margin-top: 5px;">
-        <b>Base Integration</b><br>
-        Ispirazione e base per<br>
-        l'addon Torrentio (ITA)<br>
-        &nbsp;
-      </div>
-    </td>
-  </tr>
-</table>
+<a href="[https://www.paypal.me/luc4nex](https://www.paypal.me/luc4nex)" target="_blank" style="text-decoration: none;">
+  <div style="
+    background: #FFD700;
+    color: #000;
+    padding: 12px 30px;
+    border-radius: 30px;
+    font-weight: 800;
+    font-size: 1rem;
+    display: inline-block;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+    transition: transform 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  ">
+    Supporta il Progetto
+  </div>
+</a>
+</div> </div>
 
-<br>
-<div align="center">
-  <sub style="color: #444;">Leviathan Project © 2025 • Evolution Guaranteed</sub>
-</div>
 
-<br>
 
+
+<h3 align="center" style=" color: #fff; font-family: sans-serif; letter-spacing: 4px; text-transform: uppercase; font-size: 1.5rem; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 30px; width: 80%; margin-left: auto; margin-right: auto; "> <span style="color: #00eaff;">🧬</span> Neural Network Architects </h3>
+
+<table style="border: none; width: 100%; border-collapse: collapse;"> <tr> <td align="center" style="width: 25%; vertical-align: top; padding-top: 40px;"> <div style=" background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 15px; width: 180px; "> <a href="https://github.com/qwertyuiop8899"> <img src="https://github.com/qwertyuiop8899.png" width="70" style=" border-radius: 50%; border: 2px solid #8b949e; filter: grayscale(100%); transition: filter 0.3s; " alt="qwerty"/> </a>
+
+
+
+<b style="font-size: 14px; color: #fff;">qwertyuiop8899</b> <div style=" margin-top: 8px; font-size: 10px; color: #000; background: #8b949e; padding: 2px 8px; border-radius: 4px; display: inline-block; font-weight: bold; ">CONTRIBUTOR</div> <p style="font-size: 11px; color: #8b949e; margin-top: 10px; line-height: 1.4;"> Core Logic
+
+
+Web Modules
+
+
+Trailer API </p> </div> </td>
+
+<td align="center" style="width: 50%; vertical-align: top;">
+  <div style="
+    background: radial-gradient(circle at center, rgba(0, 234, 255, 0.1) 0%, rgba(0,0,0,0) 70%);
+    padding: 20px;
+  ">
+    <a href="[https://github.com/LUC4N3X](https://github.com/LUC4N3X)">
+      <img src="[https://github.com/LUC4N3X.png](https://github.com/LUC4N3X.png)" width="140" style="
+        border-radius: 50%;
+        border: 4px solid #00eaff;
+        box-shadow: 0 0 30px rgba(0, 234, 255, 0.5);
+      " alt="LUC4N3X"/>
+    </a>
+    <br><br>
+    <h2 style="
+      margin: 0;
+      font-size: 28px;
+      background: linear-gradient(90deg, #fff, #00eaff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 900;
+      letter-spacing: 1px;
+    ">LUC4N3X</h2>
+    
+  <div style="
+      margin-top: 10px;
+      font-size: 12px;
+      color: #000;
+      background: #00eaff;
+      padding: 4px 12px;
+      border-radius: 4px;
+      display: inline-block;
+      font-weight: bold;
+      box-shadow: 0 0 10px rgba(0, 234, 255, 0.4);
+    ">SYSTEM ARCHITECT</div>
+    
+  <p style="font-size: 13px; color: #cbd5e1; margin-top: 15px;">
+      Fondatore del Protocollo<br>Lead Developer
+    </p>
+  </div>
+</td>
+
+<td align="center" style="width: 25%; vertical-align: top; padding-top: 40px;">
+  <div style="
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    width: 180px;
+  ">
+    <a href="[https://github.com/diogomiguel93](https://github.com/diogomiguel93)">
+      <img src="[https://github.com/diogomiguel93.png](https://github.com/diogomiguel93.png)" width="70" style="
+        border-radius: 50%;
+        border: 2px solid #8b949e;
+        filter: grayscale(100%);
+        transition: filter 0.3s;
+      " alt="diogo"/>
+    </a>
+    <br><br>
+    <b style="font-size: 14px; color: #fff;">diogomiguel93</b>
+    <div style="
+      margin-top: 8px;
+      font-size: 10px;
+      color: #000;
+      background: #8b949e;
+      padding: 2px 8px;
+      border-radius: 4px;
+      display: inline-block;
+      font-weight: bold;
+    ">LEGACY CORE</div>
+    <p style="font-size: 11px; color: #8b949e; margin-top: 10px; line-height: 1.4;">
+      Base Structure<br>Torrentio Inspiration
+    </p>
+  </div>
+</td>
+</tr> </table>
+
+
+
+<div align="center"> <hr style="width: 50%; border: 0; height: 1px; background: linear-gradient(90deg, transparent, #333, transparent); margin-bottom: 20px;"> <sub style="color: #666; font-family: monospace; letter-spacing: 2px;"> LEVIATHAN PROJECT © 2025 • EVOLUTION GUARANTEED </sub> </div>
 
