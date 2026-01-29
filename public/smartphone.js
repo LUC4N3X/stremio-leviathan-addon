@@ -6,6 +6,7 @@ const mobileCSS = `
     --m-accent: #b026ff;      
     --m-amber: #ff9900;       
     --m-cine: #ff0055;        
+    --m-kofi: #FF5E5B;        /* Ko-fi Brand Red/Pink */
     --m-surface: rgba(10, 15, 25, 0.85); 
     --m-text: #e0f7fa;
     --m-dim: #7a9ab5; 
@@ -56,9 +57,11 @@ body::before {
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 .m-content-wrapper { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+
+/* --- FIX SCROLLING: AUMENTATO PADDING BOTTOM A 250px --- */
 .m-content {
     flex: 1; overflow-y: scroll; overflow-x: hidden;
-    padding: 0 15px 180px 15px;
+    padding: 0 15px 250px 15px; /* AUMENTATO PER EVITARE CHE I TASTI COPRANO IL CONTENUTO */
     width: 100%; -webkit-overflow-scrolling: touch; 
 }
 
@@ -274,18 +277,62 @@ input:checked + .m-slider-pink:before { background-color: var(--m-cine); box-sha
 .m-flux-header { background: rgba(0, 242, 255, 0.05); padding: 8px 15px; font-size: 0.7rem; color: var(--m-primary); letter-spacing: 1px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0, 242, 255, 0.1); }
 .m-flux-input { width: 100%; background: transparent; border: none; color: #fff; padding: 15px; font-size: 0.75rem; resize: none; min-height: 80px; line-height: 1.4; outline: none; font-family: 'Consolas', monospace; white-space: pre-wrap; word-break: break-all; }
 
-/* CREDITS UPDATED */
-.m-credits-section { margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 15px; }
-.m-dev-hub { display: flex; flex-direction: column; gap: 12px; width: 100%; }
-.m-cmd-tag { width: 100%; height: 60px; text-decoration: none; background: linear-gradient(90deg, rgba(0, 242, 255, 0.05), rgba(0,0,0,0.4)); border: 1px solid rgba(0, 242, 255, 0.25); border-radius: 12px; display: flex; align-items: center; padding: 0 15px; gap: 15px; transition: all 0.3s ease; position: relative; overflow: hidden; }
-.m-cmd-tag::before { content: ''; position: absolute; top:0; left:0; width: 4px; height: 100%; background: var(--m-primary); box-shadow: 0 0 10px var(--m-primary); }
-.m-cmd-avatar-mini { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--m-primary); object-fit: cover; box-shadow: 0 0 10px rgba(0, 242, 255, 0.4); }
-.m-cmd-details { display: flex; flex-direction: column; justify-content: center; }
-.m-cmd-role { font-size: 0.7rem; color: var(--m-primary); letter-spacing: 2px; text-transform: uppercase; font-weight: 800; opacity: 0.8; }
-.m-cmd-nick { font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; color: #fff; font-weight: 800; line-height: 1; display: flex; align-items: center; gap: 8px; }
-.m-coffee-btn { width: 100%; height: 60px; text-decoration: none; padding: 0 15px; display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(112, 0, 255, 0.1); border: 1px solid rgba(112, 0, 255, 0.3); border-radius: 12px; font-size: 1.1rem; color: #fff; transition: all 0.3s; position: relative; font-family: 'Rajdhani', sans-serif; font-weight: 800; box-shadow: 0 0 15px rgba(112, 0, 255, 0.1); }
-.m-coffee-text { font-size: 0.9rem; letter-spacing: 2px; color: #fff; transition: color 0.3s; }
-.m-coffee-btn:active { transform: scale(0.98); background: rgba(112, 0, 255, 0.2); }
+/* --- NEW CREDITS SECTION (VISUALLY DISTINCT) --- */
+.m-credits-section { 
+    margin: 40px 10px 20px 10px;
+    padding: 20px 10px;
+    background: radial-gradient(circle at center, rgba(0, 242, 255, 0.03), transparent 70%);
+    border-top: 1px solid rgba(255,255,255,0.05);
+    display: flex; flex-direction: column; gap: 20px; 
+    position: relative;
+    text-align: center;
+}
+.m-credits-section::before {
+    content: 'NEURAL SIGNATURE';
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.6rem; letter-spacing: 4px; color: rgba(255,255,255,0.2);
+    margin-bottom: 5px; display: block;
+}
+
+/* DEV CARD - HOLOGRAPHIC STYLE */
+.m-dev-id { 
+    width: 100%; padding: 15px; text-decoration: none; 
+    background: rgba(0, 0, 0, 0.6); 
+    border: 1px solid #222; border-left: 2px solid var(--m-primary);
+    border-radius: 12px; display: flex; align-items: center; gap: 15px; 
+    transition: all 0.3s ease; position: relative; overflow: hidden;
+}
+.m-dev-id:active { transform: scale(0.98); background: rgba(0, 242, 255, 0.05); }
+
+.m-dev-avatar { width: 48px; height: 48px; border-radius: 8px; border: 1px solid var(--m-primary); object-fit: cover; box-shadow: 0 0 10px rgba(0,0,0,0.8); filter: grayscale(20%); }
+.m-dev-info { display: flex; flex-direction: column; align-items: flex-start; }
+.m-dev-role { font-size: 0.65rem; color: var(--m-primary); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; opacity: 0.8; margin-bottom: 2px; }
+.m-dev-name { font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; color: #fff; font-weight: 800; letter-spacing: 1px; }
+
+/* KO-FI ULTRA BUTTON */
+.m-kofi-ultra { 
+    width: 100%; height: 55px; text-decoration: none; padding: 0 15px; 
+    display: flex; align-items: center; justify-content: center; gap: 12px; 
+    background: linear-gradient(135deg, #FF5E5B, #E01E5A); 
+    border-radius: 12px; font-size: 1rem; color: #fff; transition: all 0.3s; 
+    position: relative; font-family: 'Rajdhani', sans-serif; font-weight: 800; 
+    box-shadow: 0 5px 20px rgba(255, 30, 90, 0.25);
+    border: 1px solid rgba(255,255,255,0.1);
+    overflow: hidden;
+}
+.m-kofi-ultra::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
+    opacity: 0; transition: opacity 0.3s; pointer-events: none;
+}
+.m-kofi-ultra:hover::before { opacity: 1; }
+.m-kofi-ultra:active { transform: scale(0.96); box-shadow: 0 2px 10px rgba(255, 30, 90, 0.4); }
+
+.m-kofi-icon { font-size: 1.2rem; animation: heartBeat 1.5s infinite ease-in-out; }
+@keyframes heartBeat { 
+    0% { transform: scale(1); } 15% { transform: scale(1.2); } 
+    30% { transform: scale(1); } 45% { transform: scale(1.2); } 100% { transform: scale(1); } 
+}
 
 .m-dock-container { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(2, 5, 10, 0.97); border-top: 1px solid rgba(0,242,255,0.15); z-index: 100; display: flex; flex-direction: column; padding-bottom: var(--safe-bottom); box-shadow: 0 -12px 35px rgba(0,0,0,0.85); backdrop-filter: blur(12px); }
 .m-dock-actions { display: flex; gap: 12px; padding: 12px 18px 6px 18px; }
@@ -506,23 +553,19 @@ const mobileHTML = `
                 </div>
 
                 <div class="m-credits-section">
-                    <div class="m-dev-hub">
-                        <a href="https://github.com/LUC4N3X/stremio-leviathan-addon" target="_blank" class="m-cmd-tag">
-                            <img src="https://i.ibb.co/gLkrjxXT/Whats-App-Image-2026-01-12-at-20-15-37.jpg" alt="Dev" class="m-cmd-avatar-mini">
-                            <div class="m-cmd-details">
-                                <span class="m-cmd-role">LEAD DEVELOPER</span>
-                                <span class="m-cmd-nick">
-                                    LUC4N3X <i class="fab fa-github m-git-icon"></i>
-                                </span>
-                            </div>
-                        </a>
+                    <a href="https://github.com/LUC4N3X/stremio-leviathan-addon" target="_blank" class="m-dev-id">
+                        <img src="https://i.ibb.co/gLkrjxXT/Whats-App-Image-2026-01-12-at-20-15-37.jpg" alt="Dev" class="m-dev-avatar">
+                        <div class="m-dev-info">
+                            <span class="m-dev-role">LEAD DEVELOPER</span>
+                            <span class="m-dev-name">LUC4N3X</span>
+                        </div>
+                        <i class="fab fa-github" style="margin-left:auto; color:#fff; font-size:1.4rem;"></i>
+                    </a>
 
-                        <a href="https://www.paypal.me/luc4nex" target="_blank" class="m-coffee-btn" title="Offri un Caffè">
-                            <i class="fas fa-mug-hot"></i>
-                            <span class="m-coffee-text">OFFRI UN CAFFÈ</span>
-                        </a>
-                    </div>
-                    <div style="height:30px;"></div> 
+                    <a href="https://ko-fi.com/luc4n3x" target="_blank" class="m-kofi-ultra" title="Supporta il progetto">
+                        <i class="fas fa-heart m-kofi-icon"></i>
+                        <span>SUPPORTA SU KO-FI</span>
+                    </a>
                 </div>
             </div>
 
