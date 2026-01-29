@@ -277,7 +277,7 @@ Definisci i confini della tua ricerca.
 ### 💠 Sequenza di Inizializzazione (Docker)
 
 Eseguire la seguente catena di comandi per il provisioning immediato del container:
-
+```bash
 center() {
   local text="$1"
   local width=$(tput cols)
