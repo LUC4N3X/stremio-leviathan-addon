@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-// URL Base decodificato
+// URL Base decodificato (include "it":"on" nella config base)
 const WEBSTREAMR_BASE = "https://webstreamr.hayd.uk/%7B%22it%22%3A%22on%22%2C%22mediaFlowProxyUrl%22%3A%22%22%2C%22mediaFlowProxyPassword%22%3A%22%22%7D";
 
 // Helper per determinare la qualità dal titolo
@@ -17,7 +17,6 @@ async function searchWebStreamr(type, id) {
     try {
         const url = `${WEBSTREAMR_BASE}/stream/${type}/${id}.json`;
         
-        // Log interno
         console.log(`🌍 [FALLBACK SYSTEM] Ricerca stream di emergenza per: ${id}`);
         
         const { data } = await axios.get(url, { timeout: 6000 });
@@ -26,50 +25,66 @@ async function searchWebStreamr(type, id) {
             return [];
         }
 
+        // 1. CERCHIAMO SOLO GLI STREAM ITALIANI
+        const italianStreams = data.streams.filter(stream => {
+            const t = (stream.title || "").toLowerCase();
+            return /\b(ita|italian|italiano)\b/i.test(t);
+        });
+
+        // 2. LOGICA DI PRIORITÀ (ITA > ENG)
+        let resultsToProcess = [];
+        let isEngFallback = false;
+
+        if (italianStreams.length > 0) {
+            // CASO A: Abbiamo trovato roba italiana!
+            console.log(`✅ [WEBSTREAMR] Trovati ${italianStreams.length} stream ITALIANI.`);
+            resultsToProcess = italianStreams;
+        } else {
+            // CASO B: Nessun italiano trovato, usiamo tutto quello che c'è (ENG)
+            console.log(`⚠️ [WEBSTREAMR] Nessun stream ITA trovato. Mostro risultati INGLESI.`);
+            resultsToProcess = data.streams;
+            isEngFallback = true;
+        }
+
         // FORMATTAZIONE STYLE "LEVIATHAN P2P"
-        return data.streams.map(stream => {
-            // 1. Pulizia titolo base
+        return resultsToProcess.map(stream => {
             const rawTitle = stream.title || "Unknown Stream";
             const cleanTitle = rawTitle.replace(/WebStreamr|Hayd/gi, "").trim();
-            
-            // 2. Rilevamento Qualità per il box a sinistra
             const { q, icon } = detectQuality(cleanTitle);
 
-            // 3. Costruzione delle righe del titolo (identico a formatStreamTitleCinePro)
+            // Costruzione righe
             const lines = [];
             
-            // RIGA 1: Titolo del file
+            // RIGA 1: Titolo
             lines.push(`🎬 ${cleanTitle}`);
             
-            // RIGA 2: Info (Simuliamo le info audio/video se presenti nel titolo)
-            let extraInfo = "🌐 Web-DL";
-            if (/ita|italian/i.test(rawTitle)) extraInfo = "🇮🇹 ITA • 🌐 Web-DL";
-            else extraInfo = "🇬🇧 ENG • 🌐 Web-DL";
-            lines.push(extraInfo);
+            // RIGA 2: Info Lingua (Dinamica)
+            let langInfo = "🇮🇹 ITA"; // Default se siamo nel caso A
+            
+            if (isEngFallback) {
+                // Se siamo nel caso B, controlliamo comunque se per miracolo c'è scritto ITA, altrimenti ENG
+                if (/\b(ita|italian)\b/i.test(rawTitle)) langInfo = "🇮🇹 ITA";
+                else langInfo = "🇬🇧 ENG";
+            }
+            
+            lines.push(`${langInfo} • 🌐 Web-DL`);
 
-            // RIGA 3: Sorgente (invece di "P2P [RD]" mettiamo "HTTP [Web]")
-            // Questo lo fa sembrare un link Debrid agli occhi dell'utente
+            // RIGA 3: Sorgente
             lines.push(`⚡ [Web] WebStreamr Fallback`);
 
             return {
-                // QUI IL CAMBIO FONDAMENTALE:
-                // Invece di "Backup", mettiamo Nome + Icona Qualità come i torrent
                 name: `🌐 LEVIATHAN\n${icon} ${q}`, 
-                
-                // Il titolo multilinea
                 title: lines.join("\n"),
-                
                 url: stream.url,
                 behaviorHints: { 
                     notWebReady: false, 
-                    // Manteniamo un gruppo separato per sicurezza, ma visivamente è identico
                     bingieGroup: "leviathan-web-fallback" 
                 }
             };
         });
 
     } catch (error) {
-        console.warn(`❌ [FALLBACK SYSTEM] Nessun risultato disponibile: ${error.message}`);
+        console.warn(`❌ [FALLBACK SYSTEM] Errore/Timeout: ${error.message}`);
         return [];
     }
 }
