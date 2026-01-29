@@ -311,6 +311,64 @@ input:checked + .m-slider-pink:before { background-color: var(--m-cine); box-sha
 .m-lock-icon { font-size: 2rem; color: var(--m-secondary); margin-bottom: 10px; }
 .m-lock-text { font-family: 'Rajdhani'; color: #fff; font-weight: 800; font-size: 1.1rem; }
 .m-lock-sub { font-size: 0.75rem; color: #888; margin-top: 5px; max-width: 80%; }
+
+/* --- MICRO-INTERACTIONS & FX --- */
+
+/* 1. AIO DENIED ANIMATION (Shake + Purple Glow) */
+@keyframes shakeGlow {
+    0%, 100% { transform: translateX(0); border-color: rgba(170,0,255,0.2); box-shadow: none; }
+    20% { transform: translateX(-5px); border-color: var(--m-secondary); box-shadow: 0 0 20px var(--m-secondary), inset 0 0 10px var(--m-secondary); }
+    40% { transform: translateX(5px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+}
+.m-denied-anim {
+    animation: shakeGlow 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* 2. PREVIEW RECALCULATION OVERLAY */
+.m-recalc-overlay {
+    position: absolute; top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10; opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+    backdrop-filter: blur(2px);
+}
+.m-recalc-overlay.visible { opacity: 1; }
+.m-recalc-text {
+    font-family: 'Rajdhani'; font-weight: 800; color: var(--m-primary);
+    letter-spacing: 2px; text-transform: uppercase; font-size: 0.9rem;
+    display: flex; align-items: center; gap: 10px;
+    text-shadow: 0 0 10px var(--m-primary);
+}
+
+/* 3. SCI-FI TOAST NOTIFICATION */
+.m-toast-container {
+    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+    z-index: 999; pointer-events: none; width: 90%; max-width: 300px;
+    display: flex; flex-direction: column; gap: 10px;
+}
+.m-toast {
+    background: rgba(5, 10, 15, 0.95);
+    border: 1px solid var(--m-primary);
+    border-left: 4px solid var(--m-primary);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+    color: #fff; padding: 12px 15px; border-radius: 8px;
+    font-family: 'Rajdhani'; font-size: 0.9rem; font-weight: 700;
+    display: flex; align-items: center; gap: 12px;
+    animation: slideUpFade 0.3s ease-out forwards;
+    backdrop-filter: blur(5px);
+}
+.m-toast.warning { border-color: var(--m-amber); border-left-color: var(--m-amber); color: var(--m-amber); }
+.m-toast.error { border-color: var(--m-error); border-left-color: var(--m-error); color: var(--m-error); }
+.m-toast.success { border-color: var(--m-success); border-left-color: var(--m-success); color: var(--m-success); }
+@keyframes slideUpFade {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.m-toast.out { animation: fadeOut 0.3s ease-out forwards; }
+@keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
 `;
 
 const mobileHTML = `
@@ -470,7 +528,7 @@ const mobileHTML = `
 
             <div id="page-filters" class="m-page">
                 
-                <div class="m-visual-core-v2">
+                <div class="m-visual-core-v2" id="m-visual-core-v2">
                 
                      <div class="m-hyp-header" style="margin-bottom:15px; border:none; padding-bottom:0;">
                         <span>VISUAL FORMATTER</span>
@@ -484,6 +542,10 @@ const mobileHTML = `
                     </div>
 
                     <div class="m-visual-preview" id="m-preview-box">
+                        <div class="m-recalc-overlay" id="m-recalc-layer">
+                            <div class="m-recalc-text"><i class="fas fa-cog fa-spin"></i> UPDATING CORE...</div>
+                        </div>
+                        
                         <div class="m-vp-icon"><i class="fas fa-film"></i></div>
                         <div class="m-vp-text">
                             <div class="m-vp-title" id="m-prev-title">LEVIATHAN</div>
@@ -736,6 +798,8 @@ const mobileHTML = `
             </div>
         </div>
     </div>
+    
+    <div class="m-toast-container" id="m-toast-area"></div>
 
 </div>
 `;
@@ -790,7 +854,56 @@ function toStylized(text, type = 'std') {
     }).join('');
 }
 
+// --- NEW TOAST & EFFECT SYSTEM ---
+
+function showToast(msg, type = 'info') {
+    const container = document.getElementById('m-toast-area');
+    if(!container) return;
+    const el = document.createElement('div');
+    el.className = `m-toast ${type}`;
+    
+    let icon = 'fa-info-circle';
+    if(type === 'warning') icon = 'fa-exclamation-triangle';
+    if(type === 'error') icon = 'fa-bug';
+    if(type === 'success') icon = 'fa-check-circle';
+    
+    el.innerHTML = `<i class="fas ${icon}"></i> <span>${msg}</span>`;
+    container.appendChild(el);
+    
+    if(navigator.vibrate) navigator.vibrate(20);
+    
+    setTimeout(() => {
+        el.classList.add('out');
+        setTimeout(() => el.remove(), 300);
+    }, 3000);
+}
+
+function triggerPreviewUpdateEffect() {
+    const layer = document.getElementById('m-recalc-layer');
+    if(!layer) return;
+    
+    layer.classList.add('visible');
+    setTimeout(() => {
+        layer.classList.remove('visible');
+    }, 400); 
+}
+
 function selectMobileSkin(skinId) {
+    // 1. CHECK AIO LOCK
+    const isAIO = document.getElementById('m-aioMode').checked;
+    
+    if (isAIO && skinId !== 'leviathan') {
+        const lockOverlay = document.getElementById('m-aio-lock-overlay');
+        lockOverlay.classList.remove('m-denied-anim');
+        void lockOverlay.offsetWidth; // Force reflow
+        lockOverlay.classList.add('m-denied-anim');
+        
+        if(navigator.vibrate) navigator.vibrate([50, 50, 50]); 
+        showToast("SKIN BLOCCATA DA AIO MODE", "warning");
+        return; 
+    }
+
+    // 2. STANDARD LOGIC
     mSkin = skinId;
     document.querySelectorAll('.m-cortex-chip').forEach(b => b.classList.remove('active'));
     const selectedBtn = document.getElementById('msk_' + skinId);
@@ -806,8 +919,10 @@ function selectMobileSkin(skinId) {
         void previewBox.offsetWidth;
         previewBox.classList.add('glitching');
     }
+    // triggerPreviewUpdateEffect();  <-- REMOVED FOR INSTANT SWITCH
     updateMobilePreview();
     updateLinkModalContent();
+    if(navigator.vibrate) navigator.vibrate(10);
 }
 
 function updateMobilePreview() {
@@ -991,6 +1106,7 @@ function navTo(pageId, btn) {
     document.querySelectorAll('.m-nav-item').forEach(i => i.classList.remove('active'));
     if(btn) btn.classList.add('active');
     document.querySelector('.m-content').scrollTop = 0;
+    if(navigator.vibrate) navigator.vibrate(10);
 }
 
 function setMService(srv, btn, keepInput = false) {
@@ -1013,6 +1129,7 @@ function setMService(srv, btn, keepInput = false) {
     
     updateMobilePreview(); 
     updateLinkModalContent();
+    if(navigator.vibrate) navigator.vibrate(10);
 }
 
 function updateStatus(inputId, statusId) {
@@ -1089,9 +1206,17 @@ function toggleGate() {
     const active = document.getElementById('m-gateActive').checked;
     const wrapper = document.getElementById('m-gate-wrapper');
     const lbl = document.getElementById('st-gate');
-    if(active) { wrapper.classList.add('show'); if(lbl) {lbl.innerText = "ON"; lbl.classList.add('on');} } 
-    else { wrapper.classList.remove('show'); if(lbl) {lbl.innerText = "OFF"; lbl.classList.remove('on');} }
+    
+    if(active) { 
+        wrapper.classList.add('show'); 
+        if(lbl) {lbl.innerText = "ON"; lbl.classList.add('on');}
+        showToast("Signal Gate Attivo: Risultati Limitati", "warning");
+    } else { 
+        wrapper.classList.remove('show'); 
+        if(lbl) {lbl.innerText = "OFF"; lbl.classList.remove('on');}
+    }
     updateLinkModalContent();
+    if(navigator.vibrate) navigator.vibrate(10);
 }
 
 function updateGateDisplay(val) { document.getElementById('m-gate-display').innerText = val; updateLinkModalContent(); }
@@ -1112,6 +1237,7 @@ function toggleSize() {
         document.getElementById('m-size-display').innerText = "∞";
     }
     updateLinkModalContent();
+    if(navigator.vibrate) navigator.vibrate(10);
 }
 
 function updateSizeDisplay(val) {
@@ -1137,6 +1263,7 @@ function setScQuality(val) {
     const activeEl = document.getElementById('mq-sc-' + val);
     if(activeEl) activeEl.classList.add('active');
     updateLinkModalContent();
+    if(navigator.vibrate) navigator.vibrate(10);
 }
 
 // --- FLUX PRIORITY LOGIC ---
@@ -1157,6 +1284,7 @@ function setSortMode(mode) {
         }, 200);
     }
     updateLinkModalContent();
+    if(navigator.vibrate) navigator.vibrate(10);
 }
 
 function updateGhostVisuals() {
@@ -1192,6 +1320,11 @@ function toggleModuleStyle(inputId, boxId) {
 
 function toggleFilter(id) { 
     document.getElementById(id).classList.toggle('excluded'); 
+    const isExcluded = document.getElementById(id).classList.contains('excluded');
+    if(isExcluded) {
+        if(navigator.vibrate) navigator.vibrate(20);
+        triggerPreviewUpdateEffect();
+    }
     updateLinkModalContent();
 }
 
@@ -1206,6 +1339,7 @@ async function pasteTo(id) {
             btn.innerHTML = '<i class="fas fa-check"></i>';
             setTimeout(() => btn.innerHTML = originalHTML, 1500);
         }
+        showToast("INCOLLATO CON SUCCESSO", "success");
     } catch (err) { alert("Impossibile accedere agli appunti. Incolla manualmente."); }
 }
 
@@ -1372,7 +1506,7 @@ function mobileInstall() {
     const config = getMobileConfig();
     const isWebEnabled = config.filters.enableVix || config.filters.enableGhd || config.filters.enableGs;
     if(!config.key && !isWebEnabled) {
-        alert("⚠️ ERRORE: Inserisci una API Key o attiva una sorgente Web."); return;
+        showToast("ERRORE: API KEY MANCANTE", "error"); return;
     }
     const manifestUrl = `${window.location.host}/${btoa(JSON.stringify(config))}/manifest.json`;
     window.location.href = `stremio://${manifestUrl}`;
@@ -1394,7 +1528,7 @@ async function copyFromModal() {
     const textToCopy = box.value;
     
     if (textToCopy.includes("WAITING FOR")) {
-        alert("Configura prima l'addon!");
+        showToast("CONFIGURA PRIMA L'ADDON", "error");
         return;
     }
 
@@ -1402,7 +1536,7 @@ async function copyFromModal() {
         if (navigator.clipboard && navigator.clipboard.writeText) {
             await navigator.clipboard.writeText(textToCopy);
             closeLinkModal();
-            triggerCopySuccess();
+            showToast("LINK COPIATO NEGLI APPUNTI", "success");
         } else {
             // Fallback
             const dummy = document.createElement("textarea");
@@ -1412,29 +1546,11 @@ async function copyFromModal() {
             document.execCommand("copy");
             document.body.removeChild(dummy);
             closeLinkModal();
-            triggerCopySuccess();
+            showToast("LINK COPIATO NEGLI APPUNTI", "success");
         }
     } catch (err) {
-        alert("Errore nella copia. Seleziona e copia manualmente dal box.");
+        showToast("ERRORE COPIA MANUALE", "error");
     }
-}
-
-function triggerCopySuccess() {
-    const btn = document.querySelector('.m-btn-copy span');
-    const icon = document.querySelector('.m-btn-copy i');
-    const originalText = btn.innerText;
-    
-    btn.innerText = "FATTO!";
-    icon.className = "fas fa-check";
-    icon.style.color = "#00f2ff";
-    
-    if(navigator.vibrate) navigator.vibrate(50);
-    
-    setTimeout(() => { 
-        btn.innerText = originalText;
-        icon.className = "fas fa-link";
-        icon.style.color = "";
-    }, 2000);
 }
 
 initMobileInterface();
