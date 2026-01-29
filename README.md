@@ -277,17 +277,16 @@ Definisci i confini della tua ricerca.
 ### 💠 Sequenza di Inizializzazione (Docker)
 
 Eseguire la seguente catena di comandi per il provisioning immediato del container:
-```bash
 
 <div align="center">
 
-
+```bash
 git clone https://github.com/LUC4N3X/stremio-leviathan-addon
 cd stremio-leviathan-addon
 docker compose up -d --build
-
- </div> 
-
+```
+</div>
+```
 ```
 ✅ Fatto! Leviathan sarà raggiungibile su:
 http://localhost:7000
