@@ -23,12 +23,9 @@ body {
     margin: 0; 
     background: radial-gradient(circle at 50% 35%, #131b29 0%, #05080d 60%, #000000 100%);
     font-family: 'Outfit', sans-serif; 
-    overflow: hidden; 
-    height: 100vh; 
     color: var(--m-text); 
-    position: relative; 
     width: 100%;
-    overscroll-behavior-y: contain;
+    overscroll-behavior-y: none; /* Impedisce il bounce dell'intera pagina su iOS */
 }
 
 body::before {
@@ -39,8 +36,35 @@ body::before {
     -webkit-mask-image: radial-gradient(circle at center, black 30%, rgba(0,0,0,0.5) 80%, transparent 100%);
 }
 
-/* --- LAYOUT --- */
-#app-container { display: flex; flex-direction: column; height: 100%; position: relative; z-index: 1; width: 100%; max-width: 100%; }
+/* --- LAYOUT FIX DEFINITIVO (FLEX) --- */
+#app-container { 
+    display: flex; 
+    flex-direction: column; 
+    height: 100dvh; /* Altezza dinamica viewport reale */
+    width: 100%; 
+    max-width: 100%; 
+    position: relative;
+    overflow: hidden; /* Blocca scroll sul container principale */
+}
+
+.m-content-wrapper { 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+    min-height: 0; /* CRUCIALE: Permette allo scroll interno di funzionare */
+    position: relative; 
+    overflow: hidden; 
+}
+
+/* --- SCROLLING FIX --- */
+.m-content {
+    flex: 1; 
+    overflow-y: auto; /* Scroll reale */
+    overflow-x: hidden;
+    padding: 0 15px 20px 15px; /* Padding normale */
+    width: 100%; 
+    -webkit-overflow-scrolling: touch; 
+}
 
 .m-ptr {
     position: absolute; top: -60px; left: 0; width: 100%; height: 60px;
@@ -55,15 +79,6 @@ body::before {
 }
 .m-ptr.loading .m-ptr-icon { animation: spin 1.2s linear infinite; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-.m-content-wrapper { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
-
-/* --- FIX SCROLLING: PADDING BOTTOM PER LA NUOVA DOCK --- */
-.m-content {
-    flex: 1; overflow-y: scroll; overflow-x: hidden;
-    padding: 0 15px 180px 15px; /* Spazio extra per la nuova dock a due piani */
-    width: 100%; -webkit-overflow-scrolling: touch; 
-}
 
 .m-page { display: none; width: 100%; }
 .m-page.active { display: block; animation: fadeFast 0.35s ease-out; }
@@ -279,7 +294,7 @@ input:checked + .m-slider-pink:before { background-color: var(--m-cine); box-sha
 
 /* --- NEURAL CREDITS GRID (Nuovo Design Professionale) --- */
 .m-credits-section {
-    margin: 20px 10px 120px 10px; /* Margine fondo aumentato per non toccare la dock */
+    margin: 20px 10px 40px 10px; /* Margine fondo ridotto ora che la dock non è fixed */
     padding: 0;
     background: transparent;
     border: none;
@@ -359,18 +374,19 @@ input:checked + .m-slider-pink:before { background-color: var(--m-cine); box-sha
 /* Footer del blocco */
 .m-neural-footer { margin-top: 10px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: monospace; letter-spacing: 2px; }
 
-/* --- COMMAND DOCK (Barra fissa ridisegnata) --- */
+/* --- COMMAND DOCK (FIXED RELATIVE) --- */
 .m-dock-container { 
-    position: fixed; bottom: 0; left: 0; width: 100%; 
-    background: rgba(3, 5, 8, 0.90); /* Più scuro */
+    position: relative; /* NIENTE FIXED! */
+    flex-shrink: 0;
+    width: 100%; 
+    background: rgba(3, 5, 8, 0.95); 
     border-top: 1px solid rgba(0, 242, 255, 0.2); 
     box-shadow: 0 -10px 40px rgba(0,0,0,0.9);
     z-index: 999; 
     display: flex; flex-direction: column; 
-    padding-bottom: max(10px, env(safe-area-inset-bottom)); /* Gestione iPhone X precisa */
+    /* FIX: Aumentato padding bottom da 10px a 20px (RICHIESTA UTENTE) */
+    padding-bottom: max(20px, env(safe-area-inset-bottom)); 
     backdrop-filter: blur(20px); 
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
 }
 
 /* Linea luminosa sopra la dock */
