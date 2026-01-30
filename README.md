@@ -403,7 +403,8 @@ Supportare Leviathan significa rafforzare un Protocollo <b>libero, curato e orie
       <div style="font-size: 10px; color: #6e7681; line-height: 1.4; margin-top: 8px; text-align: center;">
         <b style="color: #c9d1d9;">✨ Ringraziamenti speciali</b><br>
         per il contributo su:<br>
-       • Moduli Web(Vix-GuardaHD-Guardaserie)<br>
+       • Moduli Web(Vix-GHD-GS)<br>
+        • logica external-addons.js<br>
         • Trailer.js
       </div>
     </td>
