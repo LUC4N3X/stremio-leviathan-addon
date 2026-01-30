@@ -19,24 +19,11 @@ const mobileCSS = `
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
 
 /* --- CUSTOM THIN SCROLLBAR --- */
-/* Firefox */
 * { scrollbar-width: thin; scrollbar-color: rgba(0, 242, 255, 0.4) transparent; }
-
-/* Webkit (Chrome/Safari/Android) */
-::-webkit-scrollbar {
-    width: 3px; /* Sottilissima */
-    height: 3px;
-}
-::-webkit-scrollbar-track {
-    background: transparent; /* Track invisibile */
-}
-::-webkit-scrollbar-thumb {
-    background: rgba(0, 242, 255, 0.4); /* Colore semi-trasparente */
-    border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:active {
-    background: var(--m-primary); /* Si accende quando la tocchi */
-}
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0, 242, 255, 0.4); border-radius: 10px; }
+::-webkit-scrollbar-thumb:active { background: var(--m-primary); }
 
 /* --- BACKGROUND & CRT EFFECT --- */
 body { 
@@ -50,16 +37,10 @@ body {
     overflow: hidden;
 }
 
-/* CRT SCANLINE EFFECT */
 body::after {
-    content: " ";
-    display: block;
-    position: absolute;
-    top: 0; left: 0; bottom: 0; right: 0;
-    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-    z-index: 2;
-    background-size: 100% 2px, 3px 100%;
-    pointer-events: none;
+    content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.02) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+    z-index: 0; background-size: 100% 2px, 3px 100%; pointer-events: none;
 }
 
 body::before {
@@ -75,30 +56,29 @@ body::before {
 }
 
 .m-content-wrapper { 
-    flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; overflow: hidden; 
+    flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; overflow: hidden; z-index: 5; 
 }
 
 .m-content {
-    flex: 1; 
-    overflow-y: auto; /* Abilita scroll nativo */
-    overflow-x: hidden;
-    padding: 0 15px 140px 15px; /* Padding corretto dopo rimozione Ticker */
-    width: 100%; 
+    flex: 1; overflow-y: auto; overflow-x: hidden;
+    padding: 0 15px 140px 15px; width: 100%; 
     -webkit-overflow-scrolling: touch; 
 }
 
+/* --- FIX PTR Z-INDEX --- */
 .m-ptr {
-    position: absolute; top: -60px; left: 0; width: 100%; height: 60px;
+    position: absolute; top: -70px; left: 0; width: 100%; height: 70px;
     display: flex; align-items: flex-end; justify-content: center;
-    padding-bottom: 15px; color: var(--m-primary); z-index: 10;
-    pointer-events: none; opacity: 0; transition: opacity 0.25s ease-out;
+    padding-bottom: 15px; color: var(--m-primary); 
+    z-index: 100; /* FIXED: Sopra a tutto, anche al logo */
+    pointer-events: none; opacity: 0; transition: opacity 0.2s ease-out;
 }
 .m-ptr-icon {
-    font-size: 1.5rem; transition: transform 0.25s ease-in-out;
-    background: rgba(0,0,0,0.85); padding: 10px; border-radius: 50%; border: 1px solid var(--m-primary);
-    box-shadow: var(--m-glow);
+    font-size: 1.4rem; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: rgba(0, 5, 10, 0.9); padding: 12px; border-radius: 50%; border: 1px solid var(--m-primary);
+    box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
 }
-.m-ptr.loading .m-ptr-icon { animation: spin 1.2s linear infinite; }
+.m-ptr.loading .m-ptr-icon { animation: spin 1s linear infinite; border-color: var(--m-accent); }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 .m-page { display: none; width: 100%; }
@@ -106,7 +86,10 @@ body::before {
 @keyframes fadeFast { from { opacity: 0; transform: translate3d(0, 15px, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
 
 /* --- HERO SECTION --- */
-.m-hero { text-align: center; padding: 30px 10px 20px 10px; display: flex; flex-direction: column; align-items: center; width: 100%; position: relative; overflow:hidden; } 
+.m-hero { 
+    text-align: center; padding: 30px 10px 20px 10px; display: flex; flex-direction: column; align-items: center; width: 100%; position: relative; overflow:visible; 
+    z-index: 10; 
+} 
 
 .logo-container {
     width: 160px; height: 160px; margin: 0 auto 15px; border-radius: 50%; 
@@ -114,7 +97,8 @@ body::before {
     display: flex; align-items: center; justify-content: center; 
     box-shadow: 0 0 20px rgba(0, 242, 255, 0.4), inset 0 0 30px rgba(112, 0, 255, 0.2);
     position: relative; animation: breathe 4s infinite ease-in-out; 
-    background: rgba(0, 5, 10, 0.95); overflow: hidden; will-change: transform, box-shadow;
+    background: rgba(0, 5, 10, 0.4); 
+    overflow: hidden; will-change: transform, box-shadow;
 }
 @keyframes breathe { 0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(0, 242, 255, 0.4); } 50% { transform: scale(1.03); box-shadow: 0 0 30px rgba(0, 242, 255, 0.6); } }
 
@@ -122,8 +106,9 @@ body::before {
     width: 85%; height: 85%; object-fit: contain; border-radius: 50%; 
     filter: drop-shadow(0 0 15px var(--m-primary)) brightness(1.2);
     animation: pulseGlow 2s infinite alternate; will-change: filter;
+    z-index: 20;
 }
-@keyframes pulseGlow { 0% { filter: drop-shadow(0 0 10px var(--m-primary)) brightness(1.1); } 100% { filter: drop-shadow(0 0 20px var(--m-primary)) brightness(1.3); } }
+@keyframes pulseGlow { 0% { filter: drop-shadow(0 0 10px var(--m-primary)) brightness(1.1); } 100% { filter: drop-shadow(0 0 25px var(--m-primary)) brightness(1.4); } }
 
 .logo-particles { position: absolute; top: -50px; left: -50px; width: 280px; height: 280px; pointer-events: none; z-index: -1; overflow: hidden; }
 .logo-particle {
@@ -148,11 +133,9 @@ body::before {
 /* --- COMPONENTS --- */
 .m-srv-rail { display: flex; gap: 8px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 6px; margin-bottom: 25px; backdrop-filter: blur(5px); }
 .m-srv-btn { flex: 1; text-align: center; padding: 14px 0; font-family: 'Rajdhani', sans-serif; font-weight: 800; font-size: 1.1rem; color: var(--m-dim); border-radius: 12px; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(255,255,255,0.03); border: 1px solid transparent; }
-
 .m-srv-btn[onclick*="'rd'"].active { background: linear-gradient(135deg, rgba(0, 242, 255, 0.15), rgba(0,0,0,0)); border-color: var(--m-primary); color: #fff; box-shadow: 0 0 20px rgba(0, 242, 255, 0.2), inset 0 0 10px rgba(0, 242, 255, 0.05); text-shadow: 0 0 10px var(--m-primary); }
 .m-srv-btn[onclick*="'ad'"].active { background: linear-gradient(135deg, rgba(0, 255, 157, 0.15), rgba(0,0,0,0)); border-color: var(--m-success); color: #fff; box-shadow: 0 0 20px rgba(0, 255, 157, 0.2), inset 0 0 10px rgba(0, 255, 157, 0.05); text-shadow: 0 0 10px var(--m-success); }
 .m-srv-btn[onclick*="'tb'"].active { background: linear-gradient(135deg, rgba(176, 38, 255, 0.15), rgba(0,0,0,0)); border-color: var(--m-accent); color: #fff; box-shadow: 0 0 20px rgba(176, 38, 255, 0.2), inset 0 0 10px rgba(176, 38, 255, 0.05); text-shadow: 0 0 10px var(--m-accent); }
-
 .m-rail-icon { font-size: 1.2rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
 
 .m-sc-subpanel { grid-column: 1 / -1; background: rgba(0,0,0,0.4); border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; display: none; animation: slideDown 0.3s ease; margin: 10px 15px 15px 15px; }
@@ -166,6 +149,7 @@ body::before {
     border: 1px solid rgba(0, 242, 255, 0.15); border-radius: 20px; padding: 15px 15px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.5); position: relative; overflow: hidden;
     backdrop-filter: blur(20px); margin-bottom: 20px;
+    z-index: 2; 
 }
 .m-hypervisor::before {
     content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
@@ -187,7 +171,6 @@ body::before {
 #sort-balanced.active i { color: var(--m-primary); filter: drop-shadow(0 0 8px var(--m-primary)); }
 #sort-resolution.active i { color: var(--m-secondary); filter: drop-shadow(0 0 8px var(--m-secondary)); }
 #sort-size.active i { color: var(--m-amber); filter: drop-shadow(0 0 8px var(--m-amber)); }
-
 #lang-ita.active i { color: var(--m-success); filter: drop-shadow(0 0 8px var(--m-success)); }
 #lang-ita-eng.active i { color: var(--m-primary); filter: drop-shadow(0 0 8px var(--m-primary)); }
 #lang-eng.active i { color: var(--m-cine); filter: drop-shadow(0 0 8px var(--m-cine)); }
@@ -207,6 +190,15 @@ body::before {
 .m-sys-row:last-child { border-bottom: none; }
 .m-sys-info h4 { margin: 0; font-size: 0.85rem; color: #fff; font-family: 'Rajdhani'; font-weight: 700; display: flex; align-items: center; gap: 8px; }
 .m-sys-info p { margin: 2px 0 0; font-size: 0.65rem; color: rgba(255,255,255,0.5); }
+
+/* --- NEW MFP BADGE --- */
+.m-proxy-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(0, 242, 255, 0.08); border: 1px solid rgba(0, 242, 255, 0.4);
+    border-radius: 4px; padding: 2px 5px; margin-left: 6px;
+    font-size: 0.6rem; color: var(--m-primary); font-family: 'Rajdhani', sans-serif; font-weight: 800;
+    letter-spacing: 0.5px; box-shadow: 0 0 5px rgba(0, 242, 255, 0.1);
+}
 
 .m-visual-core-v2 { margin-bottom: 20px; position: relative; }
 .m-visual-preview { background: #080808; border: 1px solid rgba(0,242,255,0.15); border-radius: 16px; padding: 12px; margin-bottom: 15px; display: flex; gap: 12px; align-items: flex-start; box-shadow: 0 0 25px rgba(0,0,0,0.6); position: relative; overflow: hidden; min-height: 80px; transition: border-color 0.2s; }
@@ -319,6 +311,7 @@ input:checked + .m-slider-pink:before { background-color: var(--m-cine); box-sha
     overflow: hidden;
     backdrop-filter: blur(10px);
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index: 5;
 }
 
 .m-neural-header {
@@ -369,6 +362,40 @@ input:checked + .m-slider-pink:before { background-color: var(--m-cine); box-sha
 .m-support-module:active { transform: scale(0.98); background: rgba(255, 94, 91, 0.2); box-shadow: 0 0 15px rgba(255, 94, 91, 0.2); }
 .m-kofi-ico { font-size: 1.1rem; color: var(--m-kofi); margin-bottom: 4px; animation: heartbeat 1.5s infinite; filter: drop-shadow(0 0 5px var(--m-kofi)); }
 .m-support-txt { font-family: 'Rajdhani'; font-weight: 800; font-size: 0.75rem; color: #fff; letter-spacing: 1px; }
+
+/* --- UPDATED STAR MODULE --- */
+.m-star-btn {
+    margin-top: 10px;
+    background: linear-gradient(90deg, rgba(255, 153, 0, 0.1), rgba(255, 153, 0, 0.05), rgba(255, 153, 0, 0.1));
+    border: 1px solid rgba(255, 153, 0, 0.3);
+    border-radius: 12px;
+    padding: 10px 15px; /* Compact padding */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--m-amber);
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 800;
+    letter-spacing: 1px;
+    font-size: 0.75rem; /* Smaller Font */
+    box-shadow: 0 0 10px rgba(255, 153, 0, 0.1);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+}
+.m-star-btn:active { transform: scale(0.98); box-shadow: 0 0 20px var(--m-amber); color: #fff; background: var(--m-amber); border-color: var(--m-amber); }
+.m-star-btn::before {
+    content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transform: skewX(-25deg);
+    animation: shimmer 4s infinite;
+}
+@keyframes shimmer { 0% { left: -100%; } 20% { left: 200%; } 100% { left: 200%; } }
+.spin-star { animation: pulseStar 2s infinite ease-in-out; text-shadow: 0 0 5px var(--m-amber); font-size: 0.9rem; }
+@keyframes pulseStar { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } }
 
 .m-neural-footer { margin-top: 10px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: monospace; letter-spacing: 2px; }
 
@@ -592,7 +619,10 @@ const mobileHTML = `
 
                         <div class="m-sys-row">
                             <div class="m-sys-info">
-                                <h4><i class="fas fa-film" style="color:var(--m-primary)"></i> GuardaHD <span class="m-proxy-tag">PROXY</span></h4>
+                                <h4>
+                                    <i class="fas fa-film" style="color:var(--m-primary)"></i> GuardaHD 
+                                    <span class="m-proxy-badge"><i class="fas fa-shield-alt"></i> MFP</span>
+                                </h4>
                                 <p>Film Streaming ITA</p>
                             </div>
                             <label class="m-switch">
@@ -603,7 +633,10 @@ const mobileHTML = `
 
                         <div class="m-sys-row">
                             <div class="m-sys-info">
-                                <h4><i class="fas fa-tv" style="color:var(--m-accent)"></i> GuardaSerie <span class="m-proxy-tag">PROXY</span></h4>
+                                <h4>
+                                    <i class="fas fa-tv" style="color:var(--m-accent)"></i> GuardaSerie 
+                                    <span class="m-proxy-badge"><i class="fas fa-shield-alt"></i> MFP</span>
+                                </h4>
                                 <p>Serie TV ITA</p>
                             </div>
                             <label class="m-switch">
@@ -658,11 +691,17 @@ const mobileHTML = `
                             </a>
 
                             <a href="https://ko-fi.com/luc4n3x" target="_blank" class="m-support-module">
-                                <i class="fas fa-heart m-kofi-ico"></i>
-                                <span class="m-support-txt">SUPPORTO</span>
+                                <i class="fas fa-mug-hot m-kofi-ico"></i>
+                                <span class="m-support-txt">KO-FI</span>
                             </a>
                         </div>
                         
+                        <a href="https://stremio-addons.net/addons/leviathan" target="_blank" class="m-star-btn">
+                            <i class="fas fa-star spin-star"></i> 
+                            <span>LASCIAMI UNA STELLA</span>
+                            <i class="fas fa-star spin-star"></i>
+                        </a>
+
                         <div class="m-neural-footer">LEVIATHAN SYSTEM v2.5.0</div>
                     </div>
                 </div>
