@@ -1589,31 +1589,51 @@ app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "index.ht
 app.get("/:conf/configure", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 app.get("/configure", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 app.get("/manifest.json", (req, res) => { res.setHeader("Access-Control-Allow-Origin", "*"); res.json(getManifest()); });
+
 app.get("/:conf/manifest.json", (req, res) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
     const manifest = getManifest();
     try {
         const { conf } = req.params;
         const config = getConfig(conf);
+        
+        // --- 1. LOGICA BANDIERE DINAMICHE ---
+        const filters = config.filters || {};
+        // Determina la modalità lingua: 'ita', 'eng', o 'all'
+        const langMode = filters.language || (filters.allowEng ? "all" : "ita");
+
+        let flag = "";
+        if (langMode === "ita") {
+            flag = " 🇮🇹";        // Solo Italiano
+        } else if (langMode === "eng") {
+            flag = " 🇬🇧";        // Solo Inglese
+        } else {
+            flag = " 🇮🇹🇬🇧";      // Misto (Doppia bandiera)
+        }
+        // ------------------------------------
+
         const hasRDKey = (config.service === 'rd' && config.key) || config.rd;
         const hasTBKey = (config.service === 'tb' && config.key) || config.torbox;
         const hasADKey = (config.service === 'ad' && config.key) || config.alldebrid;
+
+        // --- 2. COSTRUZIONE NOME (Bandiera PRIMA dell'icona) ---
         if (hasRDKey) {
-            manifest.name = "Leviathan ☄️ RD";
+            manifest.name = `Leviathan${flag} ☄️ RD`;
             manifest.id += ".rd"; 
         } 
         else if (hasTBKey) {
-            manifest.name = "Leviathan 📦 TB";
+            manifest.name = `Leviathan${flag} 📦 TB`;
             manifest.id += ".tb";
         } 
         else if (hasADKey) {
-            manifest.name = "Leviathan 🦅 AD";
+            manifest.name = `Leviathan${flag} 🦅 AD`;
             manifest.id += ".ad";
         }
         else {
-            manifest.name = "Leviathan 🌐 Web";
+            manifest.name = `Leviathan${flag} 🌐 Web`;
             manifest.id += ".web";
         }
+
     } catch (e) {
         console.error("Errore personalizzazione manifest:", e);
     }
