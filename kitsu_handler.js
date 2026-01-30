@@ -2,15 +2,15 @@ const axios = require('axios');
 
 // --- CONFIGURAZIONE ---
 const URLS = {
-    // Database massivo generale (copre quasi tutto)
     FRIBB: "https://raw.githubusercontent.com/Fribb/anime-lists/master/anime-list-full.json",
-    // Database specifico per Stremio (gestisce meglio stagioni/episodi sfasati)
-    THEBEAST: "https://raw.githubusercontent.com/TheBeastLT/stremio-kitsu-anime/master/static/data/imdb_mapping.json"
+    THEBEAST: "https://raw.githubusercontent.com/TheBeastLT/stremio-kitsu-anime/master/static/data/imdb_mapping.json",
+    // API ufficiale Kitsu per i dati in tempo reale
+    KITSU_API: "https://kitsu.io/api/edge/anime"
 };
 
 const CACHE_DURATION = 1000 * 60 * 60 * 24; // 24 ore
 
-// Cache in memoria ottimizzata (Map per lookup O(1))
+// Cache in memoria
 let mappingCache = {
     map: new Map(),
     lastFetch: 0,
@@ -18,126 +18,150 @@ let mappingCache = {
 };
 
 /**
- * Aggiorna la cache scaricando da entrambe le fonti in parallelo
+ * Normalizza il tipo di contenuto basandosi sui dati Kitsu
+ * TV, OVA, ONA -> series
+ * Movie, Music, Special -> movie
+ */
+function normalizeType(kitsuType) {
+    if (!kitsuType) return 'series'; // Default a series se mancante
+    const t = kitsuType.toLowerCase();
+    return (t === 'tv' || t === 'ova' || t === 'ona' || t === 'current') ? 'series' : 'movie';
+}
+
+/**
+ * 1. Aggiorna la cache dai database statici (Fribb + TheBeast)
  */
 async function updateCache() {
     const now = Date.now();
-    // Se la cache è valida e caricata, non fare nulla
     if (mappingCache.isLoaded && (now - mappingCache.lastFetch < CACHE_DURATION)) {
         return;
     }
 
-    // console.log("🐉 [KITSU] Aggiornamento indici anime (Fribb + TheBeastLT)...");
-
     try {
-        // Scarica in parallelo (Promise.allSettled non blocca se uno fallisce)
         const [fribbRes, beastRes] = await Promise.allSettled([
-            axios.get(URLS.FRIBB, { timeout: 10000 }),
-            axios.get(URLS.THEBEAST, { timeout: 10000 })
+            axios.get(URLS.FRIBB, { timeout: 15000 }), // Timeout aumentato per sicurezza
+            axios.get(URLS.THEBEAST, { timeout: 15000 })
         ]);
 
         const tempMap = new Map();
 
-        // 1. ELABORA FRIBB (Base Layer)
+        // A. Carica FRIBB (Base Layer)
         if (fribbRes.status === 'fulfilled' && Array.isArray(fribbRes.value.data)) {
             fribbRes.value.data.forEach(item => {
                 if (item.kitsu_id && item.imdb_id) {
                     tempMap.set(String(item.kitsu_id), {
                         imdb_id: item.imdb_id,
-                        // Fribb a volte ha il campo 'type', usiamolo come hint
-                        type: (item.type === 'TV' || item.type === 'OVA' || item.type === 'ONA') ? 'series' : 'movie'
+                        type: normalizeType(item.type), // Normalizzazione immediata
+                        season: 1, // Default
+                        episode: 1
                     });
                 }
             });
-            // console.log(`✅ [KITSU] Fribb caricato: ${fribbRes.value.data.length} entries`);
-        } else {
-            console.warn("⚠️ Fribb API fallita o formato non valido");
         }
 
-        // 2. ELABORA THEBEASTLT (Overlay Layer - Priorità Alta per Stremio)
-        // Sovrascrive Fribb perché contiene info specifiche su stagioni/episodi per Stremio
+        // B. Carica THEBEASTLT (Overlay Layer - Correzione Stagioni)
+        // Questo è vitale per anime come "Attack on Titan S2" che su IMDb è "S2" della serie principale
         if (beastRes.status === 'fulfilled' && beastRes.value.data) {
             const data = beastRes.value.data;
-            let count = 0;
             Object.keys(data).forEach(kID => {
                 const entry = data[kID];
                 if (entry.imdb_id) {
+                    // Sovrascrive o crea nuova entry
                     tempMap.set(String(kID), {
                         imdb_id: entry.imdb_id,
-                        fromSeason: entry.fromSeason,
-                        fromEpisode: entry.fromEpisode,
-                        // Se c'è info sulla stagione, è sicuramente una serie
-                        type: entry.fromSeason ? 'series' : undefined 
+                        type: 'series', // Se è in TheBeast con stagioni, è una serie al 99%
+                        season: entry.fromSeason || 1,
+                        episode: entry.fromEpisode || 1
                     });
-                    count++;
                 }
             });
-            // console.log(`✅ [KITSU] TheBeastLT caricato: ${count} entries`);
-        } else {
-            console.warn("⚠️ TheBeastLT API fallita");
         }
 
-        // Aggiorna la cache globale solo se abbiamo trovato qualcosa
         if (tempMap.size > 0) {
             mappingCache.map = tempMap;
             mappingCache.lastFetch = now;
             mappingCache.isLoaded = true;
-            console.log(`🐉 [KITSU] Cache aggiornata. Totale anime mappati: ${tempMap.size}`);
+            console.log(`🐉 [KITSU] Cache Rigenerata. Totale Anime: ${tempMap.size}`);
         }
 
     } catch (e) {
-        console.error("❌ Errore critico update Kitsu cache:", e.message);
+        console.error("❌ Errore update Kitsu cache:", e.message);
+        // Non blocchiamo: se fallisce l'update, useremo la cache vecchia o la API live
     }
 }
 
 /**
- * Verifica su IMDb se è una serie o un film (Fallback)
+ * 2. Fallback Live: Interroga Kitsu API direttamente se non è nella lista statica
+ * Utile per anime usciti oggi o molto di nicchia
  */
-async function checkImdbType(imdbID) {
+async function fetchKitsuLive(kitsuID) {
     try {
-        // Timeout breve per non bloccare tutto
-        const response = await axios.get(`https://v2.sg.media-imdb.com/suggestion/t/${imdbID}.json`, { timeout: 2500 });
-        const data = response.data;
-        if (data && data.d && data.d[0]) {
-            const q = data.d[0].q; // es. "TV series", "feature", "TV mini-series"
-            if (!q) return null;
-            return (q.toLowerCase().includes('tv') || q.toLowerCase().includes('series')) ? 'series' : 'movie';
+        // Chiediamo a Kitsu i mappings (IMDb, MyAnimeList, ecc)
+        const url = `${URLS.KITSU_API}/${kitsuID}?include=mappings`;
+        const res = await axios.get(url, { timeout: 3000 });
+        
+        const data = res.data?.data;
+        const included = res.data?.included;
+
+        if (!data || !included) return null;
+
+        // Cerca ID IMDB nei mappings inclusi
+        const imdbMapping = included.find(m => 
+            m.type === 'mappings' && 
+            m.attributes?.externalSite === 'imdb'
+        );
+
+        if (imdbMapping && imdbMapping.attributes?.externalId) {
+            const kType = data.attributes?.subtype || 'TV';
+            
+            // Salviamo in cache per non richiederlo subito dopo
+            const result = {
+                imdb_id: imdbMapping.attributes.externalId,
+                type: normalizeType(kType),
+                season: 1,
+                episode: 1
+            };
+            
+            // Aggiungiamo alla cache in memoria per velocità future
+            mappingCache.map.set(String(kitsuID), result);
+            return result;
         }
+
     } catch (e) {
-        // Ignora silenziosamente errori di rete verso IMDb
+        // 404 o errore rete
+        // console.warn(`⚠️ Kitsu Live Check fallito per ID ${kitsuID}`);
     }
     return null;
 }
 
 /**
- * Funzione principale chiamata da addon.js
+ * --- MAIN HANDLER ---
  */
 async function kitsuHandler(kitsuID) {
-    // Assicura che la cache sia pronta
+    if (!kitsuID) return null;
+    
+    // 1. Assicura che la cache statica sia presente (lazy loading)
     await updateCache();
 
     const strID = String(kitsuID);
-    const entry = mappingCache.map.get(strID);
+    
+    // 2. Cerca nella Cache (Fribb + TheBeast)
+    let entry = mappingCache.map.get(strID);
+
+    // 3. Se non trovato, prova la "Live Fallback" su Kitsu API
+    if (!entry) {
+        // console.log(`🔍 ID ${kitsuID} non in cache, provo API Kitsu Live...`);
+        entry = await fetchKitsuLive(kitsuID);
+    }
 
     if (!entry) return null;
 
-    let finalType = entry.type;
-    const finalSeason = entry.fromSeason || 1;
-    const finalEpisode = entry.fromEpisode || 1;
-
-    // Se il tipo non è certo (da Fribb senza type o TheBeast senza season info), controlliamo IMDb
-    // Questo serve perché addon.js deve sapere se trattarlo come serie (S:E) o film
-    if (!finalType) {
-        const checkedType = await checkImdbType(entry.imdb_id);
-        finalType = checkedType || 'movie'; // Default a movie se check fallisce
-    }
-
-    // Rispetta esattamente il formato che addon.js si aspetta
+    // Ritorna il formato pulito per addon.js
     return {
         imdbID: entry.imdb_id,
-        season: finalSeason,
-        episode: finalEpisode,
-        type: finalType
+        season: entry.season,
+        episode: entry.episode,
+        type: entry.type
     };
 }
 
