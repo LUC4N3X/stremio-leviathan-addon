@@ -58,10 +58,10 @@ body::before {
 
 .m-content-wrapper { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
 
-/* --- FIX SCROLLING: AUMENTATO PADDING BOTTOM A 250px --- */
+/* --- FIX SCROLLING: PADDING BOTTOM PER LA NUOVA DOCK --- */
 .m-content {
     flex: 1; overflow-y: scroll; overflow-x: hidden;
-    padding: 0 15px 250px 15px; /* AUMENTATO PER EVITARE CHE I TASTI COPRANO IL CONTENUTO */
+    padding: 0 15px 180px 15px; /* Spazio extra per la nuova dock a due piani */
     width: 100%; -webkit-overflow-scrolling: touch; 
 }
 
@@ -277,74 +277,157 @@ input:checked + .m-slider-pink:before { background-color: var(--m-cine); box-sha
 .m-flux-header { background: rgba(0, 242, 255, 0.05); padding: 8px 15px; font-size: 0.7rem; color: var(--m-primary); letter-spacing: 1px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0, 242, 255, 0.1); }
 .m-flux-input { width: 100%; background: transparent; border: none; color: #fff; padding: 15px; font-size: 0.75rem; resize: none; min-height: 80px; line-height: 1.4; outline: none; font-family: 'Consolas', monospace; white-space: pre-wrap; word-break: break-all; }
 
-/* --- NEW CREDITS SECTION (VISUALLY DISTINCT) --- */
-.m-credits-section { 
-    margin: 40px 10px 20px 10px;
-    padding: 20px 10px;
-    background: radial-gradient(circle at center, rgba(0, 242, 255, 0.03), transparent 70%);
-    border-top: 1px solid rgba(255,255,255,0.05);
-    display: flex; flex-direction: column; gap: 20px; 
+/* --- NEURAL CREDITS GRID (Nuovo Design Professionale) --- */
+.m-credits-section {
+    margin: 20px 10px 120px 10px; /* Margine fondo aumentato per non toccare la dock */
+    padding: 0;
+    background: transparent;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.m-neural-frame {
+    background: rgba(5, 8, 12, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 15px;
     position: relative;
-    text-align: center;
-}
-.m-credits-section::before {
-    content: 'NEURAL SIGNATURE';
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 0.6rem; letter-spacing: 4px; color: rgba(255,255,255,0.2);
-    margin-bottom: 5px; display: block;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-/* DEV CARD - HOLOGRAPHIC STYLE */
-.m-dev-id { 
-    width: 100%; padding: 15px; text-decoration: none; 
-    background: rgba(0, 0, 0, 0.6); 
-    border: 1px solid #222; border-left: 2px solid var(--m-primary);
-    border-radius: 12px; display: flex; align-items: center; gap: 15px; 
-    transition: all 0.3s ease; position: relative; overflow: hidden;
+/* Header del blocco crediti */
+.m-neural-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
 }
-.m-dev-id:active { transform: scale(0.98); background: rgba(0, 242, 255, 0.05); }
+.m-nh-title { font-family: 'Rajdhani', sans-serif; font-size: 0.7rem; letter-spacing: 2px; color: var(--m-dim); font-weight: 700; text-transform: uppercase; }
+.m-nh-id { font-family: 'Courier New', monospace; font-size: 0.6rem; color: var(--m-primary); opacity: 0.7; }
 
-.m-dev-avatar { width: 48px; height: 48px; border-radius: 8px; border: 1px solid var(--m-primary); object-fit: cover; box-shadow: 0 0 10px rgba(0,0,0,0.8); filter: grayscale(20%); }
-.m-dev-info { display: flex; flex-direction: column; align-items: flex-start; }
-.m-dev-role { font-size: 0.65rem; color: var(--m-primary); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; opacity: 0.8; margin-bottom: 2px; }
-.m-dev-name { font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; color: #fff; font-weight: 800; letter-spacing: 1px; }
+/* Griglia pulsanti affiancati */
+.m-neural-grid {
+    display: grid;
+    grid-template-columns: 1.8fr 1fr; /* Il Dev prende più spazio */
+    gap: 10px;
+}
 
-/* KO-FI ULTRA BUTTON */
-.m-kofi-ultra { 
-    width: 100%; height: 55px; text-decoration: none; padding: 0 15px; 
-    display: flex; align-items: center; justify-content: center; gap: 12px; 
-    background: linear-gradient(135deg, #FF5E5B, #E01E5A); 
-    border-radius: 12px; font-size: 1rem; color: #fff; transition: all 0.3s; 
-    position: relative; font-family: 'Rajdhani', sans-serif; font-weight: 800; 
-    box-shadow: 0 5px 20px rgba(255, 30, 90, 0.25);
+/* Modulo Developer */
+.m-dev-module {
+    background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(0,0,0,0.2));
     border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
     overflow: hidden;
 }
-.m-kofi-ultra::before {
-    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
-    opacity: 0; transition: opacity 0.3s; pointer-events: none;
-}
-.m-kofi-ultra:hover::before { opacity: 1; }
-.m-kofi-ultra:active { transform: scale(0.96); box-shadow: 0 2px 10px rgba(255, 30, 90, 0.4); }
+.m-dev-module:active { transform: scale(0.98); border-color: var(--m-primary); background: rgba(0, 242, 255, 0.05); }
 
-.m-kofi-icon { font-size: 1.2rem; animation: heartBeat 1.5s infinite ease-in-out; }
-@keyframes heartBeat { 
-    0% { transform: scale(1); } 15% { transform: scale(1.2); } 
-    30% { transform: scale(1); } 45% { transform: scale(1.2); } 100% { transform: scale(1); } 
+.m-dev-img { width: 40px; height: 40px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); object-fit: cover; }
+.m-dev-data { display: flex; flex-direction: column; }
+.m-dev-role { font-size: 0.55rem; color: var(--m-primary); letter-spacing: 1px; font-weight: 700; text-transform: uppercase; margin-bottom: 2px; }
+.m-dev-nick { font-family: 'Rajdhani', sans-serif; font-size: 1rem; color: #fff; font-weight: 800; }
+
+/* Modulo Ko-fi (Supporto) */
+.m-support-module {
+    background: linear-gradient(135deg, rgba(255, 94, 91, 0.1), rgba(0,0,0,0.2));
+    border: 1px solid rgba(255, 94, 91, 0.3);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+}
+.m-support-module:active { transform: scale(0.98); background: rgba(255, 94, 91, 0.2); box-shadow: 0 0 15px rgba(255, 94, 91, 0.2); }
+.m-kofi-ico { font-size: 1.2rem; color: var(--m-kofi); margin-bottom: 4px; animation: heartbeat 1.5s infinite; filter: drop-shadow(0 0 5px var(--m-kofi)); }
+.m-support-txt { font-family: 'Rajdhani'; font-weight: 800; font-size: 0.8rem; color: #fff; letter-spacing: 1px; }
+
+/* Footer del blocco */
+.m-neural-footer { margin-top: 10px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: monospace; letter-spacing: 2px; }
+
+/* --- COMMAND DOCK (Barra fissa ridisegnata) --- */
+.m-dock-container { 
+    position: fixed; bottom: 0; left: 0; width: 100%; 
+    background: rgba(3, 5, 8, 0.90); /* Più scuro */
+    border-top: 1px solid rgba(0, 242, 255, 0.2); 
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.9);
+    z-index: 999; 
+    display: flex; flex-direction: column; 
+    padding-bottom: max(10px, env(safe-area-inset-bottom)); /* Gestione iPhone X precisa */
+    backdrop-filter: blur(20px); 
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
 }
 
-.m-dock-container { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(2, 5, 10, 0.97); border-top: 1px solid rgba(0,242,255,0.15); z-index: 100; display: flex; flex-direction: column; padding-bottom: var(--safe-bottom); box-shadow: 0 -12px 35px rgba(0,0,0,0.85); backdrop-filter: blur(12px); }
-.m-dock-actions { display: flex; gap: 12px; padding: 12px 18px 6px 18px; }
-.m-btn-install { flex: 3; background: linear-gradient(90deg, var(--m-primary), var(--m-secondary)); color: #000; border: none; border-radius: 12px; height: 48px; font-family: 'Rajdhani', sans-serif; font-size: 1.15rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 0 18px rgba(0,242,255,0.25); transition: all 0.2s; position: relative; overflow: hidden; }
-.m-btn-install::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent); transform: skewX(-20deg); animation: scannerBtn 3s infinite ease-in-out; }
-@keyframes scannerBtn { 0% { left: -100%; opacity: 0; } 20% { opacity: 0.5; } 50% { left: 200%; opacity: 0; } 100% { left: 200%; opacity: 0; } }
-.m-btn-copy { flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 12px; height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Rajdhani', sans-serif; font-size: 0.7rem; font-weight: 700; transition: all 0.2s; box-shadow: var(--m-glow); }
-.m-dock-nav { display: flex; justify-content: space-around; align-items: center; padding: 8px 0 10px 0; }
-.m-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--m-dim); width: 80px; transition: all 0.25s ease; }
-.m-nav-item i { font-size: 1.3rem; }
-.m-nav-item span { font-size: 0.65rem; font-weight: 700; font-family: 'Rajdhani', sans-serif; }
-.m-nav-item.active { color: var(--m-primary); text-shadow: 0 0 6px var(--m-primary); transform: scale(1.1); }
+/* Linea luminosa sopra la dock */
+.m-dock-container::before {
+    content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 40%; height: 1px; background: linear-gradient(90deg, transparent, var(--m-primary), transparent);
+    box-shadow: 0 0 10px var(--m-primary);
+}
+
+.m-dock-actions { 
+    display: flex; gap: 10px; padding: 15px 15px 10px 15px; 
+    border-bottom: 1px solid rgba(255,255,255,0.05); /* Separatore sottile */
+}
+
+/* Pulsante Installa più compatto ma evidente */
+.m-btn-install { 
+    flex: 2.5; 
+    background: linear-gradient(90deg, var(--m-primary), #00a8ff); 
+    color: #000; border: none; border-radius: 10px; height: 44px; /* Altezza ridotta leggermente */
+    font-family: 'Rajdhani', sans-serif; font-size: 1rem; font-weight: 800; 
+    text-transform: uppercase; letter-spacing: 1px; 
+    display: flex; align-items: center; justify-content: center; gap: 8px; 
+    box-shadow: 0 0 20px rgba(0, 242, 255, 0.15); 
+    transition: all 0.2s; position: relative; overflow: hidden; 
+}
+
+.m-btn-copy { 
+    flex: 1; 
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); 
+    color: var(--m-dim); border-radius: 10px; height: 44px; 
+    display: flex; flex-direction: column; align-items: center; justify-content: center; 
+    font-family: 'Rajdhani', sans-serif; font-size: 0.65rem; font-weight: 700; 
+    transition: all 0.2s; 
+}
+.m-btn-copy i { font-size: 1rem; margin-bottom: 2px; color: #fff; }
+
+/* Navigazione più pulita */
+.m-dock-nav { 
+    display: flex; justify-content: space-around; align-items: center; 
+    padding: 10px 0 5px 0; 
+}
+
+.m-nav-item { 
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; 
+    color: #555; width: 70px; transition: all 0.25s cubic-bezier(0.25, 1.5, 0.5, 1); 
+    position: relative;
+}
+.m-nav-item i { font-size: 1.1rem; transition: color 0.2s; }
+.m-nav-item span { font-size: 0.6rem; font-weight: 700; font-family: 'Rajdhani', sans-serif; letter-spacing: 1px; }
+
+/* Stato attivo con punto luminoso */
+.m-nav-item.active { color: #fff; transform: translateY(-2px); }
+.m-nav-item.active i { color: var(--m-primary); filter: drop-shadow(0 0 8px var(--m-primary)); }
+.m-nav-item.active::after {
+    content: ''; position: absolute; bottom: -8px; width: 4px; height: 4px; 
+    background: var(--m-primary); border-radius: 50%; box-shadow: 0 0 6px var(--m-primary);
+}
 
 /* CUSTOM DASHBOARD AREA */
 .m-custom-dash { margin-top: 15px; background: rgba(0, 0, 0, 0.4); border: 1px dashed rgba(0, 242, 255, 0.3); border-radius: 12px; padding: 15px; animation: slideDown 0.3s ease; display: none; }
@@ -553,19 +636,30 @@ const mobileHTML = `
                 </div>
 
                 <div class="m-credits-section">
-                    <a href="https://github.com/LUC4N3X/stremio-leviathan-addon" target="_blank" class="m-dev-id">
-                        <img src="https://i.ibb.co/gLkrjxXT/Whats-App-Image-2026-01-12-at-20-15-37.jpg" alt="Dev" class="m-dev-avatar">
-                        <div class="m-dev-info">
-                            <span class="m-dev-role">LEAD DEVELOPER</span>
-                            <span class="m-dev-name">LUC4N3X</span>
+                    <div class="m-neural-frame">
+                        <div class="m-neural-header">
+                            <span class="m-nh-title">/// NEURAL SIGNATURE ///</span>
+                            <span class="m-nh-id">ID: L3V-2026</span>
                         </div>
-                        <i class="fab fa-github" style="margin-left:auto; color:#fff; font-size:1.4rem;"></i>
-                    </a>
+                        
+                        <div class="m-neural-grid">
+                            <a href="https://github.com/LUC4N3X/stremio-leviathan-addon" target="_blank" class="m-dev-module">
+                                <img src="https://i.ibb.co/gLkrjxXT/Whats-App-Image-2026-01-12-at-20-15-37.jpg" alt="Dev" class="m-dev-img">
+                                <div class="m-dev-data">
+                                    <span class="m-dev-role">ARCHITECT</span>
+                                    <span class="m-dev-nick">LUC4N3X</span>
+                                </div>
+                                <i class="fab fa-github" style="position:absolute; right:10px; top:10px; color:rgba(255,255,255,0.1); font-size:1.5rem;"></i>
+                            </a>
 
-                    <a href="https://ko-fi.com/luc4n3x" target="_blank" class="m-kofi-ultra" title="Supporta il progetto">
-                        <i class="fas fa-heart m-kofi-icon"></i>
-                        <span>SUPPORTA SU KO-FI</span>
-                    </a>
+                            <a href="https://ko-fi.com/luc4n3x" target="_blank" class="m-support-module">
+                                <i class="fas fa-heart m-kofi-ico"></i>
+                                <span class="m-support-txt">SUPPORTO</span>
+                            </a>
+                        </div>
+                        
+                        <div class="m-neural-footer">LEVIATHAN SYSTEM v2.5.0</div>
+                    </div>
                 </div>
             </div>
 
@@ -809,13 +903,23 @@ const mobileHTML = `
 
     <div class="m-dock-container">
         <div class="m-dock-actions">
-            <button class="m-btn-install" onclick="mobileInstall()"><i class="fas fa-download"></i> INSTALLA ADDON</button>
-            <button class="m-btn-copy" onclick="openLinkModal()"><i class="fas fa-link"></i><span>COPIA</span></button>
+            <button class="m-btn-install" onclick="mobileInstall()">
+                <i class="fas fa-download"></i> INSTALLA
+            </button>
+            <button class="m-btn-copy" onclick="openLinkModal()">
+                <i class="fas fa-link"></i><span>COPIA</span>
+            </button>
         </div>
         <div class="m-dock-nav">
-            <div class="m-nav-item active" onclick="navTo('setup', this)"><i class="fas fa-sliders-h"></i><span>SETUP</span></div>
-            <div class="m-nav-item" onclick="navTo('filters', this)"><i class="fas fa-filter"></i><span>FILTRI</span></div>
-            <div class="m-nav-item" onclick="navTo('network', this)"><i class="fas fa-globe"></i><span>NET</span></div>
+            <div class="m-nav-item active" onclick="navTo('setup', this)">
+                <i class="fas fa-sliders-h"></i><span>SETUP</span>
+            </div>
+            <div class="m-nav-item" onclick="navTo('filters', this)">
+                <i class="fas fa-filter"></i><span>FILTRI</span>
+            </div>
+            <div class="m-nav-item" onclick="navTo('network', this)">
+                <i class="fas fa-globe"></i><span>NET</span>
+            </div>
         </div>
     </div>
     
