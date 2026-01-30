@@ -154,11 +154,11 @@
         .tab-icon { font-size: 2rem; display: block; transition: transform 0.4s ease; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
         .service-tab:hover .tab-icon { transform: scale(1.1); filter: drop-shadow(0 0 8px var(--primary)); }
         
-        /* --- NEW INPUT STYLE (TECH GRID & AUTOFILL FIX) --- */
+        /* --- INPUTS --- */
         .input-group { position: relative; margin-bottom: 30px; }
         .custom-input {
             width: 100%; 
-            background-color: #02060a !important; /* Force dark background */
+            background-color: #02060a !important;
             background-image: 
                 linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
@@ -171,7 +171,7 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
             box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
         }
-        /* HACK PER RIMUOVERE LO SFONDO BIANCO DELL'AUTOFILL */
+        
         input:-webkit-autofill,
         input:-webkit-autofill:hover, 
         input:-webkit-autofill:focus, 
@@ -191,7 +191,6 @@
         }
         .custom-input::placeholder { color: rgba(139, 170, 194, 0.3); font-weight: 500; letter-spacing: 1px; }
         
-        /* DISABLE STYLE FOR INPUTS */
         .custom-input:disabled, .custom-input.disabled-input {
             opacity: 0.4; cursor: not-allowed; filter: grayscale(1); border-color: #333; box-shadow: none; color: #555;
         }
@@ -466,101 +465,195 @@
             padding: 10px;
         }
 
-        .visual-core-hero { margin-bottom: 40px; border-bottom: 1px solid rgba(0, 242, 255, 0.1); padding-bottom: 20px; position: relative; margin-top: 40px; }
+        /* --- VISUAL CORE RESTYLING (FIGHISSIMO) --- */
+        .visual-core-hero { 
+            margin-bottom: 40px; 
+            padding-bottom: 25px; 
+            position: relative; 
+            margin-top: 40px;
+            background: rgba(10, 20, 30, 0.4);
+            border: 1px solid rgba(0, 242, 255, 0.15);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 50px rgba(0, 242, 255, 0.02);
+            border-radius: 20px;
+            padding: 30px;
+        }
         
         .aio-lock-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 2, 5, 0.85); backdrop-filter: blur(4px);
+            background: rgba(0, 2, 5, 0.85); backdrop-filter: blur(8px);
             z-index: 10; display: none; 
             flex-direction: column; align-items: center; justify-content: center;
-            border-radius: 15px; border: 1px solid var(--secondary);
-            cursor: pointer; /* Click to shake */
+            border-radius: 20px; border: 1px solid var(--secondary);
+            cursor: pointer;
         }
         .lock-icon { font-size: 3rem; color: var(--secondary); margin-bottom: 15px; filter: drop-shadow(0 0 10px var(--secondary)); }
         .lock-msg { font-family: 'Rajdhani', sans-serif; font-size: 1.5rem; font-weight: 800; color: #fff; letter-spacing: 2px; text-transform: uppercase; }
         
-        /* Updated: No pointer-events: none so clicks work for shake effect */
         .disabled-core .skin-selector-container, .disabled-core .custom-area {
-            opacity: 0.3; filter: grayscale(1);
+            opacity: 0.3; filter: grayscale(1); pointer-events: none;
         }
 
+        /* NEW SKIN SELECTOR GRID */
         .skin-selector-container {
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;
-            background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; border: 1px dashed rgba(255,255,255,0.05);
+            display: grid; 
+            grid-template-columns: repeat(5, 1fr); /* Default desktop */
+            gap: 15px; 
+            margin-bottom: 25px;
+            padding: 10px;
+            background: radial-gradient(circle at center, rgba(0, 242, 255, 0.05) 0%, transparent 70%);
         }
+
+        /* NEW SKIN BUTTON STYLE - CYBER PLATE */
         .skin-btn {
-            background: linear-gradient(145deg, #050a10, #000);
-            border: 1px solid rgba(255,255,255,0.1); color: var(--text-dim);
-            padding: 15px 10px; border-radius: 10px; cursor: pointer; text-align: center; 
+            background: rgba(5, 10, 15, 0.8);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--text-dim);
+            padding: 20px 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; overflow: hidden;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 10px; 
+            position: relative; 
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            backdrop-filter: blur(5px);
         }
-        .skin-btn::after {
-            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--primary);
-            transform: scaleX(0); transition: transform 0.3s ease;
-        }
-        .skin-btn:hover { 
-            transform: translateY(-5px); border-color: rgba(0, 242, 255, 0.3); 
-            box-shadow: 0 5px 20px rgba(0,0,0,0.4), inset 0 0 10px rgba(0, 242, 255, 0.05);
+
+        /* Hover Effect: Brighten & Lift */
+        .skin-btn:hover {
+            background: rgba(20, 30, 40, 0.9);
+            border-color: rgba(0, 242, 255, 0.4);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5), 0 0 15px rgba(0, 242, 255, 0.1);
             color: #fff;
         }
-        .skin-btn:hover::after { transform: scaleX(1); }
-        
-        .skin-btn.active {
-            background: linear-gradient(180deg, rgba(0, 242, 255, 0.05), rgba(0,0,0,0.8));
-            border-color: var(--primary); color: #fff; 
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.1), inset 0 0 20px rgba(0, 242, 255, 0.05);
-            transform: scale(1.05); z-index: 2;
-        }
-        .skin-btn.active::after { transform: scaleX(1); height: 4px; box-shadow: 0 0 10px var(--primary); }
-        .skin-btn.active .skin-icon { color: var(--primary); filter: drop-shadow(0 0 8px var(--primary)); transform: scale(1.2); }
-        
-        .skin-icon { font-size: 1.5rem; transition: 0.3s; color: #444; }
-        .skin-name { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; z-index: 1; }
+        .skin-btn:hover .skin-icon { transform: scale(1.1) rotate(5deg); filter: drop-shadow(0 0 5px var(--primary)); color: #fff; }
 
+        /* ACTIVE STATE: NEON GLOW */
+        .skin-btn.active {
+            background: linear-gradient(145deg, rgba(0, 5, 10, 0.95), rgba(0, 20, 40, 0.9));
+            border-color: transparent; /* Usiamo pseudo-element per il bordo */
+            color: #fff;
+            transform: scale(1.05);
+            z-index: 2;
+            box-shadow: 
+                0 0 30px rgba(0, 242, 255, 0.15), 
+                inset 0 0 20px rgba(0, 242, 255, 0.1);
+        }
+
+        /* Gradient Border trick for Active State */
+        .skin-btn.active::before {
+            content: ''; position: absolute; inset: 0; border-radius: 12px; padding: 2px; /* Border width */
+            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--primary));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor; mask-composite: exclude;
+            animation: borderRotate 4s linear infinite; opacity: 1;
+        }
+        @keyframes borderRotate { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+
+        /* Bottom glow line for Active */
+        .skin-btn.active::after {
+            content: ''; position: absolute; bottom: 0; left: 15%; width: 70%; height: 3px;
+            background: var(--primary);
+            box-shadow: 0 0 15px var(--primary), 0 0 30px var(--primary);
+            border-radius: 10px 10px 0 0;
+            animation: pulseLine 2s infinite alternate;
+        }
+        @keyframes pulseLine { 0% { opacity: 0.5; width: 60%; } 100% { opacity: 1; width: 80%; } }
+
+        .skin-icon { 
+            font-size: 1.8rem; 
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            color: #666; 
+            margin-bottom: 5px;
+        }
+        .skin-btn.active .skin-icon { 
+            color: var(--primary); 
+            filter: drop-shadow(0 0 15px var(--primary)); 
+            transform: scale(1.2); 
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+        @keyframes iconFloat { 0%, 100% { transform: translateY(0) scale(1.2); } 50% { transform: translateY(-5px) scale(1.2); } }
+
+        .skin-name { 
+            font-family: 'Rajdhani', sans-serif; font-weight: 800; font-size: 0.8rem; 
+            text-transform: uppercase; letter-spacing: 2px; z-index: 1; 
+            transition: 0.3s;
+        }
+        .skin-btn.active .skin-name { color: var(--primary); text-shadow: 0 0 10px rgba(0, 242, 255, 0.5); }
+
+
+        /* NEW PREVIEW TERMINAL STYLE */
         .preview-terminal {
-            background: #050505; 
-            border: 1px solid #333; 
-            border-radius: 12px; 
-            padding: 25px; 
-            margin-bottom: 25px;
-            font-family: 'JetBrains Mono', 'Roboto Mono', monospace; 
-            position: relative; 
-            overflow: hidden; 
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            background: #080808;
+            border: 1px solid #222;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+            font-family: 'JetBrains Mono', 'Roboto Mono', monospace;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.9);
+            /* CRT Texture */
             background-image: 
-                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 2px, 3px 100%;
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255,0,0,0.03), rgba(0,255,0,0.01), rgba(0,0,255,0.03));
+            background-size: 100% 3px, 4px 100%;
         }
         
-        /* Scanline effect for terminal */
+        /* Scanline Animation */
         .preview-terminal::after {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
-            background-size: 100% 4px;
+            content: " ";
+            display: block;
+            position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.1));
+            background-size: 100% 6px;
+            z-index: 2;
             pointer-events: none;
-            z-index: 1;
+            animation: scanlineMove 10s linear infinite;
+            opacity: 0.4;
+        }
+        @keyframes scanlineMove { 0% { background-position: 0 0; } 100% { background-position: 0 100%; } }
+
+        /* Subtle Glow Overlay inside terminal */
+        .preview-terminal::before {
+            content: ""; position: absolute; top:0; left:0; width:100%; height:100%;
+            background: radial-gradient(circle at center, rgba(0, 242, 255, 0.03), transparent 80%);
+            pointer-events: none; z-index: 1;
         }
 
         .preview-header {
-            font-family: 'Rajdhani', sans-serif; font-size: 0.9rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px;
-            margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; opacity: 0.9;
-            position: relative; z-index: 2;
+            font-family: 'Rajdhani', sans-serif; font-size: 0.85rem; color: #555; text-transform: uppercase; letter-spacing: 2px;
+            margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+            position: relative; z-index: 3;
         }
+        .preview-header i { margin-right: 8px; color: var(--primary-dim); }
+        
+        #prev-mode-label { 
+            color: var(--primary); text-shadow: 0 0 8px rgba(0, 242, 255, 0.5); font-weight: 800; 
+            padding: 2px 10px; border: 1px solid rgba(0, 242, 255, 0.3); border-radius: 4px; background: rgba(0, 242, 255, 0.05);
+        }
+
         .stremio-mock-row {
-            display: flex; gap: 20px; align-items: flex-start; background: rgba(20,20,20,0.6); padding: 15px; border-radius: 8px;
-            transition: 0.2s; cursor: default; border: 1px solid #333; position: relative; z-index: 2;
+            display: flex; gap: 20px; align-items: flex-start; background: rgba(255,255,255,0.02); padding: 20px; border-radius: 12px;
+            transition: 0.2s; cursor: default; border: 1px solid rgba(255,255,255,0.05); position: relative; z-index: 3;
             backdrop-filter: blur(2px);
         }
-        .stremio-mock-row:hover { background: rgba(30,30,30,0.8); border-color: var(--primary-dim); box-shadow: 0 0 15px rgba(0, 242, 255, 0.05); }
-        .mock-poster { width: 50px; height: 75px; background: #252525; border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #444; font-size: 1.5rem; border: 1px solid #333; }
+        .stremio-mock-row:hover { background: rgba(255,255,255,0.05); border-color: var(--primary); box-shadow: 0 0 20px rgba(0, 242, 255, 0.1); }
+        
+        .mock-poster { 
+            width: 55px; height: 82px; background: linear-gradient(to bottom, #252525, #151515); 
+            border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; 
+            color: #444; font-size: 1.5rem; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
         .mock-content { flex-grow: 1; display: flex; flex-direction: column; gap: 8px; }
-        .mock-title { color: #fff; font-size: 1.1rem; font-weight: 500; white-space: pre-wrap; line-height: 1.3; text-shadow: 0 0 5px rgba(0,0,0,0.5); }
-        .mock-info { color: #b0b0b0; font-size: 0.95rem; white-space: pre-wrap; line-height: 1.5; font-weight: 300; }
+        .mock-title { color: #fff; font-size: 1.15rem; font-weight: 500; white-space: pre-wrap; line-height: 1.3; text-shadow: 0 0 5px rgba(0,0,0,0.5); }
+        .mock-info { color: #aaa; font-size: 0.9rem; white-space: pre-wrap; line-height: 1.6; font-weight: 400; font-family: 'Outfit', sans-serif; opacity: 0.9; }
         
         .custom-area {
             display: none; background: #0a0a0a; padding: 0; border-radius: 10px; 
@@ -803,6 +896,8 @@
             @keyframes pulseLaser { 0% { opacity: 0.5; box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); } 100% { opacity: 1; box-shadow: 0 0 20px rgba(0, 242, 255, 0.6); } }
             
             .action-area { flex-direction: row; }
+            
+            /* DESKTOP VISUAL CORE */
             .skin-selector-container { grid-template-columns: repeat(5, 1fr); }
             
             .col-left { padding-right: 20px; }
@@ -822,7 +917,7 @@
             .input-action { position: absolute; bottom: 6px; left: 6px; right: 6px; top: auto; width: auto; justify-content: center; padding: 10px; font-size: 0.9rem; background: rgba(0, 242, 255, 0.1); border: 1px solid rgba(0, 242, 255, 0.2); }
             .spectrum-grid { grid-template-columns: repeat(2, 1fr); }
             .aux-grid { grid-template-columns: 1fr !important; }
-            .skin-selector-container { grid-template-columns: repeat(3, 1fr); }
+            .skin-selector-container { grid-template-columns: repeat(3, 1fr) !important; }
             .glass-panel, .logo-container, .modal-backdrop { background: rgba(0, 5, 10, 0.98) !important; }
             .particles { display: none !important; } 
             .action-area { flex-direction: column; }
@@ -1122,7 +1217,7 @@
                 </div>
             </div>
 
-            <div class="visual-core-hero spectrum-container" style="background: rgba(0, 5, 10, 0.8);">
+            <div class="visual-core-hero">
                 
                 <div class="aio-lock-overlay" id="aioLockOverlay" onclick="triggerAIODenied()">
                     <i class="fas fa-lock lock-icon"></i>
@@ -1130,7 +1225,7 @@
                     <div style="color:#aaa; font-size:0.9rem; margin-top:5px;">Disabilita "Compatibilità AIO" per sbloccare le skin.</div>
                 </div>
 
-                <div class="spectrum-header" style="margin-bottom:15px;">
+                <div class="spectrum-header" style="margin-bottom:20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;">
                     <span style="display:flex; align-items:center; gap:10px;">
                         <i class="fas fa-palette" style="color:var(--primary)"></i> FORMATTER PROTOCOL // VISUAL CORE
                     </span>
@@ -1144,7 +1239,7 @@
 
                     <div class="preview-header">
                         <span><i class="fas fa-satellite-dish"></i> LIVE SIGNAL PREVIEW</span>
-                        <span id="prev-mode-label" style="color:var(--primary)">LEVIATHAN</span>
+                        <span id="prev-mode-label">LEVIATHAN</span>
                     </div>
                     <div class="stremio-mock-row">
                         <div class="mock-poster"><i class="fas fa-image"></i></div>
