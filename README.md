@@ -356,8 +356,8 @@ Il supporto diretto accelera lo sviluppo, mantiene il Protocollo libero<br>
 e consente iterazioni rapide senza compromessi
 </p>
 
-<a href="https://www.paypal.me/luc4nex">
-  <img src="https://img.shields.io/badge/Core%20Support-PayPal-1f6feb?style=for-the-badge&logo=paypal">
+<a href="https://ko-fi.com/luc4n3x" target="_blank">
+  <img src="https://img.shields.io/badge/Core%20Support-Ko--fi-ff5f5f?style=for-the-badge&logo=ko-fi&logoColor=white">
 </a>
 
 <br><br>
