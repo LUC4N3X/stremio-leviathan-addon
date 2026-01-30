@@ -1599,7 +1599,6 @@ app.get("/:conf/manifest.json", (req, res) => {
         
         // --- 1. LOGICA BANDIERE DINAMICHE ---
         const filters = config.filters || {};
-        // Determina la modalità lingua: 'ita', 'eng', o 'all'
         const langMode = filters.language || (filters.allowEng ? "all" : "ita");
 
         let flag = "";
@@ -1610,27 +1609,30 @@ app.get("/:conf/manifest.json", (req, res) => {
         } else {
             flag = " 🇮🇹🇬🇧";      // Misto (Doppia bandiera)
         }
-        // ------------------------------------
+
+        // --- 2. NOME "GRASSETTO E SPAZIATO" (UNICODE) ---
+        // Usiamo caratteri Unicode per simulare il grassetto: 𝗟 𝗘 𝗩 𝗜 𝗔 𝗧 𝗛 𝗔 𝗡
+        const appName = "𝗟 𝗘 𝗩 𝗜 𝗔 𝗧 𝗛 𝗔 𝗡";
 
         const hasRDKey = (config.service === 'rd' && config.key) || config.rd;
         const hasTBKey = (config.service === 'tb' && config.key) || config.torbox;
         const hasADKey = (config.service === 'ad' && config.key) || config.alldebrid;
 
-        // --- 2. COSTRUZIONE NOME (Bandiera PRIMA dell'icona) ---
+        // --- 3. ASSEMBLAGGIO FINALE ---
         if (hasRDKey) {
-            manifest.name = `Leviathan${flag} ☄️ RD`;
+            manifest.name = `${appName}${flag} ☄️ RD`;
             manifest.id += ".rd"; 
         } 
         else if (hasTBKey) {
-            manifest.name = `Leviathan${flag} 📦 TB`;
+            manifest.name = `${appName}${flag} 📦 TB`;
             manifest.id += ".tb";
         } 
         else if (hasADKey) {
-            manifest.name = `Leviathan${flag} 🦅 AD`;
+            manifest.name = `${appName}${flag} 🦅 AD`;
             manifest.id += ".ad";
         }
         else {
-            manifest.name = `Leviathan${flag} 🌐 Web`;
+            manifest.name = `${appName}${flag} 🌐 Web`;
             manifest.id += ".web";
         }
 
