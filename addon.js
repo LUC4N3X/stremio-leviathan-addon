@@ -1069,6 +1069,10 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
               return true;
           }
           return false;
+      } else {
+          // PROTEZIONE FILM: Se è un film, scarta risultati che sembrano episodi/stagioni
+          if (/\b(?:S\d{2}|SEASON|STAGIONE)\b/i.test(t)) return false;
+          if (/\b\d{1,2}x\d{1,2}\b/.test(t)) return false;
       }
 
       // --- FILTRO NOME (MATCHING) ---
