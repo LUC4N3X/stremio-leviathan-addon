@@ -251,8 +251,6 @@ function parseSize(sizeText) {
   }
   
   // Rimuove virgole e caratteri non numerici (lascia il punto)
-  // Nota: sostituiamo la virgola con punto se è un decimale italiano, oppure rimuoviamo se è migliaia
-  // Per sicurezza rimuoviamo virgole come separatori migliaia o decimali in stile IT convertendo in dot
   const cleanStr = str.replace(/,/g, '.').replace(/[^\d.]/g, '');
   const num = parseFloat(cleanStr);
   return isNaN(num) ? 0 : Math.floor(num * scale);
@@ -965,9 +963,8 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   const tmdbIdLookup = meta.tmdb_id || (await imdbToTmdb(meta.imdb_id, userTmdbKey))?.tmdbId;
   const dbOnlyMode = config.filters?.dbOnly === true; 
 
-  // =========================================================
+  
   // LOGICA LINGUA UNIFICATA (ITA / ENG / ALL)
-  // =========================================================
   const langMode = config.filters?.language || (config.filters?.allowEng ? "all" : "ita");
 
   // --- FILTRO AGGRESSIVO (LOGICA A 3 VIE: ITA / ALL / ENG) ---
@@ -981,9 +978,8 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       const t = item.title; 
       const tLower = t.toLowerCase();
       
-      // =========================================================
+      
       // CASO 1: SOLO ITALIANO (Comportamento Classico)
-      // =========================================================
       if (langMode === "ita") {
            const isTrustedGroup = REGEX_TRUSTED_GROUPS.test(t) || /\bcorsaro\b/i.test(source);
            
@@ -1009,11 +1005,10 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
            }
       }
       
-      // =========================================================
+      =
       // CASO 2: SOLO INGLESE (Escludi attivamente l'Italiano)
-      // =========================================================
       else if (langMode === "eng") {
-           // Se troviamo tag espliciti ITA, scartiamo il risultato.
+           
            
            const hasStrongIta = REGEX_STRONG_ITA.test(t) || REGEX_MULTI_ITA.test(t);
            const hasContextIt = REGEX_CONTEXT_IT.test(t);
@@ -1023,11 +1018,9 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
            if (hasStrongIta || hasContextIt || isTrustedItaGroup) return false;
       }
 
-      // =========================================================
-      // CASO 3: ITALIANO + INGLESE ("all")
-      // =========================================================
-      // Passiamo direttamente ai filtri successivi (Anno, Serie, Titolo).
       
+      // CASO 3: ITALIANO + INGLESE ("all")
+    
       // --- FILTRO ANNO ---
       const metaYear = parseInt(meta.year);
       if (metaYear === 2025 && /frankenstein/i.test(meta.title)) {
@@ -1232,9 +1225,8 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       rankedList = filterByQualityLimit(rankedList, config.filters.maxPerQuality);
   }
 
-  // =================================================================
+  
   // LOGICA TORBOX: FILTRO TOTALE (SOLO FILE PRONTI) + ID GRABBER
-  // =================================================================
   if (config.service === 'tb' && hasDebridKey) {
       const apiKey = config.key || config.rd; 
       
@@ -1248,7 +1240,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       if (candidates.length > 0) {
           logger.info(`📦 [TB CHECK] Scansiono ${candidates.length} torrent alla ricerca di file video reali...`);
           
-          // Chiamata sincrona a TorBox (passiamo dbHelper per pulizia)
+          // Chiamata sincrona a TorBox 
           const cacheResults = await TbCache.checkCacheSync(candidates, apiKey, dbHelper, checkLimit);
           
           // FILTRO DISTRUTTIVO:
@@ -1259,7 +1251,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
               const result = cacheResults[hash];
 
               // CRITERIO DI AMMISSIONE:
-              // TorBox deve aver risposto con file video veri > 50MB
               if (result && result.cached === true) {
                   item._tbCached = true;
                   
@@ -1635,7 +1626,6 @@ app.get("/:conf/manifest.json", (req, res) => {
         }
 
         // --- 2. NOME "GRASSETTO E SPAZIATO" (UNICODE) ---
-        // Usiamo caratteri Unicode per simulare il grassetto: 𝗟 𝗘 𝗩 𝗜 𝗔 𝗧 𝗛 𝗔 𝗡
         const appName = "𝗟 𝗘 𝗩 𝗜 𝗔 𝗧 𝗛 𝗔 𝗡";
 
         const hasRDKey = (config.service === 'rd' && config.key) || config.rd;
