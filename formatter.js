@@ -2,14 +2,35 @@ const titleParser = require('parse-torrent-title');
 
 const UNITS = ["B", "KB", "MB", "GB", "TB"];
 
-// --- 1. CONFIGURAZIONE AGGIUNTIVA ---
-const REGEX_ITA = {
-    audio: /\b(ita|italian|italiano)\b/i,
-    sub: /\b(sub|subs|subbed|sottotitoli)\s*[:.\-_]?\s*(ita|it|italian)\b/i,
+// =========================================================================
+// 1. CONFIGURAZIONE & COSTANTI
+// =========================================================================
+
+// CONFIGURAZIONE SEPARATORE LINGUE
+// Puoi cambiarlo qui: " / " oppure " | " oppure " + "
+const LANG_SEP = " / "; 
+
+// Mappa Lingue Estesa (Ordine di priorità visuale gestito nel codice)
+const LANG_FLAGS = [
+    { id: "ita", flag: "🇮🇹", label: "ITA", regex: /\b(ita|italian|italiano|it)\b/i },
+    { id: "eng", flag: "🇬🇧", label: "ENG", regex: /\b(eng|english|en)\b/i },
+    { id: "jpn", flag: "🇯🇵", label: "JPN", regex: /\b(jap|jpn|japanese|jp)\b/i },
+    { id: "fra", flag: "🇫🇷", label: "FRA", regex: /\b(fra|french|fre|fr)\b/i },
+    { id: "deu", flag: "🇩🇪", label: "DEU", regex: /\b(ger|german|deu|de|deutsch)\b/i },
+    { id: "esp", flag: "🇪🇸", label: "ESP", regex: /\b(spa|spanish|esp|es|español)\b/i },
+    { id: "rus", flag: "🇷🇺", label: "RUS", regex: /\b(rus|russian|ru)\b/i },
+    { id: "por", flag: "🇵🇹", label: "POR", regex: /\b(por|portuguese|pt|br)\b/i },
+    { id: "ukr", flag: "🇺🇦", label: "UKR", regex: /\b(ukr|ukrainian)\b/i },
+    { id: "kor", flag: "🇰🇷", label: "KOR", regex: /\b(kor|korean)\b/i },
+    { id: "chi", flag: "🇨🇳", label: "CHI", regex: /\b(chi|chinese)\b/i },
+    { id: "hin", flag: "🇮🇳", label: "HIN", regex: /\b(hin|hindi)\b/i }
+];
+
+const REGEX_EXTRA = {
     contextIt: /\b(ac-?3|aac|mp3|ddp|dts|truehd|audio|lingua)\W+(it)\b/i
 };
 
-// Mappa per le icone di qualità (Stile Leviathan)
+// Icone Qualità
 const QUALITY_ICONS = {
     "4k": "🔥",
     "2160p": "🔥",
@@ -23,7 +44,9 @@ const QUALITY_ICONS = {
     "scr": "👀"
 };
 
-// --- 2. FUNZIONI HELPER ---
+// =========================================================================
+// 2. FUNZIONI UTILI
+// =========================================================================
 
 function formatBytes(bytes) {
   if (!+bytes) return "0 B";
@@ -41,21 +64,44 @@ function cleanFilename(filename) {
     }
 }
 
+// Parsing Episodi Intelligente (Anime Batch + Stagioni)
 function getEpisodeTag(filename) {
     const f = filename.toLowerCase();
+
+    // 1. Range Episodi (S01E01-E04 o 1x01-04)
+    const matchMulti = f.match(/s(\d+)[ex](\d+)\s*-\s*(?:[ex]?(\d+))/i) || f.match(/(\d+)x(\d+)\s*-\s*(\d+)/i);
+    if (matchMulti) {
+        const s = matchMulti[1].padStart(2, '0');
+        const eStart = matchMulti[2].padStart(2, '0');
+        const eEnd = matchMulti[3].padStart(2, '0');
+        return `🍿 S${s} E${eStart}-${eEnd}`;
+    }
+
+    // 2. Anime Batch [01-12] (Ignora anni come 19xx/20xx)
+    const matchAnimeBatch = f.match(/(?:ep|eps|episode|^|\s)\[?(\d{1,3})\s*-\s*(\d{1,3})\]?(?:\s|$)/i);
+    if (matchAnimeBatch) {
+        if (parseInt(matchAnimeBatch[1]) < 1900) { 
+             return `🍿 Ep ${matchAnimeBatch[1].padStart(2, '0')}-${matchAnimeBatch[2].padStart(2, '0')}`;
+        }
+    }
+
+    // 3. Episodio Singolo
     const matchEp = f.match(/s(\d+)[ex](\d+)/i);
-    if (matchEp) return `🍿 S${matchEp[1]}E${matchEp[2]}`;
+    if (matchEp) return `🍿 S${matchEp[1].padStart(2, '0')}E${matchEp[2].padStart(2, '0')}`;
+    
     const matchX = f.match(/(\d+)x(\d+)/i);
     if (matchX) return `🍿 S${matchX[1].padStart(2, '0')}E${matchX[2].padStart(2, '0')}`;
     
+    // 4. Stagione Intera
     if (/(?:complete|season|stagione|tutta)\s+(\d+)/i.test(f)) {
         const num = f.match(/(?:complete|season|stagione|tutta)\s+(\d+)/i)[1];
-        return `📦 STAGIONE ${num}`;
+        return `📦 STAGIONE ${num.padStart(2, '0')}`;
     }
+
     return "";
 }
 
-// --- GENERATORE FONT ---
+// Generatore Testo Stilizzato (Font)
 function toStylized(text, type = 'std') {
     if (!text) return "";
     text = String(text);
@@ -70,7 +116,6 @@ function toStylized(text, type = 'std') {
         }
     };
 
-    // LOGICA SPAZIATA (BOLD + SPAZI)
     if (type === 'spaced') {
         return text.split('').map(c => {
             const map = maps['bold'];
@@ -86,22 +131,20 @@ function toStylized(text, type = 'std') {
     }).join('');
 }
 
-// === NUOVA ESTRAZIONE IBRIDA (TORRENTIO + LEVIATHAN) ===
+// =========================================================================
+// 3. ESTRAZIONE DATI PRINCIPALE
+// =========================================================================
 function extractStreamInfo(title, source) {
   const t = String(title);
-  
-  // 1. Parser
   const info = titleParser.parse(t);
   
-  // 2. Normalizzazione Qualità
+  // A. Qualità
   let q = "SD";
   let qDetails = "SD";
   
   if (info.resolution) {
       q = info.resolution.toUpperCase();
-      if (q === "2160P") {
-          q = "4K";
-      }
+      if (q === "2160P") q = "4K";
       qDetails = q;
   } else if (info.source) {
       const camSources = ['CAM', 'TeleSync', 'TeleCine', 'SCR', 'Screener'];
@@ -115,7 +158,7 @@ function extractStreamInfo(title, source) {
 
   const qIcon = QUALITY_ICONS[q.toLowerCase()] || (q.includes('4K') ? "🔥" : "📺");
 
-  // 3. Costruzione Tag Video
+  // B. Tags Video (Remux, HDR, IMAX)
   const videoTags = [];
   const cleanTags = [];
 
@@ -124,7 +167,6 @@ function extractStreamInfo(title, source) {
   let isBluRay = info.source ? /bluray|bd/i.test(info.source) : false;
   let sourceFound = false;
 
-  // Priorità Sorgente
   if (isRemux) {
       videoTags.push(`💎 ${toStylized("REMUX")}`);
       cleanTags.push("Remux");
@@ -139,10 +181,15 @@ function extractStreamInfo(title, source) {
       sourceFound = true;
   } 
 
-  // --- LOGICA ANTI-VUOTO ---
   if (!sourceFound) {
       videoTags.push(`🎞️ ${toStylized("RIP")}`);
       cleanTags.push("Rip");
+  }
+
+  // IMAX Check
+  if (/\bIMAX\b/i.test(t)) {
+      videoTags.push(`📏 ${toStylized("IMAX")}`);
+      cleanTags.push("IMAX");
   }
 
   // Codec
@@ -153,32 +200,54 @@ function extractStreamInfo(title, source) {
       cleanTags.push(codec);
   }
 
-  // --- NUOVA LOGICA HDR / DV INTELLIGENTE (MODIFICATA: MENO ICONE) ---
+  // HDR / Dolby Vision
   const rawT = String(title).toUpperCase();
   const hasDV = /\b(DV|DOLBY\s*VISION|DOVI)\b/.test(rawT) || (info.hdr && (/dolby|vision/i.test(info.hdr.toString())));
   const hasHDR = /\b(HDR|HDR10|HDR10\+|UHD\s*HDR)\b/.test(rawT) || (info.hdr && (/hdr/i.test(info.hdr.toString())));
 
   if (hasDV && hasHDR) {
-      // SOLO OCCHIO PER DV+HDR
       videoTags.push(`👁️ ${toStylized("DV+HDR")}`);
       cleanTags.push("DV+HDR");
   } else if (hasDV) {
       videoTags.push(`👁️ ${toStylized("DV")}`);
       cleanTags.push("DV");
   } else if (hasHDR) {
-      // SOLO FUOCO PER HDR
       videoTags.push(`🔥 ${toStylized("HDR")}`);
       cleanTags.push("HDR");
   }
 
-  // Audio Detection
-  let lang = "🇬🇧 ENG";
-  if (REGEX_ITA.audio.test(t) || REGEX_ITA.contextIt.test(t) || /corsaro/i.test(source)) {
-      lang = "🇮🇹 ITA";
-      if (/multi/i.test(t)) lang = "🇮🇹 MULTI";
+  // C. Rilevamento Audio & Lingue (Style: 🇮🇹 / 🇬🇧)
+  let detectedLangs = [];
+  
+  LANG_FLAGS.forEach(l => {
+      if (l.regex.test(t)) detectedLangs.push(l);
+  });
+
+  const uniqueLangs = [...new Map(detectedLangs.map(item => [item.id, item])).values()];
+  let lang = "🇬🇧 ENG"; // Default
+
+  if (uniqueLangs.length > 0) {
+      // Ordina: ITA sempre primo
+      uniqueLangs.sort((a, b) => (a.id === 'ita' ? -1 : (b.id === 'ita' ? 1 : 0)));
+
+      if (uniqueLangs.length === 1) {
+          lang = `${uniqueLangs[0].flag} ${uniqueLangs[0].label}`; // "🇮🇹 ITA"
+      } else if (uniqueLangs.length <= 3) {
+          // "🇮🇹 / 🇬🇧"
+          lang = uniqueLangs.map(l => l.flag).join(LANG_SEP);
+      } else {
+          // "🇮🇹 / 🌐"
+          lang = `${uniqueLangs[0].flag}${LANG_SEP}🌐`;
+      }
+  } else {
+      if (/multi/i.test(t)) {
+           lang = (REGEX_EXTRA.contextIt.test(t) || /corsaro/i.test(source)) ? `🇮🇹${LANG_SEP}🌐` : `🌐${LANG_SEP}MULTI`;
+      } else if (REGEX_EXTRA.contextIt.test(t) || /corsaro/i.test(source)) {
+           lang = "🇮🇹 ITA";
+      }
   }
 
-  // Audio Tags
+  // D. Audio Details
   let audioTag = "🔈 Stereo";
   let audioChannels = "";
 
@@ -203,40 +272,36 @@ function extractStreamInfo(title, source) {
   }
   
   return { 
-      quality: q, 
-      qDetails: qDetails, 
-      qIcon: qIcon, 
-      videoTags, 
-      cleanTags, 
-      lang, 
-      codec: info.codec || "",
-      audioTag: audioTag, 
-      audioChannels: audioChannels, 
-      rawInfo: info 
+      quality: q, qDetails, qIcon, videoTags, cleanTags, lang, 
+      codec: info.codec || "", audioTag, audioChannels, rawInfo: info 
   };
 }
 
 // =========================================================================
-// 🌟 PRESET STILI
+// 4. STILI DI FORMATTAZIONE
 // =========================================================================
 
-// 1. LEVIATHAN (CLASSIC)
+// Style 1: Leviathan (Classic)
 function styleLeviathan(p) {
     const qualityBold = toStylized(p.quality, 'bold');
-    // MODIFICA: Titolo spaziato per effetto CINEMA
     const titleSpaced = toStylized("LEVIATHAN", "spaced"); 
     const name = `🦑 ${titleSpaced}\n${p.qIcon} ┃ ${qualityBold}`;
     const lines = [];
     lines.push(`📁 ${p.cleanName} ${p.epTag}`);
     lines.push(`🗣️ ${p.lang} • ${p.audioInfo}`);
-    if (p.videoTags.length > 0) lines.push(p.videoTags.join(" • "));
-    else lines.push(`🎞️ ${p.codec || "Video"}`);
+    
+    // Tag Line
+    let techLine = "";
+    if (p.videoTags.length > 0) techLine = p.videoTags.join(" • ");
+    else techLine = `🎞️ ${p.codec || "Video"}`;
+    lines.push(techLine);
+
     lines.push(`🧲 ${p.sizeString} • 👥 ${p.seeders}`);
     lines.push(p.sourceLine);
     return { name, title: lines.join("\n") };
 }
 
-// 2. LEVIATHAN 2.0 (ARCHITECT)
+// Style 2: Leviathan 2.0 (Clean)
 function styleLeviathanTwo(p) {
     const levText = toStylized("LEVIATHAN", "small");
     const name = `🦑 ${levText} ${p.serviceIconTitle} │ ${p.quality}`;
@@ -248,16 +313,22 @@ function styleLeviathanTwo(p) {
     return { name, title: lines.join("\n") };
 }
 
-// 3. FRA STYLE
+// Style 3: FRA
 function styleFra(p) {
     let qShort = p.quality === "1080p" ? "FHD" : (p.quality === "4K" ? "4K" : "HD");
     const name = `⚡️ Leviathan ${qShort}`;
     const tagString = p.cleanTags.join(' • ');
-    const lines = [`📄 ❯ ${p.fileTitle}`, `🌎 ❯ ${p.lang} • ${p.audioTag}`, `✨ ❯ ${p.serviceTag} • ${p.displaySource}`, `🔥 ❯ ${p.quality} • ${tagString}`, `💾 ❯ ${p.sizeString} / 👥 ❯ ${p.seeders}`];
+    const lines = [
+        `📄 ❯ ${p.fileTitle}`, 
+        `🌎 ❯ ${p.lang} • ${p.audioTag}`, 
+        `✨ ❯ ${p.serviceTag} • ${p.displaySource}`, 
+        `🔥 ❯ ${p.quality} • ${tagString}`, 
+        `💾 ❯ ${p.sizeString} / 👥 ❯ ${p.seeders}`
+    ];
     return { name, title: lines.join("\n") };
 }
 
-// 4. DAV STYLE
+// Style 4: DAV
 function styleDav(p) {
     let header = p.quality === "4K" ? "🎥 4K UHD" : (p.quality === "1080p" ? "📀 FHD" : "💿 HD");
     const name = `${header} ${p.codec}`;
@@ -271,7 +342,7 @@ function styleDav(p) {
     return { name, title: lines.join("\n") };
 }
 
-// 5. AND STYLE
+// Style 5: AND
 function styleAnd(p) {
     const name = `🎬 ${p.cleanName} ${p.epTag}`;
     const lines = [];
@@ -285,7 +356,7 @@ function styleAnd(p) {
     return { name, title: lines.join("\n") };
 }
 
-// 6. LAD STYLE
+// Style 6: LAD
 function styleLad(p) {
     const name = `🖥️ ${p.quality} ${p.serviceTag}`;
     const lines = [];
@@ -297,7 +368,7 @@ function styleLad(p) {
     return { name, title: lines.join("\n") };
 }
 
-// 7. PRI STYLE
+// Style 7: PRI
 function stylePri(p) {
     let resIcon = p.quality === "4K" ? "4K🔥UHD" : (p.quality === "1080p" ? "FHD🚀1080p" : "HD💿720p");
     const name = `[${p.serviceTag}]⚡️☁️\n${resIcon}\n[Leviathan]`;
@@ -310,7 +381,7 @@ function stylePri(p) {
     return { name, title: lines.join("\n") };
 }
 
-// 8. COMET STYLE
+// Style 8: COMET
 function styleComet(p) {
     const name = `[${p.serviceTag} ⚡]\nLeviathan\n${p.quality}`;
     const lines = [];
@@ -325,7 +396,7 @@ function styleComet(p) {
     return { name, title: lines.join("\n") };
 }
 
-// 9. STREMIO ITA
+// Style 9: STREMIO ITA
 function styleStremioIta(p) {
     const isCached = ["RD", "TB", "AD"].includes(p.serviceTag);
     const statusIcon = isCached ? "⚡️" : "⏳";
@@ -336,11 +407,14 @@ function styleStremioIta(p) {
     let typeIcon = "✨";
     if (!isCached) typeIcon = "⬇️"; 
     lines.push(`${typeIcon} ❯ ${p.serviceTag} • ${p.displaySource}`);
+    
     let qualIcon = "📀";
     if (p.cleanTags.some(t => /bluray|web|hdr|dv/i.test(t)) || p.quality === "4K") qualIcon = "🔥";
+    
     const tagsJoined = p.cleanTags.join(' • ');
     const qualLine = tagsJoined ? `${p.quality} • ${tagsJoined}` : p.quality;
     lines.push(`${qualIcon} ❯ ${qualLine}`);
+    
     let sizeLine = `💾 ❯ ${p.sizeString}`;
     if (!isCached && p.seeders !== null) {
         sizeLine += ` / 👥 ❯ ${p.seeders}`;
@@ -351,7 +425,7 @@ function styleStremioIta(p) {
     return { name, title: lines.join("\n") };
 }
 
-// 🛠️ CUSTOM FORMATTER
+// Custom Template
 function styleCustom(p, template) {
     if (!template) return styleLeviathan(p); 
     const vars = {
@@ -363,21 +437,23 @@ function styleCustom(p, template) {
     let userString = template;
     Object.keys(vars).forEach(key => { userString = userString.replace(new RegExp(key, "g"), vars[key]); });
     userString = userString.replace(/\\n/g, "\n");
-    // Fallback standard se custom
     return { name: `Leviathan ${p.quality}`, title: userString };
 }
 
 // =========================================================================
-// 🚀 DISPATCHER PRINCIPALE
+// 5. MAIN DISPATCHER
 // =========================================================================
 
 function formatStreamSelector(fileTitle, source, size, seeders, serviceTag = "RD", config = {}, infoHash = null, isLazy = false, isPackItem = false) {
     let { quality, qDetails, qIcon, videoTags, cleanTags, lang, codec, audioTag, audioChannels, rawInfo } = extractStreamInfo(fileTitle, source);
     
-    if (serviceTag === "RD") qIcon = "☄️";
-    else if (serviceTag === "TB") qIcon = "📦";
-    else if (serviceTag === "AD") qIcon = "🦅";
+    // Icone Service
+    let serviceIconTitle = "⚡"; 
+    if (serviceTag === "RD") { qIcon = "☄️"; serviceIconTitle = "☄️"; }
+    else if (serviceTag === "TB") { qIcon = "📦"; serviceIconTitle = "📦"; }
+    else if (serviceTag === "AD") { qIcon = "🦅"; serviceIconTitle = "🦅"; }
     
+    // Calcolo Size
     let sizeString = size ? formatBytes(size) : "";
     if (!sizeString || size === 0) {
         let hash = 0;
@@ -393,6 +469,7 @@ function formatStreamSelector(fileTitle, source, size, seeders, serviceTag = "RD
     const cleanName = cleanFilename(fileTitle);
     const epTag = isPackItem ? "📦 SEASON PACK" : getEpisodeTag(fileTitle);
 
+    // Pulizia Source
     let displaySource = source || "P2P";
     if (/1337/i.test(displaySource)) displaySource = "1337x"; 
     else if (/corsaro/i.test(displaySource)) displaySource = "ilCorSaRoNeRo";
@@ -400,23 +477,14 @@ function formatStreamSelector(fileTitle, source, size, seeders, serviceTag = "RD
     else if (/comet|stremthru/i.test(displaySource)) displaySource = "StremThru";
     else displaySource = displaySource.replace(/MediaFusion|Torrentio|Fallback/gi, '').trim() || "P2P";
 
-    let serviceIconTitle = "⚡"; 
-    if (serviceTag === "RD") serviceIconTitle = "☄️";
-    else if (serviceTag === "TB") serviceIconTitle = "📦";
-    else if (serviceTag === "AD") serviceIconTitle = "🦅";
-
     const sourceLine = `${serviceIconTitle} [${serviceTag}] ${displaySource}`;
     const sizeStr = `🧲 ${sizeString}`;
     const seedersStr = seeders != null ? `👥 ${seeders}` : "";
     
-    let langStr = "🗣️ ❓";
-    if (/multi/i.test(lang || "")) langStr = "🗣️ 🌐"; 
-    else if (/ita|it\b|italiano/i.test(lang || "")) langStr = "🗣️ 🇮🇹";
-    else if (/eng|en\b|english/i.test(lang || "")) langStr = "🗣️ 🇬🇧";
-    else if (lang) langStr = `🗣️ ${lang.toUpperCase()}`;
-
     const audioInfo = [audioTag, audioChannels].filter(Boolean).join(" ┃ ");
     const hdrPart = (rawInfo.hdr || []).join(''); 
+    
+    // Binge Grouping (Hash è vitale per evitare merge errati)
     const bingeGroup = `Leviathan|${quality}|${hdrPart}|${serviceTag}|${infoHash || 'no-hash'}`;
 
     const params = {
@@ -425,7 +493,7 @@ function formatStreamSelector(fileTitle, source, size, seeders, serviceTag = "RD
         quality, qDetails, qIcon, 
         serviceTag, serviceIconTitle,
         videoTags, cleanTags, codec,
-        lang, langStr, audioInfo, audioTag, audioChannels,
+        lang, audioInfo, audioTag, audioChannels,
         cleanName, epTag, sourceLine
     };
 
