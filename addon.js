@@ -535,7 +535,9 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta) {
                 realSize = ensureSize(realSize, item.title, isSeries, isPack);
                 if (realSize === 0) realSize = ensureSize(0, item.title, isSeries, false);
 
-                const proxyUrl = `${reqHost}/${config.rawConf}/play_tb/${item.hash}?s=${item.season || 0}&e=${item.episode || 0}`;
+                // FIX: Gestione corretta di fileIdx
+                const fIdx = (item.fileIdx !== undefined && !isNaN(item.fileIdx)) ? item.fileIdx : -1;
+                const proxyUrl = `${reqHost}/${config.rawConf}/play_tb/${item.hash}?s=${item.season || 0}&e=${item.episode || 0}&f=${fIdx}`;
 
                 if (isAIOActive) {
                     let quality = details.quality || "SD";
@@ -584,7 +586,7 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta) {
 
         if (isAIOActive) {
              let quality = fileDetails.quality || "SD";
-             if (/4k|2160p/i.test(item.title)) quality = "4K";
+             if (/4k|2160p/i.test(item.title)) quality = "4K"; 
              
              let fullService = 'p2p';
              if (service === 'rd') fullService = 'realdebrid';
@@ -697,7 +699,8 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
             techInfo: `🎞️ ${quality} ${details.tags}`
         });
 
-        const fileIdxParam = item.fileIdx !== undefined ? item.fileIdx : -1;
+        // FIX: Sanitizzazione di fileIdx per URL
+        const fileIdxParam = (item.fileIdx !== undefined && !isNaN(item.fileIdx)) ? item.fileIdx : -1;
         const lazyUrl = `${reqHost}/${userConfStr}/play_lazy/${service}/${item.hash}/${fileIdxParam}?s=${meta.season || 0}&e=${meta.episode || 0}`;
 
         return {
@@ -715,7 +718,8 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
         const { name, title, bingeGroup } = formatStreamSelector(
             item.title, item.source, realSize, item.seeders, serviceTag, config, item.hash, isLazy, item._isPack 
         );
-        const fileIdxParam = item.fileIdx !== undefined ? item.fileIdx : -1;
+        // FIX: Sanitizzazione di fileIdx per URL
+        const fileIdxParam = (item.fileIdx !== undefined && !isNaN(item.fileIdx)) ? item.fileIdx : -1;
         const lazyUrl = `${reqHost}/${userConfStr}/play_lazy/${service}/${item.hash}/${fileIdxParam}?s=${meta.season || 0}&e=${meta.episode || 0}`;
         return {
             name,
@@ -1229,47 +1233,61 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   }
 
   // =================================================================
-  // NUOVA LOGICA TORBOX CON TB-CACHE-CHECKER
+  // LOGICA TORBOX: FILTRO TOTALE (SOLO FILE PRONTI) + ID GRABBER
   // =================================================================
   if (config.service === 'tb' && hasDebridKey) {
       const apiKey = config.key || config.rd; 
       
-      // Controllo Sincrono Veloce (Solo i primi 20 per non rallentare)
-      const checkLimit = 20; 
-      const topItems = rankedList.slice(0, checkLimit);
+      // Verifichiamo i primi 30 risultati
+      const checkLimit = 30; 
+      
+      // Candidati
+      const candidates = rankedList.slice(0, checkLimit);
       const remainingItems = rankedList.slice(checkLimit);
 
-      if (topItems.length > 0) {
-          logger.info(`📦 [TB SYNC] Verifico ${topItems.length} hash con dettagli file...`);
+      if (candidates.length > 0) {
+          logger.info(`📦 [TB CHECK] Scansiono ${candidates.length} torrent alla ricerca di file video reali...`);
           
-          // Usa il nuovo modulo per il controllo
-          const cacheResults = await TbCache.checkCacheSync(topItems, apiKey, checkLimit);
+          // Chiamata sincrona a TorBox (passiamo dbHelper per pulizia)
+          const cacheResults = await TbCache.checkCacheSync(candidates, apiKey, dbHelper, checkLimit);
           
-          const cachedOnly = topItems.filter(item => {
-              const hash = item.hash.toLowerCase();
-              const cacheData = cacheResults[hash];
-              
-              if (cacheData && cacheData.cached) {
-                  item._tbCached = true;
-                  // WOW FACTOR: Aggiorniamo la dimensione con quella del file reale se disponibile
-                  if (cacheData.file_size) {
-                      item._originalSize = item._size; // Backup
-                      item._size = cacheData.file_size; // Dimensione reale episodio
-                  }
-                  return true;
-              }
-              return false;
-          });
+          // FILTRO DISTRUTTIVO:
+          const verifiedList = [];
 
-          logger.info(`📦 [TB FILTER] ${topItems.length} -> ${cachedOnly.length} in cache.`);
+          for (const item of candidates) {
+              const hash = item.hash.toLowerCase();
+              const result = cacheResults[hash];
+
+              // CRITERIO DI AMMISSIONE:
+              // TorBox deve aver risposto con file video veri > 50MB
+              if (result && result.cached === true) {
+                  item._tbCached = true;
+                  
+                  // Aggiorniamo la dimensione
+                  if (result.file_size) {
+                      item._size = result.file_size;
+                  }
+
+                  // 🆕 ASSEGNAZIONE FONDAMENTALE DELL'ID
+                  // Questo impedisce l'errore "Idx: NaN" al playback
+                  if (result.file_id !== undefined && result.file_id !== null) {
+                      item.fileIdx = result.file_id;
+                  }
+                  
+                  verifiedList.push(item);
+              }
+          }
+
+          logger.info(`📦 [TB CLEANUP] Iniziali: ${candidates.length} -> Rimasti: ${verifiedList.length} (Eliminati ${candidates.length - verifiedList.length} ghost/vuoti)`);
           
-          // I rimanenti li arricchiamo in background per il DB
+          // SOVRASCRIVIAMO LA LISTA PRINCIPALE
+          rankedList = verifiedList;
+          
+          // I rimanenti (oltre il 30esimo) vengono ignorati o salvati in background
           if (remainingItems.length > 0) {
-              // Passiamo dbHelper per salvare i risultati futuri
               TbCache.enrichCacheBackground(remainingItems, apiKey, dbHelper);
           }
 
-          rankedList = cachedOnly;
       } else {
           rankedList = [];
       }
@@ -1533,10 +1551,16 @@ app.get("/:conf/add_to_cloud/:hash", async (req, res) => {
             });
         }
         else if (service === 'tb') {
-             await axios.post("https://api.torbox.app/v1/api/torrents/create", 
-                { magnet: `magnet:?xt=urn:btih:${hash}` }, {
-                headers: { "Authorization": `Bearer ${apiKey}` }
-            });
+             // 🛠️ CORREZIONE API TORBOX (Errore 404 Fix)
+             await axios.post("https://api.torbox.app/v1/api/torrents/createtorrent", 
+                { magnet: `magnet:?xt=urn:btih:${hash}`, seed: '1', allow_zip: 'false' }, 
+                {
+                    headers: { 
+                        "Authorization": `Bearer ${apiKey}`,
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    }
+                }
+            );
         }
         const protocol = req.headers['x-forwarded-proto'] || req.protocol;
         const host = `${protocol}://${req.get('host')}`;
@@ -1688,7 +1712,7 @@ app.listen(PORT, () => {
     console.log(`🛡️ GUARDA SERIE: Modulo Integrato e Pronto`);
     console.log(`🕷️ WEBSTREAMR: Fallback Attivo (Su 0 Risultati)`);
     console.log(`🎬 TRAILER: Attivabile da Config (Default: OFF, Primo Risultato se ON)`);
-    console.log(`📦 TORBOX: ADVANCED SMART CACHE ENABLED`);
+    console.log(`📦 TORBOX: ADVANCED SMART CACHE + ID GRABBER ENABLED`);
     console.log(`📝 PARSER: ENHANCED (Smart Extraction Active)`); 
     console.log(`🦑 LEVIATHAN CORE: Optimized for High Reliability`);
     console.log(`-----------------------------------------------------`);
