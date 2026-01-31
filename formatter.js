@@ -470,9 +470,12 @@ function formatStreamSelector(fileTitle, source, size, seeders, serviceTag = "RD
     
     // Icone Service
     let serviceIconTitle = "⚡"; 
-    if (serviceTag === "RD") { qIcon = "☄️"; serviceIconTitle = "☄️"; }
-    else if (serviceTag === "TB") { qIcon = "📦"; serviceIconTitle = "📦"; }
-    else if (serviceTag === "AD") { qIcon = "🦅"; serviceIconTitle = "🦅"; }
+    // RD = Balena (🐋)
+    if (serviceTag === "RD") { qIcon = "🐋"; serviceIconTitle = "🐋"; }
+    // TB = Conchiglia (🐚)
+    else if (serviceTag === "TB") { qIcon = "⚓"; serviceIconTitle = "⚓"; }
+    // AD = Aquila (🦅)
+    else if (serviceTag === "AD") { qIcon = "🐚"; serviceIconTitle = "🐚"; }
     
     // Calcolo Size
     let sizeString = size ? formatBytes(size) : "";
