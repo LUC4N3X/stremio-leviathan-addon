@@ -163,17 +163,93 @@ body::before {
 }
 .m-hyp-icon { font-size: 1.1rem; color: var(--m-primary); filter: drop-shadow(0 0 8px var(--m-primary)); }
 
-.m-flux-group { background: rgba(0,0,0,0.4); border-radius: 14px; padding: 4px; display: flex; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.08); }
-.m-tab-btn { flex: 1; text-align: center; padding: 8px 0; font-size: 0.7rem; color: #888; font-weight: 700; border-radius: 10px; transition: all 0.3s ease; font-family: 'Rajdhani', sans-serif; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
-.m-tab-btn i { font-size: 0.9rem; margin-bottom: 2px; transition: 0.3s; opacity: 0.5; }
-.m-tab-btn.active { color: #fff; background: rgba(255,255,255,0.08); box-shadow: 0 0 15px rgba(0,0,0,0.5); }
-.m-tab-btn.active i { opacity: 1; transform: scale(1.1); }
-#sort-balanced.active i { color: var(--m-primary); filter: drop-shadow(0 0 8px var(--m-primary)); }
-#sort-resolution.active i { color: var(--m-secondary); filter: drop-shadow(0 0 8px var(--m-secondary)); }
-#sort-size.active i { color: var(--m-amber); filter: drop-shadow(0 0 8px var(--m-amber)); }
-#lang-ita.active i { color: var(--m-success); filter: drop-shadow(0 0 8px var(--m-success)); }
-#lang-ita-eng.active i { color: var(--m-primary); filter: drop-shadow(0 0 8px var(--m-primary)); }
-#lang-eng.active i { color: var(--m-cine); filter: drop-shadow(0 0 8px var(--m-cine)); }
+/* --- FLUX STYLES --- */
+.m-flux-control {
+    display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;
+}
+.m-flux-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
+}
+.m-flux-opt {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+    padding: 12px 5px; text-align: center; cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    position: relative; overflow: hidden;
+}
+.m-flux-opt i { font-size: 1.2rem; color: #666; transition: all 0.3s; }
+.m-flux-opt span { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.75rem; color: #666; transition: all 0.3s; }
+
+/* Active States for Flux */
+.m-flux-opt.active-bal {
+    background: rgba(0, 242, 255, 0.05); border-color: var(--m-primary);
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.1), inset 0 0 5px rgba(0, 242, 255, 0.05);
+}
+.m-flux-opt.active-bal i, .m-flux-opt.active-bal span { color: var(--m-primary); text-shadow: 0 0 8px rgba(0,242,255,0.4); }
+
+.m-flux-opt.active-res {
+    background: rgba(112, 0, 255, 0.05); border-color: var(--m-secondary);
+    box-shadow: 0 0 15px rgba(112, 0, 255, 0.1), inset 0 0 5px rgba(112, 0, 255, 0.05);
+}
+.m-flux-opt.active-res i, .m-flux-opt.active-res span { color: var(--m-secondary); text-shadow: 0 0 8px rgba(112,0,255,0.4); }
+
+.m-flux-opt.active-sz {
+    background: rgba(255, 153, 0, 0.05); border-color: var(--m-amber);
+    box-shadow: 0 0 15px rgba(255, 153, 0, 0.1), inset 0 0 5px rgba(255, 153, 0, 0.05);
+}
+.m-flux-opt.active-sz i, .m-flux-opt.active-sz span { color: var(--m-amber); text-shadow: 0 0 8px rgba(255,153,0,0.4); }
+
+.m-flux-readout {
+    background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08);
+    border-left: 2px solid #444; border-radius: 0 8px 8px 0;
+    padding: 12px; display: flex; gap: 12px; align-items: flex-start;
+    transition: all 0.3s; min-height: 60px;
+}
+.m-fr-icon { font-size: 1.4rem; color: #444; margin-top: 2px; transition: all 0.3s; }
+.m-fr-text { display: flex; flex-direction: column; gap: 2px; }
+.m-fr-title { font-family: 'Rajdhani'; font-weight: 800; font-size: 0.8rem; color: #fff; text-transform: uppercase; letter-spacing: 1px; }
+.m-fr-desc { font-family: 'Outfit'; font-size: 0.7rem; color: #888; line-height: 1.3; }
+
+/* Readout Colors */
+.m-flux-readout.mode-bal { border-left-color: var(--m-primary); background: linear-gradient(90deg, rgba(0,242,255,0.05), transparent); }
+.m-flux-readout.mode-bal .m-fr-icon { color: var(--m-primary); }
+.m-flux-readout.mode-res { border-left-color: var(--m-secondary); background: linear-gradient(90deg, rgba(112,0,255,0.05), transparent); }
+.m-flux-readout.mode-res .m-fr-icon { color: var(--m-secondary); }
+.m-flux-readout.mode-sz { border-left-color: var(--m-amber); background: linear-gradient(90deg, rgba(255,153,0,0.05), transparent); }
+.m-flux-readout.mode-sz .m-fr-icon { color: var(--m-amber); }
+
+/* --- LANGUAGE STYLES --- */
+.m-lang-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+.m-lang-opt {
+    background: rgba(20, 20, 25, 0.6);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+    padding: 15px 5px; text-align: center; cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+}
+.m-lang-opt i { font-size: 1.2rem; color: #555; transition: all 0.3s; margin-bottom: 2px; }
+.m-lang-txt { font-family: 'Rajdhani', sans-serif; font-weight: 800; font-size: 0.8rem; color: #777; transition: color 0.3s; }
+
+/* Active Language States */
+.m-lang-opt.active-ita {
+    background: rgba(0, 242, 255, 0.08); border-color: var(--m-primary);
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.15);
+}
+.m-lang-opt.active-ita i, .m-lang-opt.active-ita .m-lang-txt { color: var(--m-primary); filter: drop-shadow(0 0 5px rgba(0,242,255,0.5)); }
+
+.m-lang-opt.active-hyb {
+    background: rgba(112, 0, 255, 0.08); border-color: var(--m-secondary);
+    box-shadow: 0 0 15px rgba(112, 0, 255, 0.15);
+}
+.m-lang-opt.active-hyb i, .m-lang-opt.active-hyb .m-lang-txt { color: var(--m-secondary); filter: drop-shadow(0 0 5px rgba(112,0,255,0.5)); }
+
+.m-lang-opt.active-eng {
+    background: rgba(255, 0, 85, 0.08); border-color: var(--m-cine);
+    box-shadow: 0 0 15px rgba(255, 0, 85, 0.15);
+}
+.m-lang-opt.active-eng i, .m-lang-opt.active-eng .m-lang-txt { color: var(--m-cine); filter: drop-shadow(0 0 5px rgba(255,0,85,0.5)); }
 
 .m-hyp-label { font-size: 0.65rem; color: var(--m-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-family: 'Rajdhani'; font-weight: 700; }
 .m-hyp-desc { font-size: 0.65rem; color: #666; margin-bottom: 12px; margin-top: -5px; line-height: 1.3; font-family: 'Outfit'; }
@@ -797,45 +873,59 @@ const mobileHTML = `
                         <span>SYSTEM HYPERVISOR</span>
                         <i class="fas fa-microchip m-hyp-icon"></i>
                     </div>
-
-                    <div class="m-hyp-label">Flux Priority Algorithm</div>
-                    <div class="m-flux-group">
-                        <div class="m-tab-btn active" id="sort-balanced" onclick="setSortMode('balanced')">
-                            <i class="fas fa-dragon"></i> Balanced
-                        </div>
-                        <div class="m-tab-btn" id="sort-resolution" onclick="setSortMode('resolution')">
-                            <i class="fas fa-gem"></i> Quality
-                        </div>
-                        <div class="m-tab-btn" id="sort-size" onclick="setSortMode('size')">
-                            <i class="fas fa-hdd"></i> Size
-                        </div>
-                    </div>
                     
-                    <div id="flux-desc-container" style="min-height: 50px; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; margin-bottom: 25px; border: 1px dashed rgba(255,255,255,0.1);">
-                        <p id="flux-description" style="margin:0; font-size: 0.75rem; color: var(--m-dim); line-height: 1.4; transition: opacity 0.2s ease;">
-                            L'algoritmo standard di Leviathan. Cerca il bilanciamento perfetto tra qualità, popolarità del file e velocità. Ideale per l'uso quotidiano.
-                        </p>
+                    <p class="m-hyp-desc" style="margin-bottom:15px;">
+                        Ottimizza l'algoritmo di ricerca in base alle tue preferenze di visione.
+                    </p>
+
+                    <div class="m-flux-control">
+                        <div class="m-flux-grid">
+                            <div class="m-flux-opt active-bal" id="sort-balanced" onclick="setSortMode('balanced')">
+                                <i class="fas fa-dragon"></i>
+                                <span>BALANCED</span>
+                            </div>
+                            <div class="m-flux-opt" id="sort-resolution" onclick="setSortMode('resolution')">
+                                <i class="fas fa-gem"></i>
+                                <span>QUALITY</span>
+                            </div>
+                            <div class="m-flux-opt" id="sort-size" onclick="setSortMode('size')">
+                                <i class="fas fa-hdd"></i>
+                                <span>SIZE</span>
+                            </div>
+                        </div>
+                        
+                        <div class="m-flux-readout mode-bal" id="flux-readout-box">
+                            <i class="fas fa-info-circle m-fr-icon" id="flux-icon-display"></i>
+                            <div class="m-fr-text">
+                                <span class="m-fr-title" id="flux-title-display">STANDARD MODE</span>
+                                <span class="m-fr-desc" id="flux-desc-display">L'algoritmo standard di Leviathan. Bilancia perfettamente qualità e velocità.</span>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="m-hyp-header" style="margin-top:15px; border-top:1px dashed rgba(255,255,255,0.1); padding-top:10px; margin-bottom:10px;">
-                         <span>AUDIO PRIORITY</span>
+                    <div class="m-hyp-header" style="margin-top:25px; border-top:none; padding-top:0; margin-bottom:10px;">
+                         <span>AUDIO & LANGUAGE</span>
                          <i class="fas fa-globe-americas m-hyp-icon"></i>
                     </div>
-                    <div class="m-flux-group">
-                        <div class="m-tab-btn active" id="lang-ita" onclick="setLangMode('ita')">
-                            <i class="fas fa-flag"></i> ITA
+                    
+                    <div class="m-lang-grid">
+                        <div class="m-lang-opt active-ita" id="lang-ita" onclick="setLangMode('ita')">
+                            <i class="fas fa-flag"></i>
+                            <span class="m-lang-txt">ITA ONLY</span>
                         </div>
-                         <div class="m-tab-btn" id="lang-ita-eng" onclick="setLangMode('ita-eng')">
-                            <i class="fas fa-comments"></i> ITA+ENG
+                        <div class="m-lang-opt" id="lang-ita-eng" onclick="setLangMode('ita-eng')">
+                            <i class="fas fa-comments"></i>
+                            <span class="m-lang-txt">ITA + ENG</span>
                         </div>
-                         <div class="m-tab-btn" id="lang-eng" onclick="setLangMode('eng')">
-                            <i class="fas fa-flag-usa"></i> ENG
+                        <div class="m-lang-opt" id="lang-eng" onclick="setLangMode('eng')">
+                            <i class="fas fa-flag-usa"></i>
+                            <span class="m-lang-txt">ENG ONLY</span>
                         </div>
                     </div>
 
-                    <div id="lang-desc-container" style="min-height: 40px; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; margin-bottom: 25px; border: 1px dashed rgba(255,255,255,0.1);">
-                        <p id="lang-description" style="margin:0; font-size: 0.75rem; color: var(--m-dim); line-height: 1.4; transition: opacity 0.2s ease;">
-                             Cerca solo contenuti in Italiano.
+                    <div id="lang-desc-container" style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; margin-bottom: 25px; border-left: 3px solid var(--m-primary);">
+                        <p id="lang-description" style="margin:0; font-size: 0.7rem; color: var(--m-dim); line-height: 1.3; font-family:'Outfit';">
+                             Cerca solo contenuti in Italiano. Ignora tutto il resto.
                         </p>
                     </div>
 
@@ -1003,10 +1093,22 @@ let mSortMode = 'balanced';
 let mSkin = 'leviathan';
 let mLangMode = 'ita';
 
-const fluxDescriptions = {
-    'balanced': "L'algoritmo standard di Leviathan. Cerca il bilanciamento perfetto tra qualità, popolarità del file e velocità. Ideale per l'uso quotidiano.",
-    'resolution': "Gerarchia visiva rigida. I risultati 4K appariranno sempre per primi, seguiti dai 1080p e infine 720p.",
-    'size': "Ordina per grandezza del file (dal più grande al più piccolo). Ideale per chi vuole il massimo bitrate possibile."
+const fluxData = {
+    'balanced': {
+        title: "STANDARD MODE",
+        desc: "L'algoritmo standard di Leviathan. Bilancia perfettamente qualità, popolarità del file e velocità.",
+        icon: "fa-dragon"
+    },
+    'resolution': {
+        title: "VISUAL FIDELITY",
+        desc: "Gerarchia visiva rigida. I risultati 4K UHD appariranno sempre in cima alla lista.",
+        icon: "fa-gem"
+    },
+    'size': {
+        title: "DATA HEAVY",
+        desc: "Ordina per dimensione del file. Ideale per chi cerca il massimo bitrate possibile.",
+        icon: "fa-hdd"
+    }
 };
 
 const langDescriptions = {
@@ -1335,13 +1437,19 @@ function updateStatus(inputId, statusId) {
 
 function setLangMode(mode) {
     mLangMode = mode;
-    ['ita', 'ita-eng', 'eng'].forEach(m => {
-        const btn = document.getElementById('lang-' + m);
-        if(btn) {
-            if(m === mode) btn.classList.add('active');
-            else btn.classList.remove('active');
-        }
+    const btnIta = document.getElementById('lang-ita');
+    const btnHyb = document.getElementById('lang-ita-eng');
+    const btnEng = document.getElementById('lang-eng');
+
+    // Reset Classes
+    [btnIta, btnHyb, btnEng].forEach(b => {
+        b.className = 'm-lang-opt';
     });
+
+    // Apply specific Active Class
+    if(mode === 'ita') btnIta.classList.add('active-ita');
+    if(mode === 'ita-eng') btnHyb.classList.add('active-hyb');
+    if(mode === 'eng') btnEng.classList.add('active-eng');
 
     const descEl = document.getElementById('lang-description');
     if(descEl) {
@@ -1455,18 +1563,35 @@ function setSortMode(mode) {
     mSortMode = mode;
     ['balanced', 'resolution', 'size'].forEach(m => {
         const btn = document.getElementById('sort-' + m);
-        if(m === mode) btn.classList.add('active');
-        else btn.classList.remove('active');
+        const map = {'balanced':'active-bal', 'resolution':'active-res', 'size':'active-sz'};
+        
+        // Remove ALL active classes
+        btn.classList.remove('active-bal', 'active-res', 'active-sz');
+        
+        if(m === mode) btn.classList.add(map[m]);
     });
+    
+    const readout = document.getElementById('flux-readout-box');
+    const title = document.getElementById('flux-title-display');
+    const desc = document.getElementById('flux-desc-display');
+    const icon = document.getElementById('flux-icon-display');
+    
+    readout.className = "m-flux-readout"; 
+    
+    // Tiny fade effect
+    readout.style.opacity = 0.5;
+    setTimeout(() => {
+        if(mode === 'balanced') readout.classList.add('mode-bal');
+        if(mode === 'resolution') readout.classList.add('mode-res');
+        if(mode === 'size') readout.classList.add('mode-sz');
+        
+        title.innerText = fluxData[mode].title;
+        desc.innerText = fluxData[mode].desc;
+        icon.className = `fas ${fluxData[mode].icon} m-fr-icon`;
+        
+        readout.style.opacity = 1;
+    }, 150);
 
-    const descEl = document.getElementById('flux-description');
-    if(descEl) {
-        descEl.style.opacity = 0;
-        setTimeout(() => {
-            descEl.innerText = fluxDescriptions[mode];
-            descEl.style.opacity = 1;
-        }, 200);
-    }
     updateLinkModalContent();
     if(navigator.vibrate) navigator.vibrate(10);
 }
