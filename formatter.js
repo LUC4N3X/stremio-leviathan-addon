@@ -7,10 +7,9 @@ const UNITS = ["B", "KB", "MB", "GB", "TB"];
 // =========================================================================
 
 // CONFIGURAZIONE SEPARATORE LINGUE
-// Puoi cambiarlo qui: " / " oppure " | " oppure " + "
 const LANG_SEP = " / "; 
 
-// Mappa Lingue Estesa (Ordine di priorità visuale gestito nel codice)
+// Mappa Lingue Estesa
 const LANG_FLAGS = [
     { id: "ita", flag: "🇮🇹", label: "ITA", regex: /\b(ita|italian|italiano|it)\b/i },
     { id: "eng", flag: "🇬🇧", label: "ENG", regex: /\b(eng|english|en)\b/i },
@@ -253,21 +252,23 @@ function extractStreamInfo(title, source) {
 
   if (info.audio) {
       const a = info.audio.toUpperCase();
-      if (a.includes("ATMOS")) audioTag = "💥💣 Atmos";
-      else if (a.includes("DTS-X") || a.includes("DTS:X")) audioTag = "💥💣 DTS:X";
-      else if (a.includes("TRUEHD")) audioTag = "🔊⚡ TrueHD";
-      else if (a.includes("DTS-HD") || a.includes("MA")) audioTag = "🔊⚡ DTS-HD";
-      else if (a.includes("DDP") || a.includes("EAC3")) audioTag = "🔊🔥 Dolby+";
-      else if (a.includes("AC3") || a.includes("DD")) audioTag = "🔈🌑 Dolby";
-      else if (a.includes("AAC")) audioTag = "🔈✨ AAC";
-      else if (a.includes("FLAC")) audioTag = "🎼🌊 FLAC";
-      else audioTag = `🔈 ${a}`;
+      // NOTA: Qui rimuoviamo le emoji hardcoded per pulizia, verranno gestite nella funzione di stile se necessario
+      // Ma manteniamo la logica di rilevamento per retrocompatibilità con altri stili
+      if (a.includes("ATMOS")) audioTag = "Atmos"; // Emoji rimosse qui per sicurezza generale
+      else if (a.includes("DTS-X") || a.includes("DTS:X")) audioTag = "DTS:X";
+      else if (a.includes("TRUEHD")) audioTag = "TrueHD";
+      else if (a.includes("DTS-HD") || a.includes("MA")) audioTag = "DTS-HD";
+      else if (a.includes("DDP") || a.includes("EAC3")) audioTag = "Dolby+";
+      else if (a.includes("AC3") || a.includes("DD")) audioTag = "Dolby";
+      else if (a.includes("AAC")) audioTag = "AAC";
+      else if (a.includes("FLAC")) audioTag = "FLAC";
+      else audioTag = `${a}`;
   }
 
   if (info.channels) {
       audioChannels = info.channels;
       if (audioChannels.includes("5.1") || audioChannels.includes("7.1")) {
-          if (audioTag.includes("Stereo")) audioTag = "🔊🌌 Surround";
+          if (audioTag.includes("Stereo")) audioTag = "Surround";
       }
   }
   
@@ -281,23 +282,43 @@ function extractStreamInfo(title, source) {
 // 4. STILI DI FORMATTAZIONE
 // =========================================================================
 
-// Style 1: Leviathan (Classic)
+// Style 1: Leviathan (Final Signature Edition)
 function styleLeviathan(p) {
-    const qualityBold = toStylized(p.quality, 'bold');
-    const titleSpaced = toStylized("LEVIATHAN", "spaced"); 
-    const name = `🦑 ${titleSpaced}\n${p.qIcon} ┃ ${qualityBold}`;
-    const lines = [];
-    lines.push(`📁 ${p.cleanName} ${p.epTag}`);
-    lines.push(`🗣️ ${p.lang} • ${p.audioInfo}`);
+    // 1. PULIZIA AUDIO (Extra check)
+    let cleanAudio = p.audioTag.replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, "").trim();
+    if (!cleanAudio) cleanAudio = p.audioTag; 
     
-    // Tag Line
-    let techLine = "";
-    if (p.videoTags.length > 0) techLine = p.videoTags.join(" • ");
-    else techLine = `🎞️ ${p.codec || "Video"}`;
-    lines.push(techLine);
+    // --- CONFIGURAZIONE ICONE ---
+    const titleIcon = "▶️"; // Icona riga titolo (Play)
+    const techIcon = "🔱";  // Icona specifiche (Tridente)
+    // ---------------------------
 
-    lines.push(`🧲 ${p.sizeString} • 👥 ${p.seeders}`);
-    lines.push(p.sourceLine);
+    // 2. HEADER (Modifica richiesta: [RD] 🦑 𝗟 𝗘 𝗩 𝗜 𝗔 𝗧 𝗛 𝗔 𝗡)
+    // Crea la scritta spaziata: 𝗟 𝗘 𝗩 𝗜 𝗔 𝗧 𝗛 𝗔 𝗡
+    const brandName = toStylized("LEVIATHAN", "spaced");
+    const name = `[${p.serviceTag}] 🦑 ${brandName}`;
+
+    // 3. RIGA TECH (Specifiche Video: Tridente + 1080p + Tags)
+    // p.quality (es 1080p) viene messo qui col tridente
+    let techSpecs = [p.quality, ...p.cleanTags].filter(Boolean);
+    techSpecs = [...new Set(techSpecs)]; 
+    let techLine = techSpecs.map(t => toStylized(t, 'small')).join(" • ");
+
+    const lines = [];
+    
+    // RIGA 1: Titolo
+    lines.push(`${titleIcon} ${toStylized(p.cleanName, "bold")} ${p.epTag}`);
+
+    // RIGA 2: Specifiche (Tridente + Risoluzione + Tag)
+    if (techLine) lines.push(`${techIcon} ${techLine}`);
+
+    // RIGA 3: Lingua e Audio
+    let audioPart = [cleanAudio, p.audioChannels].filter(Boolean).join(" ");
+    lines.push(`🗣️ ${p.lang}  |  🔊 ${audioPart}`);
+
+    // RIGA 4: Info File (Magnete + Sorgente)
+    lines.push(`🧲 ${p.sizeString}  |  ${p.serviceIconTitle} ${p.displaySource}`);
+
     return { name, title: lines.join("\n") };
 }
 
