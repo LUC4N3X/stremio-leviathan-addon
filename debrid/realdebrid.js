@@ -1,13 +1,13 @@
 const axios = require("axios");
 const https = require("https");
 
-// --- CONFIGURAZIONE TURBO ---
+
 const RD_API_BASE = "https://api.real-debrid.com/rest/1.0";
 const RD_TIMEOUT = 30000; // 30 Secondi timeout
 const MAX_POLL = 30;      // Più tentativi di attesa (per file grossi/conversioni)
 const POLL_DELAY = 1000;  // 1 secondo tra i check
 
-// --- HTTP AGENT (Keep-Alive per velocità estrema) ---
+// HTTP AGENT 
 const httpsAgent = new https.Agent({ 
     keepAlive: true, 
     maxSockets: 64, 
