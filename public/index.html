@@ -1004,10 +1004,12 @@
                         </div>
                     </div>
                     <div class="input-group">
-                        <input type="text" id="apiKey" class="custom-input" placeholder="INSERIRE CHIAVE DEBRID..." oninput="clearError(this); updateFluxStream()">
-                        <a href="https://real-debrid.com/apitoken" target="_blank" id="apiLink" class="input-action">
-                            <i class="fas fa-key"></i> PRELEVA KEY
-                        </a>
+                        <div style="position: relative;">
+                            <input type="text" id="apiKey" class="custom-input" placeholder="INSERIRE CHIAVE DEBRID..." oninput="clearError(this); updateFluxStream()">
+                            <a href="https://real-debrid.com/apitoken" target="_blank" id="apiLink" class="input-action">
+                                <i class="fas fa-key"></i> PRELEVA KEY
+                            </a>
+                        </div>
                         <span class="error-msg">⚠️ Chiave mancante</span>
                         <div id="ad-warning" class="ad-warning-msg">⚠️ Funziona solo con Self-Hosting Casalingo</div>
                     </div>
@@ -1528,11 +1530,11 @@
             
             if(skinId === 'custom') {
                 customArea.classList.add('show');
-                customInput.disabled = false; // ABILITA SCRITTURA
+                customInput.disabled = false; 
                 if(customInput.value.trim() === "") customInput.focus();
             } else {
                 customArea.classList.remove('show');
-                customInput.disabled = true; // DISABILITA SCRITTURA
+                customInput.disabled = true; 
             }
             
             // NO EFFECT - INSTANT UPDATE FOR SKINS
@@ -1555,15 +1557,15 @@
                 qDetails: "4K",
                 codec: "HEVC",
                 
-                // Array tags puliti (come nel backend)
+                // Array tags puliti 
                 cleanTags: ["Remux", "DV+HDR"], 
-                videoTags: ["💎 REMUX", "👁️ DV+HDR"], // Solo per stili vecchi
+                videoTags: ["💎 REMUX", "👁️ DV+HDR"], 
                 
                 // Audio e Lingua
                 lang: "🇮🇹 ITA",
                 audioTag: "TrueHD",
                 audioChannels: "7.1", 
-                audioInfo: "TrueHD ┃ 7.1", // Legacy
+                audioInfo: "TrueHD ┃ 7.1", 
                 
                 // Info File
                 sizeString: "64.20 GB",
@@ -1571,9 +1573,9 @@
                 seedersStr: "👥 1337",
                 
                 // Service & Source
-                serviceTag: currentService.toUpperCase(), // Prende quello selezionato nella UI
+                serviceTag: currentService.toUpperCase(), 
                 displaySource: "1337x",
-                sourceLine: "", // Calcolato sotto
+                sourceLine: "", 
                 serviceIconTitle: "⚡"
             };
 
@@ -1687,7 +1689,7 @@
                 skinContainer.classList.add('disabled-core');
                 customArea.classList.add('disabled-core');
                 overlay.style.display = 'flex';
-                selectSkin('leviathan'); // Force revert
+                selectSkin('leviathan'); 
                 showToast("AIO MODE ATTIVO: SKIN RESETTATE", "info");
             } else {
                 skinContainer.classList.remove('disabled-core');
@@ -1732,7 +1734,7 @@
                 el.classList.remove('excluded'); el.classList.add('active'); 
             } else { 
                 el.classList.remove('active'); el.classList.add('excluded'); 
-                triggerPreviewEffect(); // Effect only when filtering out
+                triggerPreviewEffect(); 
             }
             updateFluxStream();
         }
@@ -1905,8 +1907,8 @@
                     proxyDebrid: document.getElementById('proxyDebrid').checked
                 },
                 filters: {
-                    language: lang, // PARAMETRO PRINCIPALE NUOVO
-                    allowEng: lang === 'all' || lang === 'eng', // BACKWARD COMPATIBILITY
+                    language: lang, 
+                    allowEng: lang === 'all' || lang === 'eng', 
                     no4k: document.getElementById('btn_4k').classList.contains('excluded'),
                     no1080: document.getElementById('btn_1080').classList.contains('excluded'),
                     no720: document.getElementById('btn_720').classList.contains('excluded'),
