@@ -1644,15 +1644,15 @@ app.get("/:conf/manifest.json", (req, res) => {
 
         // --- 3. ASSEMBLAGGIO FINALE ---
         if (hasRDKey) {
-            manifest.name = `${appName}${flag} ☄️ RD`;
+            manifest.name = `${appName}${flag} 🐋️ RD`;
             manifest.id += ".rd"; 
         } 
         else if (hasTBKey) {
-            manifest.name = `${appName}${flag} 📦 TB`;
+            manifest.name = `${appName}${flag} ⚓ TB`;
             manifest.id += ".tb";
         } 
         else if (hasADKey) {
-            manifest.name = `${appName}${flag} 🦅 AD`;
+            manifest.name = `${appName}${flag} 🐚 AD`;
             manifest.id += ".ad";
         }
         else {
