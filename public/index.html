@@ -1479,13 +1479,16 @@
 
         // --- SKINS LOGIC (PREVIEW) ---
         function toStylized(text, type = 'std') {
+            if (!text) return "";
+            text = String(text);
             const maps = {
                 'bold': {
                     nums: {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵'},
-                    chars: {'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭','a':'𝗮','b':'𝗯','c':'𝗰','d':'𝗱','e':'𝗲','f':'𝗳','g':'𝗴','h':'𝗵','i':'𝗶','j':'j','k':'𝗸','l':'𝗹','m':'𝗺','n':'𝗻','o':'ᴏ','p':'ᴘ','q':'𝗾','r':'𝗿','s':'𝘀','t':'𝘁','u':'𝘂','v':'𝘃','w':'𝘄','x':'𝘅','y':'𝘆','z':'ᴢ'}
+                    chars: {'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭','a':'𝗮','b':'𝗯','c':'𝗰','d':'𝗱','e':'𝗲','f':'𝗳','g':'𝗴','h':'𝗵','i':'𝗶','j':'𝗷','k':'𝗸','l':'𝗹','m':'𝗺','n':'𝗻','o':'𝗼','p':'𝗽','q':'𝗾','r':'𝗿','s':'𝘀','t':'𝘁','u':'𝘂','v':'𝘃','w':'𝘄','x':'𝘅','y':'𝘆','z':'𝘇'}
                 },
                 'spaced': {
-                    nums: {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗'},
+                    // Mappa speciale per testo spaziato
+                    nums: {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9'},
                     chars: {'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭'}
                 },
                 'small': {
@@ -1495,7 +1498,7 @@
             };
             if (type === 'spaced') {
                 return text.split('').map(c => {
-                    const map = maps['bold'];
+                    const map = maps['spaced']; 
                     const char = (/[0-9]/.test(c) ? map.nums[c] : map.chars[c]) || c;
                     return char + ' ';
                 }).join('').trim();
@@ -1540,64 +1543,110 @@
         function updateCustomPreview() { updatePreview('custom'); updateFluxStream(); }
 
         function updatePreview(skin) {
+            // 1. Mock Data Arricchiti (Per simulare i dati che ha il formatter.js)
             const p = {
-                title: "Dune Part Two",
-                cleanName: "Dune Part Two (2024)",
+                // Dati base
+                cleanName: "Dune Part Two",
+                fileTitle: "Dune.Part.Two.2024.2160p.UHD.BluRay.x265.REMUX.DV.HDR.TrueHD.7.1.Atmos-LEVIATHAN.mkv",
+                epTag: "", // Simuliamo un film
+                
+                // Specifiche
                 quality: "4K",
-                sizeString: "64.20 GB",
-                source: "P2P",
-                displaySource: "P2P",
-                serviceTag: currentService.toUpperCase(),
-                serviceIcon: currentService === 'rd' ? "☄️" : (currentService === 'tb' ? "📦" : "🦅"),
+                qDetails: "4K",
+                codec: "HEVC",
+                
+                // Array tags puliti (come nel backend)
+                cleanTags: ["Remux", "DV+HDR"], 
+                videoTags: ["💎 REMUX", "👁️ DV+HDR"], // Solo per stili vecchi
+                
+                // Audio e Lingua
                 lang: "🇮🇹 ITA",
-                audioInfo: "🔊⚡ TrueHD ┃ 7.1",
-                info: "💎 𝗥𝗘𝗠𝗨𝗫 • 🔥 𝗛𝗗𝗥 • 👁️ 𝗗𝗩", 
-                cleanInfo: "Remux • HDR • DV",
-                epTag: "",
-                seedersStr: "👥 1337x"
+                audioTag: "TrueHD",
+                audioChannels: "7.1", 
+                audioInfo: "TrueHD ┃ 7.1", // Legacy
+                
+                // Info File
+                sizeString: "64.20 GB",
+                seeders: 1337,
+                seedersStr: "👥 1337",
+                
+                // Service & Source
+                serviceTag: currentService.toUpperCase(), // Prende quello selezionato nella UI
+                displaySource: "1337x",
+                sourceLine: "", // Calcolato sotto
+                serviceIconTitle: "⚡"
             };
+
+            // Logica icone dinamiche (Simula formatStreamSelector)
+            if (p.serviceTag === "RD") { p.serviceIconTitle = "🐋"; }
+            else if (p.serviceTag === "TB") { p.serviceIconTitle = "⚓"; }
+            else if (p.serviceTag === "AD") { p.serviceIconTitle = "🐚"; }
+            
+            p.sourceLine = `${p.serviceIconTitle} [${p.serviceTag}] ${p.displaySource}`;
 
             let name = "", desc = "";
 
             if (skin === 'leviathan') {
-                const qBold = toStylized("4K", "bold");
-                const lev = toStylized("LEVIATHAN", "std"); 
-                name = `🦑 𝗟𝗘𝗩𝗜𝗔𝗧𝗛𝗔𝗡\n${p.serviceIcon} ┃ ${qBold}`;
-                desc = `📁 ${p.cleanName}\n🗣️ ${p.lang} • ${p.audioInfo}\n${p.info}\n🧲 ${p.sizeString} • ${p.seedersStr}\n${p.serviceIcon} [${p.serviceTag}] ${p.source}`;
+                // LOGICA COPIATA DA styleLeviathan in formatter.js
+                
+                // Configurazione Icone
+                const titleIcon = "▶️";
+                const techIcon = "🔱";
+
+                // Header Spaziato
+                const brandName = toStylized("LEVIATHAN", "spaced");
+                name = `[${p.serviceTag}] 🦑 ${brandName}`;
+
+                // Riga Tech
+                let techSpecs = [p.quality, ...p.cleanTags].filter(Boolean);
+                techSpecs = [...new Set(techSpecs)];
+                let techLine = techSpecs.map(t => toStylized(t, 'small')).join(" • ");
+
+                const lines = [];
+                // RIGA 1: Titolo (Play + Titolo + Ep)
+                lines.push(`${titleIcon} ${toStylized(p.cleanName, "bold")} ${p.epTag}`);
+                // RIGA 2: Tech (Tridente + Info)
+                if (techLine) lines.push(`${techIcon} ${techLine}`);
+                // RIGA 3: Lingua/Audio
+                let cleanAudio = p.audioTag; 
+                let audioPart = [cleanAudio, p.audioChannels].filter(Boolean).join(" ");
+                lines.push(`🗣️ ${p.lang}  |  🔊 ${audioPart}`);
+                // RIGA 4: Info File
+                lines.push(`🧲 ${p.sizeString}  |  ${p.serviceIconTitle} ${p.displaySource}`);
+
+                desc = lines.join("\n");
             } 
             else if (skin === 'lev2') {
+                // styleLeviathanTwo
                 const levText = toStylized("LEVIATHAN", "small");
-                const qText = p.quality;
-                const sizeSmall = toStylized("64.20", "bold") + " " + toStylized("GB", "small");
-                name = `🦑 ${levText} ${p.serviceIcon} │ ${qText}`;
-                const titleBold = toStylized(p.cleanName, "bold");
-                const audioSmall = toStylized("TrueHD 7.1", "small");
-                const langSmall = toStylized("ITA ENG", "small");
-                const srcSmall = toStylized(p.displaySource, "small");
-                let servSmall = "ᴘ𝟚ᴘ";
-                if(p.serviceTag === "RD") servSmall = "ʀᴇᴀʟ-ᴅᴇʙʀɪᴅ";
-                if(p.serviceTag === "AD") servSmall = "ᴀʟʟ-ᴅᴇʙʀɪᴅ";
-                desc = `🎬 ${titleBold}\n📦 ${sizeSmall} │ ʀᴇᴍᴜx │ ᴅᴏʟʙʏ ᴠɪsɪᴏɴ\n🔊 ${audioSmall} • 🇮🇹 ${langSmall}\n🔗 ${servSmall} │ ${srcSmall}`;
+                name = `🦑 ${levText} ${p.serviceIconTitle} │ ${p.quality}`;
+                
+                const lines = [];
+                lines.push(`🎬 ${toStylized(p.cleanName, "bold")}`);
+                lines.push(`📦 ${p.sizeString} │ ${p.codec} ${p.cleanTags.join(" ")}`);
+                lines.push(`🔊 ${p.audioTag} ${p.audioChannels} • ${p.lang}`);
+                lines.push(`🔗 ${p.sourceLine}`);
+                desc = lines.join("\n");
             }
             else if (skin === 'fra') {
                 name = `⚡️ Leviathan 4K`;
-                desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ 🇮🇹 ITA • TrueHD\n✨ ❯ ${p.serviceTag} • ${p.source}\n🔥 ❯ 4K • ${p.cleanInfo}\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337x`;
+                desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ 🇮🇹 ITA • TrueHD\n✨ ❯ ${p.serviceTag} • ${p.displaySource}\n🔥 ❯ 4K • ${p.cleanTags.join(' • ')}\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337x`;
             }
             else if (skin === 'comet') {
                 name = `[${p.serviceTag} ⚡]\nLeviathan\n4K`;
-                desc = `📄 ${p.cleanName}\n📹 HEVC • ${p.cleanInfo} | TrueHD\n⭐ ${p.source}\n💾 ${p.sizeString} 👥 1337\n🌍 ITA`;
+                desc = `📄 ${p.cleanName}\n📹 HEVC • ${p.cleanTags.join(' • ')} | TrueHD\n⭐ ${p.displaySource}\n💾 ${p.sizeString} 👥 1337\n🌍 ITA`;
             }
             else if (skin === 'stremio_ita') {
                 name = `⚡️ Leviathan 4K`;
-                desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ ita • eng\n✨ ❯ ${p.serviceTag} • ${p.source}\n🔥 ❯ 4K • HEVC • ${p.cleanInfo}\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337x\n🔉 ❯ TrueHD • 7.1`;
+                desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ ita • eng\n✨ ❯ ${p.serviceTag} • ${p.displaySource}\n🔥 ❯ 4K • HEVC • ${p.cleanTags.join(' • ')}\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337x\n🔉 ❯ TrueHD • 7.1`;
             }
             else if (skin === 'dav') {
                 name = `🎥 4K UHD HEVC`;
-                desc = `📺 ${p.cleanName}\n🎧 TrueHD 7.1 | 🎞️ HEVC\n🗣️ ITA | 📦 ${p.sizeString}\n⏱️ 1337 Seeds | 🏷️ ${p.source}\n${p.serviceIcon} Leviathan 📡 ${p.serviceTag}\n📂 ${p.title}`;
+                desc = `📺 ${p.cleanName}\n🎧 TrueHD 7.1 | 🎞️ HEVC\n🗣️ ITA | 📦 ${p.sizeString}\n⏱️ 1337 Seeds | 🏷️ ${p.displaySource}\n${p.serviceIconTitle} Leviathan 📡 ${p.serviceTag}\n📂 ${p.fileTitle}`;
             }
             else if (skin === 'and') {
                 name = `🎬 ${p.cleanName}`;
-                desc = `4K ⚡\n─ ─ ─ ─ ─ ─ ─ ─ ─ ─\nLingue: 🇮🇹\nSpecifiche: 4K | 📺 ${p.cleanInfo} | 🔊 TrueHD\n─ ─ ─ ─ ─ ─ ─ ─ ─ ─\n📂 ${p.sizeString} | ☁️ ${p.serviceTag} | 🛰️ Leviathan`;
+                desc = `4K ⚡\n─ ─ ─ ─ ─ ─ ─ ─ ─ ─\nLingue: 🇮🇹\nSpecifiche: 4K | 📺 ${p.cleanTags.join(' ')} | 🔊 TrueHD\n─ ─ ─ ─ ─ ─ ─ ─ ─ ─\n📂 ${p.sizeString} | ☁️ ${p.serviceTag} | 🛰️ Leviathan`;
             }
             else if (skin === 'lad') {
                 name = `🖥️ 4K ${p.serviceTag}`;
@@ -1605,14 +1654,14 @@
             }
             else if (skin === 'pri') {
                 name = `[${p.serviceTag}]⚡️☁️\n4K🔥UHD\n[Leviathan]`;
-                desc = `🎬 ${p.cleanName}\n${p.cleanInfo}\n🎧 TrueHD | 🔊 7.1 | 🗣️ ITA\n📁 ${p.sizeString} | 🏷️ ${p.source}\n📄 ▶️ ${p.title} ◀️`;
+                desc = `🎬 ${p.cleanName}\n${p.cleanTags.join(' ')}\n🎧 TrueHD | 🔊 7.1 | 🗣️ ITA\n📁 ${p.sizeString} | 🏷️ ${p.displaySource}\n📄 ▶️ ${p.fileTitle} ◀️`;
             }
             else if (skin === 'custom') {
                 let tpl = document.getElementById('customTemplate').value;
-                if(!tpl || tpl.trim() === "") tpl = "Lev {quality} ||| {title} - {size}"; // DEFAULT PREVIEW
+                if(!tpl || tpl.trim() === "") tpl = "Lev {quality} ||| {title} - {size}";
                 
                 tpl = tpl.replace("{title}", p.cleanName).replace("{quality}", p.quality)
-                         .replace("{size}", p.sizeString).replace("{source}", p.source)
+                         .replace("{size}", p.sizeString).replace("{source}", p.displaySource)
                          .replace("{service}", p.serviceTag).replace("{lang}", "ITA")
                          .replace("{audio}", p.audioInfo).replace(/\\n/g, "\n");
                 
