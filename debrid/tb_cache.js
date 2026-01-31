@@ -1,8 +1,5 @@
 const axios = require('axios');
 
-// =====================================================
-// TORBOX CACHE CHECKER (ID GRABBER FIX)
-// =====================================================
 
 const TB_BASE_URL = 'https://api.torbox.app/v1/api';
 
