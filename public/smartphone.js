@@ -635,9 +635,9 @@ const mobileHTML = `
                     </div>
 
                     <div class="m-srv-rail">
-                        <div class="m-srv-btn active" onclick="setMService('rd', this)"><span class="m-rail-icon">🚀</span> RD</div>
-                        <div class="m-srv-btn" onclick="setMService('ad', this)"><span class="m-rail-icon">🦅</span> AD</div>
-                        <div class="m-srv-btn" onclick="setMService('tb', this)"><span class="m-rail-icon">📦</span> TB</div>
+                        <div class="m-srv-btn active" onclick="setMService('rd', this)"><span class="m-rail-icon">🐋</span> RD</div>
+                        <div class="m-srv-btn" onclick="setMService('ad', this)"><span class="m-rail-icon">🐚</span> AD</div>
+                        <div class="m-srv-btn" onclick="setMService('tb', this)"><span class="m-rail-icon">⚓</span> TB</div>
                     </div>
 
                     <div id="m-ad-warn" class="m-ad-warning"><i class="fas fa-exclamation-triangle"></i> ATTENZIONE: AllDebrid funziona SOLO se hostato in LOCALE.</div>
