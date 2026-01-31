@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-// URL Base decodificato (include "it":"on" nella config base)
+
 const WEBSTREAMR_BASE = "https://webstreamr.hayd.uk/%7B%22it%22%3A%22on%22%2C%22mediaFlowProxyUrl%22%3A%22%22%2C%22mediaFlowProxyPassword%22%3A%22%22%7D";
 
 // Helper per determinare la qualità dal titolo
@@ -25,51 +25,57 @@ async function searchWebStreamr(type, id) {
             return [];
         }
 
-        // 1. CERCHIAMO SOLO GLI STREAM ITALIANI
-        const italianStreams = data.streams.filter(stream => {
+        // 1. FILTRO: Cerchiamo file con tag esplicitamente "ITA"
+        const explicitItalianStreams = data.streams.filter(stream => {
             const t = (stream.title || "").toLowerCase();
             return /\b(ita|italian|italiano)\b/i.test(t);
         });
 
-        // 2. LOGICA DI PRIORITÀ (ITA > ENG)
+        // 2. LOGICA DI SELEZIONE
         let resultsToProcess = [];
-        let isEngFallback = false;
+        let isFallbackMode = false;
 
-        if (italianStreams.length > 0) {
-            // CASO A: Abbiamo trovato roba italiana!
-            console.log(`✅ [WEBSTREAMR] Trovati ${italianStreams.length} stream ITALIANI.`);
-            resultsToProcess = italianStreams;
+        if (explicitItalianStreams.length > 0) {
+            console.log(`✅ [WEBSTREAMR] Trovati ${explicitItalianStreams.length} stream sicuramente ITALIANI.`);
+            resultsToProcess = explicitItalianStreams;
         } else {
-            // CASO B: Nessun italiano trovato, usiamo tutto quello che c'è (ENG)
-            console.log(`⚠️ [WEBSTREAMR] Nessun stream ITA trovato. Mostro risultati INGLESI.`);
+            console.log(`⚠️ [WEBSTREAMR] Nessun tag ITA esplicito. Analisi fallback (Defaulting to ITA)...`);
             resultsToProcess = data.streams;
-            isEngFallback = true;
+            isFallbackMode = true;
         }
 
-        // FORMATTAZIONE STYLE "LEVIATHAN P2P"
+        // 3. FORMATTAZIONE RISULTATI
         return resultsToProcess.map(stream => {
             const rawTitle = stream.title || "Unknown Stream";
+            // Pulizia titolo dai nomi dei provider
             const cleanTitle = rawTitle.replace(/WebStreamr|Hayd/gi, "").trim();
             const { q, icon } = detectQuality(cleanTitle);
 
-            // Costruzione righe
+            // Costruzione righe visuali
             const lines = [];
             
-            // RIGA 1: Titolo
+            // RIGA 1: Titolo pulito
             lines.push(`🎬 ${cleanTitle}`);
             
-            // RIGA 2: Info Lingua (Dinamica)
-            let langInfo = "🇮🇹 ITA"; // Default se siamo nel caso A
-            
-            if (isEngFallback) {
-                // Se siamo nel caso B, controlliamo comunque se per miracolo c'è scritto ITA, altrimenti ENG
-                if (/\b(ita|italian)\b/i.test(rawTitle)) langInfo = "🇮🇹 ITA";
-                else langInfo = "🇬🇧 ENG";
+            // RIGA 2: Determinazione Lingua
+            let langInfo = "🇮🇹 ITA"; 
+
+            if (isFallbackMode) {
+                
+                
+                if (/\b(eng|english|en)\b/i.test(rawTitle)) {
+                    langInfo = "🇬🇧 ENG";
+                } 
+                // Se è un anime o subbato
+                else if (/\b(sub|subbed|jap)\b/i.test(rawTitle)) {
+                    langInfo = "🇯🇵 Sub ITA"; 
+                }
+                
             }
             
             lines.push(`${langInfo} • 🌐 Web-DL`);
 
-            // RIGA 3: Sorgente
+            // RIGA 3: Info Provider
             lines.push(`⚡ [Web] WebStreamr Fallback`);
 
             return {
