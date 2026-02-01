@@ -7,6 +7,7 @@ const mobileCSS = `
     --m-amber: #ff9900;       
     --m-cine: #ff0055;        
     --m-kofi: #FF5E5B;        
+    --m-gold: #ffcc00;        /* Gold P2P */
     --m-surface: rgba(10, 15, 25, 0.85); 
     --m-text: #e0f7fa;
     --m-dim: #7a9ab5; 
@@ -131,11 +132,13 @@ body::before {
 @keyframes blinkBase { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
 
 /* --- COMPONENTS --- */
-.m-srv-rail { display: flex; gap: 8px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 6px; margin-bottom: 25px; backdrop-filter: blur(5px); }
-.m-srv-btn { flex: 1; text-align: center; padding: 14px 0; font-family: 'Rajdhani', sans-serif; font-weight: 800; font-size: 1.1rem; color: var(--m-dim); border-radius: 12px; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(255,255,255,0.03); border: 1px solid transparent; }
-.m-srv-btn[onclick*="'rd'"].active { background: linear-gradient(135deg, rgba(0, 242, 255, 0.15), rgba(0,0,0,0)); border-color: var(--m-primary); color: #fff; box-shadow: 0 0 20px rgba(0, 242, 255, 0.2), inset 0 0 10px rgba(0, 242, 255, 0.05); text-shadow: 0 0 10px var(--m-primary); }
-.m-srv-btn[onclick*="'ad'"].active { background: linear-gradient(135deg, rgba(0, 255, 157, 0.15), rgba(0,0,0,0)); border-color: var(--m-success); color: #fff; box-shadow: 0 0 20px rgba(0, 255, 157, 0.2), inset 0 0 10px rgba(0, 255, 157, 0.05); text-shadow: 0 0 10px var(--m-success); }
-.m-srv-btn[onclick*="'tb'"].active { background: linear-gradient(135deg, rgba(176, 38, 255, 0.15), rgba(0,0,0,0)); border-color: var(--m-accent); color: #fff; box-shadow: 0 0 20px rgba(176, 38, 255, 0.2), inset 0 0 10px rgba(176, 38, 255, 0.05); text-shadow: 0 0 10px var(--m-accent); }
+.m-srv-rail { display: flex; gap: 6px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.08); border-radius: 22px; padding: 5px; margin-bottom: 25px; backdrop-filter: blur(5px); }
+.m-srv-btn { flex: 1; text-align: center; padding: 14px 0; font-family: 'Rajdhani', sans-serif; font-weight: 800; font-size: 1rem; color: var(--m-dim); border-radius: 20px; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(255,255,255,0.03); border: 1px solid transparent; }
+.m-srv-btn[onclick*="'rd'"].active { background: linear-gradient(135deg, rgba(0, 242, 255, 0.15), rgba(0,0,0,0)); border-color: var(--m-primary); color: #fff; box-shadow: 0 0 15px rgba(0, 242, 255, 0.15); text-shadow: 0 0 10px var(--m-primary); }
+.m-srv-btn[onclick*="'tb'"].active { background: linear-gradient(135deg, rgba(176, 38, 255, 0.15), rgba(0,0,0,0)); border-color: var(--m-accent); color: #fff; box-shadow: 0 0 15px rgba(176, 38, 255, 0.15); text-shadow: 0 0 10px var(--m-accent); }
+/* P2P Style */
+.m-srv-btn[onclick*="'p2p'"].active { background: linear-gradient(135deg, rgba(255, 204, 0, 0.15), rgba(0,0,0,0)); border-color: var(--m-gold); color: #fff; box-shadow: 0 0 15px rgba(255, 204, 0, 0.15); text-shadow: 0 0 10px var(--m-gold); }
+
 .m-rail-icon { font-size: 1.2rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
 
 .m-sc-subpanel { grid-column: 1 / -1; background: rgba(0,0,0,0.4); border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; display: none; animation: slideDown 0.3s ease; margin: 10px 15px 15px 15px; }
@@ -315,9 +318,10 @@ body::before {
 .m-ghost-status { font-family: 'Rajdhani'; font-weight: 700; font-size: 0.65rem; padding: 3px 6px; border-radius: 4px; background: rgba(255,255,255,0.1); color: #666; transition: all 0.3s; }
 .m-ghost-panel.active .m-ghost-status { background: var(--m-secondary); color: #000; box-shadow: 0 0 10px var(--m-secondary); }
 
-.m-ad-warning { display: none; background: rgba(255, 42, 109, 0.15); border: 1px solid var(--m-error); border-radius: 12px; padding: 10px; margin-bottom: 20px; text-align: center; color: var(--m-error); font-size: 0.8rem; font-weight: 700; box-shadow: 0 0 15px rgba(255,42,109,0.2); }
-.m-ad-warning i { animation: pulseWarn 1.5s infinite; }
-@keyframes pulseWarn { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+/* P2P Panel */
+.m-p2p-panel { background: linear-gradient(135deg, rgba(20,10,0,0.8), rgba(0,0,0,0.8)); border: 1px solid var(--m-gold); border-left: 3px solid var(--m-gold); border-radius: 12px; padding: 15px; margin-bottom: 20px; animation: slideDown 0.3s ease; display: none; }
+.m-p2p-title { color: var(--m-gold); font-family: 'Rajdhani'; font-weight: 800; font-size: 1rem; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 1px; }
+.m-p2p-desc { color: #ddd; font-size: 0.8rem; line-height: 1.4; }
 
 .m-status-text { font-size: 0.65rem; padding: 3px 6px; border-radius: 5px; background: rgba(255,255,255,0.12); color: #888; white-space: nowrap; transition: all 0.2s; }
 .m-status-text.on { background: rgba(0, 255, 157, 0.2); color: var(--m-success); border: 1px solid rgba(0, 255, 157, 0.35); box-shadow: 0 0 6px rgba(0,255,157,0.25); }
@@ -623,7 +627,7 @@ const mobileHTML = `
                 
                 <h1 class="m-brand-title">LEVIATHAN</h1>
                 <div class="m-brand-sub">SOVRANO DEGLI ABISSI</div>
-                <div class="m-version-tag"><div class="m-v-dot"></div>v2.5.0 STABLE</div>
+                <div class="m-version-tag"><div class="m-v-dot"></div>v2.7.0 STABLE</div>
             </div>
 
             <div id="page-setup" class="m-page active">
@@ -636,13 +640,20 @@ const mobileHTML = `
 
                     <div class="m-srv-rail">
                         <div class="m-srv-btn active" onclick="setMService('rd', this)"><span class="m-rail-icon">🐋</span> RD</div>
-                        <div class="m-srv-btn" onclick="setMService('ad', this)"><span class="m-rail-icon">🐚</span> AD</div>
                         <div class="m-srv-btn" onclick="setMService('tb', this)"><span class="m-rail-icon">⚓</span> TB</div>
+                        <div class="m-srv-btn" onclick="setMService('p2p', this)"><span class="m-rail-icon">🦈</span> P2P</div>
                     </div>
 
-                    <div id="m-ad-warn" class="m-ad-warning"><i class="fas fa-exclamation-triangle"></i> ATTENZIONE: AllDebrid funziona SOLO se hostato in LOCALE.</div>
+                    <div id="m-p2p-panel" class="m-p2p-panel">
+                        <div class="m-p2p-title"><i class="fas fa-biohazard"></i> PROTOCOLLO DIRETTO</div>
+                        <div class="m-p2p-desc">
+                            Modalità di connessione diretta alla rete BitTorrent.<br>
+                            <strong>Da utilizzare esclusivamente se NON possiedi un abbonamento Debrid.</strong><br>
+                            <span style="color:var(--m-gold); font-size:0.7rem; margin-top:5px; display:block;">La velocità dipende dai peer connessi.</span>
+                        </div>
+                    </div>
 
-                    <div class="m-field-group">
+                    <div id="m-api-group" class="m-field-group">
                         <div class="m-field-header">
                             <span class="m-field-label">API KEY</span>
                             <div class="m-field-link" onclick="openApiPage()">OTTIENI <i class="fas fa-external-link-alt"></i></div>
@@ -778,7 +789,7 @@ const mobileHTML = `
                             <i class="fas fa-star spin-star"></i>
                         </a>
 
-                        <div class="m-neural-footer">LEVIATHAN SYSTEM v2.5.0</div>
+                        <div class="m-neural-footer">LEVIATHAN SYSTEM v2.7.0</div>
                     </div>
                 </div>
             </div>
@@ -898,7 +909,7 @@ const mobileHTML = `
                             <i class="fas fa-info-circle m-fr-icon" id="flux-icon-display"></i>
                             <div class="m-fr-text">
                                 <span class="m-fr-title" id="flux-title-display">STANDARD MODE</span>
-                                <span class="m-fr-desc" id="flux-desc-display">L'algoritmo standard di Leviathan. Bilancia perfettamente qualità e velocità.</span>
+                                <span class="m-fr-desc" id="flux-desc-display">L'algoritmo standard di Leviathan. Bilancia perfettamente qualità, popolarità del file e velocità.</span>
                             </div>
                         </div>
                     </div>
@@ -1235,7 +1246,7 @@ function updateMobilePreview() {
     // Service Icon Logic
     if (p.serviceTag === "RD") { p.serviceIconTitle = "🐋"; }
     else if (p.serviceTag === "TB") { p.serviceIconTitle = "⚓"; }
-    else if (p.serviceTag === "AD") { p.serviceIconTitle = "🐚"; }
+    else if (p.serviceTag === "P2P") { p.serviceIconTitle = "🦈"; }
     else { p.serviceIconTitle = "⚡"; }
 
     let name = "", desc = "";
@@ -1415,7 +1426,7 @@ function navTo(pageId, btn) {
 function setMService(srv, btn, keepInput = false) {
     if(mCurrentService === srv && !keepInput) return;
     mCurrentService = srv;
-    if (!keepInput) { document.getElementById('m-apiKey').value = ''; }
+    if (!keepInput && srv !== 'p2p') { document.getElementById('m-apiKey').value = ''; }
 
     document.querySelectorAll('.m-srv-btn').forEach(b => {
         b.classList.remove('active');
@@ -1424,11 +1435,20 @@ function setMService(srv, btn, keepInput = false) {
         btn.classList.add('active');
     }
     
-    const input = document.getElementById('m-apiKey');
-    const placeholders = { 'rd': "RD API Key...", 'ad': "AD API Key...", 'tb': "TB API Key..." };
-    input.placeholder = placeholders[srv];
-    const warn = document.getElementById('m-ad-warn');
-    if(warn) warn.style.display = (srv === 'ad') ? 'block' : 'none';
+    const apiGroup = document.getElementById('m-api-group');
+    const p2pPanel = document.getElementById('m-p2p-panel');
+
+    if (srv === 'p2p') {
+        // P2P Mode Logic
+        apiGroup.style.display = 'none';
+        p2pPanel.style.display = 'block';
+    } else {
+        // Standard Debrid Logic
+        apiGroup.style.display = 'block';
+        p2pPanel.style.display = 'none';
+        const placeholders = { 'rd': "RD API Key...", 'tb': "TB API Key..." };
+        document.getElementById('m-apiKey').placeholder = placeholders[srv];
+    }
     
     updateMobilePreview(); 
     updateLinkModalContent();
@@ -1559,8 +1579,8 @@ function openApiPage(type) {
          window.open('https://www.themoviedb.org/settings/api', '_blank');
          return;
     }
-    const links = { 'rd': 'https://real-debrid.com/apitoken', 'ad': 'https://alldebrid.com/apikeys', 'tb': 'https://torbox.app/settings' };
-    window.open(links[mCurrentService], '_blank');
+    const links = { 'rd': 'https://real-debrid.com/apitoken', 'tb': 'https://torbox.app/settings' };
+    if(links[mCurrentService]) window.open(links[mCurrentService], '_blank');
 }
 function setScQuality(val) {
     mScQuality = val;
@@ -1673,13 +1693,15 @@ function loadMobileConfig() {
         if (pathParts.length >= 2 && pathParts[1].length > 10) {
             const config = JSON.parse(atob(pathParts[1]));
             if(config.service) {
-                const srvMap = {'rd':0, 'ad':1, 'tb':2};
+                const srvMap = {'rd':0, 'tb':1, 'rd':2}; // Default fallback
                 const railBtns = document.querySelectorAll('#page-setup .m-srv-btn');
-                if(railBtns.length > 0 && srvMap[config.service] !== undefined) {
+                
+                // P2P Check via Filters
+                if (config.filters && config.filters.enableP2P) {
+                     setMService('p2p', railBtns[2], true);
+                } else if(railBtns.length > 0 && srvMap[config.service] !== undefined) {
                      setMService(config.service, railBtns[srvMap[config.service]], true);
                 }
-                const warn = document.getElementById('m-ad-warn');
-                if(warn) warn.style.display = (config.service === 'ad') ? 'block' : 'none';
             }
             if(config.key) document.getElementById('m-apiKey').value = config.key;
 
@@ -1771,10 +1793,11 @@ function getMobileConfig() {
     const sizeActive = document.getElementById('m-sizeActive').checked;
     const sizeVal = parseInt(document.getElementById('m-sizeVal').value);
     const finalMaxSizeGB = sizeActive ? sizeVal : 0;
+    const isP2P = (mCurrentService === 'p2p');
     
     return {
-        service: mCurrentService,
-        key: document.getElementById('m-apiKey').value.trim(),
+        service: isP2P ? 'rd' : mCurrentService, // Fallback service for P2P mode
+        key: isP2P ? 'p2p_active' : document.getElementById('m-apiKey').value.trim(),
         tmdb: document.getElementById('m-tmdb').value.trim(),
         sort: mSortMode, 
         formatter: mSkin, 
@@ -1788,6 +1811,7 @@ function getMobileConfig() {
         filters: {
             language: mLangMode,
             allowEng: (mLangMode === 'ita-eng' || mLangMode === 'eng'), 
+            enableP2P: isP2P,
             no4k: document.getElementById('mq-4k').classList.contains('excluded'),
             no1080: document.getElementById('mq-1080').classList.contains('excluded'),
             no720: document.getElementById('mq-720').classList.contains('excluded'),
@@ -1812,9 +1836,10 @@ function updateLinkModalContent() {
     
     const config = getMobileConfig();
     const isWebEnabled = config.filters.enableVix || config.filters.enableGhd || config.filters.enableGs;
+    const isP2P = config.filters.enableP2P;
     
-    if(!config.key && !isWebEnabled) {
-        box.value = "/// SYSTEM OFFLINE: WAITING FOR CONFIGURATION DATA ///\\n[!] Inserisci API Key o Attiva Sorgenti Web";
+    if(!isP2P && !config.key && !isWebEnabled) {
+        box.value = "/// SYSTEM OFFLINE: WAITING FOR CONFIGURATION DATA ///\\n[!] Inserisci API Key, Attiva P2P o Attiva Sorgenti Web";
         box.style.color = "var(--m-error)";
         return;
     }
@@ -1827,7 +1852,9 @@ function updateLinkModalContent() {
 function mobileInstall() {
     const config = getMobileConfig();
     const isWebEnabled = config.filters.enableVix || config.filters.enableGhd || config.filters.enableGs;
-    if(!config.key && !isWebEnabled) {
+    const isP2P = config.filters.enableP2P;
+    
+    if(!isP2P && !config.key && !isWebEnabled) {
         showToast("ERRORE: API KEY MANCANTE", "error"); return;
     }
     const manifestUrl = `${window.location.host}/${btoa(JSON.stringify(config))}/manifest.json`;
