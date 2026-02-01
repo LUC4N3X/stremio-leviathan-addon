@@ -24,41 +24,59 @@ jobs:
       - name: Generate Beamup Hash
         id: hash
         run: |
-          # Logic: lowercase username -> shasum -> first 12 chars
-          HASH=$(echo "${{ secrets.USERNAME_GITHUB }}" | awk '{print tolower($0)}' | shasum -a 256 | cut -c1-12)
+          # Verifica che il segreto non sia vuoto
+          if [ -z "${{ secrets.USERNAME_GITHUB }}" ]; then
+            echo "ERRORE: USERNAME_GITHUB non configurato nei segreti"
+            exit 1
+          fi
+          
+          # Logica ufficiale: lowercase -> shasum -> primi 12 caratteri
+          HASH=$(echo "${{ secrets.USERNAME_GITHUB }}" | tr '[:upper:]' '[:lower:]' | shasum -a 256 | cut -c1-12)
           echo "USER_HASH=$HASH" >> $GITHUB_ENV
           echo "Generated Hash: $HASH"
 
-      - name: Add Beamup Remote
+      - name: Configure SSH and Remote
         run: |
-          # No mkdir needed; ssh-agent action already created ~/.ssh
-          # We use -H to hash the host in known_hosts for better security
-          ssh-keyscan -H ${{ secrets.BEAMUP_HOST }} >> ~/.ssh/known_hosts
+          # Crea la cartella .ssh solo se non esiste (senza fallire)
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
           
-          # Add the remote using the generated hash
-          git remote add beamup dokku@${{ secrets.BEAMUP_HOST }}:${{ env.USER_HASH }}/${{ secrets.PROJECT_NAME }}
+          # Recupera l'host dai segreti
+          BEAMUP_HOST=${{ secrets.BEAMUP_HOST }}
+          
+          if [ -z "$BEAMUP_HOST" ]; then
+            echo "ERRORE: BEAMUP_HOST non configurato"
+            exit 1
+          fi
 
-      - name: Build Environment and Push
+          # Scansiona l'host e aggiungilo ai known_hosts (rimuovendo duplicati se presenti)
+          ssh-keyscan -H "$BEAMUP_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          
+          # Costruzione URL e aggiunta Remote
+          REMOTE_URL="dokku@$BEAMUP_HOST:${{ env.USER_HASH }}/${{ secrets.PROJECT_NAME }}"
+          git remote add beamup "$REMOTE_URL" || git remote set-url beamup "$REMOTE_URL"
+          echo "Remote configurato correttamente"
+
+      - name: Create Env and Deploy
         run: |
-          # Create .env file from secrets
-          echo "DB_HOST=${{ secrets.ENV_DB_HOST }}" > .env
-          echo "DB_PORT=${{ secrets.ENV_DB_PORT }}" >> .env
-          echo "DB_NAME=${{ secrets.ENV_DB_NAME }}" >> .env
-          echo "DB_USER=${{ secrets.ENV_DB_USER }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.ENV_DB_PASSWORD }}" >> .env
-          echo "INDEXER_URL=${{ secrets.ENV_INDEXER_URL }}" >> .env
-          echo "NODE_ENV=production" >> .env
-          
-          # Optional: Add other keys if they exist
-          # echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" >> .env
+          # Creazione file .env
+          cat <<EOF > .env
+          DB_HOST=${{ secrets.ENV_DB_HOST }}
+          DB_PORT=${{ secrets.ENV_DB_PORT }}
+          DB_NAME=${{ secrets.ENV_DB_NAME }}
+          DB_USER=${{ secrets.ENV_DB_USER }}
+          DB_PASSWORD=${{ secrets.ENV_DB_PASSWORD }}
+          INDEXER_URL=${{ secrets.ENV_INDEXER_URL }}
+          NODE_ENV=production
+          EOF
 
-          # Git Configuration
+          # Configurazione Git
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
 
-          # Stage the .env file (forced, since it's likely in .gitignore)
+          # Commit del file .env (forzato se ignorato dal .gitignore)
           git add .env -f
-          git commit -m "Deploy with env vars [skip ci]" || echo "No changes to commit"
+          git commit -m "Deploy with env vars [skip ci]" || echo "Nessuna modifica da committare"
 
-          # Push to Beamup (Dokku expects master branch)
+          # Push forzato verso il master di Beamup
           git push beamup HEAD:master --force
