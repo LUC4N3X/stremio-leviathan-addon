@@ -9,18 +9,19 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      # 1️⃣ Checkout codice
       - name: Checkout del codice
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
+      # 2️⃣ Setup SSH
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.8.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # QUESTA È LA PARTE FONDAMENTALE CHE MANCAVA
-      
+      # 3️⃣ Genera hash utente per Beamup (12 caratteri)
       - name: Generate Beamup Hash
         id: hash
         run: |
@@ -28,31 +29,34 @@ jobs:
           echo "USER_HASH=$HASH" >> $GITHUB_ENV
           echo "Generated Hash: $HASH"
 
+      # 4️⃣ Aggiunge remote Beamup
       - name: Add Beamup Remote
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan ${{ secrets.BEAMUP_HOST }} >> ~/.ssh/known_hosts
-          
-          # Costruisce l'indirizzo corretto con l'HASH
-          git remote add beamup dokku@${{ secrets.BEAMUP_HOST }}:${{ env.USER_HASH }}/${{ secrets.PROJECT_NAME }}
+          ssh-keyscan -H ${{ secrets.BEAMUP_HOST }} >> ~/.ssh/known_hosts
+          git remote add beamup dokku@${{ secrets.BEAMUP_HOST }}:${{ env.USER_HASH }}/${{ secrets.PROJECT_NAME }} || true
 
+      # 5️⃣ Creazione file .env e deploy
       - name: Deploy to Beamup
         run: |
-          # Creiamo il file .env necessario per Beamup
-          # Mappiamo i tuoi segreti (ENV_...) nelle variabili che servono all'addon
-          echo "DB_HOST=${{ secrets.ENV_DB_HOST }}" >> .env
-          echo "DB_PORT=${{ secrets.ENV_DB_PORT }}" >> .env
-          echo "DB_NAME=${{ secrets.ENV_DB_NAME }}" >> .env
-          echo "DB_USER=${{ secrets.ENV_DB_USER }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.ENV_DB_PASSWORD }}" >> .env
-          echo "INDEXER_URL=${{ secrets.ENV_INDEXER_URL }}" >> .env
-          echo "NODE_ENV=production" >> .env
-          
-          # Aggiungiamo il file .env e facciamo il push
+          # Creiamo il file .env con le variabili necessarie
+          cat <<EOF > .env
+DB_HOST=${{ secrets.ENV_DB_HOST }}
+DB_PORT=${{ secrets.ENV_DB_PORT }}
+DB_NAME=${{ secrets.ENV_DB_NAME }}
+DB_USER=${{ secrets.ENV_DB_USER }}
+DB_PASSWORD=${{ secrets.ENV_DB_PASSWORD }}
+INDEXER_URL=${{ secrets.ENV_INDEXER_URL }}
+NODE_ENV=production
+EOF
+
+          # Config git per commit automatico
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
+
+          # Commit del file .env
           git add .env -f
-          git commit -m "Add env config for deploy"
-          
+          git commit -m "Add env config for deploy" || echo "Nothing to commit"
+
           # Push forzato su Beamup
           git push beamup HEAD:master --force
