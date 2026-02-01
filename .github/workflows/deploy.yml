@@ -1,4 +1,4 @@
-name: Deploy to Beamup
+name: Deploy to My Dokku
 
 on:
   push:
@@ -15,48 +15,33 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Usa la versione più recente per evitare avvisi di Node.js
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Generate Beamup Hash
-        id: hash
+      - name: Add Remote and Deploy
         run: |
-          # Calcola l'hash univoco basato sul tuo username GitHub
-          HASH=$(echo "${{ secrets.USERNAME_GITHUB }}" | awk '{print tolower($0)}' | shasum -a 256 | cut -c1-12)
-          echo "USER_HASH=$HASH" >> $GITHUB_ENV
-          echo "Generated Hash: $HASH"
-
-      - name: Add Beamup Remote
-        run: |
+          # Aggiunge l'IP del tuo server ai conosciuti
           mkdir -p ~/.ssh
           ssh-keyscan ${{ secrets.BEAMUP_HOST }} >> ~/.ssh/known_hosts
-          # Aggiunge il remote con il formato corretto per Beamup
-          git remote add beamup dokku@${{ secrets.BEAMUP_HOST }}:${{ env.USER_HASH }}/${{ secrets.PROJECT_NAME }}
-
-      - name: Deploy to Beamup
-        run: |
-          # 1. Crea il file .env mappando i tuoi segreti (ENV_...) nelle variabili standard
+          
+          # Aggiunge il remote (Semplice: dokku@IP:NOME_PROGETTO)
+          git remote add dokku dokku@${{ secrets.BEAMUP_HOST }}:${{ secrets.PROJECT_NAME }}
+          
+          # Creazione file .env per inviare le variabili
           echo "DB_HOST=${{ secrets.ENV_DB_HOST }}" >> .env
           echo "DB_PORT=${{ secrets.ENV_DB_PORT }}" >> .env
           echo "DB_NAME=${{ secrets.ENV_DB_NAME }}" >> .env
           echo "DB_USER=${{ secrets.ENV_DB_USER }}" >> .env
           echo "DB_PASSWORD=${{ secrets.ENV_DB_PASSWORD }}" >> .env
-          echo "INDEXER_URL=${{ secrets.ENV_INDEXER_URL }}" >> .env
           echo "NODE_ENV=production" >> .env
           
-          # Se hai altri segreti (es. TMDB), scommenta e aggiungi qui:
-          # echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" >> .env
-
-          # 2. Configura Git per poter fare il commit
+          # Setup git
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
-
-          # 3. Aggiunge il file .env e fa il commit (Passaggio chiave!)
+          
+          # Commit del .env e Push
           git add .env -f
-          git commit -m "Add env config for deploy"
-
-          # 4. Push forzato su Beamup
-          git push beamup HEAD:master --force
+          git commit -m "Deploy config"
+          git push dokku HEAD:master --force
