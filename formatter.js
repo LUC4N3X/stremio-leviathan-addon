@@ -284,7 +284,7 @@ function extractStreamInfo(title, source) {
 // 4. STILI DI FORMATTAZIONE
 // =========================================================================
 
-// Style 1: Leviathan (TV Fixed Edition)
+// Style 1: Leviathan (TV Fixed Edition - WITH SEEDERS FIX & SOURCE BOTTOM)
 function styleLeviathan(p) {
     // 1. PULIZIA AUDIO
     let cleanAudio = p.audioTag.replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, "").trim();
@@ -296,9 +296,6 @@ function styleLeviathan(p) {
     // ---------------------------
 
     // 2. HEADER
-    // SOLUZIONE FIX TV: Usiamo "small" (maiuscoletto).
-    // È molto più stretto di "bold" o "double" e sembra premium (tipo locandina film).
-    // Inoltre ho rimosso gli spazi extra intorno al calamaro.
     const brandName = toStylized("LEVIATHAN", "small"); 
     const name = `[${p.serviceTag}]🦑${brandName}`;
 
@@ -319,13 +316,20 @@ function styleLeviathan(p) {
     let audioPart = [cleanAudio, p.audioChannels].filter(Boolean).join(" ");
     lines.push(`🗣️ ${p.lang}  |  🔊 ${audioPart}`);
 
-    // RIGA 4: Info File
-    lines.push(`🧲 ${p.sizeString}  |  ${p.serviceIconTitle} ${p.displaySource}`);
+    // RIGA 4: Info File (Solo Dimensione e Seeders)
+    let fileInfo = `🧲 ${p.sizeString}`;
+    if (p.seedersStr) {
+        fileInfo += `  |  ${p.seedersStr}`;
+    }
+    lines.push(fileInfo);
+
+    // RIGA 5: Source (Spostata giù)
+    lines.push(`${p.serviceIconTitle} ${p.displaySource}`);
 
     return { name, title: lines.join("\n") };
 }
 
-// Style 2: Leviathan 2.0 (Clean)
+// Style 2: Leviathan 2.0 (Clean - WITH SEEDERS FIX)
 function styleLeviathanTwo(p) {
     const levText = toStylized("LEVIATHAN", "small");
     const name = `🦑 ${levText} ${p.serviceIconTitle} │ ${p.quality}`;
@@ -333,7 +337,14 @@ function styleLeviathanTwo(p) {
     lines.push(`🎬 ${toStylized(p.cleanName, "bold")}`);
     lines.push(`📦 ${p.sizeString} │ ${p.codec} ${p.videoTags.filter(x=>!x.includes(p.codec)).join(" ")}`);
     lines.push(`🔊 ${p.audioTag} ${p.audioChannels} • ${p.lang}`);
-    lines.push(`🔗 ${p.sourceLine}`);
+    
+    // FIX SEEDERS APPLICATO
+    let sourceRow = `🔗 ${p.sourceLine}`;
+    if (p.seedersStr) {
+        sourceRow += ` ${p.seedersStr}`;
+    }
+    lines.push(sourceRow);
+    
     return { name, title: lines.join("\n") };
 }
 
