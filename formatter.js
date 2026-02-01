@@ -100,7 +100,7 @@ function getEpisodeTag(filename) {
     return "";
 }
 
-// Generatore Testo Stilizzato (Font Aggiornati)
+// Generatore Testo Stilizzato (Font)
 function toStylized(text, type = 'std') {
     if (!text) return "";
     text = String(text);
@@ -113,15 +113,9 @@ function toStylized(text, type = 'std') {
             nums: {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9'},
             chars: {'A':'ᴀ','B':'ʙ','C':'ᴄ','D':'ᴅ','E':'ᴇ','F':'ꜰ','G':'ɢ','H':'ʜ','I':'ɪ','J':'ᴊ','K':'ᴋ','L':'ʟ','M':'ᴍ','N':'ɴ','O':'ᴏ','P':'ᴘ','Q':'ǫ','R':'ʀ','S':'ꜱ','T':'ᴛ','U':'ᴜ','V':'ᴠ','W':'ᴡ','X':'x','Y':'ʏ','Z':'ᴢ','a':'ᴀ','b':'ʙ','c':'ᴄ','d':'ᴅ','e':'ᴇ','f':'ꜰ','g':'ɢ','h':'ʜ','i':'ɪ','j':'ᴊ','k':'ᴋ','l':'ʟ','m':'ᴍ','n':'ɴ','o':'ᴏ','p':'ᴘ','q':'ǫ','r':'ʀ','s':'ꜱ','t':'ᴛ','u':'ᴜ','v':'ᴠ','w':'ᴡ','x':'x','y':'ʏ','z':'ᴢ'}
         },
-        // NUOVO: Stile Double Struck (𝕃𝔼𝕍𝕀𝔸𝕋ℍ𝔸ℕ)
         'double': {
             nums: {'0':'𝟘','1':'𝟙','2':'𝟚','3':'𝟛','4':'𝟜','5':'𝟝','6':'𝟞','7':'𝟟','8':'𝟠','9':'𝟡'},
             chars: {'A':'𝔸','B':'𝔹','C':'ℂ','D':'𝔻','E':'𝔼','F':'𝔽','G':'𝔾','H':'ℍ','I':'𝕀','J':'𝕁','K':'𝕂','L':'𝕃','M':'𝕄','N':'ℕ','O':'𝕆','P':'ℙ','Q':'ℚ','R':'ℝ','S':'𝕊','T':'𝕋','U':'𝕌','V':'𝕍','W':'𝕎','X':'𝕏','Y':'𝕐','Z':'ℤ','a':'𝕒','b':'𝕓','c':'𝕔','d':'𝕕','e':'𝕖','f':'𝕗','g':'𝕘','h':'𝕙','i':'𝕚','j':'𝕛','k':'𝕜','l':'𝕝','m':'𝕞','n':'𝕟','o':'𝕠','p':'𝕡','q':'𝕢','r':'𝕣','s':'𝕤','t':'𝕥','u':'𝕦','v':'𝕧','w':'𝕨','x':'𝕩','y':'𝕪','z':'𝕫'}
-        },
-        // NUOVO: Stile Gothic (𝕷𝖊𝖛𝖎𝖆𝖙𝖍𝖆𝖓)
-        'gothic': {
-            nums: {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9'},
-            chars: {'A':'𝕬','B':'𝕭','C':'𝕮','D':'𝕯','E':'𝕰','F':'𝕱','G':'𝕲','H':'𝕳','I':'𝕴','J':'𝕵','K':'𝕶','L':'𝕷','M':'𝕸','N':'𝕹','O':'𝕺','P':'𝕻','Q':'𝕼','R':'𝕽','S':'𝕾','T':'𝕿','U':'𝖀','V':'𝖁','W':'𝖂','X':'𝖃','Y':'𝖄','Z':'𝖅','a':'𝖆','b':'𝖇','c':'𝖈','d':'𝖉','e':'𝖊','f':'𝖋','g':'𝖌','h':'𝖍','i':'𝖎','j':'𝖏','k':'𝖐','l':'𝖑','m':'𝖒','n':'𝖓','o':'𝖔','p':'𝖕','q':'𝖖','r':'𝖗','s':'𝖘','t':'𝖙','u':'𝖚','v':'𝖛','w':'𝖜','x':'𝖝','y':'𝖞','z':'𝖟'}
         }
     };
 
@@ -262,9 +256,7 @@ function extractStreamInfo(title, source) {
 
   if (info.audio) {
       const a = info.audio.toUpperCase();
-      // NOTA: Qui rimuoviamo le emoji hardcoded per pulizia, verranno gestite nella funzione di stile se necessario
-      // Ma manteniamo la logica di rilevamento per retrocompatibilità con altri stili
-      if (a.includes("ATMOS")) audioTag = "Atmos"; // Emoji rimosse qui per sicurezza generale
+      if (a.includes("ATMOS")) audioTag = "Atmos"; 
       else if (a.includes("DTS-X") || a.includes("DTS:X")) audioTag = "DTS:X";
       else if (a.includes("TRUEHD")) audioTag = "TrueHD";
       else if (a.includes("DTS-HD") || a.includes("MA")) audioTag = "DTS-HD";
@@ -292,7 +284,7 @@ function extractStreamInfo(title, source) {
 // 4. STILI DI FORMATTAZIONE
 // =========================================================================
 
-// Style 1: Leviathan (Final Signature Edition)
+// Style 1: Leviathan (TV Fixed Edition)
 function styleLeviathan(p) {
     // 1. PULIZIA AUDIO
     let cleanAudio = p.audioTag.replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, "").trim();
@@ -303,14 +295,12 @@ function styleLeviathan(p) {
     const techIcon = "🔱"; 
     // ---------------------------
 
-    // 2. HEADER - EFFETTO STRAFIGO
-    // Scegli qui lo stile: "double" (Premium), "gothic" (Dark) o "bold" (Standard)
-    
-    // --> OPZIONE SCELTA: DOUBLE STRUCK (𝕃𝔼𝕍𝕀𝔸𝕋ℍ𝔸ℕ)
-    // Non va a capo perché non ha spazi extra, ma è molto visibile.
-    const brandName = toStylized("LEVIATHAN", "double"); 
-
-    const name = `[${p.serviceTag}] 🦑 ${brandName}`;
+    // 2. HEADER
+    // SOLUZIONE FIX TV: Usiamo "small" (maiuscoletto).
+    // È molto più stretto di "bold" o "double" e sembra premium (tipo locandina film).
+    // Inoltre ho rimosso gli spazi extra intorno al calamaro.
+    const brandName = toStylized("LEVIATHAN", "small"); 
+    const name = `[${p.serviceTag}]🦑${brandName}`;
 
     // 3. RIGA TECH
     let techSpecs = [p.quality, ...p.cleanTags].filter(Boolean);
