@@ -23,6 +23,9 @@ const TbCache = require("./debrid/tb_cache.js");
 // --- IMPORT NUOVO FORMATTER (Skins & Logic) ---
 const { formatStreamSelector, cleanFilename, formatBytes } = require("./formatter");
 
+// --- 🔥 IMPORT GESTORE P2P (NUOVO) 🔥 ---
+const P2P = require("./p2p_handler");
+
 // --- IMPORT GESTORE TRAILER (YouTube/Invidious) ---
 const { getTrailerStreams } = require("./trailerProvider"); 
 
@@ -105,7 +108,7 @@ const REGEX_QUALITY_FILTER = {
 };
 
 // =========================================================================
-// 🔥 NUOVO SISTEMA DI RICONOSCIMENTO LINGUA (STRICT MODE) 🔥
+// 🔥 SISTEMA DI RICONOSCIMENTO LINGUA (STRICT MODE) 🔥
 // =========================================================================
 
 // 1. ITA/ITALIAN: Sicuri al 100% (3 lettere o più)
@@ -747,10 +750,7 @@ async function queryLocalIndexer(meta, config) {
                           const extracted = extractInfoHash(t.magnet);
                           if (extracted) finalHash = extracted.toUpperCase();
                     }
-                    let magnetLink = t.magnet;
-                    if (!magnetLink && finalHash && finalHash.length === 40) {
-                        magnetLink = `magnet:?xt=urn:btih:${finalHash}&dn=${encodeURIComponent(t.title || 'video')}`;
-                    }
+                    let magnetLink = t.magnet || `magnet:?xt=urn:btih:${finalHash}&dn=${encodeURIComponent(t.title || 'video')}`;
                     return {
                         title: t.title || t.name || "Unknown Title",
                         magnet: magnetLink,
@@ -920,9 +920,13 @@ async function fetchExternalResults(type, finalId) {
 async function generateStream(type, id, config, userConfStr, reqHost) {
   const hasDebridKey = (config.key && config.key.length > 0) || (config.rd && config.rd.length > 0);
   const isWebEnabled = config.filters && (config.filters.enableVix || config.filters.enableGhd || config.filters.enableGs);
+  
+  // --- 🆕 P2P CHECK: Leggiamo il flag dalla config ---
+  const isP2PEnabled = config.filters && config.filters.enableP2P === true;
 
-  if (!hasDebridKey && !isWebEnabled) {
-      return { streams: [{ name: "⚠️ CONFIG", title: "Inserisci API Key o Attiva SC/GuardaHD/GuardaSerie" }] };
+  // Se non c'è Debrid, NON ci sono Web Scraper E il P2P è spento, allora mostra errore.
+  if (!hasDebridKey && !isWebEnabled && !isP2PEnabled) {
+      return { streams: [{ name: "⚠️ CONFIG", title: "Inserisci API Key, Attiva P2P o Attiva WebStream" }] };
   }
   
   const configHash = crypto.createHash('md5').update(userConfStr || 'no-conf').digest('hex');
@@ -1005,11 +1009,8 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
            }
       }
       
-      =
       // CASO 2: SOLO INGLESE (Escludi attivamente l'Italiano)
       else if (langMode === "eng") {
-           
-           
            const hasStrongIta = REGEX_STRONG_ITA.test(t) || REGEX_MULTI_ITA.test(t);
            const hasContextIt = REGEX_CONTEXT_IT.test(t);
            const isTrustedItaGroup = REGEX_TRUSTED_GROUPS.test(t); // Es: Mux, Corsaro
@@ -1017,10 +1018,9 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
            // Se è palesemente italiano, via!
            if (hasStrongIta || hasContextIt || isTrustedItaGroup) return false;
       }
-
       
-      // CASO 3: ITALIANO + INGLESE ("all")
-    
+      // CASO 3: ITALIANO + INGLESE ("all") - Nessun filtro lingua
+
       // --- FILTRO ANNO ---
       const metaYear = parseInt(meta.year);
       if (metaYear === 2025 && /frankenstein/i.test(meta.title)) {
@@ -1289,6 +1289,8 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   const ranked = finalRanked;
 
   let debridStreams = [];
+  
+  // CASO 1: UTENTE CON DEBRID (Logica Esistente)
   if (ranked.length > 0 && hasDebridKey) {
       let TOP_LIMIT = 0; 
       if (type === 'series') {
@@ -1310,6 +1312,14 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
 
       const resolvedInstant = (await Promise.all(immediatePromises)).filter(Boolean);
       debridStreams = [...resolvedInstant, ...lazyStreams];
+  } 
+  
+  // 🔥🔥🔥 CASO 2: UTENTE P2P (NUOVA LOGICA UNIFICATA CON FORMATTER) 🔥🔥🔥
+  else if (ranked.length > 0 && isP2PEnabled) {
+      logger.info(`⚡ [P2P MODE] Generating direct streams for ${meta.title}`);
+      
+      // Passiamo anche 'config' per far funzionare il formatter condiviso
+      debridStreams = ranked.map(item => P2P.formatP2PStream(item, config));
   }
 
   let rawVix = [], formattedGhd = [], formattedGs = [], formattedVix = [];
@@ -1631,6 +1641,7 @@ app.get("/:conf/manifest.json", (req, res) => {
         const hasRDKey = (config.service === 'rd' && config.key) || config.rd;
         const hasTBKey = (config.service === 'tb' && config.key) || config.torbox;
         const hasADKey = (config.service === 'ad' && config.key) || config.alldebrid;
+        const isP2P = filters.enableP2P === true;
 
         // --- 3. ASSEMBLAGGIO FINALE ---
         if (hasRDKey) {
@@ -1644,6 +1655,12 @@ app.get("/:conf/manifest.json", (req, res) => {
         else if (hasADKey) {
             manifest.name = `${appName}${flag} 🐚 AD`;
             manifest.id += ".ad";
+        }
+        else if (isP2P) {
+             // ⚡ NUOVA LOGICA P2P
+            manifest.name = `${appName}${flag} 🦈 P2P`;
+            manifest.id += ".p2p";
+            manifest.description += " | ⚠️ P2P Mode (IP Visible)";
         }
         else {
             manifest.name = `${appName}${flag} 🌐 Web`;
@@ -1704,6 +1721,7 @@ app.listen(PORT, () => {
     console.log(`🎬 TRAILER: Attivabile da Config (Default: OFF, Primo Risultato se ON)`);
     console.log(`📦 TORBOX: ADVANCED SMART CACHE + ID GRABBER ENABLED`);
     console.log(`📝 PARSER: ENHANCED (Smart Extraction Active)`); 
+    console.log(`⚡ P2P: HANDLER ATTIVO (Graphic Skin + Tracker Fix)`);
     console.log(`🦑 LEVIATHAN CORE: Optimized for High Reliability`);
     console.log(`-----------------------------------------------------`);
 });
