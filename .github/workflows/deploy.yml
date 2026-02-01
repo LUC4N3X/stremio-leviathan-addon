@@ -19,23 +19,35 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      # QUESTA È LA PARTE MAGICA CHE MANCAVA
+      # Calcola un codice univoco basato sul tuo username GitHub
+      - name: Generate Beamup Hash
+        id: hash
+        run: |
+          HASH=$(echo "${{ secrets.USERNAME_GITHUB }}" | awk '{print tolower($0)}' | shasum -a 256 | cut -c1-12)
+          echo "USER_HASH=$HASH" >> $GITHUB_ENV
+          echo "Generated Hash: $HASH"
+
       - name: Aggiungi Beamup ai Known Hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.BEAMUP_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan ${{ secrets.BEAMUP_HOST }} >> ~/.ssh/known_hosts
+          
+          # Qui usa l'HASH generato per creare l'indirizzo corretto
+          # Formato: dokku@HOST:HASH/NOME_PROGETTO
+          git remote add beamup dokku@${{ secrets.BEAMUP_HOST }}:${{ env.USER_HASH }}/${{ secrets.PROJECT_NAME }}
 
-      - name: Imposta Variabili Ambiente (Config Vars)
+      - name: Deploy to Beamup
         run: |
-          ssh dokku@${{ secrets.BEAMUP_HOST }} config:set ${{ secrets.PROJECT_NAME }} \
-            DB_HOST='${{ secrets.ENV_DB_HOST }}' \
-            DB_PORT='${{ secrets.ENV_DB_PORT }}' \
-            DB_NAME='${{ secrets.ENV_DB_NAME }}' \
-            DB_USER='${{ secrets.ENV_DB_USER }}' \
-            DB_PASSWORD='${{ secrets.ENV_DB_PASSWORD }}' \
-            INDEXER_URL='${{ secrets.ENV_INDEXER_URL }}' \
-            NODE_ENV='production'
-
-      - name: Push e Deploy su Beamup
-        run: |
-          git remote add beamup dokku@${{ secrets.BEAMUP_HOST }}:${{ secrets.PROJECT_NAME }}
-          git push beamup HEAD:master -f
+          # Creiamo il file .env al volo (come nel tuo esempio)
+          # Beamup userà questo file per leggere le password
+          echo "DB_HOST=${{ secrets.ENV_DB_HOST }}" >> .env
+          echo "DB_PORT=${{ secrets.ENV_DB_PORT }}" >> .env
+          echo "DB_NAME=${{ secrets.ENV_DB_NAME }}" >> .env
+          echo "DB_USER=${{ secrets.ENV_DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.ENV_DB_PASSWORD }}" >> .env
+          echo "INDEXER_URL=${{ secrets.ENV_INDEXER_URL }}" >> .env
+          echo "NODE_ENV=production" >> .env
+          
+          # Push forzato sul server
+          git push beamup HEAD:master --force
