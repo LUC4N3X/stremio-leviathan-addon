@@ -20,7 +20,7 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       # QUESTA È LA PARTE FONDAMENTALE CHE MANCAVA
-      # Calcola l'hash basato sul tuo username GitHub
+      
       - name: Generate Beamup Hash
         id: hash
         run: |
