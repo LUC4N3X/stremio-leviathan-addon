@@ -14,13 +14,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Setup SSH con la chiave privata dal secret
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.8.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # QUESTA È LA PARTE MAGICA CHE MANCAVA
-      # Calcola un codice univoco basato sul tuo username GitHub
+      # Genera hash univoco basato sul tuo username GitHub
       - name: Generate Beamup Hash
         id: hash
         run: |
@@ -28,20 +28,21 @@ jobs:
           echo "USER_HASH=$HASH" >> $GITHUB_ENV
           echo "Generated Hash: $HASH"
 
-      - name: Aggiungi Beamup ai Known Hosts
+      # Aggiunge il server Beamup ai known hosts
+      - name: Add Beamup to known_hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan ${{ secrets.BEAMUP_HOST }} >> ~/.ssh/known_hosts
-          
-          # Qui usa l'HASH generato per creare l'indirizzo corretto
-          # Formato: dokku@HOST:HASH/NOME_PROGETTO
-          git remote add beamup dokku@${{ secrets.BEAMUP_HOST }}:${{ env.USER_HASH }}/${{ secrets.PROJECT_NAME }}
+          ssh-keyscan -H ${{ secrets.BEAMUP_HOST }} >> ~/.ssh/known_hosts
 
+      # Configura il remote git per Beamup
+      - name: Configure Git Remote
+        run: |
+          git remote add beamup dokku@${{ secrets.BEAMUP_HOST }}:${{ env.USER_HASH }}/${{ secrets.PROJECT_NAME }} || true
+
+      # Crea il file .env e push su Beamup
       - name: Deploy to Beamup
         run: |
-          # Creiamo il file .env al volo (come nel tuo esempio)
-          # Beamup userà questo file per leggere le password
-          echo "DB_HOST=${{ secrets.ENV_DB_HOST }}" >> .env
+          echo "DB_HOST=${{ secrets.ENV_DB_HOST }}" > .env
           echo "DB_PORT=${{ secrets.ENV_DB_PORT }}" >> .env
           echo "DB_NAME=${{ secrets.ENV_DB_NAME }}" >> .env
           echo "DB_USER=${{ secrets.ENV_DB_USER }}" >> .env
@@ -49,5 +50,7 @@ jobs:
           echo "INDEXER_URL=${{ secrets.ENV_INDEXER_URL }}" >> .env
           echo "NODE_ENV=production" >> .env
           
-          # Push forzato sul server
+          git add .env
+          git commit -m "Add .env for deployment" || echo "No changes to commit"
+          
           git push beamup HEAD:master --force
