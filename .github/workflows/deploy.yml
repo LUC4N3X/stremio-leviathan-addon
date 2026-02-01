@@ -23,10 +23,9 @@ jobs:
         id: hash
         run: |
           USER_NAME="${{ secrets.USERNAME_GITHUB }}"
-          if [ -z "$USER_NAME" ]; then echo "ERRORE: USERNAME_GITHUB mancante"; exit 1; fi
+          # Calcolo hash ufficiale
           HASH=$(echo "$USER_NAME" | tr '[:upper:]' '[:lower:]' | shasum -a 256 | cut -c1-12)
           echo "USER_HASH=$HASH" >> $GITHUB_ENV
-          echo "Hash generato: $HASH"
 
       - name: Prepare and Push to Beamup
         env:
@@ -37,7 +36,7 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
 
-          # 2. Creazione file .env
+          # 2. Creazione .env
           cat <<EOF > .env
           DB_HOST=${{ secrets.ENV_DB_HOST }}
           DB_PORT=${{ secrets.ENV_DB_PORT }}
@@ -48,14 +47,13 @@ jobs:
           NODE_ENV=production
           EOF
 
-          # 3. Commit (forzato)
+          # 3. Commit del file .env
           git add .env -f
           git commit -m "Deploy with env vars [skip ci]" || echo "Nessuna modifica"
 
-          # 4. PUSH DIRETTO
-          # Usiamo GIT_SSH_COMMAND per ignorare il controllo dell'host key e non toccare ~/.ssh
-          # L'URL è costruito al volo usando i tuoi segreti
-          export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"
+          # 4. IL FIX: Ignoriamo il controllo dell'host per non rimanere appesi
+          # Aggiungiamo -v per il debug in caso di errore
+          export GIT_SSH_COMMAND="ssh -v -o StrictHostKeyChecking=no"
           
           REMOTE_URL="dokku@$BEAMUP_HOST:${{ env.USER_HASH }}/$PROJECT_NAME"
           
