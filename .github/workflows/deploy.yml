@@ -22,26 +22,22 @@ jobs:
       - name: Generate Beamup Hash
         id: hash
         run: |
-          # Calcolo hash con fallback se il segreto è vuoto
           USER_NAME="${{ secrets.USERNAME_GITHUB }}"
-          if [ -z "$USER_NAME" ]; then echo "Errore: USERNAME_GITHUB mancante"; exit 1; fi
-          
+          if [ -z "$USER_NAME" ]; then echo "ERRORE: USERNAME_GITHUB mancante"; exit 1; fi
           HASH=$(echo "$USER_NAME" | tr '[:upper:]' '[:lower:]' | shasum -a 256 | cut -c1-12)
           echo "USER_HASH=$HASH" >> $GITHUB_ENV
+          echo "Hash generato: $HASH"
 
-      - name: Deploy to Beamup
+      - name: Prepare and Push to Beamup
         env:
           BEAMUP_HOST: ${{ secrets.BEAMUP_HOST }}
           PROJECT_NAME: ${{ secrets.PROJECT_NAME }}
         run: |
-          # 1. Configurazione Git identità
+          # 1. Configurazione Git
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
 
-          # 2. Setup SSH "Senza Mani": Ignora il controllo dell'host key per evitare errori di permessi su ~/.ssh
-          export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
-
-          # 3. Creazione .env
+          # 2. Creazione file .env
           cat <<EOF > .env
           DB_HOST=${{ secrets.ENV_DB_HOST }}
           DB_PORT=${{ secrets.ENV_DB_PORT }}
@@ -52,10 +48,16 @@ jobs:
           NODE_ENV=production
           EOF
 
-          # 4. Commit del file .env
+          # 3. Commit (forzato)
           git add .env -f
-          git commit -m "Deploy with env vars [skip ci]" || echo "No changes"
+          git commit -m "Deploy with env vars [skip ci]" || echo "Nessuna modifica"
 
-          # 5. Push diretto usando l'URL completo (evita problemi di 'git remote add')
+          # 4. PUSH DIRETTO
+          # Usiamo GIT_SSH_COMMAND per ignorare il controllo dell'host key e non toccare ~/.ssh
+          # L'URL è costruito al volo usando i tuoi segreti
+          export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"
+          
           REMOTE_URL="dokku@$BEAMUP_HOST:${{ env.USER_HASH }}/$PROJECT_NAME"
+          
+          echo "Avvio push su: $REMOTE_URL"
           git push "$REMOTE_URL" HEAD:master --force
