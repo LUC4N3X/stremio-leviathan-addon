@@ -1,0 +1,41 @@
+name: Deploy Leviathan to Beamup
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del codice
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Aggiungi Beamup ai Known Hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.BEAMUP_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Imposta Variabili Ambiente (Config Vars)
+        run: |
+          ssh dokku@${{ secrets.BEAMUP_HOST }} config:set ${{ secrets.PROJECT_NAME }} \
+            DB_HOST='${{ secrets.ENV_DB_HOST }}' \
+            DB_PORT='${{ secrets.ENV_DB_PORT }}' \
+            DB_NAME='${{ secrets.ENV_DB_NAME }}' \
+            DB_USER='${{ secrets.ENV_DB_USER }}' \
+            DB_PASSWORD='${{ secrets.ENV_DB_PASSWORD }}' \
+            INDEXER_URL='${{ secrets.ENV_INDEXER_URL }}' \
+            NODE_ENV='production'
+
+      - name: Push e Deploy su Beamup
+        run: |
+          git remote add beamup dokku@${{ secrets.BEAMUP_HOST }}:${{ secrets.PROJECT_NAME }}
+          git push beamup HEAD:master -f
