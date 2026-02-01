@@ -4,15 +4,15 @@ on:
   push:
     branches:
       - main
+      - master
   workflow_dispatch:
-  release:
-    types: [published]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -24,34 +24,41 @@ jobs:
       - name: Generate Beamup Hash
         id: hash
         run: |
-          # OFFICIAL LOGIC: echo (with newline) -> lowercase -> shasum -> cut 12
+          # Logic: lowercase username -> shasum -> first 12 chars
           HASH=$(echo "${{ secrets.USERNAME_GITHUB }}" | awk '{print tolower($0)}' | shasum -a 256 | cut -c1-12)
           echo "USER_HASH=$HASH" >> $GITHUB_ENV
           echo "Generated Hash: $HASH"
 
       - name: Add Beamup Remote
         run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan ${{ secrets.BEAMUP_HOST }} >> ~/.ssh/known_hosts
-          # URL format: dokku@HOST:HASH/PROJECT
+          # No mkdir needed; ssh-agent action already created ~/.ssh
+          # We use -H to hash the host in known_hosts for better security
+          ssh-keyscan -H ${{ secrets.BEAMUP_HOST }} >> ~/.ssh/known_hosts
+          
+          # Add the remote using the generated hash
           git remote add beamup dokku@${{ secrets.BEAMUP_HOST }}:${{ env.USER_HASH }}/${{ secrets.PROJECT_NAME }}
 
-      - name: Deploy to Beamup
+      - name: Build Environment and Push
         run: |
-          # Create .env file for Beamup to use during build/start
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
-          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-          echo "DEBUG_MODE=${{ secrets.DEBUG_MODE }}" >> .env
-          echo "ENRICHMENT_API_KEY=${{ secrets.ENRICHMENT_API_KEY }}" >> .env
-          echo "ENRICHMENT_PORT=${{ secrets.ENRICHMENT_PORT }}" >> .env
-          echo "ENRICHMENT_SERVER_URL=${{ secrets.ENRICHMENT_SERVER_URL }}" >> .env
-          echo "ENRICHMENT_SERVER_URL_2=${{ secrets.ENRICHMENT_SERVER_URL_2 }}" >> .env
-          echo "SEEDER_UPDATE_URL=${{ secrets.SEEDER_UPDATE_URL }}" >> .env
-          echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" >> .env
+          # Create .env file from secrets
+          echo "DB_HOST=${{ secrets.ENV_DB_HOST }}" > .env
+          echo "DB_PORT=${{ secrets.ENV_DB_PORT }}" >> .env
+          echo "DB_NAME=${{ secrets.ENV_DB_NAME }}" >> .env
+          echo "DB_USER=${{ secrets.ENV_DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.ENV_DB_PASSWORD }}" >> .env
+          echo "INDEXER_URL=${{ secrets.ENV_INDEXER_URL }}" >> .env
+          echo "NODE_ENV=production" >> .env
           
-          # Force push to beamup master/main
+          # Optional: Add other keys if they exist
+          # echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" >> .env
+
+          # Git Configuration
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+
+          # Stage the .env file (forced, since it's likely in .gitignore)
+          git add .env -f
+          git commit -m "Deploy with env vars [skip ci]" || echo "No changes to commit"
+
+          # Push to Beamup (Dokku expects master branch)
           git push beamup HEAD:master --force
