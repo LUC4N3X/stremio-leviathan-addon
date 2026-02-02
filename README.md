@@ -244,7 +244,7 @@ Leviathan non impone l'uso di intermediari. Il motore supporta la connessione di
 | **StreamingCommunity** | 🇮🇹 ITA | ![](https://img.shields.io/badge/⏱️_INSTANT-ULTRA-FF0000?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🌪️_HLS-Stream-red?style=flat-square&labelColor=black) | 🟢 |
 | **GuardaHD** | 🇮🇹 ITA | ![](https://img.shields.io/badge/⏱️_INSTANT-PREMIUM-00ff00?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🦁_HLS-Stream-red?style=flat-square&labelColor=black) | 🟢 |
 | **GuardaSerie** | 🇮🇹 ITA | ![](https://img.shields.io/badge/⏱️_INSTANT-HQ-00ff00?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🍿_HLS-Stream-red?style=flat-square&labelColor=black) | 🟢 |
-| **AnimeWorld** | 🇮🇹 ITA | ![](https://img.shields.io/badge/⏱️_INSTANT-ANIME-ff9900?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🦊_HLS-Stream-red?style=flat-square&labelColor=black) | 🟢 |
+| **AnimeWorld** | 🇮🇹 ITA | ![](https://img.shields.io/badge/⏱️_INSTANT-ANIME-ff9900?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/⛩️_HLS-Stream-red?style=flat-square&labelColor=black) | 🟢 |
 
 </div>
 
