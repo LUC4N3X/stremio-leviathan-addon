@@ -337,38 +337,40 @@ http://localhost:7000
 > **AVVISO CRITICO DI CONFORMITÀ LEGALE**
 > L'accesso, l'installazione e l'esecuzione del codice contenuto in questo repository costituiscono l'accettazione incondizionata delle seguenti clausole di esclusione della responsabilità.
 
-### 1. 🛡️ Natura Agnostica e Neutralità Tecnologica
-**Leviathan** è definito tecnicamente come un *Web Scraper User-Agent* e un *Framework di Indicizzazione Distribuita*.
+### 1. 🛡️ Natura Agnostica e Caching Tecnico
+**Leviathan** è definito tecnicamente come un *Web Scraper User-Agent* supportato da un layer di *Casting Volatile*.
 Il software opera secondo il principio della **Neutralità Tecnologica**:
-* **Funzione Esclusiva:** Il codice agisce come un interprete automatizzato di linguaggi di markup (HTML/XML/JSON). La sua funzione è limitata all'estrazione di stringhe di testo (metadati) da sorgenti pubbliche definite dall'utente.
-* **Assenza di Hosting:** Leviathan **NON** ospita, **NON** trasmette, **NON** memorizza e **NON** indicizza sui propri server alcun contenuto protetto da diritto d'autore (Video, Audio, Binari).
-* **Non-Interferenza:** Il software non possiede capacità intrinseche di decriptazione (DRM bypass), elusione di misure tecnologiche di protezione o accesso abusivo a sistemi informatici.
+
+* **Funzione Esclusiva:** Il codice agisce come un interprete automatizzato. La sua funzione è limitata all'estrazione e all'organizzazione temporanea di stringhe di testo (metadati) da sorgenti pubbliche.
+* **Assenza di Contenuti (No-Hosting):** Leviathan **NON** ospita, **NON** trasmette e **NON** possiede sui propri server alcun file multimediale protetto da diritto d'autore (Video, Audio, Binari).
+* **Natura dei Dati (Pointer Data):** L'eventuale persistenza di dati nell'infrastruttura server è limitata esclusivamente a "Puntatori Informatici" (Hash crittografici, Magnet URI, Metadati testuali). Tali dati non costituiscono l'opera creativa, ma semplici indirizzi logici già pubblicamente accessibili nella rete Internet.
+* **Finalità di Caching:** Qualsiasi memorizzazione di stringhe ha l'unico scopo tecnico di **ridurre la latenza di rete** (Performance Caching) e limitare il carico sui server sorgente. Non costituisce un indice curato o permanente.
 
 ### 2. 🧪 Finalità di Ricerca e Sviluppo (R&D)
 Il presente repository è pubblicato sotto licenza Open Source con finalità strettamente limitate a:
-* **Proof of Concept (PoC):** Dimostrazione teorica di algoritmi di scraping ed estrazione dati.
-* **Interoperabilità:** Studio delle interazioni tra protocolli di rete decentralizzati e client multimediali.
+* **Proof of Concept (PoC):** Dimostrazione teorica di algoritmi di scraping ed estrazione dati ad alta concorrenza.
+* **Network Optimization:** Studio delle tecniche di *Query Caching* per la riduzione del traffico ripetitivo su protocolli decentralizzati.
 * **Analisi Forense:** Test di sicurezza e analisi del traffico web in ambienti controllati (Sandboxed Environment).
 
 ### 3. 🚫 Limitazione di Responsabilità e Manleva (Indemnification)
-L'autore (**LUC4N3X**), i contributori e i maintainer del progetto non esercitano alcun controllo, monitoraggio o supervisione sull'utilizzo del software da parte dell'utente finale.
+L'autore (**LUC4N3X**), i contributori e i maintainer del progetto non esercitano alcun controllo, monitoraggio o supervisione sull'effettivo utilizzo dei puntatori informatici da parte dell'utente finale.
 
 **L'Utente Finale dichiara e garantisce che:**
-1.  **Utilizzo Autonomo:** L'utilizzo del software avviene a proprio esclusivo rischio e pericolo su infrastrutture locali o private.
+1.  **Utilizzo Autonomo:** L'utilizzo del software avviene a proprio esclusivo rischio.
 2.  **Conformità Giurisdizionale:** L'utente si assume l'onere di verificare che l'uso di Leviathan sia conforme alle leggi vigenti nel proprio territorio (inclusi, ma non limitati a: DMCA 17 U.S.C. § 512, Direttiva Copyright UE 2019/790).
 3.  **Esonero di Responsabilità:** L'utente accetta di manlevare, indennizzare e tenere indenne lo sviluppatore da qualsiasi rivendicazione, azione legale, sanzione o richiesta di risarcimento danni derivante dall'uso improprio, illecito o non autorizzato del codice.
 
 ### 4. 🏴‍☠️ Politica Zero-Tolerance sulla Pirateria
-Il software è progettato per l'indicizzazione di contenuti di pubblico dominio (Public Domain) o licenziati liberamente (Creative Commons).
-**Qualsiasi utilizzo volto alla violazione del copyright, alla pirateria digitale o alla distribuzione non autorizzata di proprietà intellettuale è severamente proibito.**
-Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico a configurazioni volte a tale scopo.
+Il software è progettato per l'ottimizzazione dell'accesso a contenuti di pubblico dominio (Public Domain) o licenziati liberamente.
+**Qualsiasi utilizzo volto alla violazione del copyright o alla pirateria digitale è severamente proibito.**
+La presenza di hash o magnet link nel sistema di caching non implica l'approvazione o la verifica del contenuto sottostante da parte degli sviluppatori, che agiscono come meri fornitori di tecnologia passiva (Mere Conduit).
 
 ---
 
 > **CLAUSOLA RISOLUTIVA ESPRESSA**
 > Se non concordi con anche solo una delle clausole sopra esposte, o se la legislazione del tuo paese non consente tale limitazione di responsabilità, non sei autorizzato a utilizzare questo software.
 >
-> **⚠️ INTERROMPI L'ESECUZIONE, ELIMINA IL CONTAINER E DISTRUGGI IL CODICE SORGENTE IMMEDIATAMENTE.**
+> **⚠️ INTERROMPI L'ESECUZIONE E ABBANDONA LA SESSIONE IMMEDIATAMENTE.**
 >
 > ... altrimenti ...
 
