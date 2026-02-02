@@ -23,16 +23,17 @@ const TbCache = require("./debrid/tb_cache.js");
 // --- IMPORT NUOVO FORMATTER (Skins & Logic) ---
 const { formatStreamSelector, cleanFilename, formatBytes } = require("./formatter");
 
-// --- 🔥 IMPORT GESTORE P2P (NUOVO) 🔥 ---
+// ---  IMPORT GESTORE P2P  ---
 const P2P = require("./p2p_handler");
 
 // --- IMPORT GESTORE TRAILER (YouTube/Invidious) ---
 const { getTrailerStreams } = require("./trailerProvider"); 
 
-// --- IMPORT GESTORI WEB (Vix, GuardaHD & GuardaSerie) ---
+// --- IMPORT GESTORI WEB (Vix, GuardaHD, GuardaSerie & AnimeWorld) ---
 const { searchVix } = require("./vix/vix_handler");
 const { searchGuardaHD } = require("./guardahd/ghd_handler"); 
 const { searchGuardaserie } = require("./guardaserie/gs_handler"); 
+const { searchAnimeWorld } = require("./animeworld/aw_handler"); // <--- NUOVO IMPORT
 
 // --- 1. CONFIGURAZIONE LOGGER (Winston) ---
 const logger = winston.createLogger({
@@ -919,7 +920,7 @@ async function fetchExternalResults(type, finalId) {
 // --- GENERATE STREAM ---
 async function generateStream(type, id, config, userConfStr, reqHost) {
   const hasDebridKey = (config.key && config.key.length > 0) || (config.rd && config.rd.length > 0);
-  const isWebEnabled = config.filters && (config.filters.enableVix || config.filters.enableGhd || config.filters.enableGs);
+  const isWebEnabled = config.filters && (config.filters.enableVix || config.filters.enableGhd || config.filters.enableGs || config.filters.enableAnimeWorld);
   
   // --- 🆕 P2P CHECK: Leggiamo il flag dalla config ---
   const isP2PEnabled = config.filters && config.filters.enableP2P === true;
@@ -1259,7 +1260,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
                       item._size = result.file_size;
                   }
 
-                  // 🆕 ASSEGNAZIONE FONDAMENTALE DELL'ID
+                  //  ASSEGNAZIONE FONDAMENTALE DELL'ID
                   // Questo impedisce l'errore "Idx: NaN" al playback
                   if (result.file_id !== undefined && result.file_id !== null) {
                       item.fileIdx = result.file_id;
@@ -1290,7 +1291,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
 
   let debridStreams = [];
   
-  // CASO 1: UTENTE CON DEBRID (Logica Esistente)
+  // CASO 1: UTENTE CON DEBRID 
   if (ranked.length > 0 && hasDebridKey) {
       let TOP_LIMIT = 0; 
       if (type === 'series') {
@@ -1322,7 +1323,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       debridStreams = ranked.map(item => P2P.formatP2PStream(item, config));
   }
 
-  let rawVix = [], formattedGhd = [], formattedGs = [], formattedVix = [];
+  let rawVix = [], formattedGhd = [], formattedGs = [], formattedVix = [], formattedAw = [];
 
   if (!dbOnlyMode) {
        const vixPromise = searchVix(meta, config, reqHost);
@@ -1342,7 +1343,17 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
            });
        }
 
-       [rawVix, formattedGhd, formattedGs] = await Promise.all([vixPromise, ghdPromise, gsPromise]);
+       // --- ANIME WORLD INTEGRATION ---
+       let awPromise = Promise.resolve([]);
+       if (config.filters && config.filters.enableAnimeWorld) {
+           awPromise = searchAnimeWorld(meta, config).catch(err => {
+               logger.warn(`AnimeWorld Error: ${err.message}`);
+               return [];
+           });
+       }
+       // ------------------------------
+
+       [rawVix, formattedGhd, formattedGs, formattedAw] = await Promise.all([vixPromise, ghdPromise, gsPromise, awPromise]);
        
        if (aioFormatter && aioFormatter.isAIOStreamsEnabled(config)) {
            const applyAioStyle = (streamList, sourceName) => {
@@ -1392,15 +1403,31 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
            if (typeof rawVix !== 'undefined') applyAioStyle(rawVix, "StreamingCommunity");
            if (typeof formattedGhd !== 'undefined') applyAioStyle(formattedGhd, "GuardaHD");
            if (typeof formattedGs !== 'undefined') applyAioStyle(formattedGs, "GuardaSerie");
+           
+           // Formattazione speciale per AnimeWorld in stile AIO
+           if (typeof formattedAw !== 'undefined' && formattedAw.length > 0) {
+               formattedAw.forEach(stream => {
+                   stream.name = aioFormatter.formatStreamName({ service: "web", cached: true, quality: "HD" });
+                   stream.title = aioFormatter.formatStreamTitle({
+                       title: meta.title, 
+                       size: "Web", 
+                       language: "🇯🇵 JPN/ITA", 
+                       source: "AnimeWorld", 
+                       techInfo: "⛩️ Anime"
+                   });
+                   if (!stream.behaviorHints) stream.behaviorHints = {};
+                   stream.behaviorHints.bingieGroup = `Leviathan|HD|Web|AnimeWorld`;
+               });
+           }
        }
        formattedVix = rawVix; 
   }
 
   let finalStreams = [];
   if (config.filters && config.filters.vixLast === true) {
-      finalStreams = [...debridStreams, ...formattedGhd, ...formattedGs, ...formattedVix];
+      finalStreams = [...debridStreams, ...formattedGhd, ...formattedGs, ...formattedAw, ...formattedVix];
   } else {
-      finalStreams = [...formattedGhd, ...formattedGs, ...formattedVix, ...debridStreams];
+      finalStreams = [...formattedGhd, ...formattedGs, ...formattedAw, ...formattedVix, ...debridStreams];
   }
 
   if (config.filters) {
@@ -1657,7 +1684,7 @@ app.get("/:conf/manifest.json", (req, res) => {
             manifest.id += ".ad";
         }
         else if (isP2P) {
-             // ⚡ NUOVA LOGICA P2P
+             //   LOGICA P2P
             manifest.name = `${appName}${flag} 🦈 P2P`;
             manifest.id += ".p2p";
             manifest.description += " | ⚠️ P2P Mode (IP Visible)";
@@ -1717,6 +1744,7 @@ app.listen(PORT, () => {
     console.log(`⚖️ SIZE LIMITER: Modulo Attivo (GB Filter)`);
     console.log(`🦁 GUARDA HD: Modulo Integrato e Pronto`);
     console.log(`🛡️ GUARDA SERIE: Modulo Integrato e Pronto`);
+    console.log(`⛩️ ANIMEWORLD: Modulo Integrato e Pronto`); // <--- NUOVO LOG
     console.log(`🕷️ WEBSTREAMR: Fallback Attivo (Su 0 Risultati)`);
     console.log(`🎬 TRAILER: Attivabile da Config (Default: OFF, Primo Risultato se ON)`);
     console.log(`📦 TORBOX: ADVANCED SMART CACHE + ID GRABBER ENABLED`);
