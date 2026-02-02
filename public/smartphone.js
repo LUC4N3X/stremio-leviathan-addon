@@ -276,6 +276,14 @@ body::before {
     letter-spacing: 0.5px; box-shadow: 0 0 5px rgba(0, 242, 255, 0.1);
 }
 
+.m-noproxy-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px; padding: 2px 5px; margin-left: 6px;
+    font-size: 0.6rem; color: #aaa; font-family: 'Rajdhani', sans-serif; font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
 .m-visual-core-v2 { margin-bottom: 20px; position: relative; }
 .m-visual-preview { background: #080808; border: 1px solid rgba(0,242,255,0.15); border-radius: 16px; padding: 12px; margin-bottom: 15px; display: flex; gap: 12px; align-items: flex-start; box-shadow: 0 0 25px rgba(0,0,0,0.6); position: relative; overflow: hidden; min-height: 80px; transition: border-color 0.2s; }
 .m-visual-preview::before { content: ''; position: absolute; top:0; left:0; width:3px; height:100%; background: var(--m-primary); box-shadow: 0 0 10px var(--m-primary); }
@@ -683,7 +691,10 @@ const mobileHTML = `
                         
                         <div class="m-sys-row">
                             <div class="m-sys-info">
-                                <h4><i class="fas fa-play-circle" style="color:var(--m-secondary)"></i> StreamingCommunity</h4>
+                                <h4>
+                                    <i class="fas fa-play-circle" style="color:var(--m-secondary)"></i> StreamingCommunity
+                                    <span class="m-noproxy-badge">NO PROXY</span>
+                                </h4>
                                 <p>Scraper Veloce & Affidabile</p>
                             </div>
                             <label class="m-switch">
@@ -724,6 +735,20 @@ const mobileHTML = `
                             <label class="m-switch">
                                 <input type="checkbox" id="m-enableGs" onchange="updateStatus('m-enableGs','st-gs'); toggleModuleStyle('m-enableGs', 'mod-gs');">
                                 <span class="m-slider m-slider-purple"></span>
+                            </label>
+                        </div>
+
+                        <div class="m-sys-row">
+                            <div class="m-sys-info">
+                                <h4>
+                                    <i class="fas fa-torii-gate" style="color:#ff6600"></i> AnimeWorld 
+                                    <span class="m-noproxy-badge">NO PROXY</span>
+                                </h4>
+                                <p>Anime ITA Database</p>
+                            </div>
+                            <label class="m-switch">
+                                <input type="checkbox" id="m-enableAnimeWorld" onchange="updateStatus('m-enableAnimeWorld','st-aw'); toggleModuleStyle('m-enableAnimeWorld', 'mod-aw');">
+                                <span class="m-slider m-slider-amber"></span>
                             </label>
                         </div>
 
@@ -1481,8 +1506,9 @@ function checkWebPriorityVisibility() {
     const vix = document.getElementById('m-enableVix').checked;
     const ghd = document.getElementById('m-enableGhd').checked;
     const gs = document.getElementById('m-enableGs').checked;
+    const aw = document.getElementById('m-enableAnimeWorld').checked;
     const panel = document.getElementById('m-priority-panel');
-    if (vix || ghd || gs) panel.classList.add('show');
+    if (vix || ghd || gs || aw) panel.classList.add('show');
     else panel.classList.remove('show');
 }
 
@@ -1710,6 +1736,9 @@ function loadMobileConfig() {
                 document.getElementById('m-enableGs').checked = config.filters.enableGs || false;
                 toggleModuleStyle('m-enableGs', 'mod-gs');
                 
+                document.getElementById('m-enableAnimeWorld').checked = config.filters.enableAnimeWorld || false;
+                toggleModuleStyle('m-enableAnimeWorld', 'mod-aw');
+
                 document.getElementById('m-enableWebStreamr').checked = config.filters.enableWebStreamr !== false;
                 toggleModuleStyle('m-enableWebStreamr', 'mod-webstr');
 
@@ -1756,6 +1785,7 @@ function loadMobileConfig() {
             updateStatus('m-enableVix', 'st-vix');
             updateStatus('m-enableGhd', 'st-ghd');
             updateStatus('m-enableGs', 'st-gs');
+            updateStatus('m-enableAnimeWorld', 'st-aw');
             updateStatus('m-aioMode', 'st-aio');
             updateStatus('m-enableTrailers', 'st-trailer');
             updateGhostVisuals();
@@ -1802,6 +1832,7 @@ function getMobileConfig() {
             enableVix: document.getElementById('m-enableVix').checked,
             enableGhd: document.getElementById('m-enableGhd').checked,
             enableGs: document.getElementById('m-enableGs').checked,
+            enableAnimeWorld: document.getElementById('m-enableAnimeWorld').checked,
             enableWebStreamr: document.getElementById('m-enableWebStreamr').checked,
             enableTrailers: document.getElementById('m-enableTrailers').checked,
             vixLast: document.getElementById('m-vixLast').checked,
@@ -1817,7 +1848,7 @@ function updateLinkModalContent() {
     if(!box) return;
     
     const config = getMobileConfig();
-    const isWebEnabled = config.filters.enableVix || config.filters.enableGhd || config.filters.enableGs || config.filters.enableP2P;
+    const isWebEnabled = config.filters.enableVix || config.filters.enableGhd || config.filters.enableGs || config.filters.enableAnimeWorld || config.filters.enableP2P;
     
     if(!config.key && !isWebEnabled) {
         box.value = "/// SYSTEM OFFLINE: WAITING FOR CONFIGURATION DATA ///\\n[!] Inserisci API Key o Attiva Sorgenti Web/P2P";
@@ -1832,7 +1863,7 @@ function updateLinkModalContent() {
 
 function mobileInstall() {
     const config = getMobileConfig();
-    const isWebEnabled = config.filters.enableVix || config.filters.enableGhd || config.filters.enableGs || config.filters.enableP2P;
+    const isWebEnabled = config.filters.enableVix || config.filters.enableGhd || config.filters.enableGs || config.filters.enableAnimeWorld || config.filters.enableP2P;
     if(!config.key && !isWebEnabled) {
         showToast("ERRORE: API KEY MANCANTE", "error"); return;
     }
