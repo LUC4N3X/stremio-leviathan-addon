@@ -151,6 +151,12 @@
             background: linear-gradient(135deg, rgba(0, 242, 255, 0.15), rgba(112, 0, 255, 0.15)); border-color: var(--primary); color: #fff;
             box-shadow: inset 0 0 10px rgba(0, 242, 255, 0.1), 0 0 10px rgba(0, 242, 255, 0.2);
         }
+        .service-tab.p2p-active {
+            background: linear-gradient(135deg, rgba(255, 204, 0, 0.15), rgba(255, 100, 0, 0.15)) !important;
+            border-color: var(--gold) !important;
+            color: #fff !important;
+            box-shadow: inset 0 0 10px rgba(255, 204, 0, 0.1), 0 0 10px rgba(255, 204, 0, 0.2) !important;
+        }
         .tab-icon { font-size: 2rem; display: block; transition: transform 0.4s ease; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
         .service-tab:hover .tab-icon { transform: scale(1.1); filter: drop-shadow(0 0 8px var(--primary)); }
         
@@ -943,7 +949,7 @@
             <h1 class="brand-title notranslate" translate="no">LEVIATHAN</h1>
             <div class="brand-subtitle notranslate" translate="no">SOVRANO DEGLI ABISSI</div>
             <p class="logo-desc">Il protocollo profondo che domina i flussi digitali</p>
-            <div class="version-badge">CORE v2.5.0</div>
+            <div class="version-badge">CORE v2.7.0</div>
         </header>
         <div class="glass-panel">
             <div class="panel-header">
@@ -997,13 +1003,13 @@
                             <span class="tab-icon">🐋</span>
                             <span class="tab-name notranslate" translate="no">Real-Debrid</span>
                         </div>
-                        <div class="service-tab" onclick="selectService('ad')">
-                            <span class="tab-icon">🐚</span>
-                            <span class="tab-name notranslate" translate="no">AllDebrid</span>
-                        </div>
                         <div class="service-tab" onclick="selectService('tb')">
                             <span class="tab-icon">⚓</span>
                             <span class="tab-name notranslate" translate="no">TorBox</span>
+                        </div>
+                        <div class="service-tab" onclick="selectService('p2p')">
+                            <span class="tab-icon">🦈</span>
+                            <span class="tab-name notranslate" translate="no">P2P Mode</span>
                         </div>
                     </div>
                     <div class="input-group">
@@ -1014,7 +1020,6 @@
                             </a>
                         </div>
                         <span class="error-msg">⚠️ Chiave mancante</span>
-                        <div id="ad-warning" class="ad-warning-msg">⚠️ Funziona solo con Self-Hosting Casalingo</div>
                     </div>
                     <div class="input-group">
                         <input type="text" id="tmdbKey" class="custom-input" placeholder="CHIAVE TMDB (OPZIONALE)" oninput="clearError(this); updateFluxStream()">
@@ -1023,23 +1028,6 @@
                         </a>
                     </div>
                     
-                    <div class="module-box" id="p2pModule" style="border-color: rgba(255, 204, 0, 0.3);">
-                        <div class="module-label" style="border-color: rgba(255, 204, 0, 0.5); color: #ffcc00; background:#000;">PROTOCOLLO DIRETTO</div>
-                        <div class="control-row" style="border:none; padding:5px 0;">
-                            <div class="control-info">
-                                <div class="control-title" style="color: #ffcc00;">
-                                    <i class="fas fa-project-diagram"></i> SWARM P2P
-                                    <span class="proxy-tag" style="border-color: #ffcc00; color: #ffcc00;">⚠️ IP EXPOSED</span>
-                                </div>
-                                <span class="control-desc">
-                                    Connessione diretta allo sciame BitTorrent. IP visibile ai peer. <br>
-                                    <strong>Attivare SOLO se sprovvisti di Debrid.</strong>
-                                </span>
-                            </div>
-                            <label class="switch"><input type="checkbox" id="enableP2P" onchange="updateFluxStream(); toggleP2PStyle()"><span class="slider"></span></label>
-                        </div>
-                    </div>
-
                     <div class="module-box" id="webModule">
                         <div class="module-label">MODULO SORGENTI WEB</div>
                         <div class="control-row">
@@ -1500,14 +1488,8 @@
         }
 
         function toggleP2PStyle() {
-            const chk = document.getElementById('enableP2P');
-            const box = document.getElementById('p2pModule');
-            if(chk.checked) {
-                box.classList.add('p2p-active');
-                showToast("MODALITÀ P2P DIRETTA ATTIVA", "warning");
-            } else {
-                box.classList.remove('p2p-active');
-            }
+             // Funzione non più necessaria nel formato box separato,
+             // ma mantenuta vuota per compatibilità se richiamata.
         }
 
         // --- SKINS LOGIC (PREVIEW) ---
@@ -1604,7 +1586,7 @@
                 seedersStr: "👥 1337",
                 
                 // Service & Source
-                serviceTag: currentService.toUpperCase(), 
+                serviceTag: currentService === 'p2p' ? "P2P" : currentService.toUpperCase(), 
                 displaySource: "1337x",
                 sourceLine: "", 
                 serviceIconTitle: "⚡"
@@ -1613,7 +1595,7 @@
             // Logica icone dinamiche (Simula formatStreamSelector)
             if (p.serviceTag === "RD") { p.serviceIconTitle = "🐋"; }
             else if (p.serviceTag === "TB") { p.serviceIconTitle = "⚓"; }
-            else if (p.serviceTag === "AD") { p.serviceIconTitle = "🐚"; }
+            else if (p.serviceTag === "P2P") { p.serviceIconTitle = "🦈"; }
             
             p.sourceLine = `${p.serviceIconTitle} [${p.serviceTag}] ${p.displaySource}`;
 
@@ -1835,7 +1817,12 @@
                     const config = JSON.parse(atob(pathParts[1]));
                     if (config.key) document.getElementById('apiKey').value = config.key;
                     if (config.tmdb) document.getElementById('tmdbKey').value = config.tmdb;
-                    if (config.service) selectService(config.service, true);
+                    if (config.service) {
+                        selectService(config.service, true);
+                    } else if (config.filters && config.filters.enableP2P) {
+                        // Fallback per config esistenti P2P
+                        selectService('p2p', true);
+                    }
                     if (config.formatter) selectSkin(config.formatter); 
                     if (config.customTemplate) document.getElementById('customTemplate').value = config.customTemplate;
                     if (config.aiostreams_mode) {
@@ -1853,10 +1840,6 @@
                         const langMode = config.filters.language || (config.filters.allowEng ? 'all' : 'ita'); // Fallback
                         document.getElementById('langMode').value = langMode;
                         
-                        // P2P LOADER
-                        document.getElementById('enableP2P').checked = config.filters.enableP2P || false;
-                        toggleP2PStyle();
-
                         document.getElementById('enableVix').checked = config.filters.enableVix || false;
                         document.getElementById('vixLast').checked = config.filters.vixLast || false;
                         document.getElementById('enableGhd').checked = config.filters.enableGhd || false;
@@ -1894,15 +1877,46 @@
         function selectService(service, skipReset = false) {
             if(currentService !== service && !skipReset) { document.getElementById('apiKey').value = ""; }
             currentService = service;
-            document.querySelectorAll('.service-tab').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.service-tab').forEach(el => {
+                el.classList.remove('active');
+                el.classList.remove('p2p-active');
+            });
             const tabs = document.querySelectorAll('.service-tab');
-            const links = { 'rd': ['https://real-debrid.com/apitoken', 'INCOLLA KEY REAL-DEBRID'], 'ad': ['https://alldebrid.com/apikeys', 'INCOLLA KEY ALLDEBRID'], 'tb': ['https://torbox.app/settings', 'INCOLLA KEY TORBOX'] };
-            if (service === 'rd') tabs[0].classList.add('active');
-            if (service === 'ad') tabs[1].classList.add('active');
-            if (service === 'tb') tabs[2].classList.add('active');
-            document.getElementById('apiLink').href = links[service][0];
-            document.getElementById('apiKey').placeholder = links[service][1];
-            document.getElementById('ad-warning').style.display = service === 'ad' ? 'block' : 'none';
+            const links = { 
+                'rd': ['https://real-debrid.com/apitoken', 'INCOLLA KEY REAL-DEBRID'], 
+                'tb': ['https://torbox.app/settings', 'INCOLLA KEY TORBOX'] 
+            };
+            const apiInput = document.getElementById('apiKey');
+            const apiLink = document.getElementById('apiLink');
+
+            if (service === 'rd') {
+                tabs[0].classList.add('active');
+                apiInput.disabled = false;
+                apiLink.href = links[service][0];
+                apiInput.placeholder = links[service][1];
+                apiLink.style.pointerEvents = 'auto';
+                apiLink.style.opacity = '1';
+            }
+            if (service === 'tb') {
+                tabs[1].classList.add('active');
+                apiInput.disabled = false;
+                apiLink.href = links[service][0];
+                apiInput.placeholder = links[service][1];
+                apiLink.style.pointerEvents = 'auto';
+                apiLink.style.opacity = '1';
+            }
+            if (service === 'p2p') {
+                tabs[2].classList.add('active');
+                tabs[2].classList.add('p2p-active');
+                apiInput.disabled = true;
+                apiInput.placeholder = "NESSUNA API KEY RICHIESTA (P2P)";
+                apiInput.value = "";
+                apiInput.classList.remove('input-error');
+                apiLink.style.pointerEvents = 'none';
+                apiLink.style.opacity = '0.5';
+                showToast("MODALITÀ P2P ATTIVA: IP VISIBILE", "warning");
+            }
+            
             updatePreview(document.getElementById('selectedSkin').value);
             updateFluxStream();
         }
@@ -1912,13 +1926,19 @@
             const scActive = document.getElementById('enableVix').checked;
             const ghdActive = document.getElementById('enableGhd').checked;
             const gsActive = document.getElementById('enableGs').checked;
-            const p2pActive = document.getElementById('enableP2P').checked;
-            const isWebEnabled = scActive || ghdActive || gsActive || p2pActive; // P2P ora conta come "Sorgente valida"
+            const isP2P = currentService === 'p2p';
+            const isWebEnabled = scActive || ghdActive || gsActive || isP2P; 
             
             const el = document.getElementById('apiKey');
             const value = el.value.trim();
-            if (!value && !isWebEnabled) { el.classList.add('input-error'); isValid = false; } 
-            else { el.classList.remove('input-error'); }
+
+            // Se P2P è attivo, la key non serve. Se non è P2P, serve la key OPPURE una sorgente web attiva.
+            if (!isP2P && !value && !isWebEnabled) { 
+                el.classList.add('input-error'); 
+                isValid = false; 
+            } else { 
+                el.classList.remove('input-error'); 
+            }
             return isValid;
         }
 
@@ -1926,12 +1946,11 @@
             const gateActive = document.getElementById('gateActive').checked;
             const gateVal = parseInt(document.getElementById('gateSlider').value);
             const sizeVal = parseInt(document.getElementById('maxSizeSlider').value);
-            
-            // --- NEW LANGUAGE LOGIC (DROPDOWN) ---
             const lang = document.getElementById('langMode').value;
+            const isP2P = currentService === 'p2p';
 
             return {
-                service: currentService,
+                service: isP2P ? '' : currentService,
                 key: document.getElementById('apiKey').value.trim(),
                 tmdb: document.getElementById('tmdbKey').value.trim(),
                 sort: document.getElementById('sortMode').value,
@@ -1946,7 +1965,7 @@
                 filters: {
                     language: lang, 
                     allowEng: lang === 'all' || lang === 'eng',
-                    enableP2P: document.getElementById('enableP2P').checked, // NEW P2P MODE
+                    enableP2P: isP2P, 
                     no4k: document.getElementById('btn_4k').classList.contains('excluded'),
                     no1080: document.getElementById('btn_1080').classList.contains('excluded'),
                     no720: document.getElementById('btn_720').classList.contains('excluded'),
@@ -2026,9 +2045,13 @@
             let langText = "SOLO ITA 🇮🇹"; // Default
             if(c.filters.language === 'all') langText = "HYBRID (ITA+ENG) 🌍";
             if(c.filters.language === 'eng') langText = "SOLO ENG (NO ITA) 🇬🇧";
+            
+            // --- SERVICE DISPLAY ---
+            let serviceDisplay = c.service ? c.service.toUpperCase() : "NESSUNO (P2P/WEB)";
+            if (c.filters.enableP2P && !c.service) serviceDisplay = "P2P MODE 🦈";
 
             list.innerHTML = `
-                <li>Servizio Debrid <span>${c.service.toUpperCase()}</span></li>
+                <li>Servizio Debrid <span>${serviceDisplay}</span></li>
                 <li>Visual Skin <span>${skinText}</span></li>
                 <li>Swarm P2P <span>${p2pText}</span></li>
                 <li>Sorgenti Web <span>SC: ${scText} | GHD: ${ghdText} | GS: ${gsText}</span></li>
