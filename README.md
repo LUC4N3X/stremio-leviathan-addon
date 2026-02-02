@@ -24,9 +24,9 @@
 
 <p>
   <img src="https://img.shields.io/badge/Real_Debrid-NATIVE_SUPPORT-A2B9F0?style=for-the-badge&logo=realdebrid&logoColor=black" />
-  <img src="https://img.shields.io/badge/AllDebrid-MODULE_ACTIVE-F5A623?style=for-the-badge&logo=alldebrid&logoColor=white" />
   <img src="https://img.shields.io/badge/TorBox-COMPATIBLE-7A4EE3?style=for-the-badge&logo=torbox&logoColor=white" />
   <img src="https://img.shields.io/badge/AIOStreams-COMPATIBLE-1ABC9C?style=for-the-badge&logo=stream&logoColor=white" />
+  <img src="https://img.shields.io/badge/P2P_Network-DIRECT_SWARM-ff0055?style=for-the-badge&logo=qbittorrent&logoColor=white" />
 </p>
 
 <p>
@@ -92,7 +92,7 @@
 
 Il core, sviluppato in **Node.js**, orchestra scansioni parallele sui principali index mondiali e italiani. Utilizza una logica proprietaria per distinguere le sorgenti in base alla latenza di risposta, applicando timeout dinamici e tecniche di evasione anti-bot.
 
-### 🔥 Release 2.5 Highlights
+### 🔥 Release 2.7 Highlights
 
 * 🚀 **Core Refactoring:** Motore riscritto per massimizzare stabilità e concorrenza.
 * 🕷️ **WebStreams Fallback:** Attivazione automatica intelligente delle sorgenti Web se il P2P non ha risultati (Disattivabile).
@@ -104,7 +104,7 @@ Il core, sviluppato in **Node.js**, orchestra scansioni parallele sui principali
 * 👻 **Ghost Proxying:** Supporto nativo a **MediaFlow** per l'uso sicuro di Account Debrid condivisi.
 * 🔗 **AIOStreams:** Supporto nativo per flussi AIOStreams integrato nel motore.
 * 🛡️ **Cloudscraper Integration:** Ottimizzazione avanzata per il superamento dei controlli Cloudflare.
-
+* 📡 **Direct Swarm Protocol:** Supporto nativo per la riproduzione P2P diretta (senza Debrid) con download sequenziale ottimizzato.
 
 
 ---
@@ -183,6 +183,11 @@ Definisci i confini della tua ricerca.
 ### 12. 🎬 Visual Pre-Fetch (Trailer Integration)
 * **Instant Preview:** Integrazione diretta con le API di YouTube.
 * **Context Aware:** Recupera automaticamente il trailer corretto basandosi sui metadati IMDB/TMDB del contenuto selezionato.
+
+### 13. 📡 Direct Swarm Access (Pure P2P)
+Leviathan non impone l'uso di intermediari. Il motore supporta la connessione diretta alla rete BitTorrent.
+* **Sequential Priority:** Forza il download sequenziale dei pezzi del file per garantire uno streaming fluido senza attendere il completamento.
+* **Peer Exchange:** Aggancio aggressivo ai peer tramite DHT e PEX per massimizzare la velocità anche su torrent con pochi seed.
 
 <br>
 
