@@ -105,7 +105,7 @@ Il core, sviluppato in **Node.js**, orchestra scansioni parallele sui principali
 * 🔗 **AIOStreams:** Supporto nativo per flussi AIOStreams integrato nel motore.
 * 🛡️ **Cloudscraper Integration:** Ottimizzazione avanzata per il superamento dei controlli Cloudflare.
 * 📡 **Direct Swarm Protocol:** Supporto nativo per la riproduzione P2P diretta (senza Debrid) con download sequenziale ottimizzato.
-
+* ⛩️ **AnimeWorld Module:** Integrazione nativa per l'animazione giapponese con estrazione diretta dei flussi (SUB/DUB).
 
 ---
 
@@ -158,33 +158,41 @@ Sorgente web specializzata in Serie TV ITA.
 * **Zero-Seed Playback:** Avvio immediato, nessuna dipendenza da torrent o debrid.
 * **Fast Web Lane:** Priorità alta come web fallback per serie TV.
 
-### 8. 👻 Debrid Ghost Shell (MediaFlow Proxy)
+### 8. ⛩️ AnimeWorld Integration Layer
+Modulo verticale dedicato all'animazione giapponese (Anime).
+* **Direct Stream Extraction:** Estrazione flussi diretti dai server proprietari di AnimeWorld.
+* **Simulcast Engine:** Accesso prioritario agli episodi in corso di trasmissione (Simulcast) e ai cataloghi completi.
+* **Dual-Audio Recognition:** Identificazione intelligente release DUB (Doppiato) vs SUB (Sottotitolato).
+* **Zero-Seed Playback:** Avvio immediato, nessuna dipendenza da torrent o debrid.
+* **Fast Web Lane:** Priorità alta come web fallback per contenuti anime.
+
+### 9. 👻 Debrid Ghost Shell (MediaFlow Proxy)
 Progettato per l'elusione dei blocchi IP e la gestione di account Multi-Utente.
 * **IP Masking:** Tutto il traffico verso Real-Debrid viene tunnelizzato tramite **MediaFlow Proxy**.
 * **Shared Account Support:** Permette l'utilizzo dello stesso account Debrid su più IP contemporaneamente senza rischiare il ban, poiché il provider vede solo l'IP del Proxy.
 * **Anti-Throttling:** Bypassa i blocchi imposti dagli ISP sui domini dei servizi Debrid.
 
-### 9. 🕷️ WebStreams Auto-Failover
+### 10. 🕷️ WebStreams Auto-Failover
 Il sistema non accetta vicoli ciechi.
 * **Smart Switch:** Se la scansione Torrent restituisce 0 risultati validi, Leviathan innesca automaticamente i moduli Web (StreamingCommunity/GuardaHD).
 * **Configurable Logic:** Funzione attivata di default, ma disabilitabile dalla dashboard per gli utenti che desiderano un'esperienza rigorosamente P2P.
 
-### 10. 🎨 Polymorphic Formatter Engine
+### 11. 🎨 Polymorphic Formatter Engine
 Il controllo totale sulla presentazione visiva dei risultati.
 * **Preset Selection:** Seleziona tra diversi stili di visualizzazione pre-codificati per adattare l'output ai tuoi gusti.
 * **Custom Syntax:** Possibilità di definire un formatter personalizzato per strutturare i metadati (Risoluzione, Codec, Audio) esattamente come vuoi tu.
 
-### 11. 🗣️ Linguistic Scope Control
+### 12. 🗣️ Linguistic Scope Control
 Definisci i confini della tua ricerca.
 * **🇮🇹 ITA Strict:** Filtro chirurgico solo per contenuti in lingua italiana.
 * **🌍 Global (ENG):** Accesso diretto ai tracker internazionali senza filtri linguistici.
 * **🧬 Hybrid (ITA+ENG):** La fusione perfetta. Priorità ai contenuti italiani, con fallback immediato sulle release internazionali ad alta qualità.
 
-### 12. 🎬 Visual Pre-Fetch (Trailer Integration)
+### 13. 🎬 Visual Pre-Fetch (Trailer Integration)
 * **Instant Preview:** Integrazione diretta con le API di YouTube.
 * **Context Aware:** Recupera automaticamente il trailer corretto basandosi sui metadati IMDB/TMDB del contenuto selezionato.
 
-### 13. 📡 Direct Swarm Access (Pure P2P)
+### 14. 📡 Direct Swarm Access (Pure P2P)
 Leviathan non impone l'uso di intermediari. Il motore supporta la connessione diretta alla rete BitTorrent.
 * **Sequential Priority:** Forza il download sequenziale dei pezzi del file per garantire uno streaming fluido senza attendere il completamento.
 * **Peer Exchange:** Aggancio aggressivo ai peer tramite DHT e PEX per massimizzare la velocità anche su torrent con pochi seed.
@@ -221,13 +229,33 @@ Leviathan non impone l'uso di intermediari. Il motore supporta la connessione di
 
 ## 🌐 LEVIATHAN NETWORK NODES
 
+<div align="center">
+
 <br>
 
+<div style="background: rgba(0, 234, 255, 0.05); border: 1px solid rgba(0, 234, 255, 0.2); border-radius: 10px; padding: 10px; margin-bottom: 20px; width: 95%;">
+  <h3 style="margin: 0; padding: 10px; color: #fff; text-transform: uppercase; letter-spacing: 3px; font-size: 1.2rem; border-bottom: 1px solid rgba(0, 234, 255, 0.2);">
+    🌊 Direct Stream Protocols <span style="font-size: 0.8rem; color: #00eaff; vertical-align: middle;">(NO P2P REQUIRED)</span>
+  </h3>
+  <br>
+  
 | **TARGET ENGINE** | **REGION** | **LATENCY** | **MODE** | **STATUS** |
 | :--- | :---: | :---: | :---: | :---: |
 | **StreamingCommunity** | 🇮🇹 ITA | ![](https://img.shields.io/badge/⏱️_INSTANT-ULTRA-FF0000?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🌪️_HLS-Stream-red?style=flat-square&labelColor=black) | 🟢 |
 | **GuardaHD** | 🇮🇹 ITA | ![](https://img.shields.io/badge/⏱️_INSTANT-PREMIUM-00ff00?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🦁_HLS-Stream-red?style=flat-square&labelColor=black) | 🟢 |
 | **GuardaSerie** | 🇮🇹 ITA | ![](https://img.shields.io/badge/⏱️_INSTANT-HQ-00ff00?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🍿_HLS-Stream-red?style=flat-square&labelColor=black) | 🟢 |
+| **AnimeWorld** | 🇮🇹 ITA | ![](https://img.shields.io/badge/⏱️_INSTANT-ANIME-ff9900?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🦊_HLS-Stream-red?style=flat-square&labelColor=black) | 🟢 |
+
+</div>
+
+<div style="background: rgba(138, 43, 226, 0.05); border: 1px solid rgba(138, 43, 226, 0.2); border-radius: 10px; padding: 10px; width: 95%;">
+  <h3 style="margin: 0; padding: 10px; color: #fff; text-transform: uppercase; letter-spacing: 3px; font-size: 1.2rem; border-bottom: 1px solid rgba(138, 43, 226, 0.2);">
+    🕸️ Decentralized Swarm <span style="font-size: 0.8rem; color: #8A2BE2; vertical-align: middle;">(BITTORRENT NETWORK)</span>
+  </h3>
+  <br>
+
+| **TARGET ENGINE** | **REGION** | **LATENCY** | **MODE** | **STATUS** |
+| :--- | :---: | :---: | :---: | :---: |
 | **Il Corsaro Nero** | 🇮🇹 ITA | ![](https://img.shields.io/badge/⏱️_3000ms-HQ-00eaff?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/⚡_Fast-Lane-00eaff?style=flat-square&labelColor=black) | 🟢 |
 | **Knaben** | 🌍 GLB | ![](https://img.shields.io/badge/⏱️_3000ms-HQ-00eaff?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🔌_API-JSON-blueviolet?style=flat-square&labelColor=black) | 🟢 |
 | **The Pirate Bay** | 🌍 GLB | ![](https://img.shields.io/badge/⏱️_3000ms-HQ-00eaff?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🔌_API-JSON-blueviolet?style=flat-square&labelColor=black) | 🟢 |
@@ -241,7 +269,10 @@ Leviathan non impone l'uso di intermediari. Il motore supporta la connessione di
 | **RARBG** | 🌍 GLB | ![](https://img.shields.io/badge/⏱️_5000ms-DEEP-orange?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🪞_Mirror-Cluster-ff69b4?style=flat-square&labelColor=black) | 🟢 |
 | **1337x** | 🌍 GLB | ![](https://img.shields.io/badge/⏱️_5000ms-DEEP-orange?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🛡️_Cloudflare-Protected-f38020?style=flat-square&labelColor=black) | 🟢 |
 
+</div>
+
 <br>
+</div>
 
 
 
