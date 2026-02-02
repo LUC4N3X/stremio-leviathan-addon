@@ -267,21 +267,24 @@ body::before {
 .m-sys-info h4 { margin: 0; font-size: 0.85rem; color: #fff; font-family: 'Rajdhani'; font-weight: 700; display: flex; align-items: center; gap: 8px; }
 .m-sys-info p { margin: 2px 0 0; font-size: 0.65rem; color: rgba(255,255,255,0.5); }
 
-/* --- NEW MFP BADGE --- */
+/* --- NEW MFP BADGE & NO PROXY FIX (TINY VERSION) --- */
 .m-proxy-badge {
-    display: inline-flex; align-items: center; gap: 4px;
+    display: inline-flex; align-items: center; gap: 3px;
     background: rgba(0, 242, 255, 0.08); border: 1px solid rgba(0, 242, 255, 0.4);
-    border-radius: 4px; padding: 2px 5px; margin-left: 6px;
-    font-size: 0.6rem; color: var(--m-primary); font-family: 'Rajdhani', sans-serif; font-weight: 800;
+    border-radius: 3px; padding: 1px 4px; margin-left: 5px;
+    font-size: 0.55rem; color: var(--m-primary); font-family: 'Rajdhani', sans-serif; font-weight: 800;
     letter-spacing: 0.5px; box-shadow: 0 0 5px rgba(0, 242, 255, 0.1);
+    white-space: nowrap; flex-shrink: 0;
 }
 
 .m-noproxy-badge {
-    display: inline-flex; align-items: center; gap: 4px;
+    display: inline-flex; align-items: center; gap: 3px;
     background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 4px; padding: 2px 5px; margin-left: 6px;
-    font-size: 0.6rem; color: #aaa; font-family: 'Rajdhani', sans-serif; font-weight: 800;
-    letter-spacing: 0.5px;
+    border-radius: 3px; padding: 1px 3px; margin-left: 4px;
+    font-size: 0.5rem; color: #aaa; font-family: 'Rajdhani', sans-serif; font-weight: 800;
+    letter-spacing: 0px; /* Compattato */
+    white-space: nowrap; flex-shrink: 0;
+    line-height: 1;
 }
 
 .m-visual-core-v2 { margin-bottom: 20px; position: relative; }
