@@ -1068,10 +1068,20 @@
                             <label class="switch mf-switch"><input type="checkbox" id="enableGs" onchange="checkWebVisibility(); updateFluxStream()"><span class="slider"></span></label>
                         </div>
 
+                        <div class="control-row">
+                            <div class="control-info">
+                                <div class="control-title notranslate" translate="no">
+                                    <i class="fas fa-torii-gate" style="color: #ff6600"></i> AnimeWorld
+                                    <span class="proxy-tag">NO PROXY</span>
+                                </div>
+                                <span class="control-desc">Il più grande database italiano di Anime. Include gestione Cookie SecurityAW.</span>
+                            </div>
+                            <label class="switch mf-switch"><input type="checkbox" id="enableAnimeWorld" onchange="checkWebVisibility(); updateFluxStream()"><span class="slider"></span></label>
+                        </div>
                         <div class="control-row sub-row" id="webPriorityRow" style="display:none; margin-top:15px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top:10px;">
                              <div class="control-info">
                                  <div class="control-title"><i class="fas fa-sort-amount-down"></i> Gerarchia Sorgenti</div>
-                                 <span class="control-desc">Sposta i risultati Web (SC, GHD, GS) dopo i Torrent.</span>
+                                 <span class="control-desc">Sposta i risultati Web (SC, GHD, GS, AW) dopo i Torrent.</span>
                              </div>
                              <label class="switch mf-switch"><input type="checkbox" id="vixLast" onchange="updateFluxStream()"><span class="slider"></span></label>
                          </div>
@@ -1762,11 +1772,13 @@
             const sc = document.getElementById('enableVix').checked;
             const ghd = document.getElementById('enableGhd').checked;
             const gs = document.getElementById('enableGs').checked;
+            const aw = document.getElementById('enableAnimeWorld').checked; // AGGIUNTO
             const qContainer = document.getElementById('scQualityContainer');
             if(qContainer) qContainer.style.display = sc ? 'block' : 'none';
             const pRow = document.getElementById('webPriorityRow');
             if(pRow) {
-                if(sc || ghd || gs) { pRow.style.display = 'flex'; pRow.style.animation = 'fadeInRow 0.3s ease'; } 
+                // Aggiunto controllo AW
+                if(sc || ghd || gs || aw) { pRow.style.display = 'flex'; pRow.style.animation = 'fadeInRow 0.3s ease'; } 
                 else { pRow.style.display = 'none'; }
             }
         }
@@ -1820,7 +1832,6 @@
                     if (config.service) {
                         selectService(config.service, true);
                     } else if (config.filters && config.filters.enableP2P) {
-                        // Fallback per config esistenti P2P
                         selectService('p2p', true);
                     }
                     if (config.formatter) selectSkin(config.formatter); 
@@ -1836,14 +1847,16 @@
                         document.getElementById('proxyDebrid').checked = config.mediaflow.proxyDebrid || false;
                     }
                     if (config.filters) {
-                        // NEW LANGUAGE LOGIC LOADER (3-WAY MODE) VIA DROPDOWN
-                        const langMode = config.filters.language || (config.filters.allowEng ? 'all' : 'ita'); // Fallback
+                        const langMode = config.filters.language || (config.filters.allowEng ? 'all' : 'ita'); 
                         document.getElementById('langMode').value = langMode;
                         
                         document.getElementById('enableVix').checked = config.filters.enableVix || false;
                         document.getElementById('vixLast').checked = config.filters.vixLast || false;
                         document.getElementById('enableGhd').checked = config.filters.enableGhd || false;
                         document.getElementById('enableGs').checked = config.filters.enableGs || false;
+                        // AGGIUNTO LOADER ANIMEWORLD
+                        document.getElementById('enableAnimeWorld').checked = config.filters.enableAnimeWorld || false;
+
                         document.getElementById('enableWebStreamr').checked = config.filters.enableWebStreamr !== false;
                         document.getElementById('enableTrailers').checked = config.filters.enableTrailers || false; 
                         
@@ -1926,13 +1939,14 @@
             const scActive = document.getElementById('enableVix').checked;
             const ghdActive = document.getElementById('enableGhd').checked;
             const gsActive = document.getElementById('enableGs').checked;
+            const awActive = document.getElementById('enableAnimeWorld').checked; // AGGIUNTO
             const isP2P = currentService === 'p2p';
-            const isWebEnabled = scActive || ghdActive || gsActive || isP2P; 
+            // Aggiunto awActive al controllo
+            const isWebEnabled = scActive || ghdActive || gsActive || awActive || isP2P; 
             
             const el = document.getElementById('apiKey');
             const value = el.value.trim();
 
-            // Se P2P è attivo, la key non serve. Se non è P2P, serve la key OPPURE una sorgente web attiva.
             if (!isP2P && !value && !isWebEnabled) { 
                 el.classList.add('input-error'); 
                 isValid = false; 
@@ -1974,6 +1988,7 @@
                     enableVix: document.getElementById('enableVix').checked,
                     enableGhd: document.getElementById('enableGhd').checked,
                     enableGs: document.getElementById('enableGs').checked,
+                    enableAnimeWorld: document.getElementById('enableAnimeWorld').checked, // AGGIUNTO
                     enableWebStreamr: document.getElementById('enableWebStreamr').checked,
                     enableTrailers: document.getElementById('enableTrailers').checked, 
                     vixLast: document.getElementById('vixLast').checked,
@@ -2026,6 +2041,7 @@
             let p2pText = c.filters.enableP2P ? 'ATTIVO (⚠️)' : 'DISATTIVATO';
             let ghdText = c.filters.enableGhd ? 'ATTIVO 🦁' : 'NO';
             let gsText = c.filters.enableGs ? 'ATTIVO 🛡️' : 'NO';
+            let awText = c.filters.enableAnimeWorld ? 'ATTIVO ⛩️' : 'NO'; // AGGIUNTO
             let webStreamrText = c.filters.enableWebStreamr ? 'ATTIVO 🕷️' : 'DISATTIVATO';
             let exclText = [];
             if(c.filters.no4k) exclText.push("4K");
@@ -2041,20 +2057,19 @@
             let trailerText = c.filters.enableTrailers ? 'ATTIVO 🎬' : 'NO';
             let skinText = c.formatter.toUpperCase();
             
-            // --- DISPLAY LINGUA CORRETTA NEL RIEPILOGO ---
-            let langText = "SOLO ITA 🇮🇹"; // Default
+            let langText = "SOLO ITA 🇮🇹";
             if(c.filters.language === 'all') langText = "HYBRID (ITA+ENG) 🌍";
             if(c.filters.language === 'eng') langText = "SOLO ENG (NO ITA) 🇬🇧";
             
-            // --- SERVICE DISPLAY ---
             let serviceDisplay = c.service ? c.service.toUpperCase() : "NESSUNO (P2P/WEB)";
             if (c.filters.enableP2P && !c.service) serviceDisplay = "P2P MODE 🦈";
 
+            // AGGIORNATO CON ANIMEWORLD (AW)
             list.innerHTML = `
                 <li>Servizio Debrid <span>${serviceDisplay}</span></li>
                 <li>Visual Skin <span>${skinText}</span></li>
                 <li>Swarm P2P <span>${p2pText}</span></li>
-                <li>Sorgenti Web <span>SC: ${scText} | GHD: ${ghdText} | GS: ${gsText}</span></li>
+                <li>Sorgenti Web <span>SC: ${scText} | GHD: ${ghdText} | GS: ${gsText} | AW: ${awText}</span></li>
                 <li>Fallback WebStreamr <span>${webStreamrText}</span></li>
                 <li>Flux Priority <span>${sortText}</span></li>
                 <li>Proxy Bridge <span>${c.mediaflow.url ? 'CONFIGURATO' : 'NON ATTIVO'}</span></li>
