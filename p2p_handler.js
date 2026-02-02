@@ -59,6 +59,7 @@ function constructRobustMagnet(item) {
     
     if (!hash) return { magnet: null, hash: null };
 
+    // Costruiamo un magnet pulito
     const cleanTitle = encodeURIComponent(item.title.replace(/[^a-zA-Z0-9\.\-_ ]/g, '').trim());
     const finalMagnet = `magnet:?xt=urn:btih:${hash}&dn=${cleanTitle}${TRACKER_STRING}`;
     
@@ -66,7 +67,6 @@ function constructRobustMagnet(item) {
 }
 
 module.exports = {
-    // Aggiunto parametro 'config' per supportare le Skin
     formatP2PStream: (item, config) => {
         
         // 1. Costruzione Magnet e Hash
@@ -74,40 +74,40 @@ module.exports = {
 
         if (!magnet) return null;
 
-        // 2. Integrazione con il Formatter (SKIN SYSTEM)
-        // Questo fa sì che il P2P appaia graficamente identico a RD/TB
+        // 2. Formattazione Grafica (Skin)
         const { name, title, bingeGroup } = formatStreamSelector(
-            item.title,             // Nome file
-            item.source || "P2P",   // Provider
-            item._size || item.sizeBytes || 0, // Dimensione
-            item.seeders || 0,      // Seeders
-            "P2P",                  // Service Tag (per icona fulmine/P2P)
-            config,                 // Configurazione utente (Skin scelta)
-            hash,                   // Hash per ID univoci
-            false,                  // isLazy (P2P è diretto, non lazy http)
-            item._isPack || false   // isPack
+            item.title,             
+            item.source || "P2P",   
+            item._size || item.sizeBytes || 0, 
+            item.seeders || 0,      
+            "P2P",                  
+            config,                 
+            hash,                   
+            false,                  
+            item._isPack || false   
         );
 
+        // 3. COSTRUZIONE OGGETTO STREAM
         const streamObj = {
-            name: name,   // Nome formattato dalla Skin
-            title: title, // Titolo formattato dalla Skin
+            name: name,   
+            title: title, 
             infoHash: hash, 
-            sources: [magnet], 
-            url: magnet,
+            sources: [
+                magnet,              
+                `dht:${hash}`        
+            ],
+            
             behaviorHints: {
-                bingieGroup: bingeGroup, // Gruppo formattato dalla Skin
-                notWebReady: false 
+                bingieGroup: bingeGroup, 
+                notWebReady: false
             }
         };
 
-        // 3. Logica intelligente per fileIdx (Fix caricamento infinito)
+        
+        
+        
         if (item.fileIdx !== undefined && item.fileIdx !== null && !isNaN(parseInt(item.fileIdx))) {
-            const idx = parseInt(item.fileIdx);
-            // Se l'indice è maggiore di 0 (es. episodi serie o pack) lo manteniamo.
-            // Se è 0, lo rimuoviamo per lasciare che Stremio scelga il file video principale.
-            if (idx > 0) {
-                streamObj.fileIdx = idx;
-            }
+            streamObj.fileIdx = parseInt(item.fileIdx);
         }
 
         return streamObj;
