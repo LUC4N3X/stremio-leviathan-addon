@@ -4,7 +4,7 @@ const mobileCSS = `
     --m-primary: #00f2ff;     /* Ciano Leviathan */
     --m-secondary: #7000ff;   /* Viola Abisso */
     --m-accent: #b026ff;      
-    --m-amber: #ff9900;       
+    --m-amber: #ffcc00;       /* Gold P2P Warning */
     --m-cine: #ff0055;        
     --m-kofi: #FF5E5B;        
     --m-surface: rgba(10, 15, 25, 0.85); 
@@ -134,8 +134,8 @@ body::before {
 .m-srv-rail { display: flex; gap: 8px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 6px; margin-bottom: 25px; backdrop-filter: blur(5px); }
 .m-srv-btn { flex: 1; text-align: center; padding: 14px 0; font-family: 'Rajdhani', sans-serif; font-weight: 800; font-size: 1.1rem; color: var(--m-dim); border-radius: 12px; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(255,255,255,0.03); border: 1px solid transparent; }
 .m-srv-btn[onclick*="'rd'"].active { background: linear-gradient(135deg, rgba(0, 242, 255, 0.15), rgba(0,0,0,0)); border-color: var(--m-primary); color: #fff; box-shadow: 0 0 20px rgba(0, 242, 255, 0.2), inset 0 0 10px rgba(0, 242, 255, 0.05); text-shadow: 0 0 10px var(--m-primary); }
+.m-srv-btn[onclick*="'p2p'"].active { background: linear-gradient(135deg, rgba(255, 204, 0, 0.15), rgba(0,0,0,0)); border-color: var(--m-amber); color: #fff; box-shadow: 0 0 20px rgba(255, 204, 0, 0.2), inset 0 0 10px rgba(255, 204, 0, 0.05); text-shadow: 0 0 10px var(--m-amber); }
 .m-srv-btn[onclick*="'tb'"].active { background: linear-gradient(135deg, rgba(176, 38, 255, 0.15), rgba(0,0,0,0)); border-color: var(--m-accent); color: #fff; box-shadow: 0 0 20px rgba(176, 38, 255, 0.2), inset 0 0 10px rgba(176, 38, 255, 0.05); text-shadow: 0 0 10px var(--m-accent); }
-.m-srv-btn[onclick*="toggleP2P"].active { background: linear-gradient(135deg, rgba(255, 153, 0, 0.15), rgba(0,0,0,0)); border-color: var(--m-amber); color: #fff; box-shadow: 0 0 20px rgba(255, 153, 0, 0.2), inset 0 0 10px rgba(255, 153, 0, 0.05); text-shadow: 0 0 10px var(--m-amber); }
 .m-rail-icon { font-size: 1.2rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
 
 .m-sc-subpanel { grid-column: 1 / -1; background: rgba(0,0,0,0.4); border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; display: none; animation: slideDown 0.3s ease; margin: 10px 15px 15px 15px; }
@@ -315,6 +315,17 @@ body::before {
 .m-ghost-status { font-family: 'Rajdhani'; font-weight: 700; font-size: 0.65rem; padding: 3px 6px; border-radius: 4px; background: rgba(255,255,255,0.1); color: #666; transition: all 0.3s; }
 .m-ghost-panel.active .m-ghost-status { background: var(--m-secondary); color: #000; box-shadow: 0 0 10px var(--m-secondary); }
 
+/* --- P2P MODULE STYLE --- */
+.m-p2p-module { background: rgba(255, 204, 0, 0.05); border: 1px solid rgba(255, 204, 0, 0.3); border-radius: 16px; padding: 15px; margin-top: 15px; position: relative; overflow: hidden; transition: all 0.3s; }
+.m-p2p-module.active { border-color: var(--m-amber); box-shadow: 0 0 20px rgba(255, 204, 0, 0.2); background: radial-gradient(circle at top right, rgba(255, 204, 0, 0.08), transparent); }
+.m-p2p-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.m-p2p-title { font-family: 'Rajdhani'; font-weight: 800; font-size: 1rem; color: var(--m-amber); display: flex; align-items: center; gap: 8px; text-shadow: 0 0 5px rgba(255,204,0,0.3); }
+.m-p2p-status { font-family: 'Rajdhani'; font-weight: 700; font-size: 0.65rem; padding: 3px 6px; border-radius: 4px; background: rgba(255,204,0,0.1); color: var(--m-amber); transition: all 0.3s; border: 1px solid rgba(255,204,0,0.2); }
+.m-p2p-module.active .m-p2p-status { background: var(--m-amber); color: #000; box-shadow: 0 0 10px var(--m-amber); }
+
+.m-ad-warning { display: none; background: rgba(255, 42, 109, 0.15); border: 1px solid var(--m-error); border-radius: 12px; padding: 10px; margin-bottom: 20px; text-align: center; color: var(--m-error); font-size: 0.8rem; font-weight: 700; box-shadow: 0 0 15px rgba(255,42,109,0.2); }
+.m-ad-warning i { animation: pulseWarn 1.5s infinite; }
+@keyframes pulseWarn { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 
 .m-status-text { font-size: 0.65rem; padding: 3px 6px; border-radius: 5px; background: rgba(255,255,255,0.12); color: #888; white-space: nowrap; transition: all 0.2s; }
 .m-status-text.on { background: rgba(0, 255, 157, 0.2); color: var(--m-success); border: 1px solid rgba(0, 255, 157, 0.35); box-shadow: 0 0 6px rgba(0,255,157,0.25); }
@@ -329,7 +340,7 @@ input:checked + .m-slider:before { transform: translateX(20px); background-color
 input:checked + .m-slider-purple { background-color: rgba(176, 38, 255, 0.3); border-color: var(--m-accent); box-shadow: inset 0 0 10px rgba(176,38,255,0.4); }
 input:checked + .m-slider-purple:before { background-color: var(--m-accent); box-shadow: 0 0 10px var(--m-accent); }
 .m-slider-amber { background-color: #1c1c1c; }
-input:checked + .m-slider-amber { background-color: rgba(255, 153, 0, 0.3); border-color: var(--m-amber); box-shadow: inset 0 0 10px rgba(255,153,0,0.4); }
+input:checked + .m-slider-amber { background-color: rgba(255, 204, 0, 0.3); border-color: var(--m-amber); box-shadow: inset 0 0 10px rgba(255,204,0,0.4); }
 input:checked + .m-slider-amber:before { background-color: var(--m-amber); box-shadow: 0 0 10px var(--m-amber); }
 .m-slider-pink { background-color: #1c1c1c; }
 input:checked + .m-slider-pink { background-color: rgba(255, 0, 85, 0.3); border-color: var(--m-cine); box-shadow: inset 0 0 10px rgba(255,0,85,0.4); }
@@ -620,7 +631,7 @@ const mobileHTML = `
                 
                 <h1 class="m-brand-title">LEVIATHAN</h1>
                 <div class="m-brand-sub">SOVRANO DEGLI ABISSI</div>
-                <div class="m-version-tag"><div class="m-v-dot"></div>v2.5.0 STABLE</div>
+                <div class="m-version-tag"><div class="m-v-dot"></div>v2.7.0 STABLE</div>
             </div>
 
             <div id="page-setup" class="m-page active">
@@ -634,7 +645,7 @@ const mobileHTML = `
                     <div class="m-srv-rail">
                         <div class="m-srv-btn active" onclick="setMService('rd', this)"><span class="m-rail-icon">🐋</span> RD</div>
                         <div class="m-srv-btn" onclick="setMService('tb', this)"><span class="m-rail-icon">⚓</span> TB</div>
-                        <div class="m-srv-btn" onclick="toggleP2P(this)"><span class="m-rail-icon">🦈</span> P2P</div>
+                        <div class="m-srv-btn" onclick="setMService('p2p', this)"><span class="m-rail-icon">🦈</span> P2P</div>
                     </div>
 
                     <div class="m-field-group">
@@ -773,7 +784,7 @@ const mobileHTML = `
                             <i class="fas fa-star spin-star"></i>
                         </a>
 
-                        <div class="m-neural-footer">LEVIATHAN SYSTEM v2.5.0</div>
+                        <div class="m-neural-footer">LEVIATHAN SYSTEM v2.7.0</div>
                     </div>
                 </div>
             </div>
@@ -944,10 +955,6 @@ const mobileHTML = `
                             <label class="m-switch"><input type="checkbox" id="m-enableTrailers" onchange="updateStatus('m-enableTrailers','st-trailer')"><span class="m-slider m-slider-pink"></span></label>
                         </div>
                     </div>
-                    
-                    <!-- Hidden P2P checkbox controlled by rail button -->
-                    <input type="checkbox" id="m-enableP2P" style="display:none;">
-                    <div class="m-status-dot" id="st-p2p" style="display:none;"></div>
 
                     <div class="m-row" style="border:none; padding: 5px 0;">
                         <div class="m-label">
@@ -1119,7 +1126,7 @@ const langDescriptions = {
 const skinMaps = {
     'bold': {
         nums: {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵'},
-        chars: {'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭','a':'𝗮','b':'𝗯','c':'𝗰','d':'𝗱','e':'𝗲','f':'𝗳','g':'𝗴','h':'𝗵','i':'𝗶','j':'j','k':'𝗸','l':'𝗹','m':'𝗺','n':'𝗻','o':'ᴏ','p':'ᴘ','q':'𝗾','r':'𝗿','s':'𝘀','t':'𝘁','u':'𝘂','v':'ᴠ','w':'𝘄','x':'𝘅','y':'𝘆','z':'ᴢ'}
+        chars: {'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭','a':'𝗮','b':'𝗯','c':'𝗰','d':'𝗱','e':'𝗲','f':'𝗳','g':'𝗴','h':'𝗵','i':'𝗶','j':'j','k':'𝗸','l':'𝗹','m':'𝗺','n':'𝗻','o':'ᴏ','p':'ᴘ','q':'𝗾','r':'𝗿','s':'𝘀','t':'𝘁','u':'𝘂','v':'𝘃','w':'𝘄','x':'𝘅','y':'𝘆','z':'ᴢ'}
     },
     'spaced': {
         nums: {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗'},
@@ -1217,69 +1224,54 @@ function updateMobilePreview() {
     if(mLangMode === 'ita-eng') langStr = "🇮🇹 ITA 🇺🇸 ENG";
     if(mLangMode === 'eng') langStr = "🇺🇸 ENG";
 
-    // Mock Data (Matching Photo Style)
     const p = {
-        cleanName: "Dune Part Two",
-        epTag: "",
+        title: "Dune Parte Due",
+        cleanName: "Dune Parte Due (2024)",
         quality: "4K",
-        sizeString: "64.20 GB",
-        displaySource: "1337x",
-        serviceTag: mCurrentService.toUpperCase(),
-        lang: langStr, 
-        audioInfo: "Stereo",
-        // Specific tags for the trident line in photo: 4K • RIP • x265 • DV+HDR
-        techLine: "4K • RIP • x265 • DV+HDR"
+        sizeString: "67.81 GB",
+        source: "ilCorSaRoNeRo",
+        displaySource: "ilCorSaRoNeRo",
+        serviceTag: mCurrentService === 'p2p' ? "P2P" : mCurrentService.toUpperCase(),
+        serviceIcon: mCurrentService === 'rd' ? "☄️" : (mCurrentService === 'tb' ? "📦" : "🦈"),
+        lang: langStr,
+        audioInfo: "🔊 ⚡ Stereo",
+        info: "💎 𝗥𝗘𝗠𝗨𝗫 • 🔥 𝗛𝗗𝗥 • 👁️ 𝗗𝗩 • ⚙️ 𝗛𝗘𝗩𝗖", 
+        cleanInfo: "Remux • HDR • DV",
+        seedersStr: "152"
     };
-
-    // Service Icon Logic
-    if (p.serviceTag === "RD") { p.serviceIconTitle = "🐋"; }
-    else if (p.serviceTag === "TB") { p.serviceIconTitle = "⚓"; }
-    else if (p.serviceTag === "AD") { p.serviceIconTitle = "🐚"; }
-    else { p.serviceIconTitle = "⚡"; }
 
     let name = "", desc = "";
 
     if (mSkin === 'leviathan') {
-        const titleIcon = "▶️";
-        const techIcon = "🔱";
-        const brandName = toStylized("LEVIATHAN", "spaced");
-
-        name = `[${p.serviceTag}] 🦑 ${brandName}`;
-
-        const lines = [];
-        // Line 1: Play + Title
-        lines.push(`${titleIcon} ${toStylized(p.cleanName, "bold")}`);
-        // Line 2: Trident + Tech (Mocked exactly as photo)
-        lines.push(`${techIcon} ${toStylized("4K", "small")} • ${toStylized("RIP", "small")} • ${toStylized("x265", "small")} • ${toStylized("DV+HDR", "small")}`);
-        // Line 3: Audio/Lang
-        lines.push(`🗣️ ${p.lang}  |  🔊 ${p.audioInfo}`);
-        // Line 4: Size + Source
-        lines.push(`🧲 ${p.sizeString}  |  ${p.serviceIconTitle} ${p.displaySource}`);
-
-        desc = lines.join("\n");
-    } 
-    else if (mSkin === 'lev2') {
+        const qualityBold = toStylized(p.quality, 'bold');
+        const qIconOverride = p.serviceIcon;
+        name = `🦑 𝗟𝗘𝗩𝗜𝗔𝗧𝗛𝗔𝗡\n${qIconOverride} ┃ ${qualityBold}`;
+        desc = `📁 ${p.cleanName}\n🗣️ ${p.lang} • ${p.audioInfo}\n${p.info}\n🧲 ${p.sizeString} • 👥 ${p.seedersStr}\n${p.serviceIcon} [${p.serviceTag}] ${p.displaySource}`;
+    } else if (mSkin === 'lev2') {
         const levText = toStylized("LEVIATHAN", "small");
         const qText = toStylized("4K", "bold");
         const sizeSmall = toStylized("64.20", "bold") + " " + toStylized("GB", "small");
-        name = `🦑 ${levText} ${p.serviceIconTitle} │ ${qText}`;
+        name = `🦑 ${levText} ${p.serviceIcon} │ ${qText}`;
         const titleBold = toStylized(p.cleanName, "bold");
         const audioSmall = toStylized("TrueHD 7.1", "small");
         const langSmall = toStylized("ITA ENG", "small");
         const srcSmall = toStylized(p.displaySource, "small");
-        desc = `🎬 ${titleBold}\n📦 ${sizeSmall} │ ʀᴇᴍᴜx │ ᴅᴏʟʙʏ ᴠɪsɪᴏɴ\n🔊 ${audioSmall} • 🇮🇹 ${langSmall}\n🔗 ${p.serviceIconTitle} [${p.serviceTag}] │ ${srcSmall}`;
+        let servSmall = "ᴘ𝟚ᴘ";
+        if(p.serviceTag === "RD") servSmall = "ʀᴇᴀʟ-ᴅᴇʙʀɪᴅ";
+        if(p.serviceTag === "TB") servSmall = "ᴛᴏʀʙᴏx";
+        desc = `🎬 ${titleBold}\n📦 ${sizeSmall} │ ʀᴇᴍᴜx │ ᴅᴏʟʙʏ ᴠɪsɪᴏɴ\n🔊 ${audioSmall} • 🇮🇹 ${langSmall}\n🔗 ${servSmall} │ ${srcSmall}`;
     } else if (mSkin === 'fra') {
         name = `⚡️ Leviathan 4K`;
-        desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ ${p.lang} • TrueHD\n✨ ❯ ${p.serviceTag} • ${p.displaySource}\n🔥 ❯ 4K • Remux • HDR\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337`;
+        desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ ${p.lang} • TrueHD\n✨ ❯ ${p.serviceTag} • ${p.source}\n🔥 ❯ 4K • Remux • HDR\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337`;
     } else if (mSkin === 'comet') {
         name = `[${p.serviceTag} ⚡]\nLeviathan\n4K`;
-        desc = `📄 ${p.cleanName}\n📹 HEVC • Remux | TrueHD\n⭐ ${p.displaySource}\n💾 ${p.sizeString} 👥 1337\n🌍 ${p.lang}`;
+        desc = `📄 ${p.cleanName}\n📹 HEVC • ${p.cleanInfo} | TrueHD\n⭐ ${p.source}\n💾 ${p.sizeString} 👥 1337\n🌍 ${p.lang}`;
     } else if (mSkin === 'stremio_ita') {
         name = `⚡️ Leviathan 4K`;
-        desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ ${p.lang}\n✨ ❯ ${p.serviceTag} • ${p.displaySource}\n🔥 ❯ 4K • HEVC • Remux\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337\n🔉 ❯ TrueHD • 7.1`;
+        desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ ${p.lang}\n✨ ❯ ${p.serviceTag} • ${p.source}\n🔥 ❯ 4K • HEVC • ${p.cleanInfo}\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337\n🔉 ❯ TrueHD • 7.1`;
     } else if (mSkin === 'dav') {
         name = `🎥4K UHD HEVC`;
-        desc = `📺 ${p.cleanName}\n🎧 TrueHD 7.1 | 🎞️ HEVC\n🗣️ ${p.lang} | 📦 ${p.sizeString}\n⏱️ 1337 Seeds | 🏷️ ${p.displaySource}\n${p.serviceIconTitle} Leviathan 📡 ${p.serviceTag}\n📂 ${p.cleanName}`;
+        desc = `📺 ${p.cleanName}\n🎧 TrueHD 7.1 | 🎞️ HEVC\n🗣️ ${p.lang} | 📦 ${p.sizeString}\n⏱️ 1337 Seeds | 🏷️ ${p.source}\n${p.serviceIcon} Leviathan 📡 ${p.serviceTag}\n📂 ${p.title}`;
     } else if (mSkin === 'and') {
         name = `🎬 ${p.cleanName}`;
         desc = `4K ⚡\n─ ─ ─ ─ ─ ─ ─ ─ ─ ─\nLingue: ${p.lang}\nSpecifiche: 4K | 📺 Remux HDR | 🔊 TrueHD\n─ ─ ─ ─ ─ ─ ─ ─ ─ ─\n📂 ${p.sizeString} | ☁️ ${p.serviceTag} | 🛰️ Leviathan`;
@@ -1288,11 +1280,11 @@ function updateMobilePreview() {
         desc = `🎟️ ${p.cleanName}\n📜 Movie\n🎥 4K 🎞️ HEVC 🎧 TrueHD\n📦 ${p.sizeString} • 🔗 Leviathan\n🌐 ${p.lang}`;
     } else if (mSkin === 'pri') {
         name = `[${p.serviceTag}]⚡️☁️\n4K🔥UHD\n[Leviathan]`;
-        desc = `🎬 ${toStylized(p.cleanName, 'bold')}\n💎 ʀᴇᴍᴜx 🔆 HDR\n🎧 TrueHD | 🔊 7.1 | 🗣️ ${p.lang}\n📁 ${p.sizeString} | 🏷️ ${p.displaySource}\n📄 ▶️ ${p.cleanName} ◀️`;
+        desc = `🎬 ${toStylized(p.cleanName, 'bold')}\n💎 ʀᴇᴍᴜx 🔆 HDR\n🎧 TrueHD | 🔊 7.1 | 🗣️ ${p.lang}\n📁 ${p.sizeString} | 🏷️ ${p.source}\n📄 ▶️ ${p.title} ◀️`;
     } else if (mSkin === 'custom') {
         let tpl = document.getElementById('m-customTemplate').value || "Lev {quality} ||| {title} - {size}";
         tpl = tpl.replace("{title}", p.cleanName).replace("{quality}", p.quality)
-                 .replace("{size}", p.sizeString).replace("{source}", p.displaySource)
+                 .replace("{size}", p.sizeString).replace("{source}", p.source)
                  .replace("{service}", p.serviceTag).replace("{lang}", p.lang)
                  .replace("{audio}", p.audioInfo).replace(/\\n/g, "\n");
         if (tpl.includes("|||")) {
@@ -1424,31 +1416,21 @@ function setMService(srv, btn, keepInput = false) {
     }
     
     const input = document.getElementById('m-apiKey');
-    const placeholders = { 'rd': "RD API Key...", 'tb': "TB API Key..." };
-    input.placeholder = placeholders[srv];
     
+    if (srv === 'p2p') {
+        input.placeholder = "Nessuna API Key richiesta (P2P)";
+        input.disabled = true;
+        input.style.opacity = "0.5";
+    } else {
+        const placeholders = { 'rd': "RD API Key...", 'tb': "TB API Key..." };
+        input.placeholder = placeholders[srv];
+        input.disabled = false;
+        input.style.opacity = "1";
+    }
+
     updateMobilePreview(); 
     updateLinkModalContent();
     if(navigator.vibrate) navigator.vibrate(10);
-}
-
-function toggleP2P(btn) {
-    const checkbox = document.getElementById('m-enableP2P');
-    checkbox.checked = !checkbox.checked;
-    
-    document.querySelectorAll('.m-srv-btn').forEach(b => {
-        b.classList.remove('active');
-    });
-    
-    if(checkbox.checked) {
-        btn.classList.add('active');
-    }
-    
-    updateStatus('m-enableP2P', 'st-p2p');
-    toggleModuleStyle('m-enableP2P', 'mod-p2p');
-    updateMobilePreview();
-    updateLinkModalContent();
-    if(navigator.vibrate) navigator.vibrate(15);
 }
 
 function updateStatus(inputId, statusId) {
@@ -1575,8 +1557,8 @@ function openApiPage(type) {
          window.open('https://www.themoviedb.org/settings/api', '_blank');
          return;
     }
-    const links = { 'rd': 'https://real-debrid.com/apitoken', 'ad': 'https://alldebrid.com/apikeys', 'tb': 'https://torbox.app/settings' };
-    window.open(links[mCurrentService], '_blank');
+    const links = { 'rd': 'https://real-debrid.com/apitoken', 'tb': 'https://torbox.app/settings' };
+    if (links[mCurrentService]) window.open(links[mCurrentService], '_blank');
 }
 function setScQuality(val) {
     mScQuality = val;
@@ -1669,9 +1651,11 @@ function toggleFilter(id) {
 }
 
 async function pasteTo(id) {
+    const input = document.getElementById(id);
+    if (input.disabled) return;
     try {
         const text = await navigator.clipboard.readText();
-        document.getElementById(id).value = text;
+        input.value = text;
         updateLinkModalContent();
         const btn = document.querySelector(`#${id}`).parentElement.querySelector('.m-paste-action');
         if(btn) {
@@ -1689,12 +1673,17 @@ function loadMobileConfig() {
         if (pathParts.length >= 2 && pathParts[1].length > 10) {
             const config = JSON.parse(atob(pathParts[1]));
             if(config.service) {
-                const srvMap = {'rd':0, 'tb':1};
+                const srvMap = {'rd':0, 'tb':1}; 
                 const railBtns = document.querySelectorAll('#page-setup .m-srv-btn');
                 if(railBtns.length > 0 && srvMap[config.service] !== undefined) {
                      setMService(config.service, railBtns[srvMap[config.service]], true);
                 }
+            } else if (config.filters && config.filters.enableP2P) {
+                 // Select P2P if active and no service
+                 const railBtns = document.querySelectorAll('#page-setup .m-srv-btn');
+                 setMService('p2p', railBtns[2], true);
             }
+
             if(config.key) document.getElementById('m-apiKey').value = config.key;
 
             if(config.tmdb) document.getElementById('m-tmdb').value = config.tmdb;
@@ -1723,15 +1712,6 @@ function loadMobileConfig() {
                 
                 document.getElementById('m-enableWebStreamr').checked = config.filters.enableWebStreamr !== false;
                 toggleModuleStyle('m-enableWebStreamr', 'mod-webstr');
-
-                document.getElementById('m-enableP2P').checked = config.filters.enableP2P || false;
-                toggleModuleStyle('m-enableP2P', 'mod-p2p');
-                
-                // Attiva visivamente il pulsante P2P nella rail se abilitato
-                if(config.filters.enableP2P) {
-                    const p2pBtn = document.querySelector('.m-srv-btn[onclick*="toggleP2P"]');
-                    if(p2pBtn) p2pBtn.classList.add('active');
-                }
 
                 if(config.filters.language) {
                     setLangMode(config.filters.language);
@@ -1776,7 +1756,6 @@ function loadMobileConfig() {
             updateStatus('m-enableVix', 'st-vix');
             updateStatus('m-enableGhd', 'st-ghd');
             updateStatus('m-enableGs', 'st-gs');
-            updateStatus('m-enableP2P', 'st-p2p');
             updateStatus('m-aioMode', 'st-aio');
             updateStatus('m-enableTrailers', 'st-trailer');
             updateGhostVisuals();
@@ -1796,8 +1775,10 @@ function getMobileConfig() {
     const sizeVal = parseInt(document.getElementById('m-sizeVal').value);
     const finalMaxSizeGB = sizeActive ? sizeVal : 0;
     
+    const isP2P = mCurrentService === 'p2p';
+
     return {
-        service: mCurrentService,
+        service: isP2P ? '' : mCurrentService,
         key: document.getElementById('m-apiKey').value.trim(),
         tmdb: document.getElementById('m-tmdb').value.trim(),
         sort: mSortMode, 
@@ -1812,6 +1793,7 @@ function getMobileConfig() {
         filters: {
             language: mLangMode,
             allowEng: (mLangMode === 'ita-eng' || mLangMode === 'eng'), 
+            enableP2P: isP2P,
             no4k: document.getElementById('mq-4k').classList.contains('excluded'),
             no1080: document.getElementById('mq-1080').classList.contains('excluded'),
             no720: document.getElementById('mq-720').classList.contains('excluded'),
@@ -1821,7 +1803,6 @@ function getMobileConfig() {
             enableGhd: document.getElementById('m-enableGhd').checked,
             enableGs: document.getElementById('m-enableGs').checked,
             enableWebStreamr: document.getElementById('m-enableWebStreamr').checked,
-            enableP2P: document.getElementById('m-enableP2P').checked,
             enableTrailers: document.getElementById('m-enableTrailers').checked,
             vixLast: document.getElementById('m-vixLast').checked,
             scQuality: mScQuality,
@@ -1836,11 +1817,10 @@ function updateLinkModalContent() {
     if(!box) return;
     
     const config = getMobileConfig();
-    const isWebEnabled = config.filters.enableVix || config.filters.enableGhd || config.filters.enableGs;
-    const isP2PEnabled = config.filters.enableP2P;
+    const isWebEnabled = config.filters.enableVix || config.filters.enableGhd || config.filters.enableGs || config.filters.enableP2P;
     
-    if(!config.key && !isWebEnabled && !isP2PEnabled) {
-        box.value = "/// SYSTEM OFFLINE: WAITING FOR CONFIGURATION DATA ///\\n[!] Inserisci API Key, Attiva Sorgenti Web o Attiva P2P";
+    if(!config.key && !isWebEnabled) {
+        box.value = "/// SYSTEM OFFLINE: WAITING FOR CONFIGURATION DATA ///\\n[!] Inserisci API Key o Attiva Sorgenti Web/P2P";
         box.style.color = "var(--m-error)";
         return;
     }
@@ -1852,10 +1832,9 @@ function updateLinkModalContent() {
 
 function mobileInstall() {
     const config = getMobileConfig();
-    const isWebEnabled = config.filters.enableVix || config.filters.enableGhd || config.filters.enableGs;
-    const isP2PEnabled = config.filters.enableP2P;
-    if(!config.key && !isWebEnabled && !isP2PEnabled) {
-        showToast("ERRORE: CONFIGURA ADDON", "error"); return;
+    const isWebEnabled = config.filters.enableVix || config.filters.enableGhd || config.filters.enableGs || config.filters.enableP2P;
+    if(!config.key && !isWebEnabled) {
+        showToast("ERRORE: API KEY MANCANTE", "error"); return;
     }
     const manifestUrl = `${window.location.host}/${btoa(JSON.stringify(config))}/manifest.json`;
     window.location.href = `stremio://${manifestUrl}`;
