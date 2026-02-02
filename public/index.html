@@ -251,11 +251,29 @@
         .q-btn:hover { background: rgba(255,255,255,0.1); }
         .q-btn.active { background: rgba(112, 0, 255, 0.2); border-color: var(--secondary); color: #fff; box-shadow: 0 0 5px rgba(112, 0, 255, 0.2); }
 
+        /* --- UPDATED TAGS (MFP & NO PROXY) --- */
         .proxy-tag {
-            display: inline-block; padding: 2px 8px; margin-left: 10px;
-            border: 1px solid var(--text-dim); border-radius: 4px; color: var(--text-dim);
-            font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.75rem; letter-spacing: 1px;
-            text-transform: uppercase; background: rgba(255,255,255,0.05);
+            display: inline-block; padding: 3px 8px; margin-left: 8px;
+            border-radius: 4px; 
+            font-family: 'Rajdhani', sans-serif; font-weight: 800; font-size: 0.7rem; letter-spacing: 1px;
+            text-transform: uppercase; vertical-align: middle;
+            transition: 0.3s;
+        }
+        
+        /* MFP Style (Cool, Purple/Secondary theme) */
+        .tag-mfp {
+            background: rgba(112, 0, 255, 0.15);
+            border: 1px solid var(--secondary);
+            color: #dbb8ff;
+            text-shadow: 0 0 5px var(--secondary);
+            box-shadow: inset 0 0 5px rgba(112, 0, 255, 0.1);
+        }
+        
+        /* NO PROXY Style (Clean, Technical, Ghostly) */
+        .tag-noproxy {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-dim);
         }
 
         .section-header { margin: 50px 0 25px; font-family: 'Rajdhani', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 4px; border-left: 4px solid var(--primary); padding-left: 20px; text-shadow: 0 0 10px var(--primary-dim); }
@@ -1031,12 +1049,15 @@
                     <div class="module-box" id="webModule">
                         <div class="module-label">MODULO SORGENTI WEB</div>
                         <div class="control-row">
-                            <div class="control-info">
-                                <div class="control-title notranslate" translate="no"><i class="fas fa-play-circle" style="color: var(--secondary)"></i> StreamingCommunity</div>
-                                <span class="control-desc">Accesso diretto ai server di StreamingCommunity. Massima priorità e velocità.</span>
-                            </div>
-                            <label class="switch mf-switch"><input type="checkbox" id="enableVix" onchange="checkWebVisibility(); updateFluxStream()"><span class="slider"></span></label>
-                        </div>
+    <div class="control-info">
+        <div class="control-title notranslate" translate="no">
+            <i class="fas fa-play-circle" style="color: var(--secondary)"></i> StreamingCommunity
+            <span class="proxy-tag tag-noproxy">NO PROXY</span>
+        </div>
+        <span class="control-desc">Accesso diretto ai server di StreamingCommunity. Massima priorità e velocità.</span>
+    </div>
+    <label class="switch mf-switch"><input type="checkbox" id="enableVix" onchange="checkWebVisibility(); updateFluxStream()"><span class="slider"></span></label>
+</div>
                         <div class="sc-quality-container" id="scQualityContainer">
                            <div class="quality-label">Seleziona Qualità Flusso</div>
                             <div class="quality-grid">
@@ -1050,7 +1071,7 @@
                             <div class="control-info">
                                 <div class="control-title notranslate" translate="no">
                                     <i class="fas fa-film" style="color: #ff9900"></i> GuardaHD 
-                                    <span class="proxy-tag">PROXY</span>
+                                    <span class="proxy-tag tag-mfp">MFP</span>
                                 </div>
                                 <span class="control-desc">Scraper ibrido Film & Serie TV. Ideale per contenuti in alta definizione.</span>
                             </div>
@@ -1061,7 +1082,7 @@
                             <div class="control-info">
                                 <div class="control-title notranslate" translate="no">
                                     <i class="fas fa-tv" style="color: #aa00ff"></i> GuardaSerie
-                                    <span class="proxy-tag">PROXY</span>
+                                    <span class="proxy-tag tag-mfp">MFP</span>
                                 </div>
                                 <span class="control-desc">Tracker dedicato per Serie TV. Aggiornamento rapido nuovi episodi.</span>
                             </div>
@@ -1072,7 +1093,7 @@
                             <div class="control-info">
                                 <div class="control-title notranslate" translate="no">
                                     <i class="fas fa-torii-gate" style="color: #ff6600"></i> AnimeWorld
-                                    <span class="proxy-tag">NO PROXY</span>
+                                    <span class="proxy-tag tag-noproxy">NO PROXY</span>
                                 </div>
                                 <span class="control-desc">Il più grande database italiano di Anime. Include gestione Cookie SecurityAW.</span>
                             </div>
