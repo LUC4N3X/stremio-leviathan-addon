@@ -250,7 +250,7 @@ Leviathan non impone l'uso di intermediari. Il motore supporta la connessione di
 
 <div style="background: rgba(138, 43, 226, 0.05); border: 1px solid rgba(138, 43, 226, 0.2); border-radius: 10px; padding: 10px; width: 95%;">
   <h3 style="margin: 0; padding: 10px; color: #fff; text-transform: uppercase; letter-spacing: 3px; font-size: 1.2rem; border-bottom: 1px solid rgba(138, 43, 226, 0.2);">
-    🕸️ Decentralized Swarm <span style="font-size: 0.8rem; color: #8A2BE2; vertical-align: middle;">(BITTORRENT NETWORK)</span>
+    🕸️ Magnet Swarm Indexers <span style="font-size: 0.8rem; color: #8A2BE2; vertical-align: middle;">(DEBRID & P2P READY)</span>
   </h3>
   <br>
 
