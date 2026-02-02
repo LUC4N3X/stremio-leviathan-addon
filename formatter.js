@@ -483,7 +483,7 @@ function formatStreamSelector(fileTitle, source, size, seeders, serviceTag = "RD
     let { quality, qDetails, qIcon, videoTags, cleanTags, lang, codec, audioTag, audioChannels, rawInfo } = extractStreamInfo(fileTitle, source);
     
     // Icone Service
-    let serviceIconTitle = "⚡"; 
+    let serviceIconTitle = "🦈"; 
     // RD = Balena (🐋)
     if (serviceTag === "RD") { qIcon = "🐋"; serviceIconTitle = "🐋"; }
     // TB = Conchiglia (🐚)
