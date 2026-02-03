@@ -68,11 +68,7 @@ risultati **semanticamente validati**, **immediati** e **affidabili**.
 🔹 Routing a bassa latenza  
 🔹 Aggregazione ibrida DHT + Provider  
     </span>
-    <div style="margin-top: 10px;">
-      <code style="background: rgba(0, 234, 255, 0.1); color: #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">Query_Morphing: ACTIVE</code>
-      <code style="background: rgba(0, 234, 255, 0.1); color: #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">Latency: LOW</code>
-    </div>
-  </div>
+    
 
   <div style="margin-bottom: 25px;">
     <img src="https://img.shields.io/badge/⚡_Adaptive-Latency_Scaling-161b22?style=flat-square&labelColor=0d1117&color=00eaff" />
