@@ -26,11 +26,14 @@ const LANG_FLAGS = [
 ];
 
 const REGEX_EXTRA = {
-    contextIt: /\b(ac-?3|aac|mp3|ddp|dts|truehd|audio|lingua)\W+(it)\b/i
+    contextIt: /\b(ac-?3|aac|mp3|ddp|dts|truehd|audio|lingua)\W+(it)\b/i,
+    dualAudio: /\b(dual[\s\.-]*audio)\b/i,
+    multiAudio: /\b(multi[\s\.-]*audio|multi)\b/i
 };
 
 // Icone Qualità
 const QUALITY_ICONS = {
+    "8k": "🪐",
     "4k": "🔥",
     "2160p": "🔥",
     "1440p": "🖥️",
@@ -148,6 +151,7 @@ function extractStreamInfo(title, source) {
   if (info.resolution) {
       q = info.resolution.toUpperCase();
       if (q === "2160P") q = "4K";
+      else if (q === "4320P") q = "8K";
       qDetails = q;
   } else if (info.source) {
       const camSources = ['CAM', 'TeleSync', 'TeleCine', 'SCR', 'Screener'];
@@ -195,31 +199,50 @@ function extractStreamInfo(title, source) {
       cleanTags.push("IMAX");
   }
 
-  // Codec
+  // Codec (AGGIORNATO: AV1 e VVC)
   if (info.codec) {
       const codec = info.codec.toUpperCase();
-      const icon = /265|HEVC/i.test(codec) ? "⚙️" : "📼";
-      videoTags.push(`${icon} ${toStylized(codec)}`);
-      cleanTags.push(codec);
+      let icon = "📼";
+      let stylCodec = codec;
+
+      if (/AV1/i.test(codec)) {
+          icon = "🪐";
+          stylCodec = "AV1";
+      } else if (/VVC|H266/i.test(codec)) {
+          icon = "⚡";
+          stylCodec = "VVC";
+      } else if (/265|HEVC/i.test(codec)) {
+          icon = "⚙️";
+      }
+
+      videoTags.push(`${icon} ${toStylized(stylCodec)}`);
+      cleanTags.push(stylCodec);
   }
 
-  // HDR / Dolby Vision
+  // HDR / Dolby Vision (MIGLIORATO)
   const rawT = String(title).toUpperCase();
-  const hasDV = /\b(DV|DOLBY\s*VISION|DOVI)\b/.test(rawT) || (info.hdr && (/dolby|vision/i.test(info.hdr.toString())));
-  const hasHDR = /\b(HDR|HDR10|HDR10\+|UHD\s*HDR)\b/.test(rawT) || (info.hdr && (/hdr/i.test(info.hdr.toString())));
+  // Regex specifica per Dolby Vision
+  const isDV = /\b(DV|DOLBY\s*VISION|DOVI)\b/.test(rawT) || (info.hdr && (/dolby|vision/i.test(info.hdr.toString())));
+  // Regex specifica per HDR10+
+  const isHDR10Plus = /\b(HDR10\+|HDR10PLUS)\b/.test(rawT) || (info.hdr && (/hdr10\+|plus/i.test(info.hdr.toString())));
+  // Regex generica HDR
+  const isHDR = /\b(HDR|HDR10|UHD\s*HDR)\b/.test(rawT) || (info.hdr && (/hdr/i.test(info.hdr.toString())));
 
-  if (hasDV && hasHDR) {
+  if (isDV && (isHDR || isHDR10Plus)) {
       videoTags.push(`👁️ ${toStylized("DV+HDR")}`);
       cleanTags.push("DV+HDR");
-  } else if (hasDV) {
+  } else if (isDV) {
       videoTags.push(`👁️ ${toStylized("DV")}`);
       cleanTags.push("DV");
-  } else if (hasHDR) {
+  } else if (isHDR10Plus) {
+      videoTags.push(`🔥 ${toStylized("HDR10+")}`);
+      cleanTags.push("HDR10+");
+  } else if (isHDR) {
       videoTags.push(`🔥 ${toStylized("HDR")}`);
       cleanTags.push("HDR");
   }
 
-  // C. Rilevamento Audio & Lingue (Style: 🇮🇹 / 🇬🇧)
+  // C. Rilevamento Audio & Lingue (AGGIORNATO: Dual vs Multi)
   let detectedLangs = [];
   
   LANG_FLAGS.forEach(l => {
@@ -243,8 +266,11 @@ function extractStreamInfo(title, source) {
           lang = `${uniqueLangs[0].flag}${LANG_SEP}🌐`;
       }
   } else {
-      if (/multi/i.test(t)) {
-           lang = (REGEX_EXTRA.contextIt.test(t) || /corsaro/i.test(source)) ? `🇮🇹${LANG_SEP}🌐` : `🌐${LANG_SEP}MULTI`;
+      // Fallback Regex
+      if (REGEX_EXTRA.multiAudio.test(t)) {
+           lang = `🌐${LANG_SEP}MULTI`;
+      } else if (REGEX_EXTRA.dualAudio.test(t)) {
+           lang = `🌐${LANG_SEP}DUAL`;
       } else if (REGEX_EXTRA.contextIt.test(t) || /corsaro/i.test(source)) {
            lang = "🇮🇹 ITA";
       }
@@ -260,17 +286,26 @@ function extractStreamInfo(title, source) {
       else if (a.includes("DTS-X") || a.includes("DTS:X")) audioTag = "DTS:X";
       else if (a.includes("TRUEHD")) audioTag = "TrueHD";
       else if (a.includes("DTS-HD") || a.includes("MA")) audioTag = "DTS-HD";
-      else if (a.includes("DDP") || a.includes("EAC3")) audioTag = "Dolby+";
+      else if (a.includes("DDP") || a.includes("EAC3") || a.includes("E-AC-3")) audioTag = "Dolby+";
       else if (a.includes("AC3") || a.includes("DD")) audioTag = "Dolby";
       else if (a.includes("AAC")) audioTag = "AAC";
       else if (a.includes("FLAC")) audioTag = "FLAC";
+      else if (a.includes("OPUS")) audioTag = "OPUS";
       else audioTag = `${a}`;
   }
 
+  // Icone Canali
   if (info.channels) {
-      audioChannels = info.channels;
-      if (audioChannels.includes("5.1") || audioChannels.includes("7.1")) {
-          if (audioTag.includes("Stereo")) audioTag = "Surround";
+      const ch = info.channels;
+      if (ch.includes("7.1")) audioChannels = "🔊 7.1";
+      else if (ch.includes("5.1")) audioChannels = "🔊 5.1";
+      else if (ch.includes("2.0")) audioChannels = "🔉 2.0";
+      else if (ch.includes("1.0")) audioChannels = "🔈 1.0";
+      else audioChannels = ch;
+
+      // Aggiorna tag stereo se surround
+      if ((ch.includes("5.1") || ch.includes("7.1")) && audioTag.includes("Stereo")) {
+          audioTag = "Surround";
       }
   }
   
