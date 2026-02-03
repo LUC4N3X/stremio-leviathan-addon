@@ -1346,7 +1346,8 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
        // --- ANIME WORLD INTEGRATION ---
        let awPromise = Promise.resolve([]);
        if (config.filters && config.filters.enableAnimeWorld) {
-           awPromise = searchAnimeWorld(meta, config).catch(err => {
+           // MODIFICA QUI: Aggiunto 'id' come primo argomento per Kitsu check
+           awPromise = searchAnimeWorld(id, meta, config).catch(err => {
                logger.warn(`AnimeWorld Error: ${err.message}`);
                return [];
            });
