@@ -1,46 +1,22 @@
-<div align="center" style="text-align: center;">
+<div align="center">
 
+  <!-- Logo -->
   <img src="https://i.ibb.co/j9tSSy7f/Gemini-Generated-Image-xep84gxep84gxep8-Photoroom.png" 
        alt="Leviathan Logo"
-       style="width: 200px; 
-              border-radius: 40px; 
-              filter: drop-shadow(0 0 40px rgba(0, 140, 255, 0.8)); 
-              margin-bottom: 10px;
-              margin-left: auto;
-              margin-right: auto;
-              display: inline-block;
-              transition: transform 0.3s;" />
+       style="width: 200px; border-radius: 30px; filter: drop-shadow(0 0 30px rgba(0, 234, 255, 0.7)); margin-bottom: 20px;" />
 
-<h1 align="center"
-    style="
-      margin: 14px 0 6px;
-      font-size: 4.4rem;
-      font-weight: 900;
-      letter-spacing: 12px;
-      text-transform: uppercase;
-      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: linear-gradient(90deg,#00eaff,#8cf9ff,#00eaff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      border-bottom: 2px solid rgba(0,234,255,.6);
-      padding-bottom: 8px;
-      filter: drop-shadow(0 8px 25px rgba(0,234,255,.5));
-    ">
-  LEVIATHAN
-</h1>
-
-
-
-  <div style="font-size: 1.2rem; 
-              color: #aaddff; 
-              letter-spacing: 8px; 
-              text-transform: uppercase; 
-              margin-top: 10px;
-              opacity: 0.8;">
-    — L'abisso si risveglia —
-  </div>
-
-</div>
+  <!-- Titolo + Slogan nello stesso blocco -->
+  <h1 style="background: linear-gradient(180deg, #fff 30%, #00eaff 100%);
+             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+             font-size: 6rem; font-weight: 900; margin: 0; line-height: 1;
+             letter-spacing: -5px; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+             text-transform: uppercase;
+             filter: drop-shadow(0 8px 20px rgba(0, 234, 255, 0.5));">
+    𝗟𝗘𝗩𝗜𝗔𝗧𝗛𝗔𝗡<br>
+    <span style="font-size: 1.5rem; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0, 234, 255, 0.5);">
+      ⚡ L'abisso si risveglia ⚡
+    </span>
+  </h1>>
 
 
 <br>
