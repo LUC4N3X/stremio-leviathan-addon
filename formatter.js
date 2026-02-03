@@ -144,6 +144,29 @@ function extractStreamInfo(title, source) {
   const t = String(title);
   const info = titleParser.parse(t);
   
+  // *** ESTRAZIONE RELEASE GROUP POTENZIATA ***
+  let releaseGroup = info.group || "";
+  
+  // Se il parser fallisce, prova regex manuali
+  if (!releaseGroup) {
+      // 1. Cerca pattern finale "- GRUPPO" (es. "-SPARKS" o "- DR4GON")
+      const endMatch = t.match(/- ?([a-zA-Z0-9_]+)$/);
+      if (endMatch) {
+          releaseGroup = endMatch[1];
+      } else {
+          // 2. Cerca pattern iniziale "[GRUPPO]" (es. "[HorribleSubs]")
+          const startMatch = t.match(/^\[([a-zA-Z0-9_\-\.\s]+)\]/);
+          if (startMatch && startMatch[1].length < 20) {
+              releaseGroup = startMatch[1];
+          }
+      }
+  }
+
+  // Pulizia finale gruppo (rimuove parentesi rimaste)
+  if (releaseGroup) {
+      releaseGroup = releaseGroup.replace(/^(-|_|\[|\])+|(-|_|\[|\])+$/g, "").trim();
+  }
+
   // A. Qualità
   let q = "SD";
   let qDetails = "SD";
@@ -328,7 +351,8 @@ function extractStreamInfo(title, source) {
   
   return { 
       quality: q, qDetails, qIcon, videoTags, cleanTags, lang, 
-      codec: info.codec || "", audioTag, audioChannels, rawInfo: info 
+      codec: info.codec || "", audioTag, audioChannels, rawInfo: info,
+      releaseGroup 
   };
 }
 
@@ -336,7 +360,7 @@ function extractStreamInfo(title, source) {
 // 4. STILI DI FORMATTAZIONE
 // =========================================================================
 
-// Style 1: Leviathan (TV Fixed Edition - WITH SEEDERS FIX & SOURCE BOTTOM)
+// Style 1: Leviathan (TV Fixed Edition - GROUP NEXT TO PROVIDER)
 function styleLeviathan(p) {
     // 1. PULIZIA AUDIO
     let cleanAudio = p.audioTag.replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, "").trim();
@@ -351,7 +375,7 @@ function styleLeviathan(p) {
     const brandName = toStylized("LEVIATHAN", "small"); 
     const name = `[${p.serviceTag}]🦑${brandName}`;
 
-    // 3. RIGA TECH
+    // 3. RIGA TECH (Senza Group qui)
     let techSpecs = [p.quality, ...p.cleanTags].filter(Boolean);
     techSpecs = [...new Set(techSpecs)]; 
     let techLine = techSpecs.map(t => toStylized(t, 'small')).join(" • ");
@@ -375,8 +399,16 @@ function styleLeviathan(p) {
     }
     lines.push(fileInfo);
 
-    // RIGA 5: Source (Spostata giù)
-    lines.push(`${p.serviceIconTitle} ${p.displaySource}`);
+    // RIGA 5: Source + Release Group (SPOSTATO QUI)
+    let sourceRow = `${p.serviceIconTitle} ${p.displaySource}`;
+    
+    // Se c'è un gruppo, lo aggiungiamo accanto al provider
+    if (p.releaseGroup && p.releaseGroup.length < 25) {
+        const styledGroup = toStylized(p.releaseGroup, 'small');
+        sourceRow += ` | 🏷️ ${styledGroup}`;
+    }
+    
+    lines.push(sourceRow);
 
     return { name, title: lines.join("\n") };
 }
@@ -532,7 +564,7 @@ function styleCustom(p, template) {
 // =========================================================================
 
 function formatStreamSelector(fileTitle, source, size, seeders, serviceTag = "RD", config = {}, infoHash = null, isLazy = false, isPackItem = false) {
-    let { quality, qDetails, qIcon, videoTags, cleanTags, lang, codec, audioTag, audioChannels, rawInfo } = extractStreamInfo(fileTitle, source);
+    let { quality, qDetails, qIcon, videoTags, cleanTags, lang, codec, audioTag, audioChannels, rawInfo, releaseGroup } = extractStreamInfo(fileTitle, source);
     
     // Icone Service
     let serviceIconTitle = "🦈"; 
@@ -584,7 +616,8 @@ function formatStreamSelector(fileTitle, source, size, seeders, serviceTag = "RD
         serviceTag, serviceIconTitle,
         videoTags, cleanTags, codec,
         lang, audioInfo, audioTag, audioChannels,
-        cleanName, epTag, sourceLine
+        cleanName, epTag, sourceLine,
+        releaseGroup
     };
 
     let result;
