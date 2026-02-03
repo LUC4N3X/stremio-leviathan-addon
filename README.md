@@ -1,79 +1,38 @@
-<div align="center" style="padding: 40px 0;">
+<div align="center">
+  <img src="https://i.ibb.co/j9tSSy7f/Gemini-Generated-Image-xep84gxep84gxep8-Photoroom.png" 
+       alt="Leviathan Logo"
+       style="width: 220px; 
+              border-radius: 50%; 
+              border: 4px solid #fff;
+              box-shadow: 0 0 20px #00eaff, 0 0 50px rgba(0, 234, 255, 0.5), inset 0 0 20px #00eaff;
+              margin-bottom: 30px;" />
 
-  <!-- LOGO -->
-  <img
-    src="https://i.ibb.co/j9tSSy7f/Gemini-Generated-Image-xep84gxep84gxep8-Photoroom.png"
-    alt="Leviathan Logo"
-    style="
-      width: 210px;
-      border-radius: 28px;
-      margin-bottom: 28px;
-      filter:
-        drop-shadow(0 0 25px rgba(0,234,255,.85))
-        drop-shadow(0 0 60px rgba(0,234,255,.35));
-    "
-  />
-
-  <!-- TITLE -->
-  <h1
-    style="
-      margin: 0;
-      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: -6px;
-      line-height: 0.95;
-      font-size: clamp(4rem, 8vw, 6.5rem);
-      background: linear-gradient(
-        180deg,
-        #ffffff 0%,
-        #bff8ff 35%,
-        #00eaff 100%
-      );
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      filter:
-        drop-shadow(0 10px 25px rgba(0,234,255,.55))
-        drop-shadow(0 0 80px rgba(0,234,255,.25));
-    "
-  >
+  <h1 style="font-family: 'Arial Black', sans-serif; 
+             font-size: 6.5rem; 
+             line-height: 1;
+             margin: 0;
+             letter-spacing: -6px; 
+             color: #fff;
+             text-transform: uppercase; 
+             text-shadow: 4px 4px 0px #ff0050, -4px -4px 0px #00eaff;">
     LEVIATHAN
   </h1>
 
-  <!-- DIVIDER -->
-  <div
-    style="
-      width: 180px;
-      height: 2px;
-      margin: 18px auto 16px;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        #00eaff,
-        transparent
-      );
-      box-shadow: 0 0 15px rgba(0,234,255,.8);
-    "
-  ></div>
-
-  <!-- SLOGAN -->
-  <div
-    style="
-      font-size: 1.35rem;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: #cfffff;
-      text-shadow:
-        0 0 10px rgba(0,234,255,.7),
-        0 0 25px rgba(0,234,255,.4);
-      opacity: 0.95;
-    "
-  >
+  <p style="font-family: 'Courier New', monospace; 
+            font-size: 1.4rem; 
+            font-weight: bold; 
+            color: #00eaff; 
+            background: rgba(0, 234, 255, 0.1); 
+            display: inline-block; 
+            padding: 8px 20px; 
+            border: 1px solid #00eaff; 
+            border-radius: 5px;
+            margin-top: 15px;
+            text-transform: uppercase;
+            letter-spacing: 3px;">
     ⚡ L'abisso si risveglia ⚡
-  </div>
-
+  </p>
 </div>
-
 
 
 <br>
