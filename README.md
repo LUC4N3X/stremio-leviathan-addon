@@ -63,17 +63,21 @@
   
   <br>
 
- <div style="background: rgba(0,136,204,0.1); border: 1px solid rgba(0,136,204,0.3); border-radius: 8px; padding: 15px; width: 80%; max-width: 600px; margin: 20px auto; text-align:center;">
-  <strong style="color: #0088CC; font-size: 1rem;">💬 Contattami direttamente su Telegram</strong>
-  <p style="color: #cbd5e1; font-size: 0.9rem; margin: 5px 0;">
-    Hai domande o vuoi parlarmi? Questo è il modo più veloce per raggiungermi.
-  </p>
-  <a href="https://t.me/Stremio_ITA/7153" target="_blank" style="text-decoration:none;">
-    <img src="https://img.shields.io/badge/📩_Telegram-Chat_Diretta-0088CC?style=for-the-badge&logo=telegram&logoColor=white" alt="Contattami Telegram">
-  </a>
-</div>
-  
-  <hr style="width: 40%; border: 0; height: 1px; background: linear-gradient(90deg, transparent, #00eaff, transparent); margin-top: 15px; opacity: 0.4;">
+ ## 💬 Contatto Diretto
+
+Hai domande o feedback?  
+Telegram è il canale più veloce.
+
+<a href="https://t.me/Stremio_ITA/7153" target="_blank">
+  <img src="https://img.shields.io/badge/Telegram-Chat_Diretta-0088CC?style=for-the-badge&logo=telegram&logoColor=white" />
+</a>
+
+---
+
+<p align="center">
+  <sub>🦑 Leviathan — Global Hybrid Aggregation Framework</sub>
+</p>
+
 </div>
 
 
