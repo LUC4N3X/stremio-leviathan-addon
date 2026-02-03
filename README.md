@@ -16,7 +16,7 @@
   <em>L'abisso si risveglia</em>
 </h3>
 
----
+
 
 <!-- BADGES CORE -->
 <p>
@@ -32,7 +32,7 @@
   <img src="https://img.shields.io/badge/Status-OPERATIONAL-success?style=for-the-badge" />
 </p>
 
----
+
 
 <!-- DESCRIPTION -->
 ### 🇮🇹 Engineered for Italian Content Precision
@@ -45,7 +45,7 @@ risultati **semanticamente validati**, **immediati** e **affidabili**.
 🔹 Routing a bassa latenza  
 🔹 Aggregazione ibrida DHT + Provider  
 
----
+
 
 <!-- FEATURES -->
 <p>
@@ -55,7 +55,7 @@ risultati **semanticamente validati**, **immediati** e **affidabili**.
   <img src="https://img.shields.io/badge/🔗_Magnet-Fusion_Engine-000000?style=for-the-badge&labelColor=00eaff" />
 </p>
 
----
+
 
 <!-- INSTALL -->
 ## 🚀 Installazione
@@ -64,7 +64,7 @@ risultati **semanticamente validati**, **immediati** e **affidabili**.
   <img src="public/button5.svg" width="300" alt="Installa Leviathan">
 </a>
 
----
+
 
 <!-- MIRROR -->
 ## 🕶 Shadow Mirror
@@ -73,7 +73,7 @@ risultati **semanticamente validati**, **immediati** e **affidabili**.
   <img src="https://img.shields.io/badge/ACCESS-SHADOW_MIRROR-1f2937?style=for-the-badge&logo=huggingface&logoColor=FFD21E" />
 </a>
 
----
+
 
 <!-- CONTACT -->
 ## 💬 Contatto Diretto
@@ -85,7 +85,7 @@ Telegram è il canale più veloce.
   <img src="https://img.shields.io/badge/Telegram-Chat_Diretta-0088CC?style=for-the-badge&logo=telegram&logoColor=white" />
 </a>
 
----
+
 
 <p align="center">
   <sub>🦑 Leviathan — Global Hybrid Aggregation Framework</sub>
