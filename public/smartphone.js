@@ -261,30 +261,99 @@ body::before {
 .mini-tag { font-size: 0.55rem; opacity: 0.7; margin-top: -2px; font-weight: 700; letter-spacing: 1px; color: var(--m-primary); }
 .m-qual-chip.excluded .mini-tag { color: var(--m-error); }
 
-.m-sys-grid { display: grid; grid-template-columns: 1fr; gap: 0; background: rgba(0,0,0,0.2); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; margin-bottom: 20px; }
-.m-sys-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.m-sys-row:last-child { border-bottom: none; }
-.m-sys-info h4 { margin: 0; font-size: 0.85rem; color: #fff; font-family: 'Rajdhani'; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-.m-sys-info p { margin: 2px 0 0; font-size: 0.65rem; color: rgba(255,255,255,0.5); }
-
-/* --- NEW MFP BADGE & NO PROXY FIX (TINY VERSION) --- */
-.m-proxy-badge {
-    display: inline-flex; align-items: center; gap: 3px;
-    background: rgba(0, 242, 255, 0.08); border: 1px solid rgba(0, 242, 255, 0.4);
-    border-radius: 3px; padding: 1px 4px; margin-left: 5px;
-    font-size: 0.55rem; color: var(--m-primary); font-family: 'Rajdhani', sans-serif; font-weight: 800;
-    letter-spacing: 0.5px; box-shadow: 0 0 5px rgba(0, 242, 255, 0.1);
-    white-space: nowrap; flex-shrink: 0;
+/* --- REVAMPED WEB MODULES GRID --- */
+.m-sys-grid { 
+    display: flex; flex-direction: column; gap: 8px; 
+    margin-bottom: 20px; 
+}
+.m-sys-row { 
+    display: flex; align-items: center; justify-content: space-between; 
+    padding: 16px 15px; 
+    background: rgba(20, 25, 30, 0.4); 
+    border: 1px solid rgba(255,255,255,0.08); 
+    border-radius: 14px;
+    position: relative; overflow: hidden;
+    transition: all 0.3s ease;
+}
+/* Active Module Glow */
+.m-sys-row.mod-active {
+    background: rgba(0, 242, 255, 0.03);
+    border-color: rgba(0, 242, 255, 0.4);
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.05);
+}
+.m-sys-row.mod-active::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--m-primary);
+    box-shadow: 0 0 8px var(--m-primary);
 }
 
-.m-noproxy-badge {
-    display: inline-flex; align-items: center; gap: 3px;
-    background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 3px; padding: 1px 3px; margin-left: 4px;
-    font-size: 0.5rem; color: #aaa; font-family: 'Rajdhani', sans-serif; font-weight: 800;
-    letter-spacing: 0px; /* Compattato */
-    white-space: nowrap; flex-shrink: 0;
-    line-height: 1;
+/* Variant Colors for Glow */
+.m-sys-row.mod-active.mod-ghd { border-color: rgba(0, 242, 255, 0.4); }
+.m-sys-row.mod-active.mod-gs { border-color: rgba(112, 0, 255, 0.4); } 
+.m-sys-row.mod-active.mod-gs::before { background: var(--m-secondary); box-shadow: 0 0 8px var(--m-secondary); }
+.m-sys-row.mod-active.mod-aw { border-color: rgba(255, 102, 0, 0.4); }
+.m-sys-row.mod-active.mod-aw::before { background: #ff6600; box-shadow: 0 0 8px #ff6600; }
+.m-sys-row.mod-active.mod-webstr { border-color: rgba(255,255,255,0.2); }
+.m-sys-row.mod-active.mod-webstr::before { background: #666; }
+
+.m-sys-info { 
+    flex: 1; display: flex; align-items: center; gap: 15px; 
+    position: relative; z-index: 2;
+}
+
+.m-mod-icon-box {
+    width: 42px; height: 42px; 
+    background: rgba(0,0,0,0.3); 
+    border-radius: 10px; 
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s;
+}
+.m-sys-row.mod-active .m-mod-icon-box {
+    border-color: var(--m-primary);
+    background: rgba(0, 242, 255, 0.1);
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.15);
+}
+.m-sys-row.mod-active.mod-gs .m-mod-icon-box { border-color: var(--m-secondary); background: rgba(112, 0, 255, 0.1); box-shadow: 0 0 10px rgba(112, 0, 255, 0.15); }
+.m-sys-row.mod-active.mod-aw .m-mod-icon-box { border-color: #ff6600; background: rgba(255, 102, 0, 0.1); box-shadow: 0 0 10px rgba(255, 102, 0, 0.15); }
+
+.m-mod-icon { font-size: 1.4rem; color: #555; transition: all 0.3s; }
+.m-sys-row.mod-active .m-mod-icon { color: #fff; filter: drop-shadow(0 0 5px var(--m-primary)); }
+.m-sys-row.mod-active.mod-gs .m-mod-icon { color: #fff; filter: drop-shadow(0 0 5px var(--m-secondary)); }
+.m-sys-row.mod-active.mod-aw .m-mod-icon { color: #fff; filter: drop-shadow(0 0 5px #ff6600); }
+
+.m-mod-text { display: flex; flex-direction: column; justify-content: center; gap: 3px; }
+
+.m-mod-title { 
+    margin: 0; font-size: 1rem; color: #fff; 
+    font-family: 'Rajdhani'; font-weight: 800; letter-spacing: 0.5px; 
+    line-height: 1; text-transform: uppercase;
+}
+
+.m-mod-meta { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+
+.m-mod-desc { 
+    margin: 0; font-size: 0.65rem; color: rgba(255,255,255,0.5); 
+    font-weight: 500; letter-spacing: 0.5px;
+}
+
+/* --- BADGES RESTYLED --- */
+.m-proxy-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 6px; border-radius: 4px;
+    font-family: 'Rajdhani', sans-serif; font-weight: 800; font-size: 0.55rem;
+    letter-spacing: 0.5px; line-height: 1; text-transform: uppercase;
+}
+.m-tag-mfp {
+    background: rgba(0, 242, 255, 0.1); 
+    border: 1px solid rgba(0, 242, 255, 0.4);
+    color: var(--m-primary);
+    box-shadow: 0 0 5px rgba(0, 242, 255, 0.15);
+}
+.m-tag-noproxy {
+    background: rgba(255, 100, 100, 0.1); 
+    border: 1px solid rgba(255, 100, 100, 0.3);
+    color: #ff8888;
 }
 
 .m-visual-core-v2 { margin-bottom: 20px; position: relative; }
@@ -692,19 +761,25 @@ const mobileHTML = `
 
                     <div class="m-sys-grid">
                         
-                        <div class="m-sys-row">
+                        <div class="m-sys-row" id="mod-vix">
                             <div class="m-sys-info">
-                                <h4>
-                                    <i class="fas fa-play-circle" style="color:var(--m-secondary)"></i> StreamingCommunity
-                                    <span class="m-noproxy-badge">NO PROXY</span>
-                                </h4>
-                                <p>Scraper Veloce & Affidabile</p>
+                                <div class="m-mod-icon-box">
+                                    <i class="fas fa-play-circle m-mod-icon"></i>
+                                </div>
+                                <div class="m-mod-text">
+                                    <h4 class="m-mod-title">StreamingCommunity</h4>
+                                    <div class="m-mod-meta">
+                                        <span class="m-proxy-tag m-tag-noproxy">NO PROXY</span>
+                                    </div>
+                                    <p class="m-mod-desc">Scraper Veloce & Affidabile</p>
+                                </div>
                             </div>
                             <label class="m-switch">
                                 <input type="checkbox" id="m-enableVix" onchange="updateStatus('m-enableVix','st-vix'); toggleModuleStyle('m-enableVix', 'mod-vix');">
                                 <span class="m-slider"></span>
                             </label>
                         </div>
+                        
                         <div id="m-sc-options" class="m-sc-subpanel">
                             <div class="m-mini-tabs">
                                 <div class="m-mini-tab active" id="mq-sc-all" onclick="setScQuality('all')">HYBRID</div>
@@ -713,13 +788,18 @@ const mobileHTML = `
                             </div>
                         </div>
 
-                        <div class="m-sys-row">
+                        <div class="m-sys-row" id="mod-ghd">
                             <div class="m-sys-info">
-                                <h4>
-                                    <i class="fas fa-film" style="color:var(--m-primary)"></i> GuardaHD 
-                                    <span class="m-proxy-badge"><i class="fas fa-shield-alt"></i> MFP</span>
-                                </h4>
-                                <p>Film Streaming ITA</p>
+                                <div class="m-mod-icon-box">
+                                    <i class="fas fa-film m-mod-icon"></i>
+                                </div>
+                                <div class="m-mod-text">
+                                    <h4 class="m-mod-title">GuardaHD</h4>
+                                    <div class="m-mod-meta">
+                                        <span class="m-proxy-tag m-tag-mfp"><i class="fas fa-shield-alt"></i> MFP</span>
+                                    </div>
+                                    <p class="m-mod-desc">Database Filmico</p>
+                                </div>
                             </div>
                             <label class="m-switch">
                                 <input type="checkbox" id="m-enableGhd" onchange="updateStatus('m-enableGhd','st-ghd'); toggleModuleStyle('m-enableGhd', 'mod-ghd');">
@@ -727,13 +807,18 @@ const mobileHTML = `
                             </label>
                         </div>
 
-                        <div class="m-sys-row">
+                        <div class="m-sys-row" id="mod-gs">
                             <div class="m-sys-info">
-                                <h4>
-                                    <i class="fas fa-tv" style="color:var(--m-accent)"></i> GuardaSerie 
-                                    <span class="m-proxy-badge"><i class="fas fa-shield-alt"></i> MFP</span>
-                                </h4>
-                                <p>Serie TV ITA</p>
+                                <div class="m-mod-icon-box">
+                                    <i class="fas fa-tv m-mod-icon"></i>
+                                </div>
+                                <div class="m-mod-text">
+                                    <h4 class="m-mod-title">GuardaSerie</h4>
+                                    <div class="m-mod-meta">
+                                        <span class="m-proxy-tag m-tag-mfp"><i class="fas fa-shield-alt"></i> MFP</span>
+                                    </div>
+                                    <p class="m-mod-desc">Catalogo Seriale</p>
+                                </div>
                             </div>
                             <label class="m-switch">
                                 <input type="checkbox" id="m-enableGs" onchange="updateStatus('m-enableGs','st-gs'); toggleModuleStyle('m-enableGs', 'mod-gs');">
@@ -741,13 +826,18 @@ const mobileHTML = `
                             </label>
                         </div>
 
-                        <div class="m-sys-row">
+                        <div class="m-sys-row" id="mod-aw">
                             <div class="m-sys-info">
-                                <h4>
-                                    <i class="fas fa-torii-gate" style="color:#ff6600"></i> AnimeWorld 
-                                    <span class="m-noproxy-badge">NO PROXY</span>
-                                </h4>
-                                <p>Anime ITA Database</p>
+                                <div class="m-mod-icon-box">
+                                    <i class="fas fa-torii-gate m-mod-icon"></i>
+                                </div>
+                                <div class="m-mod-text">
+                                    <h4 class="m-mod-title">AnimeWorld</h4>
+                                    <div class="m-mod-meta">
+                                        <span class="m-proxy-tag m-tag-noproxy">NO PROXY</span>
+                                    </div>
+                                    <p class="m-mod-desc">Archivio Anime & Simulcast</p>
+                                </div>
                             </div>
                             <label class="m-switch">
                                 <input type="checkbox" id="m-enableAnimeWorld" onchange="updateStatus('m-enableAnimeWorld','st-aw'); toggleModuleStyle('m-enableAnimeWorld', 'mod-aw');">
@@ -755,10 +845,15 @@ const mobileHTML = `
                             </label>
                         </div>
 
-                        <div class="m-sys-row">
+                        <div class="m-sys-row" id="mod-webstr">
                             <div class="m-sys-info">
-                                <h4><i class="fas fa-spider" style="color:#fff"></i> WebStreamr</h4>
-                                <p>Fallback di emergenza (No-Debrid)</p>
+                                <div class="m-mod-icon-box">
+                                    <i class="fas fa-spider m-mod-icon"></i>
+                                </div>
+                                <div class="m-mod-text">
+                                    <h4 class="m-mod-title">WebStreamr</h4>
+                                    <p class="m-mod-desc">Fallback di Emergenza</p>
+                                </div>
                             </div>
                             <label class="m-switch">
                                 <input type="checkbox" id="m-enableWebStreamr" checked onchange="toggleModuleStyle('m-enableWebStreamr', 'mod-webstr');">
