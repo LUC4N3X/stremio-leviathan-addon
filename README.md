@@ -1,100 +1,88 @@
 <div align="center">
 
+  <!-- Logo -->
   <img src="https://i.ibb.co/j9tSSy7f/Gemini-Generated-Image-xep84gxep84gxep8-Photoroom.png" 
        alt="Leviathan Logo"
-       width="200"
-       style="border-radius: 40px; 
-              box-shadow: 0 0 40px rgba(0, 234, 255, 0.4); 
-              margin-bottom: 10px;
-              border: 2px solid rgba(0, 234, 255, 0.2);" />
+       style="width: 200px; border-radius: 30px; filter: drop-shadow(0 0 30px rgba(0, 234, 255, 0.7)); margin-bottom: 20px;" />
 
-  <h1 translate="no" style="font-size: 5rem; 
-             font-weight: 900; 
-             margin: 0; 
-             line-height: 1;
-             letter-spacing: -3px;
-             background: linear-gradient(180deg, #ffffff 10%, #00eaff 100%);
-             -webkit-background-clip: text;
-             -webkit-text-fill-color: transparent;
-             filter: drop-shadow(0 0 20px rgba(0, 234, 255, 0.6));">
-    LEVIATHAN
+  <!-- Titolo + Slogan nello stesso blocco -->
+  <h1 style="background: linear-gradient(180deg, #fff 30%, #00eaff 100%);
+             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+             font-size: 6rem; font-weight: 900; margin: 0; line-height: 1;
+             letter-spacing: -5px; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+             text-transform: uppercase;
+             filter: drop-shadow(0 8px 20px rgba(0, 234, 255, 0.5));">
+    𝗟𝗘𝗩𝗜𝗔𝗧𝗛𝗔𝗡<br>
+    <span style="font-size: 1.5rem; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0, 234, 255, 0.5);">
+      ⚡ L'abisso si risveglia ⚡
+    </span>
   </h1>
-  
-  <p style="font-size: 1.1rem; 
-            font-family: monospace; 
-            color: #aaddff; 
-            letter-spacing: 6px; 
-            text-transform: uppercase; 
-            margin-top: 5px; 
-            margin-bottom: 20px;
-            opacity: 0.9;
-            text-shadow: 0 0 10px rgba(0, 234, 255, 0.8);">
-    ⚡ L'abisso si risveglia ⚡
+
+
+
+<br>
+
+<p>
+  <img src="https://img.shields.io/badge/Real_Debrid-NATIVE_SUPPORT-A2B9F0?style=for-the-badge&logo=realdebrid&logoColor=black" />
+  <img src="https://img.shields.io/badge/TorBox-COMPATIBLE-7A4EE3?style=for-the-badge&logo=torbox&logoColor=white" />
+  <img src="https://img.shields.io/badge/AIOStreams-COMPATIBLE-1ABC9C?style=for-the-badge&logo=stream&logoColor=white" />
+  <img src="https://img.shields.io/badge/P2P_Network-DIRECT_SWARM-ff0055?style=for-the-badge&logo=qbittorrent&logoColor=white" />
+</p>
+
+<p>
+  <img src="https://img.shields.io/badge/Node.js-v18_LTS-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
+  <img src="https://img.shields.io/badge/Architecture-HyperMode_v3.5-8A2BE2?style=for-the-badge&logo=dependabot&logoColor=white" />
+  <img src="https://img.shields.io/badge/Status-OPERATIONAL-success?style=for-the-badge&logo=githubactions&logoColor=white" />
+</p>
+
+<br>
+
+<div style="background: #050a10; border: 1px solid rgba(0, 234, 255, 0.15); border-radius: 8px; padding: 25px; width: 85%; max-width: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+  <strong style="font-size: 1.3rem; color: #00eaff; display: block; margin-bottom: 10px;">
+    🇮🇹 Engineered for Italian Content Precision
+  </strong>
+  <span style="color: #cbd5e1; line-height: 1.6; font-size: 1rem;">
+    Leviathan ridefinisce lo standard dei metamotori torrent attraverso un'architettura <b>Italy-First</b>.
+    Integra un sistema di validazione semantica dei titoli, gestione automatizzata delle challenge WAF e un algoritmo di routing a bassa latenza per garantire risultati pertinenti e immediati.
+  </span>
+</div>
+
+<br>
+
+  <p>
+    <img src="https://img.shields.io/badge/⚡_Adaptive-Latency_Scaling-000?style=for-the-badge&labelColor=00eaff" />
+    <img src="https://img.shields.io/badge/🔍_Smart-Query_Morphing-000?style=for-the-badge&labelColor=00eaff" />
+    <img src="https://img.shields.io/badge/🛡️_WAF-Bypass_Protocol-000?style=for-the-badge&labelColor=00eaff" />
+    <img src="https://img.shields.io/badge/🔗_Magnet-Fusion_Engine-000?style=for-the-badge&labelColor=00eaff" />
   </p>
 
-  <div style="display: flex; justify-content: center; gap: 5px; flex-wrap: wrap; margin-bottom: 5px;">
-    <img src="https://img.shields.io/badge/Node.js-v18_LTS-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" height="25">
-    <img src="https://img.shields.io/badge/Architecture-HyperMode-8A2BE2?style=for-the-badge&logo=dependabot&logoColor=white" height="25">
-    <img src="https://img.shields.io/badge/Status-OPERATIONAL-00eaff?style=for-the-badge&logo=githubactions&logoColor=black" height="25">
-  </div>
-  <div style="display: flex; justify-content: center; gap: 5px; flex-wrap: wrap; margin-bottom: 20px;">
-    <img src="https://img.shields.io/badge/Real_Debrid-NATIVE-A2B9F0?style=for-the-badge&logo=realdebrid&logoColor=black" height="22">
-    <img src="https://img.shields.io/badge/TorBox-READY-7A4EE3?style=for-the-badge&logo=torbox&logoColor=white" height="22">
-    <img src="https://img.shields.io/badge/P2P-DIRECT_SWARM-ff0055?style=for-the-badge&logo=qbittorrent&logoColor=white" height="22">
-  </div>
 
-  <div style="background: linear-gradient(145deg, #0d1117, #050a10); 
-              border: 1px solid #1f6feb; 
-              border-left: 4px solid #00eaff;
-              border-radius: 8px; 
-              padding: 15px; 
-              width: 90%; 
-              max-width: 650px; 
-              box-shadow: 0 5px 25px rgba(0,0,0,0.6);
-              text-align: left;
-              margin-bottom: 20px;">
-    <div style="display: flex; align-items: center; margin-bottom: 8px;">
-      <span style="font-size: 1.2rem; margin-right: 8px;">🇮🇹</span>
-      <strong style="font-size: 1.1rem; color: #fff;">Engineered for Italian Precision</strong>
-    </div>
-    <span style="color: #8b949e; font-family: sans-serif; font-size: 0.95rem; line-height: 1.5;">
-      Leviathan ridefinisce lo standard dei metamotori torrent attraverso un'architettura <b>Italy-First</b>.
-      Integra validazione semantica, bypass automatico dei WAF e routing a bassa latenza.
-    </span>
-    <div style="margin-top: 10px;">
-      <code style="background: rgba(0, 234, 255, 0.1); color: #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">Query_Morphing: ACTIVE</code>
-      <code style="background: rgba(0, 234, 255, 0.1); color: #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">Latency: LOW</code>
-    </div>
-  </div>
-
-  <div style="margin-bottom: 25px;">
-    <img src="https://img.shields.io/badge/⚡_Adaptive-Latency_Scaling-161b22?style=flat-square&labelColor=0d1117&color=00eaff" />
-    <img src="https://img.shields.io/badge/🛡️_WAF-Bypass_Protocol-161b22?style=flat-square&labelColor=0d1117&color=00eaff" />
-    <img src="https://img.shields.io/badge/🔗_Magnet-Fusion_Engine-161b22?style=flat-square&labelColor=0d1117&color=00eaff" />
-  </div>
-
+<div align="center">
   <a href="https://leviathanaddon.dpdns.org" target="_blank">
-    <img src="public/button5.svg" 
-         width="320" 
-         alt="Installa Leviathan" 
-         style="filter: drop-shadow(0 0 15px rgba(0, 234, 255, 0.4)); transition: transform 0.2s;">
+    <img src="public/button5.svg" width="350" alt="Installa Leviathan">
   </a>
 
+<div align="center">
+  <a href="https://leaviathan-leviathan.hf.space">
+    <img src="https://img.shields.io/badge/ACCESS-SHADOW%20MIRROR%20%F0%9F%91%BB-1f2937?style=for-the-badge&logo=huggingface&logoColor=FFD21E&labelColor=black" alt="Shadow Mirror">
+  </a>
+</div>
+  
   <br>
 
-  <div style="margin-top: 15px;">
-    <a href="https://leaviathan-leviathan.hf.space" target="_blank">
-      <img src="https://img.shields.io/badge/ACCESS_MIRROR-SHADOW_SERVER-374151?style=for-the-badge&logo=huggingface&logoColor=FFD21E" height="28" alt="Shadow Mirror">
-    </a>
-  </div>
-
-  <hr style="width: 50%; border: 0; height: 1px; background: linear-gradient(90deg, transparent, #00eaff, transparent); margin-top: 25px; margin-bottom: 10px; opacity: 0.3;">
-
-  <a href="https://t.me/Stremio_ITA/7153" target="_blank">
-    <img src="https://img.shields.io/badge/TELEGRAM-Direct_Support_Uplink-0088CC?style=social&logo=telegram" alt="Telegram Support">
+ <div style="background: rgba(0,136,204,0.1); border: 1px solid rgba(0,136,204,0.3); border-radius: 8px; padding: 15px; width: 80%; max-width: 600px; margin: 20px auto; text-align:center;">
+  <strong style="color: #0088CC; font-size: 1rem;">💬 Contattami direttamente su Telegram</strong>
+  <p style="color: #cbd5e1; font-size: 0.9rem; margin: 5px 0;">
+    Hai domande o vuoi parlarmi? Questo è il modo più veloce per raggiungermi.
+  </p>
+  <a href="https://t.me/Stremio_ITA/7153" target="_blank" style="text-decoration:none;">
+    <img src="https://img.shields.io/badge/📩_Telegram-Chat_Diretta-0088CC?style=for-the-badge&logo=telegram&logoColor=white" alt="Contattami Telegram">
   </a>
-
 </div>
+  
+  <hr style="width: 40%; border: 0; height: 1px; background: linear-gradient(90deg, transparent, #00eaff, transparent); margin-top: 15px; opacity: 0.4;">
+</div>
+
 
 
 
@@ -117,7 +105,7 @@ Il core, sviluppato in **Node.js**, orchestra scansioni parallele sui principali
 * 🔗 **AIOStreams:** Supporto nativo per flussi AIOStreams integrato nel motore.
 * 🛡️ **Cloudscraper Integration:** Ottimizzazione avanzata per il superamento dei controlli Cloudflare.
 * 📡 **Direct Swarm Protocol:** Supporto nativo per la riproduzione P2P diretta (senza Debrid) con download sequenziale ottimizzato.
-* ⛩️ **AnimeWorld Module:** Integrazione nativa per l'animazione giapponese con estrazione diretta dei flussi (SUB/DUB).
+
 
 ---
 
@@ -170,41 +158,33 @@ Sorgente web specializzata in Serie TV ITA.
 * **Zero-Seed Playback:** Avvio immediato, nessuna dipendenza da torrent o debrid.
 * **Fast Web Lane:** Priorità alta come web fallback per serie TV.
 
-### 8. ⛩️ AnimeWorld Integration Layer
-Modulo verticale dedicato all'animazione giapponese (Anime).
-* **Direct Stream Extraction:** Estrazione flussi diretti dai server proprietari di AnimeWorld.
-* **Simulcast Engine:** Accesso prioritario agli episodi in corso di trasmissione (Simulcast) e ai cataloghi completi.
-* **Dual-Audio Recognition:** Identificazione intelligente release DUB (Doppiato) vs SUB (Sottotitolato).
-* **Zero-Seed Playback:** Avvio immediato, nessuna dipendenza da torrent o debrid.
-* **Fast Web Lane:** Priorità alta come web fallback per contenuti anime.
-
-### 9. 👻 Debrid Ghost Shell (MediaFlow Proxy)
+### 8. 👻 Debrid Ghost Shell (MediaFlow Proxy)
 Progettato per l'elusione dei blocchi IP e la gestione di account Multi-Utente.
 * **IP Masking:** Tutto il traffico verso Real-Debrid viene tunnelizzato tramite **MediaFlow Proxy**.
 * **Shared Account Support:** Permette l'utilizzo dello stesso account Debrid su più IP contemporaneamente senza rischiare il ban, poiché il provider vede solo l'IP del Proxy.
 * **Anti-Throttling:** Bypassa i blocchi imposti dagli ISP sui domini dei servizi Debrid.
 
-### 10. 🕷️ WebStreams Auto-Failover
+### 9. 🕷️ WebStreams Auto-Failover
 Il sistema non accetta vicoli ciechi.
 * **Smart Switch:** Se la scansione Torrent restituisce 0 risultati validi, Leviathan innesca automaticamente i moduli Web (StreamingCommunity/GuardaHD).
 * **Configurable Logic:** Funzione attivata di default, ma disabilitabile dalla dashboard per gli utenti che desiderano un'esperienza rigorosamente P2P.
 
-### 11. 🎨 Polymorphic Formatter Engine
+### 10. 🎨 Polymorphic Formatter Engine
 Il controllo totale sulla presentazione visiva dei risultati.
 * **Preset Selection:** Seleziona tra diversi stili di visualizzazione pre-codificati per adattare l'output ai tuoi gusti.
 * **Custom Syntax:** Possibilità di definire un formatter personalizzato per strutturare i metadati (Risoluzione, Codec, Audio) esattamente come vuoi tu.
 
-### 12. 🗣️ Linguistic Scope Control
+### 11. 🗣️ Linguistic Scope Control
 Definisci i confini della tua ricerca.
 * **🇮🇹 ITA Strict:** Filtro chirurgico solo per contenuti in lingua italiana.
 * **🌍 Global (ENG):** Accesso diretto ai tracker internazionali senza filtri linguistici.
 * **🧬 Hybrid (ITA+ENG):** La fusione perfetta. Priorità ai contenuti italiani, con fallback immediato sulle release internazionali ad alta qualità.
 
-### 13. 🎬 Visual Pre-Fetch (Trailer Integration)
+### 12. 🎬 Visual Pre-Fetch (Trailer Integration)
 * **Instant Preview:** Integrazione diretta con le API di YouTube.
 * **Context Aware:** Recupera automaticamente il trailer corretto basandosi sui metadati IMDB/TMDB del contenuto selezionato.
 
-### 14. 📡 Direct Swarm Access (Pure P2P)
+### 13. 📡 Direct Swarm Access (Pure P2P)
 Leviathan non impone l'uso di intermediari. Il motore supporta la connessione diretta alla rete BitTorrent.
 * **Sequential Priority:** Forza il download sequenziale dei pezzi del file per garantire uno streaming fluido senza attendere il completamento.
 * **Peer Exchange:** Aggancio aggressivo ai peer tramite DHT e PEX per massimizzare la velocità anche su torrent con pochi seed.
@@ -241,33 +221,13 @@ Leviathan non impone l'uso di intermediari. Il motore supporta la connessione di
 
 ## 🌐 LEVIATHAN NETWORK NODES
 
-<div align="center">
-
 <br>
 
-<div style="background: rgba(0, 234, 255, 0.05); border: 1px solid rgba(0, 234, 255, 0.2); border-radius: 10px; padding: 10px; margin-bottom: 20px; width: 95%;">
-  <h3 style="margin: 0; padding: 10px; color: #fff; text-transform: uppercase; letter-spacing: 3px; font-size: 1.2rem; border-bottom: 1px solid rgba(0, 234, 255, 0.2);">
-    🌊 Direct Stream Protocols <span style="font-size: 0.8rem; color: #00eaff; vertical-align: middle;">(NO P2P REQUIRED)</span>
-  </h3>
-  <br>
-  
 | **TARGET ENGINE** | **REGION** | **LATENCY** | **MODE** | **STATUS** |
 | :--- | :---: | :---: | :---: | :---: |
 | **StreamingCommunity** | 🇮🇹 ITA | ![](https://img.shields.io/badge/⏱️_INSTANT-ULTRA-FF0000?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🌪️_HLS-Stream-red?style=flat-square&labelColor=black) | 🟢 |
 | **GuardaHD** | 🇮🇹 ITA | ![](https://img.shields.io/badge/⏱️_INSTANT-PREMIUM-00ff00?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🦁_HLS-Stream-red?style=flat-square&labelColor=black) | 🟢 |
 | **GuardaSerie** | 🇮🇹 ITA | ![](https://img.shields.io/badge/⏱️_INSTANT-HQ-00ff00?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🍿_HLS-Stream-red?style=flat-square&labelColor=black) | 🟢 |
-| **AnimeWorld** | 🇮🇹 ITA | ![](https://img.shields.io/badge/⏱️_INSTANT-ANIME-ff9900?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/⛩️_HLS-Stream-red?style=flat-square&labelColor=black) | 🟢 |
-
-</div>
-
-<div style="background: rgba(138, 43, 226, 0.05); border: 1px solid rgba(138, 43, 226, 0.2); border-radius: 10px; padding: 10px; width: 95%;">
-  <h3 style="margin: 0; padding: 10px; color: #fff; text-transform: uppercase; letter-spacing: 3px; font-size: 1.2rem; border-bottom: 1px solid rgba(138, 43, 226, 0.2);">
-    🕸️ Magnet Swarm Indexers <span style="font-size: 0.8rem; color: #8A2BE2; vertical-align: middle;">(DEBRID & P2P READY)</span>
-  </h3>
-  <br>
-
-| **TARGET ENGINE** | **REGION** | **LATENCY** | **MODE** | **STATUS** |
-| :--- | :---: | :---: | :---: | :---: |
 | **Il Corsaro Nero** | 🇮🇹 ITA | ![](https://img.shields.io/badge/⏱️_3000ms-HQ-00eaff?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/⚡_Fast-Lane-00eaff?style=flat-square&labelColor=black) | 🟢 |
 | **Knaben** | 🌍 GLB | ![](https://img.shields.io/badge/⏱️_3000ms-HQ-00eaff?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🔌_API-JSON-blueviolet?style=flat-square&labelColor=black) | 🟢 |
 | **The Pirate Bay** | 🌍 GLB | ![](https://img.shields.io/badge/⏱️_3000ms-HQ-00eaff?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🔌_API-JSON-blueviolet?style=flat-square&labelColor=black) | 🟢 |
@@ -281,10 +241,7 @@ Leviathan non impone l'uso di intermediari. Il motore supporta la connessione di
 | **RARBG** | 🌍 GLB | ![](https://img.shields.io/badge/⏱️_5000ms-DEEP-orange?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🪞_Mirror-Cluster-ff69b4?style=flat-square&labelColor=black) | 🟢 |
 | **1337x** | 🌍 GLB | ![](https://img.shields.io/badge/⏱️_5000ms-DEEP-orange?style=flat-square&labelColor=black) | ![](https://img.shields.io/badge/🛡️_Cloudflare-Protected-f38020?style=flat-square&labelColor=black) | 🟢 |
 
-</div>
-
 <br>
-</div>
 
 
 
@@ -349,40 +306,38 @@ http://localhost:7000
 > **AVVISO CRITICO DI CONFORMITÀ LEGALE**
 > L'accesso, l'installazione e l'esecuzione del codice contenuto in questo repository costituiscono l'accettazione incondizionata delle seguenti clausole di esclusione della responsabilità.
 
-### 1. 🛡️ Natura Agnostica e Caching Tecnico
-**Leviathan** è definito tecnicamente come un *Web Scraper User-Agent* supportato da un layer di *Casting Volatile*.
+### 1. 🛡️ Natura Agnostica e Neutralità Tecnologica
+**Leviathan** è definito tecnicamente come un *Web Scraper User-Agent* e un *Framework di Indicizzazione Distribuita*.
 Il software opera secondo il principio della **Neutralità Tecnologica**:
-
-* **Funzione Esclusiva:** Il codice agisce come un interprete automatizzato. La sua funzione è limitata all'estrazione e all'organizzazione temporanea di stringhe di testo (metadati) da sorgenti pubbliche.
-* **Assenza di Contenuti (No-Hosting):** Leviathan **NON** ospita, **NON** trasmette e **NON** possiede sui propri server alcun file multimediale protetto da diritto d'autore (Video, Audio, Binari).
-* **Natura dei Dati (Pointer Data):** L'eventuale persistenza di dati nell'infrastruttura server è limitata esclusivamente a "Puntatori Informatici" (Hash crittografici, Magnet URI, Metadati testuali). Tali dati non costituiscono l'opera creativa, ma semplici indirizzi logici già pubblicamente accessibili nella rete Internet.
-* **Finalità di Caching:** Qualsiasi memorizzazione di stringhe ha l'unico scopo tecnico di **ridurre la latenza di rete** (Performance Caching) e limitare il carico sui server sorgente. Non costituisce un indice curato o permanente.
+* **Funzione Esclusiva:** Il codice agisce come un interprete automatizzato di linguaggi di markup (HTML/XML/JSON). La sua funzione è limitata all'estrazione di stringhe di testo (metadati) da sorgenti pubbliche definite dall'utente.
+* **Assenza di Hosting:** Leviathan **NON** ospita, **NON** trasmette, **NON** memorizza e **NON** indicizza sui propri server alcun contenuto protetto da diritto d'autore (Video, Audio, Binari).
+* **Non-Interferenza:** Il software non possiede capacità intrinseche di decriptazione (DRM bypass), elusione di misure tecnologiche di protezione o accesso abusivo a sistemi informatici.
 
 ### 2. 🧪 Finalità di Ricerca e Sviluppo (R&D)
 Il presente repository è pubblicato sotto licenza Open Source con finalità strettamente limitate a:
-* **Proof of Concept (PoC):** Dimostrazione teorica di algoritmi di scraping ed estrazione dati ad alta concorrenza.
-* **Network Optimization:** Studio delle tecniche di *Query Caching* per la riduzione del traffico ripetitivo su protocolli decentralizzati.
+* **Proof of Concept (PoC):** Dimostrazione teorica di algoritmi di scraping ed estrazione dati.
+* **Interoperabilità:** Studio delle interazioni tra protocolli di rete decentralizzati e client multimediali.
 * **Analisi Forense:** Test di sicurezza e analisi del traffico web in ambienti controllati (Sandboxed Environment).
 
 ### 3. 🚫 Limitazione di Responsabilità e Manleva (Indemnification)
-L'autore (**LUC4N3X**), i contributori e i maintainer del progetto non esercitano alcun controllo, monitoraggio o supervisione sull'effettivo utilizzo dei puntatori informatici da parte dell'utente finale.
+L'autore (**LUC4N3X**), i contributori e i maintainer del progetto non esercitano alcun controllo, monitoraggio o supervisione sull'utilizzo del software da parte dell'utente finale.
 
 **L'Utente Finale dichiara e garantisce che:**
-1.  **Utilizzo Autonomo:** L'utilizzo del software avviene a proprio esclusivo rischio.
+1.  **Utilizzo Autonomo:** L'utilizzo del software avviene a proprio esclusivo rischio e pericolo su infrastrutture locali o private.
 2.  **Conformità Giurisdizionale:** L'utente si assume l'onere di verificare che l'uso di Leviathan sia conforme alle leggi vigenti nel proprio territorio (inclusi, ma non limitati a: DMCA 17 U.S.C. § 512, Direttiva Copyright UE 2019/790).
 3.  **Esonero di Responsabilità:** L'utente accetta di manlevare, indennizzare e tenere indenne lo sviluppatore da qualsiasi rivendicazione, azione legale, sanzione o richiesta di risarcimento danni derivante dall'uso improprio, illecito o non autorizzato del codice.
 
 ### 4. 🏴‍☠️ Politica Zero-Tolerance sulla Pirateria
-Il software è progettato per l'ottimizzazione dell'accesso a contenuti di pubblico dominio (Public Domain) o licenziati liberamente.
-**Qualsiasi utilizzo volto alla violazione del copyright o alla pirateria digitale è severamente proibito.**
-La presenza di hash o magnet link nel sistema di caching non implica l'approvazione o la verifica del contenuto sottostante da parte degli sviluppatori, che agiscono come meri fornitori di tecnologia passiva (Mere Conduit).
+Il software è progettato per l'indicizzazione di contenuti di pubblico dominio (Public Domain) o licenziati liberamente (Creative Commons).
+**Qualsiasi utilizzo volto alla violazione del copyright, alla pirateria digitale o alla distribuzione non autorizzata di proprietà intellettuale è severamente proibito.**
+Lo sviluppatore condanna fermamente la pirateria e non fornirà supporto tecnico a configurazioni volte a tale scopo.
 
 ---
 
 > **CLAUSOLA RISOLUTIVA ESPRESSA**
 > Se non concordi con anche solo una delle clausole sopra esposte, o se la legislazione del tuo paese non consente tale limitazione di responsabilità, non sei autorizzato a utilizzare questo software.
 >
-> **⚠️ INTERROMPI L'ESECUZIONE E ABBANDONA LA SESSIONE IMMEDIATAMENTE.**
+> **⚠️ INTERROMPI L'ESECUZIONE, ELIMINA IL CONTAINER E DISTRUGGI IL CODICE SORGENTE IMMEDIATAMENTE.**
 >
 > ... altrimenti ...
 
