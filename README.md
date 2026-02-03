@@ -198,18 +198,45 @@ Leviathan non impone l'uso di intermediari. Il motore supporta la connessione di
 <div align="center">
   <div style="background: rgba(245, 166, 35, 0.1); border: 1px solid rgba(245, 166, 35, 0.3); border-radius: 6px; padding: 15px; width: 90%; max-width: 800px;">
     <strong style="color: #F5A623; font-size: 0.9rem; display: block; margin-bottom: 5px;">
-      ⚠️ RESTRIZIONE ALLDEBRID
-    </strong>
-    <span style="color: #cbd5e1; font-size: 0.85rem;">
-      Per motivi di policy del servizio <b>AllDebrid</b>, il servizio è supportato
-      <b>esclusivamente tramite Self-Hosting casalingo</b>.
-      <br>
-      L’istanza pubblica non è compatibile con AllDebrid: per garantire
-      autenticazione corretta, stabilità delle sessioni e continuità del servizio
-      è necessario un <b>deploy locale (Docker su rete domestica)</b>.
-    </span>
+      <div align="center" style="margin-top: 25px;">
+  
+  <div style="
+      display: inline-flex;
+      gap: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid #334155;
+      padding: 10px 25px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      color: #94a3b8;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  ">
+    
+    <div>
+      <span style="color: #64748b;">SYSTEM:</span> 
+      <span style="color: #fff; font-weight: bold;">v.2.7.0</span>
+    </div>
+    
+    <div style="width: 1px; background: #334155;"></div>
+
+    <div>
+      <span style="color: #64748b;">STATUS:</span> 
+      <span style="color: #00eaff; text-shadow: 0 0 8px rgba(0, 234, 255, 0.6);">ONLINE ●</span>
+    </div>
+
+    <div style="width: 1px; background: #334155;"></div>
+
+    <div>
+      <span style="color: #64748b;">LICENSE:</span> 
+      <span style="color: #fff;">MIT</span>
+    </div>
+
   </div>
+
 </div>
+
 
 ## 🌐 LEVIATHAN NETWORK NODES
 
