@@ -3,101 +3,95 @@
   <img src="https://i.ibb.co/j9tSSy7f/Gemini-Generated-Image-xep84gxep84gxep8-Photoroom.png" 
        alt="Leviathan Logo"
        width="200"
-       style="margin-bottom: 10px;
-              filter: drop-shadow(0 0 30px rgba(138, 43, 226, 0.6)); transition: transform 0.3s;" />
+       style="border-radius: 40px; 
+              box-shadow: 0 0 40px rgba(0, 234, 255, 0.4); 
+              margin-bottom: 10px;
+              border: 2px solid rgba(0, 234, 255, 0.2);" />
 
-  <h1 translate="no" style="
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Ubuntu, sans-serif;
-      font-size: 7.5rem;
-      font-weight: 900;
-      margin: 0;
-      line-height: 0.9;
-      letter-spacing: -4px;
-      text-transform: uppercase;
-      background: linear-gradient(180deg, #ffffff 15%, #00eaff 55%, #004e92 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 0 40px rgba(0, 234, 255, 0.5)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
-      padding-bottom: 10px;">
+  <h1 translate="no" style="font-size: 5rem; 
+             font-weight: 900; 
+             margin: 0; 
+             line-height: 1;
+             letter-spacing: -3px;
+             background: linear-gradient(180deg, #ffffff 10%, #00eaff 100%);
+             -webkit-background-clip: text;
+             -webkit-text-fill-color: transparent;
+             filter: drop-shadow(0 0 20px rgba(0, 234, 255, 0.6));">
     LEVIATHAN
   </h1>
   
-  <p style="font-size: 1.3rem; 
+  <p style="font-size: 1.1rem; 
             font-family: monospace; 
-            color: #d1d5db; 
+            color: #aaddff; 
             letter-spacing: 6px; 
             text-transform: uppercase; 
             margin-top: 5px; 
-            margin-bottom: 25px;
-            font-weight: bold;
-            text-shadow: 0 0 15px rgba(168, 85, 247, 0.8);">
+            margin-bottom: 20px;
+            opacity: 0.9;
+            text-shadow: 0 0 10px rgba(0, 234, 255, 0.8);">
     ⚡ L'abisso si risveglia ⚡
   </p>
 
-  <div style="display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
-    <img src="https://img.shields.io/badge/Node.js-v18_LTS-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" height="24">
-    <img src="https://img.shields.io/badge/Architecture-HyperMode-8A2BE2?style=for-the-badge&logo=dependabot&logoColor=white" height="24">
-    <img src="https://img.shields.io/badge/Status-OPERATIONAL-00eaff?style=for-the-badge&logo=githubactions&logoColor=black" height="24">
+  <div style="display: flex; justify-content: center; gap: 5px; flex-wrap: wrap; margin-bottom: 5px;">
+    <img src="https://img.shields.io/badge/Node.js-v18_LTS-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" height="25">
+    <img src="https://img.shields.io/badge/Architecture-HyperMode-8A2BE2?style=for-the-badge&logo=dependabot&logoColor=white" height="25">
+    <img src="https://img.shields.io/badge/Status-OPERATIONAL-00eaff?style=for-the-badge&logo=githubactions&logoColor=black" height="25">
   </div>
-  <div style="display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-bottom: 25px;">
+  <div style="display: flex; justify-content: center; gap: 5px; flex-wrap: wrap; margin-bottom: 20px;">
     <img src="https://img.shields.io/badge/Real_Debrid-NATIVE-A2B9F0?style=for-the-badge&logo=realdebrid&logoColor=black" height="22">
     <img src="https://img.shields.io/badge/TorBox-READY-7A4EE3?style=for-the-badge&logo=torbox&logoColor=white" height="22">
     <img src="https://img.shields.io/badge/P2P-DIRECT_SWARM-ff0055?style=for-the-badge&logo=qbittorrent&logoColor=white" height="22">
   </div>
 
-  <div style="background: linear-gradient(145deg, #0d1117, #161b22); 
-              border: 1px solid #30363d; 
-              border-left: 4px solid #a855f7;
+  <div style="background: linear-gradient(145deg, #0d1117, #050a10); 
+              border: 1px solid #1f6feb; 
+              border-left: 4px solid #00eaff;
               border-radius: 8px; 
-              padding: 18px; 
+              padding: 15px; 
               width: 90%; 
-              max-width: 680px; 
-              box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+              max-width: 650px; 
+              box-shadow: 0 5px 25px rgba(0,0,0,0.6);
               text-align: left;
-              margin-bottom: 25px;">
-    <div style="display: flex; align-items: center; margin-bottom: 10px;">
-      <span style="font-size: 1.2rem; margin-right: 10px;">🇮🇹</span>
-      <strong style="font-size: 1.1rem; color: #fff;">Progettato per la precisione italiana</strong>
+              margin-bottom: 20px;">
+    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+      <span style="font-size: 1.2rem; margin-right: 8px;">🇮🇹</span>
+      <strong style="font-size: 1.1rem; color: #fff;">Engineered for Italian Precision</strong>
     </div>
-    <span style="color: #c9d1d9; font-family: sans-serif; font-size: 0.95rem; line-height: 1.6;">
+    <span style="color: #8b949e; font-family: sans-serif; font-size: 0.95rem; line-height: 1.5;">
       Leviathan ridefinisce lo standard dei metamotori torrent attraverso un'architettura <b>Italy-First</b>.
       Integra validazione semantica, bypass automatico dei WAF e routing a bassa latenza.
     </span>
-    <div style="margin-top: 12px;">
-      <code style="background: rgba(168, 85, 247, 0.15); color: #c084fc; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; border: 1px solid rgba(168, 85, 247, 0.3);">Query_Morphing: ACTIVE</code>
-      <code style="background: rgba(0, 234, 255, 0.1); color: #22d3ee; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; border: 1px solid rgba(0, 234, 255, 0.3);">Latency: LOW</code>
+    <div style="margin-top: 10px;">
+      <code style="background: rgba(0, 234, 255, 0.1); color: #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">Query_Morphing: ACTIVE</code>
+      <code style="background: rgba(0, 234, 255, 0.1); color: #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">Latency: LOW</code>
     </div>
   </div>
 
-  <div style="margin-bottom: 30px;">
-    <img src="https://img.shields.io/badge/⚡_Adaptive-Latency_Scaling-0d1117?style=flat-square&labelColor=1f2937&color=00eaff" />
-    <img src="https://img.shields.io/badge/🛡️_WAF-Bypass_Protocol-0d1117?style=flat-square&labelColor=1f2937&color=00eaff" />
-    <img src="https://img.shields.io/badge/🔗_Magnet-Fusion_Engine-0d1117?style=flat-square&labelColor=1f2937&color=00eaff" />
+  <div style="margin-bottom: 25px;">
+    <img src="https://img.shields.io/badge/⚡_Adaptive-Latency_Scaling-161b22?style=flat-square&labelColor=0d1117&color=00eaff" />
+    <img src="https://img.shields.io/badge/🛡️_WAF-Bypass_Protocol-161b22?style=flat-square&labelColor=0d1117&color=00eaff" />
+    <img src="https://img.shields.io/badge/🔗_Magnet-Fusion_Engine-161b22?style=flat-square&labelColor=0d1117&color=00eaff" />
   </div>
-
-  <h3 style="color: #fff; font-family: sans-serif; text-transform: uppercase; letter-spacing: 2px; font-size: 1.2rem; margin-bottom: 15px;">
-    Opzioni di Distribuzione
-  </h3>
 
   <a href="https://leviathanaddon.dpdns.org" target="_blank">
     <img src="public/button5.svg" 
-         width="340" 
+         width="320" 
          alt="Installa Leviathan" 
-         style="filter: drop-shadow(0 0 20px rgba(0, 234, 255, 0.5)); transition: transform 0.2s;"
-         onmouseover="this.style.transform='scale(1.05)'" 
-         onmouseout="this.style.transform='scale(1)'">
+         style="filter: drop-shadow(0 0 15px rgba(0, 234, 255, 0.4)); transition: transform 0.2s;">
   </a>
 
-  <br><br>
+  <br>
 
-  <a href="https://leaviathan-leviathan.hf.space" target="_blank">
-    <img src="https://img.shields.io/badge/ACCESS_MIRROR-SHADOW_SERVER-374151?style=for-the-badge&logo=huggingface&logoColor=FFD21E" height="30" alt="Shadow Mirror">
-  </a>
+  <div style="margin-top: 15px;">
+    <a href="https://leaviathan-leviathan.hf.space" target="_blank">
+      <img src="https://img.shields.io/badge/ACCESS_MIRROR-SHADOW_SERVER-374151?style=for-the-badge&logo=huggingface&logoColor=FFD21E" height="28" alt="Shadow Mirror">
+    </a>
+  </div>
 
-  <div style="width: 100%; height: 1px; background: linear-gradient(90deg, transparent, #a855f7, #00eaff, transparent); margin-top: 40px; margin-bottom: 20px; opacity: 0.5;"></div>
+  <hr style="width: 50%; border: 0; height: 1px; background: linear-gradient(90deg, transparent, #00eaff, transparent); margin-top: 25px; margin-bottom: 10px; opacity: 0.3;">
 
   <a href="https://t.me/Stremio_ITA/7153" target="_blank">
-    <img src="https://img.shields.io/badge/TELEGRAM-Direct_Support_Uplink-ffffff?style=social&logo=telegram" alt="Telegram Support">
+    <img src="https://img.shields.io/badge/TELEGRAM-Direct_Support_Uplink-0088CC?style=social&logo=telegram" alt="Telegram Support">
   </a>
 
 </div>
