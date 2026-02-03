@@ -282,7 +282,24 @@ function extractStreamInfo(title, source) {
 
   if (info.audio) {
       const a = info.audio.toUpperCase();
-      if (a.includes("ATMOS")) audioTag = "Atmos"; 
+      const rawUpper = t.toUpperCase(); 
+
+      // --- NUOVA LOGICA ATMOS (Lossy vs Lossless) ---
+      if (a.includes("ATMOS")) {
+          // 1. Atmos TrueHD (Lossless)
+          if (a.includes("TRUEHD") || rawUpper.includes("TRUEHD")) {
+               audioTag = "Atmos TrueHD";
+          } 
+          // 2. Atmos DDP/JOC (Lossy)
+          else if (a.includes("DDP") || a.includes("EAC3") || a.includes("E-AC-3") || rawUpper.includes("JOC")) {
+               audioTag = "Atmos DDP";
+          } 
+          // 3. Fallback Atmos
+          else {
+               audioTag = "Atmos";
+          }
+      }
+      // ---------------------------------------------
       else if (a.includes("DTS-X") || a.includes("DTS:X")) audioTag = "DTS:X";
       else if (a.includes("TRUEHD")) audioTag = "TrueHD";
       else if (a.includes("DTS-HD") || a.includes("MA")) audioTag = "DTS-HD";
