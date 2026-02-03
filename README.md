@@ -214,28 +214,12 @@ Leviathan non impone l'uso di intermediari. Il motore supporta la connessione di
       box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   ">
     
-    <div>
-      <span style="color: #64748b;">SYSTEM:</span> 
-      <span style="color: #fff; font-weight: bold;">v.2.7.0</span>
-    </div>
-    
-    <div style="width: 1px; background: #334155;"></div>
-
-    <div>
-      <span style="color: #64748b;">STATUS:</span> 
-      <span style="color: #00eaff; text-shadow: 0 0 8px rgba(0, 234, 255, 0.6);">ONLINE ●</span>
-    </div>
-
-    <div style="width: 1px; background: #334155;"></div>
-
-    <div>
-      <span style="color: #64748b;">LICENSE:</span> 
-      <span style="color: #fff;">MIT</span>
-    </div>
-
-  </div>
-
+    <div align="center">
+  <img src="https://img.shields.io/badge/SYSTEM-v.2.7.0-0f172a?style=for-the-badge&labelColor=000&color=00eaff" alt="Version">
+  <img src="https://img.shields.io/badge/STATUS-ONLINE-0f172a?style=for-the-badge&labelColor=000&color=00eaff" alt="Status">
+  <img src="https://img.shields.io/badge/LICENSE-MIT-0f172a?style=for-the-badge&labelColor=000&color=00eaff" alt="License">
 </div>
+
 
 
 ## 🌐 LEVIATHAN NETWORK NODES
