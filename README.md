@@ -1,19 +1,23 @@
-<div align="center">
-  
+<div align="center" style="text-align: center;">
+
   <img src="https://i.ibb.co/j9tSSy7f/Gemini-Generated-Image-xep84gxep84gxep8-Photoroom.png" 
        alt="Leviathan Logo"
        style="width: 200px; 
               border-radius: 40px; 
               filter: drop-shadow(0 0 40px rgba(0, 140, 255, 0.8)); 
               margin-bottom: 10px;
+              margin-left: auto;
+              margin-right: auto;
+              display: inline-block;
               transition: transform 0.3s;" />
 
-  <h1 style="background: linear-gradient(180deg, #e0ffff 0%, #00eaff 50%, #004e92 100%);
+  <h1 translate="no" class="notranslate" 
+      style="background: linear-gradient(180deg, #e0ffff 0%, #00eaff 50%, #004e92 100%);
              -webkit-background-clip: text; 
              -webkit-text-fill-color: transparent;
              font-size: 7rem; 
              font-weight: 900; 
-             margin: 0; 
+             margin: 0 auto; 
              line-height: 0.9;
              font-family: system-ui, -apple-system, sans-serif;
              letter-spacing: -8px; 
@@ -29,6 +33,7 @@
               opacity: 0.8;">
     — L'abisso si risveglia —
   </div>
+
 </div>
 
 
