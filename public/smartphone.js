@@ -5,6 +5,7 @@ const mobileCSS = `
     --m-secondary: #7000ff;   /* Viola Abisso */
     --m-accent: #b026ff;      
     --m-amber: #ffcc00;       /* Gold P2P Warning */
+    --m-orange: #ff6600;      /* Blaze Orange (AnimeWorld) */
     --m-cine: #ff0055;        
     --m-kofi: #FF5E5B;        
     --m-surface: rgba(10, 15, 25, 0.85); 
@@ -138,12 +139,6 @@ body::before {
 .m-srv-btn[onclick*="'tb'"].active { background: linear-gradient(135deg, rgba(176, 38, 255, 0.15), rgba(0,0,0,0)); border-color: var(--m-accent); color: #fff; box-shadow: 0 0 20px rgba(176, 38, 255, 0.2), inset 0 0 10px rgba(176, 38, 255, 0.05); text-shadow: 0 0 10px var(--m-accent); }
 .m-rail-icon { font-size: 1.2rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
 
-.m-sc-subpanel { grid-column: 1 / -1; background: rgba(0,0,0,0.4); border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; display: none; animation: slideDown 0.3s ease; margin: 10px 15px 15px 15px; }
-@keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-.m-mini-tabs { display: flex; gap: 8px; }
-.m-mini-tab { flex: 1; padding: 8px; text-align: center; font-size: 0.8rem; font-weight: 700; border-radius: 8px; background: rgba(255,255,255,0.05); color: var(--m-dim); font-family: 'Rajdhani'; transition: all 0.2s; }
-.m-mini-tab.active { background: var(--m-primary); color: #000; box-shadow: 0 0 10px rgba(0,242,255,0.3); }
-
 .m-hypervisor {
     background: linear-gradient(165deg, rgba(15, 20, 30, 0.95), rgba(5, 5, 10, 0.98));
     border: 1px solid rgba(0, 242, 255, 0.15); border-radius: 20px; padding: 15px 15px;
@@ -267,25 +262,158 @@ body::before {
 .m-sys-info h4 { margin: 0; font-size: 0.85rem; color: #fff; font-family: 'Rajdhani'; font-weight: 700; display: flex; align-items: center; gap: 5px; }
 .m-sys-info p { margin: 2px 0 0; font-size: 0.65rem; color: rgba(255,255,255,0.5); }
 
-/* --- NEW MFP BADGE & NO PROXY FIX (TINY VERSION) --- */
-.m-proxy-badge {
-    display: inline-flex; align-items: center; gap: 3px;
-    background: rgba(0, 242, 255, 0.08); border: 1px solid rgba(0, 242, 255, 0.4);
-    border-radius: 3px; padding: 1px 4px; margin-left: 2px;
-    font-size: 0.55rem; color: var(--m-primary); font-family: 'Rajdhani', sans-serif; font-weight: 800;
-    letter-spacing: 0.5px; box-shadow: 0 0 5px rgba(0, 242, 255, 0.1);
-    white-space: nowrap; flex-shrink: 0;
+
+/* --- REACTOR CORE MODULES (OPTIMIZED & LESS ZOOMED) --- */
+.m-reactor-grid {
+    display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px;
 }
 
-.m-noproxy-badge {
-    display: inline-flex; align-items: center; gap: 3px;
-    background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 3px; padding: 1px 3px; margin-left: 2px;
-    font-size: 0.5rem; color: #aaa; font-family: 'Rajdhani', sans-serif; font-weight: 800;
-    letter-spacing: 0px; /* Compattato */
-    white-space: nowrap; flex-shrink: 0;
-    line-height: 1;
+.m-reactor-module {
+    /* Base Appearance */
+    background: rgba(10, 12, 16, 0.95);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: flex;
+    align-items: stretch;
+    min-height: 75px; /* Reduced from 90px */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
+
+/* The "Core" (Left Bar) */
+.m-reactor-core {
+    width: 45px; /* Reduced from 60px */
+    flex-shrink: 0;
+    background: #0f1219;
+    border-right: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2; /* Keeps icon above glow */
+    transition: background 0.3s, box-shadow 0.3s;
+}
+
+.m-core-icon {
+    font-size: 1.1rem; /* Reduced from 1.4rem */
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
+    z-index: 3;
+    position: relative;
+}
+
+/* The Body (Content) */
+.m-reactor-body {
+    flex: 1;
+    padding: 8px 12px; /* Reduced padding */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+    background: linear-gradient(90deg, rgba(255,255,255,0.01), transparent);
+}
+
+/* Titles & Text */
+.m-reactor-top {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;
+}
+.m-reactor-title {
+    font-family: 'Rajdhani', sans-serif; font-weight: 800; color: #fff; font-size: 0.95rem; /* Reduced from 1rem */
+    letter-spacing: 0.5px; text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+.m-reactor-desc {
+    font-family: 'Outfit', sans-serif; font-size: 0.6rem; /* Reduced from 0.65rem */
+    color: #666; 
+    line-height: 1.3; margin-bottom: 4px; display: block;
+}
+
+/* Badges (Tech Tags) */
+.m-tag-row { display: flex; gap: 6px; align-items: center; }
+.m-tech-tag {
+    font-family: 'Rajdhani', monospace; font-size: 0.5rem; font-weight: 700;
+    padding: 2px 5px; border-radius: 4px; border: 1px solid;
+    text-transform: uppercase; letter-spacing: 1px; line-height: 1;
+}
+.tag-noproxy { border-color: #444; color: #777; background: rgba(255,255,255,0.02); }
+.tag-mfp { border-color: rgba(0, 242, 255, 0.3); color: var(--m-primary); background: rgba(0, 242, 255, 0.05); }
+
+/* --- ACTIVE STATES (THE MAGIC) --- */
+
+/* Background Glow Effect */
+.m-reactor-module::after {
+    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at 0% 50%, var(--glow-color), transparent 70%);
+    opacity: 0; transition: opacity 0.5s ease;
+    z-index: 0; pointer-events: none;
+}
+.m-reactor-module.active::after { opacity: 0.25; }
+
+/* Border Glow */
+.m-reactor-module.active {
+    border-color: var(--border-color);
+    box-shadow: 0 0 20px rgba(0,0,0,0.5), inset 0 0 0 1px var(--border-color-dim);
+}
+
+/* Core Activation */
+.m-reactor-module.active .m-reactor-core {
+    background: var(--core-bg);
+    border-right-color: var(--border-color);
+    box-shadow: 10px 0 30px -5px var(--glow-color); /* Spills light into body */
+}
+
+/* Icon Activation - BOOST BRIGHTNESS but keep color */
+.m-reactor-module.active .m-core-icon {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 8px var(--border-color)) brightness(1.2);
+}
+
+/* Specific Module Colors & ALWAYS ON ICONS */
+#mod-vix { --glow-color: rgba(112, 0, 255, 0.8); --border-color: #7000ff; --border-color-dim: rgba(112,0,255,0.3); --core-bg: rgba(112,0,255,0.2); }
+#mod-vix .m-core-icon { color: var(--m-secondary); }
+
+#mod-ghd { --glow-color: rgba(0, 242, 255, 0.8); --border-color: #00f2ff; --border-color-dim: rgba(0,242,255,0.3); --core-bg: rgba(0,242,255,0.2); }
+#mod-ghd .m-core-icon { color: var(--m-primary); }
+
+#mod-gs { --glow-color: rgba(176, 38, 255, 0.8); --border-color: #b026ff; --border-color-dim: rgba(176,38,255,0.3); --core-bg: rgba(176,38,255,0.2); }
+#mod-gs .m-core-icon { color: var(--m-accent); }
+
+/* AnimeWorld - BLAZE ORANGE */
+#mod-aw { --glow-color: rgba(255, 102, 0, 0.8); --border-color: #ff6600; --border-color-dim: rgba(255,102,0,0.3); --core-bg: rgba(255,102,0,0.2); }
+#mod-aw .m-core-icon { color: var(--m-orange); }
+
+#mod-webstr { --glow-color: rgba(255, 255, 255, 0.6); --border-color: #ffffff; --border-color-dim: rgba(255,255,255,0.3); --core-bg: rgba(255,255,255,0.1); }
+#mod-webstr .m-core-icon { color: #ccc; }
+
+
+/* --- SWITCH OVERRIDE FOR REACTOR --- */
+/* Makes the switch fit the theme better */
+.m-reactor-top .m-switch { transform: scale(0.85); transform-origin: right center; }
+
+/* --- SC SUBPANEL (FIXED: NO CUT OFF & HIDDEN BY DEFAULT) --- */
+.m-sc-subpanel {
+    display: none; /* KEY FIX: HIDDEN BY DEFAULT */
+    background: transparent; 
+    border: none;
+    margin: 8px 0 0 0; 
+    padding: 0;
+    width: 100%;
+}
+.m-mini-tabs { gap: 6px; }
+.m-mini-tab {
+    padding: 6px 4px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+    color: #888; letter-spacing: 0.5px;
+    font-size: 0.7rem; font-weight: 800;
+}
+.m-mini-tab.active {
+    background: var(--m-secondary); border-color: var(--m-secondary);
+    color: #fff; box-shadow: 0 0 10px rgba(112,0,255,0.4);
+}
+
+
 
 .m-visual-core-v2 { margin-bottom: 20px; position: relative; }
 .m-visual-preview { background: #080808; border: 1px solid rgba(0,242,255,0.15); border-radius: 16px; padding: 12px; margin-bottom: 15px; display: flex; gap: 12px; align-items: flex-start; box-shadow: 0 0 25px rgba(0,0,0,0.6); position: relative; overflow: hidden; min-height: 80px; transition: border-color 0.2s; }
@@ -690,81 +818,108 @@ const mobileHTML = `
                         <i class="fas fa-cubes m-hyp-icon"></i>
                     </div>
 
-                    <div class="m-sys-grid">
+                    <div class="m-reactor-grid">
                         
-                        <div class="m-sys-row">
-                            <div class="m-sys-info">
-                                <h4>
-                                    <i class="fas fa-play-circle" style="color:var(--m-secondary)"></i> StreamingCommunity
-                                    <span class="m-noproxy-badge">NO PROXY</span>
-                                </h4>
-                                <p>Film, Serie TV & Anime (Catalogo Vasto)</p>
+                        <div class="m-reactor-module" id="mod-vix">
+                            <div class="m-reactor-core">
+                                <i class="fas fa-play-circle m-core-icon"></i>
                             </div>
-                            <label class="m-switch">
-                                <input type="checkbox" id="m-enableVix" onchange="updateStatus('m-enableVix','st-vix'); toggleModuleStyle('m-enableVix', 'mod-vix');">
-                                <span class="m-slider"></span>
-                            </label>
-                        </div>
-                        <div id="m-sc-options" class="m-sc-subpanel">
-                            <div class="m-mini-tabs">
-                                <div class="m-mini-tab active" id="mq-sc-all" onclick="setScQuality('all')">HYBRID</div>
-                                <div class="m-mini-tab" id="mq-sc-1080" onclick="setScQuality('1080')">1080p</div>
-                                <div class="m-mini-tab" id="mq-sc-720" onclick="setScQuality('720')">720p</div>
+                            <div class="m-reactor-body">
+                                <div class="m-reactor-top">
+                                    <span class="m-reactor-title">StreamingCommunity</span>
+                                    <label class="m-switch">
+                                        <input type="checkbox" id="m-enableVix" onchange="updateStatus('m-enableVix','st-vix'); toggleModuleStyle('m-enableVix', 'mod-vix');">
+                                        <span class="m-slider"></span>
+                                    </label>
+                                </div>
+                                <span class="m-reactor-desc">Film, Serie TV & Anime (Catalogo Vasto)</span>
+                                <div class="m-tag-row">
+                                    <span class="m-tech-tag tag-noproxy"><i class="fas fa-bolt"></i> NO PROXY</span>
+                                </div>
+
+                                <div id="m-sc-options" class="m-sc-subpanel">
+                                    <div class="m-mini-tabs">
+                                        <div class="m-mini-tab active" id="mq-sc-all" onclick="setScQuality('all')">HYBRID</div>
+                                        <div class="m-mini-tab" id="mq-sc-1080" onclick="setScQuality('1080')">1080p</div>
+                                        <div class="m-mini-tab" id="mq-sc-720" onclick="setScQuality('720')">720p</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="m-sys-row">
-                            <div class="m-sys-info">
-                                <h4>
-                                    <i class="fas fa-film" style="color:var(--m-primary)"></i> GuardaHD 
-                                    <span class="m-proxy-badge"><i class="fas fa-shield-alt"></i> MFP</span>
-                                </h4>
-                                <p>Film & Serie TV ITA</p>
+                        <div class="m-reactor-module" id="mod-ghd">
+                            <div class="m-reactor-core">
+                                <i class="fas fa-film m-core-icon"></i>
                             </div>
-                            <label class="m-switch">
-                                <input type="checkbox" id="m-enableGhd" onchange="updateStatus('m-enableGhd','st-ghd'); toggleModuleStyle('m-enableGhd', 'mod-ghd');">
-                                <span class="m-slider"></span>
-                            </label>
+                            <div class="m-reactor-body">
+                                <div class="m-reactor-top">
+                                    <span class="m-reactor-title">GuardaHD</span>
+                                    <label class="m-switch">
+                                        <input type="checkbox" id="m-enableGhd" onchange="updateStatus('m-enableGhd','st-ghd'); toggleModuleStyle('m-enableGhd', 'mod-ghd');">
+                                        <span class="m-slider"></span>
+                                    </label>
+                                </div>
+                                <span class="m-reactor-desc">Film & Serie TV ITA</span>
+                                <div class="m-tag-row">
+                                    <span class="m-tech-tag tag-mfp"><i class="fas fa-shield-alt"></i> MFP</span>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="m-sys-row">
-                            <div class="m-sys-info">
-                                <h4>
-                                    <i class="fas fa-tv" style="color:var(--m-accent)"></i> GuardaSerie 
-                                    <span class="m-proxy-badge"><i class="fas fa-shield-alt"></i> MFP</span>
-                                </h4>
-                                <p>Serie TV ITA</p>
+                        <div class="m-reactor-module" id="mod-gs">
+                            <div class="m-reactor-core">
+                                <i class="fas fa-tv m-core-icon"></i>
                             </div>
-                            <label class="m-switch">
-                                <input type="checkbox" id="m-enableGs" onchange="updateStatus('m-enableGs','st-gs'); toggleModuleStyle('m-enableGs', 'mod-gs');">
-                                <span class="m-slider m-slider-purple"></span>
-                            </label>
+                            <div class="m-reactor-body">
+                                <div class="m-reactor-top">
+                                    <span class="m-reactor-title">GuardaSerie</span>
+                                    <label class="m-switch">
+                                        <input type="checkbox" id="m-enableGs" onchange="updateStatus('m-enableGs','st-gs'); toggleModuleStyle('m-enableGs', 'mod-gs');">
+                                        <span class="m-slider m-slider-purple"></span>
+                                    </label>
+                                </div>
+                                <span class="m-reactor-desc">Serie TV ITA</span>
+                                <div class="m-tag-row">
+                                    <span class="m-tech-tag tag-mfp"><i class="fas fa-shield-alt"></i> MFP</span>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="m-sys-row">
-                            <div class="m-sys-info">
-                                <h4>
-                                    <i class="fas fa-torii-gate" style="color:#ff6600"></i> AnimeWorld 
-                                    <span class="m-noproxy-badge">NO PROXY</span>
-                                </h4>
-                                <p>Anime ITA Database</p>
+                        <div class="m-reactor-module" id="mod-aw">
+                            <div class="m-reactor-core">
+                                <i class="fas fa-torii-gate m-core-icon"></i>
                             </div>
-                            <label class="m-switch">
-                                <input type="checkbox" id="m-enableAnimeWorld" onchange="updateStatus('m-enableAnimeWorld','st-aw'); toggleModuleStyle('m-enableAnimeWorld', 'mod-aw');">
-                                <span class="m-slider m-slider-amber"></span>
-                            </label>
+                            <div class="m-reactor-body">
+                                <div class="m-reactor-top">
+                                    <span class="m-reactor-title">AnimeWorld</span>
+                                    <label class="m-switch">
+                                        <input type="checkbox" id="m-enableAnimeWorld" onchange="updateStatus('m-enableAnimeWorld','st-aw'); toggleModuleStyle('m-enableAnimeWorld', 'mod-aw');">
+                                        <span class="m-slider m-slider-amber"></span>
+                                    </label>
+                                </div>
+                                <span class="m-reactor-desc">Anime ITA Database</span>
+                                <div class="m-tag-row">
+                                    <span class="m-tech-tag tag-noproxy"><i class="fas fa-bolt"></i> NO PROXY</span>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="m-sys-row">
-                            <div class="m-sys-info">
-                                <h4><i class="fas fa-spider" style="color:#fff"></i> WebStreamr</h4>
-                                <p>Fallback di emergenza (No-Debrid)</p>
+                         <div class="m-reactor-module" id="mod-webstr">
+                            <div class="m-reactor-core">
+                                <i class="fas fa-spider m-core-icon"></i>
                             </div>
-                            <label class="m-switch">
-                                <input type="checkbox" id="m-enableWebStreamr" checked onchange="toggleModuleStyle('m-enableWebStreamr', 'mod-webstr');">
-                                <span class="m-slider" style="background-color:#333;"></span>
-                            </label>
+                            <div class="m-reactor-body">
+                                <div class="m-reactor-top">
+                                    <span class="m-reactor-title">WebStreamr</span>
+                                    <label class="m-switch">
+                                        <input type="checkbox" id="m-enableWebStreamr" checked onchange="toggleModuleStyle('m-enableWebStreamr', 'mod-webstr');">
+                                        <span class="m-slider" style="background-color:#333;"></span>
+                                    </label>
+                                </div>
+                                <span class="m-reactor-desc">Fallback di emergenza (No-Debrid)</span>
+                            </div>
                         </div>
+
                     </div>
                 </div>
 
