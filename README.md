@@ -32,11 +32,6 @@
     <img src="https://img.shields.io/badge/TorBox-READY-7A4EE3?style=for-the-badge&logo=torbox&logoColor=white" height="22">
     <img src="https://img.shields.io/badge/P2P-DIRECT_SWARM-ff0055?style=for-the-badge&logo=qbittorrent&logoColor=white" height="22">
   </div>
-<p>
-  <img src="https://img.shields.io/badge/Node.js-v18_LTS-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
-  <img src="https://img.shields.io/badge/Architecture-HyperMode_v3.5-8A2BE2?style=for-the-badge&logo=dependabot&logoColor=white" />
-  <img src="https://img.shields.io/badge/Status-OPERATIONAL-success?style=for-the-badge&logo=githubactions&logoColor=white" />
-</p>
 
 <br>
 
