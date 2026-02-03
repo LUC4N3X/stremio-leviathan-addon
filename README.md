@@ -214,7 +214,7 @@ Leviathan non impone l'uso di intermediari. Il motore supporta la connessione di
       box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   ">
     
-    <div align="center">
+<div align="center">
   <img src="https://img.shields.io/badge/SYSTEM-v.2.7.0-0f172a?style=for-the-badge&labelColor=000&color=00eaff" alt="Version">
   <img src="https://img.shields.io/badge/STATUS-ONLINE-0f172a?style=for-the-badge&labelColor=000&color=00eaff" alt="Status">
   <img src="https://img.shields.io/badge/LICENSE-MIT-0f172a?style=for-the-badge&labelColor=000&color=00eaff" alt="License">
