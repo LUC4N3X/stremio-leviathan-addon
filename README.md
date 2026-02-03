@@ -1,37 +1,34 @@
 <div align="center">
+  
   <img src="https://i.ibb.co/j9tSSy7f/Gemini-Generated-Image-xep84gxep84gxep8-Photoroom.png" 
        alt="Leviathan Logo"
-       style="width: 220px; 
-              border-radius: 50%; 
-              border: 4px solid #fff;
-              box-shadow: 0 0 20px #00eaff, 0 0 50px rgba(0, 234, 255, 0.5), inset 0 0 20px #00eaff;
-              margin-bottom: 30px;" />
+       style="width: 200px; 
+              border-radius: 40px; 
+              filter: drop-shadow(0 0 40px rgba(0, 140, 255, 0.8)); 
+              margin-bottom: 10px;
+              transition: transform 0.3s;" />
 
-  <h1 style="font-family: 'Arial Black', sans-serif; 
-             font-size: 6.5rem; 
-             line-height: 1;
-             margin: 0;
-             letter-spacing: -6px; 
-             color: #fff;
-             text-transform: uppercase; 
-             text-shadow: 4px 4px 0px #ff0050, -4px -4px 0px #00eaff;">
+  <h1 style="background: linear-gradient(180deg, #e0ffff 0%, #00eaff 50%, #004e92 100%);
+             -webkit-background-clip: text; 
+             -webkit-text-fill-color: transparent;
+             font-size: 7rem; 
+             font-weight: 900; 
+             margin: 0; 
+             line-height: 0.9;
+             font-family: system-ui, -apple-system, sans-serif;
+             letter-spacing: -8px; 
+             filter: drop-shadow(0 0 25px rgba(0, 234, 255, 0.6));">
     LEVIATHAN
   </h1>
 
-  <p style="font-family: 'Courier New', monospace; 
-            font-size: 1.4rem; 
-            font-weight: bold; 
-            color: #00eaff; 
-            background: rgba(0, 234, 255, 0.1); 
-            display: inline-block; 
-            padding: 8px 20px; 
-            border: 1px solid #00eaff; 
-            border-radius: 5px;
-            margin-top: 15px;
-            text-transform: uppercase;
-            letter-spacing: 3px;">
-    ⚡ L'abisso si risveglia ⚡
-  </p>
+  <div style="font-size: 1.2rem; 
+              color: #aaddff; 
+              letter-spacing: 8px; 
+              text-transform: uppercase; 
+              margin-top: 10px;
+              opacity: 0.8;">
+    — L'abisso si risveglia —
+  </div>
 </div>
 
 
