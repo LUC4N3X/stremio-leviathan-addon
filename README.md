@@ -63,19 +63,11 @@
   
   <br>
 
- ## 💬 Contatto Diretto
+<hr style="width: 50%; border: 0; height: 1px; background: linear-gradient(90deg, transparent, #00eaff, transparent); margin-top: 25px; margin-bottom: 10px; opacity: 0.3;">
 
-Hai domande o feedback?  
-Telegram è il canale più veloce.
-
-<a href="https://t.me/Stremio_ITA/7153" target="_blank">
-  <img src="https://img.shields.io/badge/Telegram-Chat_Diretta-0088CC?style=for-the-badge&logo=telegram&logoColor=white" />
-</a>
-
-
-<p align="center">
-  <sub>🦑 Leviathan — Global Hybrid Aggregation Framework</sub>
-</p>
+  <a href="https://t.me/Stremio_ITA/7153" target="_blank">
+    <img src="https://img.shields.io/badge/TELEGRAM-Direct_Support_Uplink-0088CC?style=social&logo=telegram" alt="Telegram Support">
+  </a>
 
 </div>
 
