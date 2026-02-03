@@ -11,19 +11,23 @@
               display: inline-block;
               transition: transform 0.3s;" />
 
-  <h1 translate="no" class="notranslate" 
-      style="background: linear-gradient(180deg, #e0ffff 0%, #00eaff 50%, #004e92 100%);
-             -webkit-background-clip: text; 
-             -webkit-text-fill-color: transparent;
-             font-size: 7rem; 
-             font-weight: 900; 
-             margin: 0 auto; 
-             line-height: 0.9;
-             font-family: system-ui, -apple-system, sans-serif;
-             letter-spacing: -8px; 
-             filter: drop-shadow(0 0 25px rgba(0, 234, 255, 0.6));">
-    LEVIATHAN
-  </h1>
+<h1 align="center"
+    style="
+      margin: 10px 0;
+      font-size: 4.6rem;
+      font-weight: 900;
+      letter-spacing: 10px;
+      text-transform: uppercase;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #e8feff;
+      text-shadow:
+        0 0 10px rgba(0,234,255,.8),
+        0 0 30px rgba(0,234,255,.6),
+        0 0 70px rgba(0,234,255,.35);
+    ">
+  LEVIATHAN
+</h1>
+
 
   <div style="font-size: 1.2rem; 
               color: #aaddff; 
