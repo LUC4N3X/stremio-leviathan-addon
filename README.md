@@ -32,36 +32,33 @@
     <img src="https://img.shields.io/badge/TorBox-READY-7A4EE3?style=for-the-badge&logo=torbox&logoColor=white" height="22">
     <img src="https://img.shields.io/badge/P2P-DIRECT_SWARM-ff0055?style=for-the-badge&logo=qbittorrent&logoColor=white" height="22">
   </div>
+<p>
+  <img src="https://img.shields.io/badge/Node.js-v18_LTS-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
+  <img src="https://img.shields.io/badge/Architecture-HyperMode_v3.5-8A2BE2?style=for-the-badge&logo=dependabot&logoColor=white" />
+  <img src="https://img.shields.io/badge/Status-OPERATIONAL-success?style=for-the-badge&logo=githubactions&logoColor=white" />
+</p>
 
-  <div style="background: linear-gradient(145deg, #0d1117, #050a10); 
-              border: 1px solid #1f6feb; 
-              border-left: 4px solid #00eaff;
-              border-radius: 8px; 
-              padding: 15px; 
-              width: 90%; 
-              max-width: 650px; 
-              box-shadow: 0 5px 25px rgba(0,0,0,0.6);
-              text-align: left;
-              margin-bottom: 20px;">
-    <div style="display: flex; align-items: center; margin-bottom: 8px;">
-      <span style="font-size: 1.2rem; margin-right: 8px;">🇮🇹</span>
-      <strong style="font-size: 1.1rem; color: #fff;">Engineered for Italian Precision</strong>
-    </div>
-    <span style="color: #8b949e; font-family: sans-serif; font-size: 0.95rem; line-height: 1.5;">
-      Leviathan ridefinisce lo standard dei metamotori torrent attraverso un'architettura <b>Italy-First</b>.
-      Integra validazione semantica, bypass automatico dei WAF e routing a bassa latenza.
-    </span>
-    <div style="margin-top: 10px;">
-      <code style="background: rgba(0, 234, 255, 0.1); color: #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">Query_Morphing: ACTIVE</code>
-      <code style="background: rgba(0, 234, 255, 0.1); color: #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">Latency: LOW</code>
-    </div>
-  </div>
+<br>
 
-  <div style="margin-bottom: 25px;">
-    <img src="https://img.shields.io/badge/⚡_Adaptive-Latency_Scaling-161b22?style=flat-square&labelColor=0d1117&color=00eaff" />
-    <img src="https://img.shields.io/badge/🛡️_WAF-Bypass_Protocol-161b22?style=flat-square&labelColor=0d1117&color=00eaff" />
-    <img src="https://img.shields.io/badge/🔗_Magnet-Fusion_Engine-161b22?style=flat-square&labelColor=0d1117&color=00eaff" />
-  </div>
+<div style="background: #050a10; border: 1px solid rgba(0, 234, 255, 0.15); border-radius: 8px; padding: 25px; width: 85%; max-width: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+  <strong style="font-size: 1.3rem; color: #00eaff; display: block; margin-bottom: 10px;">
+    🇮🇹 Engineered for Italian Content Precision
+  </strong>
+  <span style="color: #cbd5e1; line-height: 1.6; font-size: 1rem;">
+    Leviathan ridefinisce lo standard dei metamotori torrent attraverso un'architettura <b>Italy-First</b>.
+    Integra un sistema di validazione semantica dei titoli, gestione automatizzata delle challenge WAF e un algoritmo di routing a bassa latenza per garantire risultati pertinenti e immediati.
+  </span>
+</div>
+
+<br>
+
+  <p>
+    <img src="https://img.shields.io/badge/⚡_Adaptive-Latency_Scaling-000?style=for-the-badge&labelColor=00eaff" />
+    <img src="https://img.shields.io/badge/🔍_Smart-Query_Morphing-000?style=for-the-badge&labelColor=00eaff" />
+    <img src="https://img.shields.io/badge/🛡️_WAF-Bypass_Protocol-000?style=for-the-badge&labelColor=00eaff" />
+    <img src="https://img.shields.io/badge/🔗_Magnet-Fusion_Engine-000?style=for-the-badge&labelColor=00eaff" />
+  </p>
+
 
 <div align="center">
   <a href="https://leviathanaddon.dpdns.org" target="_blank">
