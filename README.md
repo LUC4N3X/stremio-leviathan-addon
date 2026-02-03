@@ -1,106 +1,95 @@
 <div align="center">
 
-  <img src="https://i.ibb.co/j9tSSy7f/Gemini-Generated-Image-xep84gxep84gxep8-Photoroom.png" 
-       alt="Leviathan Logo"
-       width="220"
-       style="border-radius: 40px; 
-              box-shadow: 0 0 50px rgba(0, 234, 255, 0.4); 
-              margin-bottom: 20px;
-              border: 2px solid rgba(0, 234, 255, 0.2);" />
+<!-- LOGO -->
+<img src="https://i.ibb.co/j9tSSy7f/Gemini-Generated-Image-xep84gxep84gxep8-Photoroom.png"
+     alt="Leviathan Logo"
+     width="180" />
 
-  <h1 translate="no" style="font-size: 5rem; 
-             font-weight: 900; 
-             margin: 0; 
-             letter-spacing: -3px;
-             background: linear-gradient(180deg, #ffffff 10%, #00eaff 100%);
-             -webkit-background-clip: text;
-             -webkit-text-fill-color: transparent;
-             filter: drop-shadow(0 0 20px rgba(0, 234, 255, 0.6));">
-    LEVIATHAN
-  </h1>
-  
-  <p style="font-size: 1.2rem; 
-            font-family: monospace; 
-            color: #aaddff; 
-            letter-spacing: 6px; 
-            text-transform: uppercase; 
-            margin-top: -10px; 
-            opacity: 0.9;
-            text-shadow: 0 0 10px rgba(0, 234, 255, 0.8);">
-    ⚡ L'abisso si risveglia ⚡
-  </p>
+<br><br>
 
-  <br>
+<!-- TITLE -->
+<h1>
+  ⚡ LEVIATHAN ⚡
+</h1>
 
-  <div style="display: flex; justify-content: center; gap: 5px; flex-wrap: wrap;">
-    <img src="https://img.shields.io/badge/Node.js-v18_LTS-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" height="28">
-    <img src="https://img.shields.io/badge/Architecture-HyperMode-8A2BE2?style=for-the-badge&logo=dependabot&logoColor=white" height="28">
-    <img src="https://img.shields.io/badge/Status-OPERATIONAL-00eaff?style=for-the-badge&logo=githubactions&logoColor=black" height="28">
-  </div>
-  
-  <div style="margin-top: 8px; display: flex; justify-content: center; gap: 5px; flex-wrap: wrap;">
-    <img src="https://img.shields.io/badge/Real_Debrid-NATIVE-A2B9F0?style=for-the-badge&logo=realdebrid&logoColor=black" height="25">
-    <img src="https://img.shields.io/badge/TorBox-READY-7A4EE3?style=for-the-badge&logo=torbox&logoColor=white" height="25">
-    <img src="https://img.shields.io/badge/P2P-DIRECT_SWARM-ff0055?style=for-the-badge&logo=qbittorrent&logoColor=white" height="25">
-  </div>
+<h3>
+  <em>L'abisso si risveglia</em>
+</h3>
 
-  <br>
+---
 
-  <div style="background: linear-gradient(145deg, #0d1117, #050a10); 
-              border: 1px solid #1f6feb; 
-              border-left: 5px solid #00eaff;
-              border-radius: 10px; 
-              padding: 20px; 
-              width: 90%; 
-              max-width: 700px; 
-              box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-              text-align: left;">
-    <div style="display: flex; align-items: center; margin-bottom: 10px;">
-      <span style="font-size: 1.5rem; margin-right: 10px;">🇮🇹</span>
-      <strong style="font-size: 1.2rem; color: #fff;">Engineered for Italian Precision</strong>
-    </div>
-    <span style="color: #8b949e; font-family: sans-serif; line-height: 1.6;">
-      Leviathan ridefinisce lo standard dei metamotori torrent attraverso un'architettura <b>Italy-First</b>.
-      Integra validazione semantica, bypass automatico dei WAF e routing a bassa latenza.
-      <br><br>
-      <code style="background: rgba(0, 234, 255, 0.1); color: #00eaff; padding: 2px 8px; border-radius: 4px;">Query_Morphing: ACTIVE</code>
-      <code style="background: rgba(0, 234, 255, 0.1); color: #00eaff; padding: 2px 8px; border-radius: 4px;">Latency: LOW</code>
-    </span>
-  </div>
+<!-- BADGES CORE -->
+<p>
+  <img src="https://img.shields.io/badge/Real--Debrid-NATIVE_SUPPORT-00eaff?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/TorBox-COMPATIBLE-7A4EE3?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/AIOStreams-COMPATIBLE-1ABC9C?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/P2P-DIRECT_SWARM-ff0055?style=for-the-badge" />
+</p>
 
-  <br>
+<p>
+  <img src="https://img.shields.io/badge/Node.js-v18_LTS-339933?style=for-the-badge&logo=node.js&logoColor=white" />
+  <img src="https://img.shields.io/badge/Architecture-HyperMode_v3.5-8A2BE2?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Status-OPERATIONAL-success?style=for-the-badge" />
+</p>
 
-  <p>
-    <img src="https://img.shields.io/badge/⚡_Adaptive-Latency_Scaling-161b22?style=flat-square&labelColor=0d1117&color=00eaff" />
-    <img src="https://img.shields.io/badge/🛡️_WAF-Bypass_Protocol-161b22?style=flat-square&labelColor=0d1117&color=00eaff" />
-    <img src="https://img.shields.io/badge/🔗_Magnet-Fusion_Engine-161b22?style=flat-square&labelColor=0d1117&color=00eaff" />
-  </p>
+---
 
-  <br>
+<!-- DESCRIPTION -->
+### 🇮🇹 Engineered for Italian Content Precision
 
-  <h3 style="color: #fff; margin-bottom: 10px;">DEPLOYMENT OPTIONS</h3>
-  
-  <a href="https://leviathanaddon.dpdns.org" target="_blank">
-    <img src="https://img.shields.io/badge/INSTALL_ADDON-LEVIATHAN_MAIN-00eaff?style=for-the-badge&logo=stremio&logoColor=black&labelColor=white" height="50" alt="Installa Leviathan" style="border-radius: 8px; box-shadow: 0 0 20px rgba(0, 234, 255, 0.4);">
-  </a>
+**Leviathan** è un metamotore torrent **Italy-First**, progettato per offrire  
+risultati **semanticamente validati**, **immediati** e **affidabili**.
 
-  <br><br>
+🔹 Validazione intelligente dei titoli  
+🔹 Gestione automatica WAF & challenge  
+🔹 Routing a bassa latenza  
+🔹 Aggregazione ibrida DHT + Provider  
 
-  <a href="https://leaviathan-leviathan.hf.space" target="_blank">
-    <img src="https://img.shields.io/badge/ACCESS_MIRROR-SHADOW_SERVER-374151?style=for-the-badge&logo=huggingface&logoColor=FFD21E" height="30" alt="Shadow Mirror">
-  </a>
+---
 
-  <br><br>
+<!-- FEATURES -->
+<p>
+  <img src="https://img.shields.io/badge/⚡_Adaptive-Latency_Scaling-000000?style=for-the-badge&labelColor=00eaff" />
+  <img src="https://img.shields.io/badge/🔍_Smart-Query_Morphing-000000?style=for-the-badge&labelColor=00eaff" />
+  <img src="https://img.shields.io/badge/🛡️_WAF-Bypass_Protocol-000000?style=for-the-badge&labelColor=00eaff" />
+  <img src="https://img.shields.io/badge/🔗_Magnet-Fusion_Engine-000000?style=for-the-badge&labelColor=00eaff" />
+</p>
 
-  <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" style="opacity: 0.3; max-width: 600px;">
+---
 
-  <br>
+<!-- INSTALL -->
+## 🚀 Installazione
 
-  <div style="margin-top: 20px;">
-    <a href="https://t.me/Stremio_ITA/7153" target="_blank">
-      <img src="https://img.shields.io/badge/TELEGRAM-Direct_Support_Uplink-0088CC?style=social&logo=telegram" alt="Telegram Support">
-    </a>
-  </div>
+<a href="https://leviathanaddon.dpdns.org" target="_blank">
+  <img src="public/button5.svg" width="300" alt="Installa Leviathan">
+</a>
+
+---
+
+<!-- MIRROR -->
+## 🕶 Shadow Mirror
+
+<a href="https://leaviathan-leviathan.hf.space" target="_blank">
+  <img src="https://img.shields.io/badge/ACCESS-SHADOW_MIRROR-1f2937?style=for-the-badge&logo=huggingface&logoColor=FFD21E" />
+</a>
+
+---
+
+<!-- CONTACT -->
+## 💬 Contatto Diretto
+
+Hai domande o feedback?  
+Telegram è il canale più veloce.
+
+<a href="https://t.me/Stremio_ITA/7153" target="_blank">
+  <img src="https://img.shields.io/badge/Telegram-Chat_Diretta-0088CC?style=for-the-badge&logo=telegram&logoColor=white" />
+</a>
+
+---
+
+<p align="center">
+  <sub>🦑 Leviathan — Global Hybrid Aggregation Framework</sub>
+</p>
 
 </div>
 
