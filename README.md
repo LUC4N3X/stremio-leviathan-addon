@@ -1,22 +1,78 @@
-<div align="center">
+<div align="center" style="padding: 40px 0;">
 
-  <!-- Logo -->
-  <img src="https://i.ibb.co/j9tSSy7f/Gemini-Generated-Image-xep84gxep84gxep8-Photoroom.png" 
-       alt="Leviathan Logo"
-       style="width: 200px; border-radius: 30px; filter: drop-shadow(0 0 30px rgba(0, 234, 255, 0.7)); margin-bottom: 20px;" />
+  <!-- LOGO -->
+  <img
+    src="https://i.ibb.co/j9tSSy7f/Gemini-Generated-Image-xep84gxep84gxep8-Photoroom.png"
+    alt="Leviathan Logo"
+    style="
+      width: 210px;
+      border-radius: 28px;
+      margin-bottom: 28px;
+      filter:
+        drop-shadow(0 0 25px rgba(0,234,255,.85))
+        drop-shadow(0 0 60px rgba(0,234,255,.35));
+    "
+  />
 
-  <!-- Titolo + Slogan nello stesso blocco -->
-  <h1 style="background: linear-gradient(180deg, #fff 30%, #00eaff 100%);
-             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-             font-size: 6rem; font-weight: 900; margin: 0; line-height: 1;
-             letter-spacing: -5px; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-             text-transform: uppercase;
-             filter: drop-shadow(0 8px 20px rgba(0, 234, 255, 0.5));">
-    𝗟𝗘𝗩𝗜𝗔𝗧𝗛𝗔𝗡<br>
-    <span style="font-size: 1.5rem; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0, 234, 255, 0.5);">
-      ⚡ L'abisso si risveglia ⚡
-    </span>
+  <!-- TITLE -->
+  <h1
+    style="
+      margin: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -6px;
+      line-height: 0.95;
+      font-size: clamp(4rem, 8vw, 6.5rem);
+      background: linear-gradient(
+        180deg,
+        #ffffff 0%,
+        #bff8ff 35%,
+        #00eaff 100%
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter:
+        drop-shadow(0 10px 25px rgba(0,234,255,.55))
+        drop-shadow(0 0 80px rgba(0,234,255,.25));
+    "
+  >
+    LEVIATHAN
   </h1>
+
+  <!-- DIVIDER -->
+  <div
+    style="
+      width: 180px;
+      height: 2px;
+      margin: 18px auto 16px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        #00eaff,
+        transparent
+      );
+      box-shadow: 0 0 15px rgba(0,234,255,.8);
+    "
+  ></div>
+
+  <!-- SLOGAN -->
+  <div
+    style="
+      font-size: 1.35rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #cfffff;
+      text-shadow:
+        0 0 10px rgba(0,234,255,.7),
+        0 0 25px rgba(0,234,255,.4);
+      opacity: 0.95;
+    "
+  >
+    ⚡ L'abisso si risveglia ⚡
+  </div>
+
+</div>
 
 
 
