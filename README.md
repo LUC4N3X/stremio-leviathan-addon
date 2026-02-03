@@ -13,20 +13,22 @@
 
 <h1 align="center"
     style="
-      margin: 10px 0;
-      font-size: 4.6rem;
+      margin: 14px 0 6px;
+      font-size: 4.4rem;
       font-weight: 900;
-      letter-spacing: 10px;
+      letter-spacing: 12px;
       text-transform: uppercase;
       font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      color: #e8feff;
-      text-shadow:
-        0 0 10px rgba(0,234,255,.8),
-        0 0 30px rgba(0,234,255,.6),
-        0 0 70px rgba(0,234,255,.35);
+      background: linear-gradient(90deg,#00eaff,#8cf9ff,#00eaff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      border-bottom: 2px solid rgba(0,234,255,.6);
+      padding-bottom: 8px;
+      filter: drop-shadow(0 8px 25px rgba(0,234,255,.5));
     ">
   LEVIATHAN
 </h1>
+
 
 
   <div style="font-size: 1.2rem; 
