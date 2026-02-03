@@ -215,9 +215,18 @@ Leviathan non impone l'uso di intermediari. Il motore supporta la connessione di
   ">
     
 <div align="center">
-  <img src="https://img.shields.io/badge/SYSTEM-v.2.7.0-0f172a?style=for-the-badge&labelColor=000&color=00eaff" alt="Version">
-  <img src="https://img.shields.io/badge/STATUS-ONLINE-0f172a?style=for-the-badge&labelColor=000&color=00eaff" alt="Status">
-  <img src="https://img.shields.io/badge/LICENSE-MIT-0f172a?style=for-the-badge&labelColor=000&color=00eaff" alt="License">
+  <table>
+    <tr>
+      <td align="center"><b>SYSTEM</b></td>
+      <td align="center"><b>STATUS</b></td>
+      <td align="center"><b>LICENSE</b></td>
+    </tr>
+    <tr>
+      <td align="center"><code>v.2.7.0</code></td>
+      <td align="center"><code>ONLINE 🟢</code></td>
+      <td align="center"><code>MIT</code></td>
+    </tr>
+  </table>
 </div>
 
 
