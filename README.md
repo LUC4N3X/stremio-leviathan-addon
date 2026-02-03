@@ -72,7 +72,6 @@ Telegram è il canale più veloce.
   <img src="https://img.shields.io/badge/Telegram-Chat_Diretta-0088CC?style=for-the-badge&logo=telegram&logoColor=white" />
 </a>
 
----
 
 <p align="center">
   <sub>🦑 Leviathan — Global Hybrid Aggregation Framework</sub>
