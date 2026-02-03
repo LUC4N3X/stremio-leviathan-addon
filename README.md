@@ -37,7 +37,7 @@
 
 <div style="background: #050a10; border: 1px solid rgba(0, 234, 255, 0.15); border-radius: 8px; padding: 25px; width: 85%; max-width: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
   <strong style="font-size: 1.3rem; color: #00eaff; display: block; margin-bottom: 10px;">
-    ### 🇮🇹 Engineered for Italian Content Precision
+    ## 🇮🇹 Engineered for Italian Content Precision
 
 **Leviathan** è un metamotore torrent **Italy-First**, progettato per offrire  
 risultati **semanticamente validati**, **immediati** e **affidabili**.
