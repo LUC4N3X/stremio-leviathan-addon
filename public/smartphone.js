@@ -132,12 +132,124 @@ body::before {
 @keyframes blinkBase { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
 
 /* --- COMPONENTS --- */
-.m-srv-rail { display: flex; gap: 8px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 6px; margin-bottom: 25px; backdrop-filter: blur(5px); }
-.m-srv-btn { flex: 1; text-align: center; padding: 14px 0; font-family: 'Rajdhani', sans-serif; font-weight: 800; font-size: 1.1rem; color: var(--m-dim); border-radius: 12px; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(255,255,255,0.03); border: 1px solid transparent; }
-.m-srv-btn[onclick*="'rd'"].active { background: linear-gradient(135deg, rgba(0, 242, 255, 0.15), rgba(0,0,0,0)); border-color: var(--m-primary); color: #fff; box-shadow: 0 0 20px rgba(0, 242, 255, 0.2), inset 0 0 10px rgba(0, 242, 255, 0.05); text-shadow: 0 0 10px var(--m-primary); }
-.m-srv-btn[onclick*="'p2p'"].active { background: linear-gradient(135deg, rgba(255, 204, 0, 0.15), rgba(0,0,0,0)); border-color: var(--m-amber); color: #fff; box-shadow: 0 0 20px rgba(255, 204, 0, 0.2), inset 0 0 10px rgba(255, 204, 0, 0.05); text-shadow: 0 0 10px var(--m-amber); }
-.m-srv-btn[onclick*="'tb'"].active { background: linear-gradient(135deg, rgba(176, 38, 255, 0.15), rgba(0,0,0,0)); border-color: var(--m-accent); color: #fff; box-shadow: 0 0 20px rgba(176, 38, 255, 0.2), inset 0 0 10px rgba(176, 38, 255, 0.05); text-shadow: 0 0 10px var(--m-accent); }
-.m-rail-icon { font-size: 1.2rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+
+/* === NEW CREDENTIALS STYLES === */
+.m-cred-deck {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    margin-bottom: 25px; perspective: 1000px;
+}
+.m-cred-opt {
+    position: relative;
+    background: linear-gradient(145deg, rgba(20,25,35,0.8), rgba(5,5,10,0.9));
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 15px 5px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+.m-cred-opt::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+    background: var(--opt-color);
+    box-shadow: 0 0 10px var(--opt-color);
+    opacity: 0.3; transition: 0.3s;
+}
+.m-cred-icon { font-size: 1.6rem; margin-bottom: 4px; filter: drop-shadow(0 0 5px rgba(0,0,0,0.5)); transition: 0.3s; }
+.m-cred-name { font-family: 'Rajdhani', sans-serif; font-weight: 800; font-size: 0.9rem; letter-spacing: 1px; color: #666; transition: 0.3s; }
+
+/* Active State for Credentials */
+.m-cred-opt.active {
+    background: linear-gradient(145deg, rgba(20,25,35,0.9), #000);
+    border-color: var(--opt-color);
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px var(--opt-glow), inset 0 0 10px rgba(0,0,0,0.5);
+}
+.m-cred-opt.active::before { opacity: 1; height: 3px; }
+.m-cred-opt.active .m-cred-icon { transform: scale(1.1); color: var(--opt-color); filter: drop-shadow(0 0 8px var(--opt-color)); }
+.m-cred-opt.active .m-cred-name { color: #fff; text-shadow: 0 0 8px var(--opt-color); }
+
+/* Specific Colors */
+.cred-rd { --opt-color: var(--m-primary); --opt-glow: rgba(0, 242, 255, 0.2); }
+.cred-tb { --opt-color: var(--m-accent); --opt-glow: rgba(176, 38, 255, 0.2); }
+.cred-p2p { --opt-color: var(--m-amber); --opt-glow: rgba(255, 204, 0, 0.2); }
+
+/* Input Fuselage (Container) */
+.m-input-fuselage {
+    position: relative; margin-bottom: 18px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 2px; /* For double border effect */
+    transition: 0.3s;
+}
+.m-input-fuselage:focus-within {
+    border-color: var(--m-primary);
+    box-shadow: 0 0 15px rgba(0,242,255,0.15);
+}
+.m-input-fuselage.is-p2p { opacity: 0.6; pointer-events: none; filter: grayscale(1); border-style: dashed; }
+
+/* Inner Input Wrapper */
+.m-if-inner {
+    display: flex; align-items: center;
+    background: #080a10;
+    border-radius: 12px;
+    padding: 0 10px;
+    height: 50px;
+    position: relative;
+    overflow: hidden;
+}
+.m-if-icon {
+    font-size: 1rem; color: #555; width: 30px; text-align: center;
+    transition: 0.3s;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    padding-right: 10px; margin-right: 10px;
+    height: 60%; display: flex; align-items: center; justify-content: center;
+}
+.m-input-fuselage:focus-within .m-if-icon { color: var(--m-primary); border-right-color: var(--m-primary); }
+
+.m-if-field {
+    flex: 1; background: transparent; border: none; color: #fff;
+    font-family: 'Roboto Mono', monospace; font-size: 0.85rem; letter-spacing: 0.5px;
+    width: 100%; height: 100%;
+}
+.m-if-field::placeholder { color: #444; font-family: 'Rajdhani'; letter-spacing: 1px; text-transform: uppercase; }
+
+.m-if-action {
+    color: var(--m-dim); cursor: pointer; padding: 8px; border-radius: 6px;
+    transition: 0.2s; display: flex; align-items: center; justify-content: center;
+}
+.m-if-action:hover { color: #fff; background: rgba(255,255,255,0.1); }
+.m-if-action:active { transform: scale(0.9); color: var(--m-primary); }
+
+/* Field Labels Top Right */
+.m-if-label {
+    position: absolute; top: -10px; right: 15px;
+    background: #000; padding: 0 8px;
+    font-family: 'Rajdhani', sans-serif; font-size: 0.65rem; font-weight: 700;
+    color: var(--m-dim); letter-spacing: 1px;
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;
+    z-index: 2;
+}
+.m-input-fuselage:focus-within .m-if-label {
+    color: var(--m-primary); border-color: var(--m-primary);
+    box-shadow: 0 0 10px rgba(0,242,255,0.2);
+}
+.m-if-label.opt { color: var(--m-accent); border-color: rgba(176,38,255,0.3); }
+
+/* Link Button */
+.m-get-link {
+    font-family: 'Rajdhani'; font-size: 0.65rem; font-weight: 700;
+    color: var(--m-primary); text-transform: uppercase; letter-spacing: 1px;
+    margin-left: auto; cursor: pointer; padding: 4px 8px;
+    border: 1px solid rgba(0,242,255,0.2); border-radius: 4px;
+    background: rgba(0,242,255,0.05); transition: 0.3s;
+    display: inline-flex; align-items: center; gap: 5px;
+}
+.m-get-link:hover { background: var(--m-primary); color: #000; box-shadow: 0 0 10px var(--m-primary); }
+
 
 .m-hypervisor {
     background: linear-gradient(165deg, rgba(15, 20, 30, 0.95), rgba(5, 5, 10, 0.98));
@@ -781,35 +893,41 @@ const mobileHTML = `
                         <i class="fas fa-fingerprint m-hyp-icon"></i>
                     </div>
 
-                    <div class="m-srv-rail">
-                        <div class="m-srv-btn active" onclick="setMService('rd', this)"><span class="m-rail-icon">🐋</span> RD</div>
-                        <div class="m-srv-btn" onclick="setMService('tb', this)"><span class="m-rail-icon">⚓</span> TB</div>
-                        <div class="m-srv-btn" onclick="setMService('p2p', this)"><span class="m-rail-icon">🦈</span> P2P</div>
-                    </div>
-
-                    <div class="m-field-group">
-                        <div class="m-field-header">
-                            <span class="m-field-label">API KEY</span>
-                            <div class="m-field-link" onclick="openApiPage()">OTTIENI <i class="fas fa-external-link-alt"></i></div>
+                    <div class="m-cred-deck">
+                        <div class="m-cred-opt cred-rd m-srv-btn active" onclick="setMService('rd', this)">
+                            <div class="m-cred-icon">🐋</div>
+                            <div class="m-cred-name">REAL-DEBRID</div>
                         </div>
-                        <div class="m-input-box">
-                            <i class="fas fa-key m-input-ico"></i>
-                            <input type="text" id="m-apiKey" class="m-input-tech" placeholder="Incolla la tua chiave qui..." oninput="updateLinkModalContent()">
-                            <div class="m-paste-action" onclick="pasteTo('m-apiKey')"><i class="fas fa-paste"></i></div>
+                        <div class="m-cred-opt cred-tb m-srv-btn" onclick="setMService('tb', this)">
+                            <div class="m-cred-icon">⚓</div>
+                            <div class="m-cred-name">TORBOX</div>
+                        </div>
+                        <div class="m-cred-opt cred-p2p m-srv-btn" onclick="setMService('p2p', this)">
+                            <div class="m-cred-icon">🦈</div>
+                            <div class="m-cred-name">P2P MODE</div>
                         </div>
                     </div>
 
-                    <div class="m-field-group">
-                        <div class="m-field-header">
-                            <span class="m-field-label" style="color:var(--m-accent)">TMDB (Opzionale)</span>
-                            <div class="m-field-link" style="color:var(--m-accent)" onclick="openApiPage('tmdb')">OTTIENI <i class="fas fa-external-link-alt"></i></div>
-                        </div>
-                        <div class="m-input-box tmdb-box">
-                            <i class="fas fa-film m-input-ico"></i>
-                            <input type="text" id="m-tmdb" class="m-input-tech" placeholder="Chiave Personale (Opzionale)" oninput="updateLinkModalContent()">
-                            <div class="m-paste-action" onclick="pasteTo('m-tmdb')"><i class="fas fa-paste"></i></div>
+                    <div class="m-input-fuselage" id="box-apikey">
+                        <div class="m-if-label">API ACCESS KEY</div>
+                        <div class="m-if-inner">
+                            <div class="m-if-icon"><i class="fas fa-key"></i></div>
+                            <input type="text" id="m-apiKey" class="m-if-field" placeholder="INCOLLA KEY..." oninput="updateLinkModalContent()">
+                            <div class="m-if-action" onclick="pasteTo('m-apiKey')"><i class="fas fa-paste"></i></div>
+                            <div class="m-get-link" onclick="openApiPage()">GET <i class="fas fa-external-link-alt"></i></div>
                         </div>
                     </div>
+
+                    <div class="m-input-fuselage tmdb-box" id="box-tmdb">
+                        <div class="m-if-label opt">TMDB (OPTIONAL)</div>
+                        <div class="m-if-inner">
+                            <div class="m-if-icon"><i class="fas fa-film"></i></div>
+                            <input type="text" id="m-tmdb" class="m-if-field" placeholder="PERSONAL KEY..." oninput="updateLinkModalContent()">
+                            <div class="m-if-action" onclick="pasteTo('m-tmdb')"><i class="fas fa-paste"></i></div>
+                            <div class="m-get-link" style="color:var(--m-accent); border-color:var(--m-accent); background:rgba(176,38,255,0.05);" onclick="openApiPage('tmdb')">GET <i class="fas fa-external-link-alt"></i></div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <div class="m-hypervisor">
@@ -859,7 +977,7 @@ const mobileHTML = `
                                         <span class="m-slider"></span>
                                     </label>
                                 </div>
-                                <span class="m-reactor-desc">Film & Serie TV ITA</span>
+                                <span class="m-reactor-desc">Archivio HD di Film e Serie TV in Italiano. Aggiornamenti quotidiani.</span>
                                 <div class="m-tag-row">
                                     <span class="m-tech-tag tag-mfp"><i class="fas fa-shield-alt"></i> MFP</span>
                                 </div>
@@ -878,7 +996,7 @@ const mobileHTML = `
                                         <span class="m-slider m-slider-purple"></span>
                                     </label>
                                 </div>
-                                <span class="m-reactor-desc">Serie TV ITA</span>
+                                <span class="m-reactor-desc">Specializzato in Serie TV. Catalogo Italiano completo con ultime uscite.</span>
                                 <div class="m-tag-row">
                                     <span class="m-tech-tag tag-mfp"><i class="fas fa-shield-alt"></i> MFP</span>
                                 </div>
@@ -916,7 +1034,7 @@ const mobileHTML = `
                                         <span class="m-slider" style="background-color:#333;"></span>
                                     </label>
                                 </div>
-                                <span class="m-reactor-desc">Fallback di emergenza (No-Debrid)</span>
+                                <span class="m-reactor-desc">Modulo di emergenza. Si attiva automaticamente <b>solo</b> quando non ci sono altri risultati.</span>
                             </div>
                         </div>
 
@@ -1599,16 +1717,17 @@ function setMService(srv, btn, keepInput = false) {
     }
     
     const input = document.getElementById('m-apiKey');
+    const box = document.getElementById('box-apikey');
     
     if (srv === 'p2p') {
-        input.placeholder = "Nessuna API Key richiesta (P2P)";
+        input.placeholder = "P2P BYPASS MODE";
         input.disabled = true;
-        input.style.opacity = "0.5";
+        if(box) box.classList.add('is-p2p');
     } else {
-        const placeholders = { 'rd': "RD API Key...", 'tb': "TB API Key..." };
+        const placeholders = { 'rd': "INCOLLA RD KEY...", 'tb': "INCOLLA TB KEY..." };
         input.placeholder = placeholders[srv];
         input.disabled = false;
-        input.style.opacity = "1";
+        if(box) box.classList.remove('is-p2p');
     }
 
     updateMobilePreview(); 
@@ -1841,7 +1960,13 @@ async function pasteTo(id) {
         const text = await navigator.clipboard.readText();
         input.value = text;
         updateLinkModalContent();
-        const btn = document.querySelector(`#${id}`).parentElement.querySelector('.m-paste-action');
+        
+        // Find button relative to input wrapper now
+        let btn = null;
+        const wrapper = input.closest('.m-if-inner') || input.parentElement;
+        if(wrapper) btn = wrapper.querySelector('.m-if-action .fa-paste')?.parentElement;
+        if(!btn) btn = wrapper.querySelector('.m-paste-action'); // fallback
+
         if(btn) {
             const originalHTML = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-check"></i>';
@@ -1858,6 +1983,7 @@ function loadMobileConfig() {
             const config = JSON.parse(atob(pathParts[1]));
             if(config.service) {
                 const srvMap = {'rd':0, 'tb':1}; 
+                // Updated selector for new structure
                 const railBtns = document.querySelectorAll('#page-setup .m-srv-btn');
                 if(railBtns.length > 0 && srvMap[config.service] !== undefined) {
                      setMService(config.service, railBtns[srvMap[config.service]], true);
