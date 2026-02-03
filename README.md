@@ -58,8 +58,15 @@
       <strong style="font-size: 1.1rem; color: #fff;">Engineered for Italian Precision</strong>
     </div>
     <span style="color: #8b949e; font-family: sans-serif; font-size: 0.95rem; line-height: 1.5;">
-      Leviathan ridefinisce lo standard dei metamotori torrent attraverso un'architettura <b>Italy-First</b>.
-      Integra validazione semantica, bypass automatico dei WAF e routing a bassa latenza.
+      ### 🇮🇹 Engineered for Italian Content Precision
+
+**Leviathan** è un metamotore torrent **Italy-First**, progettato per offrire  
+risultati **semanticamente validati**, **immediati** e **affidabili**.
+
+🔹 Validazione intelligente dei titoli  
+🔹 Gestione automatica WAF & challenge  
+🔹 Routing a bassa latenza  
+🔹 Aggregazione ibrida DHT + Provider  
     </span>
     <div style="margin-top: 10px;">
       <code style="background: rgba(0, 234, 255, 0.1); color: #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">Query_Morphing: ACTIVE</code>
