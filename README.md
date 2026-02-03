@@ -58,7 +58,7 @@
       <strong style="font-size: 1.1rem; color: #fff;">Engineered for Italian Precision</strong>
     </div>
     <span style="color: #8b949e; font-family: sans-serif; font-size: 0.95rem; line-height: 1.5;">
-      # 🇮🇹 Engineered for Italian Content Precision
+      #🇮🇹 Engineered for Italian Content Precision
 
 **Leviathan** è un metamotore torrent **Italy-First**, progettato per offrire  
 risultati **semanticamente validati**, **immediati** e **affidabili**.
