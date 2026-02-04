@@ -47,7 +47,6 @@ const QUALITY_ICONS = {
 };
 
 // Lista nera ESTESA per evitare falsi positivi nel riconoscimento gruppi
-// Include ogni possibile termine tecnico che potrebbe trovarsi alla fine del file
 const GROUP_BLACKLIST = new Set([
     // Estensioni
     "mkv", "mp4", "avi", "wmv", "iso", "flv", "mov", "ts", "m2ts",
@@ -77,12 +76,48 @@ function formatBytes(bytes) {
 
 function cleanFilename(filename) {
     if (!filename) return "";
+    let clean = "";
+    
     try {
         const info = titleParser.parse(filename);
-        return info.title || filename;
+        clean = info.title || filename;
     } catch (e) {
-        return filename.replace(/\./g, " ").trim();
+        clean = filename.replace(/\./g, " ").trim();
     }
+
+    // ============================================================
+    // FIX TITOLI DOPPI (Logica Aggressiva)
+    // ============================================================
+
+    // 1. Caso specifico: "Fratelli demolitori" (Priorità ITA)
+    // Se contiene sia il titolo ENG che ITA, forza quello ITA
+    if (/Fratelli demolitori/i.test(clean) && /The Wrecking Crew/i.test(clean)) {
+        return "Fratelli demolitori";
+    }
+
+    // 2. Taglio netto al separatore " - " (o variazioni come "-")
+    // Esempio: "Titolo A - Titolo B" diventa "Titolo A"
+    // Usa regex flessibile per catturare spazi variabili attorno al trattino
+    if (/\s+-\s+/.test(clean)) {
+        const parts = clean.split(/\s+-\s+/);
+        // Prendi la prima parte se ha senso (più di 2 lettere)
+        if (parts[0] && parts[0].trim().length > 2) {
+            clean = parts[0].trim();
+        }
+    }
+    
+    // 3. Controllo duplicati parola per parola (es. "Movie Movie")
+    const words = clean.split(/\s+/);
+    if (words.length >= 2 && words.length % 2 === 0) {
+        const mid = words.length / 2;
+        const p1 = words.slice(0, mid).join(" ");
+        const p2 = words.slice(mid).join(" ");
+        if (p1.toLowerCase() === p2.toLowerCase()) {
+            return p1;
+        }
+    }
+
+    return clean;
 }
 
 // Parsing Episodi Intelligente
@@ -129,7 +164,11 @@ function toStylized(text, type = 'std') {
     const maps = {
         'bold': {
             nums: {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵'},
-            chars: {'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭','a':'𝗮','b':'𝗯','c':'𝗰','d':'𝗱','e':'𝗲','f':'𝗳','g':'𝗴','h':'𝗵','i':'𝗶','j':'𝗷','k':'𝗸','l':'𝗹','m':'𝗺','n':'𝗻','o':'𝗼','p':'𝗽','q':'𝗾','r':'𝗿','s':'𝘀','t':'𝘁','u':'𝘂','v':'𝘃','w':'𝘄','x':'𝘅','y':'𝘆','z':'𝘇'}
+            // Mappa corretta: TUTTI i caratteri sono Mathematical Sans-Serif Bold
+            chars: {
+                'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭',
+                'a':'𝗮','b':'𝗯','c':'𝗰','d':'𝗱','e':'𝗲','f':'𝗳','g':'𝗴','h':'𝗵','i':'𝗶','j':'𝗷','k':'𝗸','l':'𝗹','m':'𝗺','n':'𝗻','o':'𝗼','p':'𝗽','q':'𝗾','r':'𝗿','s':'𝘀','t':'𝘁','u':'𝘂','v':'𝘃','w':'𝘄','x':'𝘅','y':'𝘆','z':'𝘇'
+            }
         },
         'small': {
             nums: {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9'},
@@ -153,43 +192,34 @@ function toStylized(text, type = 'std') {
 }
 
 // =========================================================================
-// 3. ESTRAZIONE DATI PRINCIPALE (REVISIONATA)
+// 3. ESTRAZIONE DATI PRINCIPALE
 // =========================================================================
 function extractStreamInfo(title, source) {
   const t = String(title);
   const info = titleParser.parse(t);
   
+  // PULIZIA PER REGEX
+  const cleanForRegex = t.toUpperCase().replace(/[\.\-_\[\]\(\)\s]+/g, ' '); 
+
   // ==========================================================
-  // LOGICA ESTRAZIONE RELEASE GROUP DEFINITIVA
+  // LOGICA ESTRAZIONE RELEASE GROUP
   // ==========================================================
   let releaseGroup = info.group || "";
 
-  // 1. Pulizia: Rimuovi estensione file (.mkv, .mp4, ecc.)
+  // 1. Pulizia: Rimuovi estensione file
   const cleanT = t.replace(/\.(mkv|mp4|avi|iso|wmv|ts|flv|mov)$/i, "").trim();
 
   if (!releaseGroup) {
-      // Strategia 1: Cerca il pattern "- GRUPPO" alla fine
       const endHyphen = cleanT.match(/[-_]\s?([a-zA-Z0-9@\.]+)$/);
-      
-      // Strategia 2: Cerca il pattern "[GRUPPO]" alla fine
       const endBracket = cleanT.match(/\[([a-zA-Z0-9_\-\.\s]+)\]$/);
-      
-      // Strategia 3: Cerca il pattern "[GRUPPO]" all'inizio
       const startBracket = t.match(/^\[([a-zA-Z0-9_\-\.\s]+)\]/);
 
-      if (endHyphen) {
-          releaseGroup = endHyphen[1];
-      } else if (endBracket) {
-          releaseGroup = endBracket[1];
-      } else if (startBracket) {
-          releaseGroup = startBracket[1];
-      } else {
-          // Strategia 4: LOGICA "LAST TOKEN" (Per MirCrew e simili senza trattino)
-          // Divide la stringa per punti o spazi e prende l'ultimo pezzo
+      if (endHyphen) releaseGroup = endHyphen[1];
+      else if (endBracket) releaseGroup = endBracket[1];
+      else if (startBracket) releaseGroup = startBracket[1];
+      else {
           const tokens = cleanT.split(/[\s\.]+/);
-          const candidate = tokens[tokens.length - 1]; // Prendi l'ultima parola
-
-          // Se il candidato esiste e NON è nella blacklist, è probabilmente il gruppo
+          const candidate = tokens[tokens.length - 1]; 
           if (candidate && candidate.length > 2 && !GROUP_BLACKLIST.has(candidate.toLowerCase()) && !/^\d+$/.test(candidate)) {
               releaseGroup = candidate;
           }
@@ -198,15 +228,11 @@ function extractStreamInfo(title, source) {
 
   // VALIDAZIONE FINALE GRUPPO
   if (releaseGroup) {
-      // Pulisci caratteri residui
       releaseGroup = releaseGroup.replace(/^(-|_|\[|\]|\s|\.)+|(-|_|\[|\]|\s|\.)+$/g, "").trim();
-      
-      // Controllo finale Blacklist (nel caso sia passato da regex)
       if (GROUP_BLACKLIST.has(releaseGroup.toLowerCase()) || releaseGroup.length > 25 || releaseGroup.length < 2) {
           releaseGroup = "";
       }
   }
-  // ==========================================================
 
   // A. Qualità
   let q = "SD";
@@ -234,8 +260,8 @@ function extractStreamInfo(title, source) {
   const cleanTags = [];
 
   let isRemux = info.remux;
-  let isWeb = info.source ? /web|hdtv/i.test(info.source) : false;
-  let isBluRay = info.source ? /bluray|bd/i.test(info.source) : false;
+  let isWeb = (info.source && /web|hdtv/i.test(info.source)) || /WEB/i.test(cleanForRegex);
+  let isBluRay = (info.source && /bluray|bd/i.test(info.source)) || /BLURAY|BD/i.test(cleanForRegex);
   let sourceFound = false;
 
   if (isRemux) {
@@ -303,7 +329,7 @@ function extractStreamInfo(title, source) {
       cleanTags.push("HDR");
   }
 
-  // C. Audio & Lingue
+  // C. Lingue
   let detectedLangs = [];
   
   LANG_FLAGS.forEach(l => {
@@ -328,47 +354,60 @@ function extractStreamInfo(title, source) {
       else if (REGEX_EXTRA.contextIt.test(t) || /corsaro/i.test(source)) lang = "🇮🇹 ITA";
   }
 
-  // D. Audio Details
-  let audioTag = "🔈 Stereo";
+  // ==========================================================
+  // D. AUDIO EXTRACTION (Aggiornata e Corretta)
+  // ==========================================================
+  let audioTag = "";
   let audioChannels = "";
 
-  if (info.audio) {
-      const a = info.audio.toUpperCase();
-      const rawUpper = t.toUpperCase(); 
+  const channelMatch = cleanForRegex.match(/\b([1-7]\s[0-1])\b/) || cleanForRegex.match(/\b([1-7]\.[0-1])\b/);
+  if (channelMatch) audioChannels = channelMatch[1].replace(' ', '.');
+  else if (info.channels) audioChannels = info.channels;
+  
+  if(audioChannels.includes("7.1")) audioChannels = "7.1";
+  else if(audioChannels.includes("5.1")) audioChannels = "5.1";
+  else if(audioChannels.includes("2.0")) audioChannels = "2.0";
+  else if(audioChannels.includes("1.0")) audioChannels = "1.0";
 
-      if (a.includes("ATMOS")) {
-          if (a.includes("TRUEHD") || rawUpper.includes("TRUEHD")) audioTag = "Atmos TrueHD";
-          else if (a.includes("DDP") || a.includes("EAC3") || rawUpper.includes("JOC")) audioTag = "Atmos DDP";
-          else audioTag = "Atmos";
-      }
-      else if (a.includes("DTS-X") || a.includes("DTS:X")) audioTag = "DTS:X";
-      else if (a.includes("TRUEHD")) audioTag = "TrueHD";
-      else if (a.includes("DTS-HD") || a.includes("MA")) audioTag = "DTS-HD";
-      else if (a.includes("DDP") || a.includes("EAC3")) audioTag = "Dolby+";
-      else if (a.includes("AC3") || a.includes("DD")) audioTag = "Dolby";
-      else if (a.includes("AAC")) audioTag = "AAC";
-      else if (a.includes("FLAC")) audioTag = "FLAC";
-      else if (a.includes("OPUS")) audioTag = "OPUS";
-      else audioTag = `${a}`;
+  let foundCodec = "";
+  if (/\b(ATMOS)\b/.test(cleanForRegex)) foundCodec = "ATMOS";
+  else if (/\b(DTS\s?X|DTS\:X)\b/.test(cleanForRegex)) foundCodec = "DTS:X";
+  else if (/\b(DTS\s?HD\s?MA|DTS\s?MA)\b/.test(cleanForRegex)) foundCodec = "DTS-HD MA";
+  else if (/\b(DTS\s?HD\s?HRA)\b/.test(cleanForRegex)) foundCodec = "DTS-HD HRA";
+  else if (/\b(DTS\s?HD)\b/.test(cleanForRegex)) foundCodec = "DTS-HD";
+  else if (/\b(TRUEHD|THD)\b/.test(cleanForRegex)) foundCodec = "TrueHD";
+  else if (/\b(DTS)\b/.test(cleanForRegex)) foundCodec = "DTS";
+  else if (/\b(DDP|EAC3|E\s?AC3|DD\+|DDPLUS|DIGITAL\s?PLUS)\b/.test(cleanForRegex)) foundCodec = "DDP";
+  else if (/\b(AC3|AC\s?3|DD|DOLBY\s?DIGITAL)\b/.test(cleanForRegex)) foundCodec = "AC3";
+  else if (/\b(AAC)\b/.test(cleanForRegex)) foundCodec = "AAC";
+  else if (/\b(OPUS)\b/.test(cleanForRegex)) foundCodec = "OPUS";
+  else if (/\b(FLAC)\b/.test(cleanForRegex)) foundCodec = "FLAC";
+  else if (/\b(PCM|LPCM)\b/.test(cleanForRegex)) foundCodec = "LPCM";
+  else if (/\b(MP3)\b/.test(cleanForRegex)) foundCodec = "MP3";
+
+  if (!foundCodec) {
+      if (isWeb) foundCodec = "AAC";
+      else if (isBluRay) foundCodec = "AC3";
   }
 
-  if (info.channels) {
-      const ch = info.channels;
-      if (ch.includes("7.1")) audioChannels = "🔊 7.1";
-      else if (ch.includes("5.1")) audioChannels = "🔊 5.1";
-      else if (ch.includes("2.0")) audioChannels = "🔉 2.0";
-      else if (ch.includes("1.0")) audioChannels = "🔈 1.0";
-      else audioChannels = ch;
-
-      if ((ch.includes("5.1") || ch.includes("7.1")) && audioTag.includes("Stereo")) {
-          audioTag = "Surround";
-      }
+  if (foundCodec === "ATMOS") {
+      if (/\b(TRUEHD)\b/.test(cleanForRegex)) audioTag = "Atmos TrueHD";
+      else if (/\b(DDP|EAC3)\b/.test(cleanForRegex)) audioTag = "Atmos DDP";
+      else audioTag = "Dolby Atmos";
+  } 
+  else if (foundCodec === "DDP") audioTag = "Dolby DDP";
+  else if (foundCodec === "AC3") audioTag = "Dolby Digital";
+  else if (foundCodec) audioTag = foundCodec;
+  else {
+      if (audioChannels.includes("5.1") || audioChannels.includes("7.1")) audioTag = "Surround";
+      else if (audioChannels.includes("2.0")) audioTag = "Stereo";
+      else audioTag = "AAC"; 
   }
   
   return { 
       quality: q, qDetails, qIcon, videoTags, cleanTags, lang, 
-      codec: info.codec || "", audioTag, audioChannels, rawInfo: info,
-      releaseGroup 
+      codec: foundCodec || info.codec || "", audioTag, audioChannels, rawInfo: info,
+      releaseGroup, cleanName: cleanFilename(t), epTag: getEpisodeTag(t)
   };
 }
 
@@ -395,7 +434,7 @@ function styleLeviathan(p) {
     if (techLine) lines.push(`${techIcon} ${techLine}`);
     
     let audioPart = [cleanAudio, p.audioChannels].filter(Boolean).join(" ");
-    lines.push(`🗣️ ${p.lang}  |  🔊 ${audioPart}`);
+    lines.push(`🗣️ ${p.lang}  |  🫧 ${audioPart}`);
 
     let fileInfo = `🧲 ${p.sizeString}`;
     if (p.seedersStr) fileInfo += `  |  ${p.seedersStr}`;
@@ -622,3 +661,4 @@ function formatStreamSelector(fileTitle, source, size, seeders, serviceTag = "RD
 }
 
 module.exports = { formatStreamSelector, cleanFilename, formatBytes, extractStreamInfo, getEpisodeTag };
+
