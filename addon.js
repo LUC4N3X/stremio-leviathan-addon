@@ -1,3 +1,5 @@
+
+
 require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
@@ -33,7 +35,7 @@ const { getTrailerStreams } = require("./trailerProvider");
 const { searchVix } = require("./vix/vix_handler");
 const { searchGuardaHD } = require("./guardahd/ghd_handler"); 
 const { searchGuardaserie } = require("./guardaserie/gs_handler"); 
-const { searchAnimeWorld } = require("./animeworld/aw_handler"); // <--- NUOVO IMPORT
+const { searchAnimeWorld } = require("./animeworld/aw_handler"); 
 
 // --- 1. CONFIGURAZIONE LOGGER (Winston) ---
 const logger = winston.createLogger({
@@ -130,9 +132,7 @@ const REGEX_TRUSTED_GROUPS = /\b(iDN_CreW|CORSARO|MUX|WMS|TRIDIM|SPEEDVIDEO|EAGL
 // 6. FALSE POSITIVE CHECK
 const REGEX_FALSE_IT = /\b(10BIT|BIT|WIT|HIT|FIT|KIT|SIT|LIT|PIT)\b/i;
 
-// Regex specifica per escludere i soli sottotitoli (False Positives)
 const REGEX_SUB_ONLY = /\b(SUB|SUBS|SUBBED|SOTTOTITOLI|VOST|VOSTIT)\s*[:.\-_]?\s*(ITA|IT|ITALIAN)\b/i;
-// Regex per confermare che, anche se c'è scritto SUB, c'è pure l'audio
 const REGEX_AUDIO_CONFIRM = /\b(AUDIO|AC3|AAC|DTS|MD|LD|DDP|MP3|LINGUA)[\s.\-_]+(ITA|IT)\b/i;
 
 // =========================================================================
@@ -232,9 +232,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-// --- HELPER FUNZIONALI POTENZIATI ---
+// --- HELPER FUNZIONALI ---
 
-// Nuova parseSize robusta (Gestisce virgole e formati sporchi)
 function parseSize(sizeText) {
   if (!sizeText) return 0;
   if (typeof sizeText === 'number') return sizeText;
@@ -254,26 +253,21 @@ function parseSize(sizeText) {
     scale = 1;
   }
   
-  // Rimuove virgole e caratteri non numerici (lascia il punto)
   const cleanStr = str.replace(/,/g, '.').replace(/[^\d.]/g, '');
   const num = parseFloat(cleanStr);
   return isNaN(num) ? 0 : Math.floor(num * scale);
 }
 
-// Estrae seeders da stringhe formattate con icone (stile Leviathan)
 function extractSeeders(title) {
-  // Cerca sia l'icona singola 👤 che quella di gruppo 👥
   const seedersMatch = title.match(/(?:👤|👥)\s*(\d+)/);
   return seedersMatch && parseInt(seedersMatch[1]) || 0;
 }
 
-// Estrae dimensione da stringhe formattate con icone
 function extractSize(title) {
   const sizeMatch = title.match(/(?:💾|🧲|📦)\s*([\d.,]+\s*\w+)/i);
   return sizeMatch && parseSize(sizeMatch[1]) || 0;
 }
 
-// Estrae provider da tag nel titolo (es. [RD])
 function extractProvider(title) {
   const match = title.match(/\[([A-Z]{2,3})\]/);
   return match?.[1] || "P2P";
@@ -289,7 +283,6 @@ function deduplicateResults(results) {
     item.hash = finalHash;
     item.infoHash = finalHash;
     
-    // Assicuriamoci che la dimensione sia parsata correttamente
     item._size = parseSize(item.sizeBytes || item.size);
 
     const existing = hashMap.get(finalHash);
@@ -364,6 +357,90 @@ async function withTimeout(promise, ms, operation = 'Operation') {
       throw error;
   }
 }
+
+// --- HELPER PER APPLICARE LE SKIN AI RISULTATI WEB (ICONE PERSONALIZZATE + FIX TITOLI + LINGUA DINAMICA) ---
+function applyWebFormatter(streamList, sourceName, meta, config) {
+    if (!streamList || !Array.isArray(streamList)) return [];
+    
+    return streamList.map(stream => {
+        // 1. Determina la qualità
+        let quality = "HD";
+        const upperName = (stream.name || "").toUpperCase();
+        
+        if (upperName.includes("4K") || upperName.includes("2160P")) quality = "4K";
+        else if (upperName.includes("1080P") || upperName.includes("FHD")) quality = "1080p";
+        else if (upperName.includes("720P")) quality = "720p";
+        else if (upperName.includes("SD") || upperName.includes("480P")) quality = "SD";
+
+        // 2. RECUPERO TITOLO REALE (FIX "ONE PIECE")
+        // Recuperiamo il titolo per due motivi: fixare il nome e controllare la lingua
+        let fileTitle = meta.title; 
+        let rawTitleToCheck = (stream.title || "").toUpperCase(); // Salviamo il titolo grezzo per l'analisi lingua
+
+        if (stream.title) {
+            let rawLines = stream.title.split('\n');
+            let rawTitle = rawLines[0]; // Prende la prima riga
+            let cleanRaw = rawTitle.replace(/[🎬⚡🌪️⛩️🍿🦁🌐]/g, '').trim();
+            if (cleanRaw.length > 2) {
+                fileTitle = cleanRaw;
+            }
+        }
+
+        // 3. LOGICA LINGUA & ICONA PROVIDER
+        let langTag = "ITA"; 
+        let providerIcon = "🌐"; 
+
+        const sLower = sourceName.toLowerCase();
+        
+        if (sLower.includes("animeworld")) {
+            providerIcon = "⛩️"; 
+            
+            // 🔥 LOGICA DINAMICA JPN vs ITA 🔥
+            // Se nel titolo c'è "JPN", "SUB" o "VOST", usiamo la bandiera del Giappone.
+            // Altrimenti (es. se c'è "ITA" o nulla), usiamo la bandiera dell'Italia.
+            if (rawTitleToCheck.includes("JPN") || rawTitleToCheck.includes("SUB") || rawTitleToCheck.includes("VOST")) {
+                langTag = "JPN"; // Bandiera 🇯🇵
+            } else {
+                langTag = "ITA"; // Bandiera 🇮🇹
+            }
+
+        } else if (sLower.includes("streamingcommunity")) {
+            providerIcon = "🌪️"; 
+        } else if (sLower.includes("guardaserie")) {
+            providerIcon = "🍿"; 
+        } else if (sLower.includes("guardahd")) {
+            providerIcon = "🦁"; 
+        }
+
+        // 4. Creazione "Nome File" fittizio con la lingua corretta
+        const fakeFilename = `${fileTitle} ${quality} ${langTag} WEB-DL AAC`;
+
+        // 5. Chiamata al formatter grafico
+        const formatted = formatStreamSelector(
+            fakeFilename, sourceName, 0, null, "WEB", config, null, false, false
+        );
+
+        // --- 6. SOSTITUZIONE ICONE E PULIZIA ---
+        let cleanTitle = formatted.title;
+        cleanTitle = cleanTitle.replace(/🦑/g, "⛵");
+        cleanTitle = cleanTitle.replace(/🦈/g, providerIcon);
+        cleanTitle = cleanTitle.replace(/🧲\s*\d+(\.\d+)?\s*(GB|MB)/gi, "☁️ Web Stream");
+
+        let cleanName = formatted.name;
+        cleanName = cleanName.replace(/🦑/g, "⛵").replace(/🦈/g, providerIcon);
+
+        return {
+            name: cleanName,
+            title: cleanTitle,
+            url: stream.url,
+            behaviorHints: stream.behaviorHints || { 
+                notWebReady: false, 
+                bingieGroup: `Leviathan|${quality}|Web|${sourceName}` 
+            }
+        };
+    });
+}
+
 
 async function fetchTmdbMeta(tmdbId, type, userApiKey) {
     if (!tmdbId) return null;
@@ -528,7 +605,6 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta) {
             return (0.7 + variance) * 1024 * 1024 * 1024;
         };
 
-        // ANALISI DETTAGLI PER TORBOX (e fallback)
         const details = parseTitleDetails(item.title);
 
         if (service === 'tb') {
@@ -537,7 +613,6 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta) {
                 realSize = ensureSize(realSize, item.title, isSeries, isPack);
                 if (realSize === 0) realSize = ensureSize(0, item.title, isSeries, false);
 
-                // FIX: Gestione corretta di fileIdx
                 const fIdx = (item.fileIdx !== undefined && !isNaN(item.fileIdx)) ? item.fileIdx : -1;
                 const proxyUrl = `${reqHost}/${config.rawConf}/play_tb/${item.hash}?s=${item.season || 0}&e=${item.episode || 0}&f=${fIdx}`;
 
@@ -583,7 +658,6 @@ async function resolveDebridLink(config, item, showFake, reqHost, meta) {
         finalSize = ensureSize(finalSize, streamData.filename || item.title, isSeries, isPack);
         if (finalSize === 0) finalSize = ensureSize(0, item.title, isSeries, false);
 
-        // USIAMO IL NUOVO PARSER SUL FILE EFFETTIVO (SE DISPONIBILE) O SUL TITOLO
         const fileDetails = parseTitleDetails(streamData.filename || item.title);
 
         if (isAIOActive) {
@@ -673,7 +747,6 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
     }
 
     if (isAIOActive) {
-        // PARSER INTEGRATION
         const details = parseTitleDetails(item.title);
         let quality = details.quality || "SD";
         
@@ -701,7 +774,6 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
             techInfo: `🎞️ ${quality} ${details.tags}`
         });
 
-        // FIX: Sanitizzazione di fileIdx per URL
         const fileIdxParam = (item.fileIdx !== undefined && !isNaN(item.fileIdx)) ? item.fileIdx : -1;
         const lazyUrl = `${reqHost}/${userConfStr}/play_lazy/${service}/${item.hash}/${fileIdxParam}?s=${meta.season || 0}&e=${meta.episode || 0}`;
 
@@ -720,7 +792,6 @@ function generateLazyStream(item, config, meta, reqHost, userConfStr, isLazy = f
         const { name, title, bingeGroup } = formatStreamSelector(
             item.title, item.source, realSize, item.seeders, serviceTag, config, item.hash, isLazy, item._isPack 
         );
-        // FIX: Sanitizzazione di fileIdx per URL
         const fileIdxParam = (item.fileIdx !== undefined && !isNaN(item.fileIdx)) ? item.fileIdx : -1;
         const lazyUrl = `${reqHost}/${userConfStr}/play_lazy/${service}/${item.hash}/${fileIdxParam}?s=${meta.season || 0}&e=${meta.episode || 0}`;
         return {
@@ -876,14 +947,12 @@ async function fetchExternalResults(type, finalId) {
             fetchExternalAddonsFlat(type, finalId).then(items => {
                 return items.map(i => {
                     const title = i.title || i.filename;
-                    // Recupero dati mancanti usando il nuovo parser
                     let finalSeeders = i.seeders;
                     if (!finalSeeders && title) finalSeeders = extractSeeders(title);
                     
                     let finalSize = i.mainFileSize;
                     if ((!finalSize || finalSize === 0) && title) finalSize = extractSize(title);
                     
-                    // Fallback per visualizzazione stringa
                     let displaySize = i.size;
                     if (!displaySize && finalSize > 0) displaySize = formatBytes(finalSize);
 
@@ -922,10 +991,8 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   const hasDebridKey = (config.key && config.key.length > 0) || (config.rd && config.rd.length > 0);
   const isWebEnabled = config.filters && (config.filters.enableVix || config.filters.enableGhd || config.filters.enableGs || config.filters.enableAnimeWorld);
   
-  // --- 🆕 P2P CHECK: Leggiamo il flag dalla config ---
   const isP2PEnabled = config.filters && config.filters.enableP2P === true;
 
-  // Se non c'è Debrid, NON ci sono Web Scraper E il P2P è spento, allora mostra errore.
   if (!hasDebridKey && !isWebEnabled && !isP2PEnabled) {
       return { streams: [{ name: "⚠️ CONFIG", title: "Inserisci API Key, Attiva P2P o Attiva WebStream" }] };
   }
@@ -968,26 +1035,18 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   const tmdbIdLookup = meta.tmdb_id || (await imdbToTmdb(meta.imdb_id, userTmdbKey))?.tmdbId;
   const dbOnlyMode = config.filters?.dbOnly === true; 
 
-  
-  // LOGICA LINGUA UNIFICATA (ITA / ENG / ALL)
   const langMode = config.filters?.language || (config.filters?.allowEng ? "all" : "ita");
 
-  // --- FILTRO AGGRESSIVO (LOGICA A 3 VIE: ITA / ALL / ENG) ---
   const aggressiveFilter = (item) => {
       if (!item?.magnet) return false;
-      
       const source = (item.source || "").toLowerCase();
-      // Filtro globale per fonti indesiderate
       if (source.includes("comet") || source.includes("stremthru")) return false;
 
       const t = item.title; 
       const tLower = t.toLowerCase();
       
-      
-      // CASO 1: SOLO ITALIANO (Comportamento Classico)
       if (langMode === "ita") {
            const isTrustedGroup = REGEX_TRUSTED_GROUPS.test(t) || /\bcorsaro\b/i.test(source);
-           
            if (!isTrustedGroup) {
                const hasStrongIta = REGEX_STRONG_ITA.test(t) || REGEX_MULTI_ITA.test(t);
                const hasContextIt = REGEX_CONTEXT_IT.test(t);
@@ -998,7 +1057,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
 
                if (!hasStrongIta && !hasContextIt && !hasIsolatedIt) return false;
 
-               // Controllo Anti-Falsi Positivi (Sub Only)
                const looksLikeSubOnly = REGEX_SUB_ONLY.test(t);
                const hasConfirmedAudio = REGEX_AUDIO_CONFIRM.test(t);
                if (looksLikeSubOnly && !hasConfirmedAudio) {
@@ -1009,20 +1067,14 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
                }
            }
       }
-      
-      // CASO 2: SOLO INGLESE (Escludi attivamente l'Italiano)
       else if (langMode === "eng") {
            const hasStrongIta = REGEX_STRONG_ITA.test(t) || REGEX_MULTI_ITA.test(t);
            const hasContextIt = REGEX_CONTEXT_IT.test(t);
-           const isTrustedItaGroup = REGEX_TRUSTED_GROUPS.test(t); // Es: Mux, Corsaro
+           const isTrustedItaGroup = REGEX_TRUSTED_GROUPS.test(t);
 
-           // Se è palesemente italiano, via!
            if (hasStrongIta || hasContextIt || isTrustedItaGroup) return false;
       }
       
-      // CASO 3: ITALIANO + INGLESE ("all") - Nessun filtro lingua
-
-      // --- FILTRO ANNO ---
       const metaYear = parseInt(meta.year);
       if (metaYear === 2025 && /frankenstein/i.test(meta.title)) {
            if (!item.title.includes("2025")) return false;
@@ -1036,7 +1088,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
            }
       }
 
-      // --- FILTRO SERIE TV ---
       if (meta.isSeries) {
           const s = meta.season;
           const e = meta.episode;
@@ -1068,12 +1119,10 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           }
           return false;
       } else {
-          // PROTEZIONE FILM: Se è un film, scarta risultati che sembrano episodi/stagioni
           if (/\b(?:S\d{2}|SEASON|STAGIONE)\b/i.test(t)) return false;
           if (/\b\d{1,2}x\d{1,2}\b/.test(t)) return false;
       }
 
-      // --- FILTRO NOME (MATCHING) ---
       const cleanFile = tLower.replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
       const cleanMeta = meta.title.toLowerCase().replace(/[\.\_\-\(\)\[\]]/g, " ").replace(/\s{2,}/g, " ").trim();
       const metaTitleShort = meta.title.split(/ - |: /)[0].toLowerCase().trim();
@@ -1101,7 +1150,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       return false;
   };
 
-  // --- FONTI VELOCI ---
   const remotePromise = withTimeout(
       queryRemoteIndexer(tmdbIdLookup, type, meta.season, meta.episode, config),
       CONFIG.TIMEOUTS.REMOTE_INDEXER,
@@ -1140,7 +1188,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           if (tmdbIdLookup) dynamicTitles = await getTmdbAltTitles(tmdbIdLookup, type, userTmdbKey);
       } catch (e) {}
       
-      // Gli scraper devono cercare in inglese se la modalità è 'all' o 'eng'
       const allowEngScraper = (langMode === "all" || langMode === "eng");
       const queries = generateSmartQueries(meta, dynamicTitles, allowEngScraper);
       
@@ -1226,74 +1273,51 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       rankedList = filterByQualityLimit(rankedList, config.filters.maxPerQuality);
   }
 
-  
-  // LOGICA TORBOX: FILTRO TOTALE (SOLO FILE PRONTI) + ID GRABBER
+  // LOGICA TORBOX
   if (config.service === 'tb' && hasDebridKey) {
       const apiKey = config.key || config.rd; 
-      
-      // Verifichiamo i primi 30 risultati
       const checkLimit = 30; 
-      
-      // Candidati
       const candidates = rankedList.slice(0, checkLimit);
       const remainingItems = rankedList.slice(checkLimit);
 
       if (candidates.length > 0) {
           logger.info(`📦 [TB CHECK] Scansiono ${candidates.length} torrent alla ricerca di file video reali...`);
           
-          // Chiamata sincrona a TorBox 
           const cacheResults = await TbCache.checkCacheSync(candidates, apiKey, dbHelper, checkLimit);
-          
-          // FILTRO DISTRUTTIVO:
           const verifiedList = [];
 
           for (const item of candidates) {
               const hash = item.hash.toLowerCase();
               const result = cacheResults[hash];
-
-              // CRITERIO DI AMMISSIONE:
               if (result && result.cached === true) {
                   item._tbCached = true;
-                  
-                  // Aggiorniamo la dimensione
                   if (result.file_size) {
                       item._size = result.file_size;
                   }
-
-                  //  ASSEGNAZIONE FONDAMENTALE DELL'ID
-                  // Questo impedisce l'errore "Idx: NaN" al playback
                   if (result.file_id !== undefined && result.file_id !== null) {
                       item.fileIdx = result.file_id;
                   }
-                  
                   verifiedList.push(item);
               }
           }
 
-          logger.info(`📦 [TB CLEANUP] Iniziali: ${candidates.length} -> Rimasti: ${verifiedList.length} (Eliminati ${candidates.length - verifiedList.length} ghost/vuoti)`);
-          
-          // SOVRASCRIVIAMO LA LISTA PRINCIPALE
+          logger.info(`📦 [TB CLEANUP] Iniziali: ${candidates.length} -> Rimasti: ${verifiedList.length}`);
           rankedList = verifiedList;
-          
-          // I rimanenti (oltre il 30esimo) vengono ignorati o salvati in background
           if (remainingItems.length > 0) {
               TbCache.enrichCacheBackground(remainingItems, apiKey, dbHelper);
           }
-
       } else {
           rankedList = [];
       }
   }
-  // =================================================================
 
   let finalRanked = rankedList.slice(0, CONFIG.MAX_RESULTS);
   const ranked = finalRanked;
 
   let debridStreams = [];
   
-  // CASO 1: UTENTE CON DEBRID 
+  // CASO 1: DEBRID
   if (ranked.length > 0 && hasDebridKey) {
-      // MODIFICA: TOP_LIMIT = 0 per TUTTO (Film e Serie). Tutto Lazy.
       let TOP_LIMIT = 0; 
       
       const topItems = ranked.slice(0, TOP_LIMIT);
@@ -1314,11 +1338,9 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       debridStreams = [...resolvedInstant, ...lazyStreams];
   } 
   
-  // 🔥🔥🔥 CASO 2: UTENTE P2P (NUOVA LOGICA UNIFICATA CON FORMATTER) 🔥🔥🔥
+  // CASO 2: P2P
   else if (ranked.length > 0 && isP2PEnabled) {
       logger.info(`⚡ [P2P MODE] Generating direct streams for ${meta.title}`);
-      
-      // Passiamo anche 'config' per far funzionare il formatter condiviso
       debridStreams = ranked.map(item => P2P.formatP2PStream(item, config));
   }
 
@@ -1342,16 +1364,13 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
            });
        }
 
-       // --- ANIME WORLD INTEGRATION ---
        let awPromise = Promise.resolve([]);
        if (config.filters && config.filters.enableAnimeWorld) {
-           // MODIFICA QUI: Aggiunto 'id' come primo argomento per Kitsu check
            awPromise = searchAnimeWorld(id, meta, config).catch(err => {
                logger.warn(`AnimeWorld Error: ${err.message}`);
                return [];
            });
        }
-       // ------------------------------
 
        [rawVix, formattedGhd, formattedGs, formattedAw] = await Promise.all([vixPromise, ghdPromise, gsPromise, awPromise]);
        
@@ -1404,7 +1423,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
            if (typeof formattedGhd !== 'undefined') applyAioStyle(formattedGhd, "GuardaHD");
            if (typeof formattedGs !== 'undefined') applyAioStyle(formattedGs, "GuardaSerie");
            
-           // Formattazione speciale per AnimeWorld in stile AIO
            if (typeof formattedAw !== 'undefined' && formattedAw.length > 0) {
                formattedAw.forEach(stream => {
                    stream.name = aioFormatter.formatStreamName({ service: "web", cached: true, quality: "HD" });
@@ -1419,8 +1437,21 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
                    stream.behaviorHints.bingieGroup = `Leviathan|HD|Web|AnimeWorld`;
                });
            }
+           formattedVix = rawVix; 
+       } else {
+           // 🔥 APPLICAZIONE SKIN SE AIO È DISATTIVO
+           if (rawVix && rawVix.length > 0) 
+               formattedVix = applyWebFormatter(rawVix, "StreamingCommunity", meta, config);
+           
+           if (formattedGhd && formattedGhd.length > 0) 
+               formattedGhd = applyWebFormatter(formattedGhd, "GuardaHD", meta, config);
+           
+           if (formattedGs && formattedGs.length > 0) 
+               formattedGs = applyWebFormatter(formattedGs, "GuardaSerie", meta, config);
+           
+           if (formattedAw && formattedAw.length > 0) 
+               formattedAw = applyWebFormatter(formattedAw, "AnimeWorld", meta, config);
        }
-       formattedVix = rawVix; 
   }
 
   let finalStreams = [];
@@ -1672,11 +1703,11 @@ app.get("/:conf/manifest.json", (req, res) => {
 
         // --- 3. ASSEMBLAGGIO FINALE ---
         if (hasRDKey) {
-            manifest.name = `${appName}${flag} 🐋️ RD`;
+            manifest.name = `${appName}${flag} 🔱 RD`;
             manifest.id += ".rd"; 
         } 
         else if (hasTBKey) {
-            manifest.name = `${appName}${flag} ⚓ TB`;
+            manifest.name = `${appName}${flag} 🔱 TB`;
             manifest.id += ".tb";
         } 
         else if (hasADKey) {
@@ -1690,7 +1721,7 @@ app.get("/:conf/manifest.json", (req, res) => {
             manifest.description += " | ⚠️ P2P Mode (IP Visible)";
         }
         else {
-            manifest.name = `${appName}${flag} 🌐 Web`;
+            manifest.name = `${appName}${flag} ⛵ Web`;
             manifest.id += ".web";
         }
 
