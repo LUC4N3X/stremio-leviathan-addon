@@ -1293,10 +1293,9 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
   
   // CASO 1: UTENTE CON DEBRID 
   if (ranked.length > 0 && hasDebridKey) {
+      // MODIFICA: TOP_LIMIT = 0 per TUTTO (Film e Serie). Tutto Lazy.
       let TOP_LIMIT = 0; 
-      if (type === 'series') {
-          TOP_LIMIT = 3;
-      }
+      
       const topItems = ranked.slice(0, TOP_LIMIT);
       const lazyItems = ranked.slice(TOP_LIMIT);
 
