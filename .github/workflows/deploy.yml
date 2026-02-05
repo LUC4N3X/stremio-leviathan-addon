@@ -1,57 +1,61 @@
-name: Deploy to Beamup
+name: Deploy to Beamup (Final Git Method)
 
 on:
   push:
     branches:
       - main
+      - master
   workflow_dispatch:
-  release:
-    types: [published]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Setup SSH
+      - name: 🔑 Setup SSH
         uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Generate Beamup Hash
-        id: hash
-        run: |
-          # OFFICIAL LOGIC: echo (with newline) -> lowercase -> shasum -> cut 12
-          HASH=$(echo "${{ secrets.USERNAME_GITHUB }}" | awk '{print tolower($0)}' | shasum -a 256 | cut -c1-12)
-          echo "USER_HASH=$HASH" >> $GITHUB_ENV
-          echo "Generated Hash: $HASH"
-
-      - name: Add Beamup Remote
+      - name: 🕵️ Debug SSH Connection (Il momento della verità)
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan ${{ secrets.BEAMUP_HOST }} >> ~/.ssh/known_hosts
-          # URL format: dokku@HOST:HASH/PROJECT
-          git remote add beamup dokku@${{ secrets.BEAMUP_HOST }}:${{ env.USER_HASH }}/${{ secrets.PROJECT_NAME }}
-
-      - name: Deploy to Beamup
-        run: |
-          # Create .env file for Beamup to use during build/start
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
-          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-          echo "DEBUG_MODE=${{ secrets.DEBUG_MODE }}" >> .env
-          echo "ENRICHMENT_API_KEY=${{ secrets.ENRICHMENT_API_KEY }}" >> .env
-          echo "ENRICHMENT_PORT=${{ secrets.ENRICHMENT_PORT }}" >> .env
-          echo "ENRICHMENT_SERVER_URL=${{ secrets.ENRICHMENT_SERVER_URL }}" >> .env
-          echo "ENRICHMENT_SERVER_URL_2=${{ secrets.ENRICHMENT_SERVER_URL_2 }}" >> .env
-          echo "SEEDER_UPDATE_URL=${{ secrets.SEEDER_UPDATE_URL }}" >> .env
-          echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" >> .env
+          # Pulisce l'indirizzo host
+          CLEAN_HOST="git.baby-beamup.club"
+          ssh-keyscan -H "$CLEAN_HOST" >> ~/.ssh/known_hosts
           
-          # Force push to beamup master/main
+          echo "Test connessione verso $CLEAN_HOST..."
+          # Proviamo a connetterci. ssh -T non esegue comandi, controlla solo l'accesso.
+          # Se esce con "Permission denied", lo script si fermerà qui e sapremo che è la chiave.
+          ssh -T -o StrictHostKeyChecking=no git@$CLEAN_HOST || true
+
+      - name: 🚀 Deploy via Git Push
+        run: |
+          # 1. Configurazione Variabili .env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" > .env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "INDEXER_URL=${{ secrets.INDEXER_URL }}" >> .env
+          echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" >> .env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+
+          # 2. Configurazione Git User
+          git config --global user.email "deploy@actions.github.com"
+          git config --global user.name "Beamup Deploy"
+
+          # 3. Commit del .env
+          git add -f .env
+          git commit -m "Deploy: Configurazione inclusa" || echo "Nessuna modifica da committare"
+
+          # 4. Setup Remote e Push
+          # Usiamo l'indirizzo standard per inizializzare il progetto
+          git remote add beamup ssh://git@git.baby-beamup.club/${{ secrets.PROJECT_NAME }}
+          
+          echo "Eseguo il Push..."
           git push beamup HEAD:master --force
