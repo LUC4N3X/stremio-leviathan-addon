@@ -1746,8 +1746,8 @@ app.get("/:conf/manifest.json", (req, res) => {
             flag = " 🇮🇹🇬🇧";      // Misto (Doppia bandiera)
         }
 
-        // --- 2. NOME "GRASSETTO E SPAZIATO" (UNICODE) ---
-        const appName = "𝗟 𝗘 𝗩 𝗜 𝗔 𝗧 𝗛 𝗔 𝗡";
+        // --- 2. NOME "SPAZIATO" (COMPATIBILE TV) ---
+        const appName = "L E V I A T H A N";
 
         const hasRDKey = (config.service === 'rd' && config.key) || config.rd;
         const hasTBKey = (config.service === 'tb' && config.key) || config.torbox;
