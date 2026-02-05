@@ -1,4 +1,4 @@
-name: Deploy to Beamup
+name: Deploy to Beamup (CLI Method)
 
 on:
   push:
@@ -13,50 +13,52 @@ jobs:
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: 🔑 Setup SSH
         uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: 🔗 Add Beamup Remote
+      - name: 🛠 Install Beamup CLI
+        run: npm install -g beamup-cli
+
+      - name: ⚙️ Configure Beamup
         run: |
+          # Configura la CLI come se fossimo sul tuo PC
+          beamup config url https://a.baby-beamup.club/
+          beamup config hostname git.baby-beamup.club
+          
+          # Aggiunge l'host ai known_hosts per evitare blocchi
           mkdir -p ~/.ssh
-          # Pulisce l'host da http/https o slash finali per sicurezza
-          CLEAN_HOST=$(echo "${{ secrets.BEAMUP_HOST }}" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
-          
-          # Aggiunge l'host ai known_hosts
-          ssh-keyscan -H "$CLEAN_HOST" >> ~/.ssh/known_hosts
-          
-          # CONFIGURAZIONE STANDARD PER PRIMO DEPLOY
-          # Sintassi: ssh://git@HOST/PROJECT_NAME
-          # Questo è il metodo più compatibile per inizializzare il repo
-          git remote add beamup "ssh://git@$CLEAN_HOST/${{ secrets.PROJECT_NAME }}"
+          ssh-keyscan -H git.baby-beamup.club >> ~/.ssh/known_hosts
 
-      - name: 🚀 Deploy to Beamup (con .env)
+      - name: 🚀 Deploy via CLI
+        env:
+          # Passiamo le variabili d'ambiente necessarie
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          INDEXER_URL: ${{ secrets.INDEXER_URL }}
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          # 1. Creazione del file .env con le tue variabili
-          echo "Generazione file .env..."
-          echo "DB_HOST=${{ secrets.DB_HOST }}" > .env
-          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "INDEXER_URL=${{ secrets.INDEXER_URL }}" >> .env
-          echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" >> .env
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-          # Aggiungi qui altre variabili se mancano
+          # 1. Creiamo il file .env (necessario per la CLI)
+          echo "Generazione .env..."
+          echo "DB_HOST=$DB_HOST" > .env
+          echo "DB_PORT=$DB_PORT" >> .env
+          echo "DB_NAME=$DB_NAME" >> .env
+          echo "DB_USER=$DB_USER" >> .env
+          echo "DB_PASSWORD=$DB_PASSWORD" >> .env
+          echo "INDEXER_URL=$INDEXER_URL" >> .env
+          echo "TMDB_API_KEY=$TMDB_API_KEY" >> .env
+          echo "DATABASE_URL=$DATABASE_URL" >> .env
 
-          # 2. Configura Git User fittizio (serve per il commit)
-          git config --global user.email "deploy@actions.github.com"
-          git config --global user.name "Beamup Deploy Action"
-
-          # 3. Aggiunge forzatamente il .env al commit
-          git add -f .env
-          git commit -m "Deploy: Configurazione produzione inclusa" || echo "Nessuna modifica al codice, procedo comunque"
-
-          # 4. Push forzato
-          echo "Tentativo di Push su Beamup..."
-          git push beamup HEAD:master --force
+          # 2. Eseguiamo il deploy usando la CLI
+          # La CLI cercherà di capire chi sei tramite la chiave SSH caricata
+          echo "Avvio deploy per il progetto: ${{ secrets.PROJECT_NAME }}"
+          
+          # Forziamo il deploy. Se il progetto non esiste, la CLI potrebbe fallire
+          # ma ci darà un errore molto più chiaro di "Permission denied".
+          beamup deploy
