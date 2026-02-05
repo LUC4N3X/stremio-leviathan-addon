@@ -1,0 +1,66 @@
+name: Deploy to Beamup (Correct Address)
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 🔑 Setup SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: 🕵️ Debug SSH Connection
+        run: |
+          mkdir -p ~/.ssh
+          
+          # CORREZIONE: Usiamo l'indirizzo originale senza 'git.' davanti
+          CLEAN_HOST="a.baby-beamup.club"
+          
+          echo "Aggiungo $CLEAN_HOST ai known_hosts..."
+          ssh-keyscan -H "$CLEAN_HOST" >> ~/.ssh/known_hosts
+          
+          echo "Test connessione verso $CLEAN_HOST..."
+          # Se qui dice "Welcome" o "Authenticated", abbiamo vinto.
+          # Se dice "Permission denied", la chiave non è ancora attiva (aspetta 20 min).
+          ssh -T -o StrictHostKeyChecking=no git@$CLEAN_HOST || true
+
+      - name: 🚀 Deploy via Git Push
+        run: |
+          # 1. Configurazione Variabili .env
+          echo "Generazione file .env..."
+          echo "DB_HOST=${{ secrets.DB_HOST }}" > .env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "INDEXER_URL=${{ secrets.INDEXER_URL }}" >> .env
+          echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" >> .env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+
+          # 2. Configurazione Git User
+          git config --global user.email "deploy@actions.github.com"
+          git config --global user.name "Beamup Deploy"
+
+          # 3. Commit del .env
+          git add -f .env
+          git commit -m "Deploy: Configurazione inclusa" || echo "Nessuna modifica da committare"
+
+          # 4. Setup Remote e Push
+          # CORREZIONE: Uso l'indirizzo corretto a.baby-beamup.club
+          # Sintassi: ssh://git@HOST/PROJECT_NAME
+          git remote add beamup ssh://git@a.baby-beamup.club/${{ secrets.PROJECT_NAME }}
+          
+          echo "Eseguo il Push..."
+          git push beamup HEAD:master --force
