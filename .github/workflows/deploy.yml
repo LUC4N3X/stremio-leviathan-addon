@@ -4,28 +4,46 @@ on:
   push:
     branches:
       - main
-      - master
+      - master # Aggiungo master per sicurezza
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: 📥 Checkout del codice
-        uses: actions/checkout@v4
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       - name: 🔑 Setup SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: 🧮 Generate Beamup Hash
+        id: hash
+        run: |
+          # Logica ufficiale Beamup: username lowercase -> shasum -> primi 12 caratteri
+          # Assicurati che USERNAME_GITHUB sia il tuo user ESATTO di GitHub
+          HASH=$(echo "${{ secrets.USERNAME_GITHUB }}" | awk '{print tolower($0)}' | shasum -a 256 | cut -c1-12)
+          echo "USER_HASH=$HASH" >> $GITHUB_ENV
+          echo "Hash Generato: $HASH"
+
+      - name: 🔗 Add Beamup Remote
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H ${{ secrets.BEAMUP_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan ${{ secrets.BEAMUP_HOST }} >> ~/.ssh/known_hosts
+          
+          # Configura il remote usando l'hash calcolato
+          git remote add beamup dokku@${{ secrets.BEAMUP_HOST }}:${{ env.USER_HASH }}/${{ secrets.PROJECT_NAME }}
 
-      - name: 📝 Genera Configurazione (.env)
+      - name: 🚀 Deploy to Beamup
         run: |
-          # Creiamo il file .env usando i segreti di GitHub
+          # 1. Creazione del file .env (Unisci le tue variabili vecchie e nuove)
+          echo "Generazione file .env..."
+          
+          # Variabili Database (quelle che mi hai dato prima)
           echo "DB_HOST=${{ secrets.DB_HOST }}" > .env
           echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
           echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
@@ -33,22 +51,20 @@ jobs:
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
           echo "INDEXER_URL=${{ secrets.INDEXER_URL }}" >> .env
           
-          # Verifica che il file sia stato creato (senza mostrare il contenuto)
-          ls -la .env
-
-      - name: 🚀 Push su Beamup
-        run: |
-          # Configura un utente git fittizio per il commit di deploy
-          git config --global user.name "Beamup Deploy Action"
-          git config --global user.email "deploy@actions.github.com"
-
-          # Aggiunge forzatamente il file .env al commit (anche se è in .gitignore)
-          git add -f .env
-          git commit -m "Deploy: Aggiunta configurazione produzione" || echo "Nessuna modifica da committare"
-
-          # Setup del remote e Push
-          # Usa l'URL SSH standard
-          git remote add beamup ssh://git@${{ secrets.BEAMUP_HOST }}/${{ secrets.PROJECT_NAME }}
+          # Variabili Aggiuntive (quelle presenti nel tuo file nuovo)
+          # Assicurati di aver aggiunto questi Secrets su GitHub, altrimenti saranno vuote!
+          echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" >> .env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
           
-          echo "Eseguo il push del codice e della configurazione..."
-          git push beamup HEAD:master -f
+          # 2. CONFIGURAZIONE GIT (Cruciale per inviare il .env)
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          
+          # 3. Commit del file .env
+          # Usiamo -f (force) perché solitamente .env è ignorato dal .gitignore
+          git add -f .env
+          git commit -m "Deploy: Configurazione produzione inclusa"
+          
+          # 4. Push forzato
+          echo "Eseguo il push su Beamup..."
+          git push beamup HEAD:master --force
