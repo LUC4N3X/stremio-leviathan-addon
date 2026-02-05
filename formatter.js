@@ -90,23 +90,19 @@ function cleanFilename(filename) {
     // ============================================================
 
     // 1. Caso specifico: "Fratelli demolitori" (Priorità ITA)
-    // Se contiene sia il titolo ENG che ITA, forza quello ITA
     if (/Fratelli demolitori/i.test(clean) && /The Wrecking Crew/i.test(clean)) {
         return "Fratelli demolitori";
     }
 
-    // 2. Taglio netto al separatore " - " (o variazioni come "-")
-    // Esempio: "Titolo A - Titolo B" diventa "Titolo A"
-    // Usa regex flessibile per catturare spazi variabili attorno al trattino
+    // 2. Taglio netto al separatore " - "
     if (/\s+-\s+/.test(clean)) {
         const parts = clean.split(/\s+-\s+/);
-        // Prendi la prima parte se ha senso (più di 2 lettere)
         if (parts[0] && parts[0].trim().length > 2) {
             clean = parts[0].trim();
         }
     }
     
-    // 3. Controllo duplicati parola per parola (es. "Movie Movie")
+    // 3. Controllo duplicati parola per parola
     const words = clean.split(/\s+/);
     if (words.length >= 2 && words.length % 2 === 0) {
         const mid = words.length / 2;
@@ -124,7 +120,7 @@ function cleanFilename(filename) {
 function getEpisodeTag(filename) {
     const f = filename.toLowerCase();
 
-    // 1. Range Episodi (S01E01-E04 o 1x01-04)
+    // 1. Range Episodi
     const matchMulti = f.match(/s(\d+)[ex](\d+)\s*-\s*(?:[ex]?(\d+))/i) || f.match(/(\d+)x(\d+)\s*-\s*(\d+)/i);
     if (matchMulti) {
         const s = matchMulti[1].padStart(2, '0');
@@ -133,7 +129,7 @@ function getEpisodeTag(filename) {
         return `🍿 S${s} E${eStart}-${eEnd}`;
     }
 
-    // 2. Anime Batch [01-12]
+    // 2. Anime Batch
     const matchAnimeBatch = f.match(/(?:ep|eps|episode|^|\s)\[?(\d{1,3})\s*-\s*(\d{1,3})\]?(?:\s|$)/i);
     if (matchAnimeBatch) {
         if (parseInt(matchAnimeBatch[1]) < 1900) { 
@@ -164,7 +160,6 @@ function toStylized(text, type = 'std') {
     const maps = {
         'bold': {
             nums: {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵'},
-            // Mappa corretta: TUTTI i caratteri sono Mathematical Sans-Serif Bold
             chars: {
                 'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭',
                 'a':'𝗮','b':'𝗯','c':'𝗰','d':'𝗱','e':'𝗲','f':'𝗳','g':'𝗴','h':'𝗵','i':'𝗶','j':'𝗷','k':'𝗸','l':'𝗹','m':'𝗺','n':'𝗻','o':'𝗼','p':'𝗽','q':'𝗾','r':'𝗿','s':'𝘀','t':'𝘁','u':'𝘂','v':'𝘃','w':'𝘄','x':'𝘅','y':'𝘆','z':'𝘇'
@@ -198,15 +193,10 @@ function extractStreamInfo(title, source) {
   const t = String(title);
   const info = titleParser.parse(t);
   
-  // PULIZIA PER REGEX
   const cleanForRegex = t.toUpperCase().replace(/[\.\-_\[\]\(\)\s]+/g, ' '); 
 
-  // ==========================================================
-  // LOGICA ESTRAZIONE RELEASE GROUP
-  // ==========================================================
   let releaseGroup = info.group || "";
 
-  // 1. Pulizia: Rimuovi estensione file
   const cleanT = t.replace(/\.(mkv|mp4|avi|iso|wmv|ts|flv|mov)$/i, "").trim();
 
   if (!releaseGroup) {
@@ -226,7 +216,6 @@ function extractStreamInfo(title, source) {
       }
   }
 
-  // VALIDAZIONE FINALE GRUPPO
   if (releaseGroup) {
       releaseGroup = releaseGroup.replace(/^(-|_|\[|\]|\s|\.)+|(-|_|\[|\]|\s|\.)+$/g, "").trim();
       if (GROUP_BLACKLIST.has(releaseGroup.toLowerCase()) || releaseGroup.length > 25 || releaseGroup.length < 2) {
@@ -354,9 +343,7 @@ function extractStreamInfo(title, source) {
       else if (REGEX_EXTRA.contextIt.test(t) || /corsaro/i.test(source)) lang = "🇮🇹 ITA";
   }
 
-  // ==========================================================
-  // D. AUDIO EXTRACTION (Aggiornata e Corretta)
-  // ==========================================================
+  // D. AUDIO
   let audioTag = "";
   let audioChannels = "";
 
@@ -420,17 +407,34 @@ function styleLeviathan(p) {
     if (!cleanAudio) cleanAudio = p.audioTag; 
     
     const titleIcon = "▶️"; 
-    const techIcon = "🔱"; 
+    const techIcon = "🔱"; // <--- ECCOLO! Il tridente torna qui per le specifiche tecniche
+
+    // LOGICA ICONE SERVIZI
+    // RD = Delfino, TB = Ancora, AD = Conchiglia, P2P = Squalo
+    let serviceIcon = "🦈"; // Default Squalo (P2P)
+    if (p.serviceTag === "RD") serviceIcon = "🐬";
+    else if (p.serviceTag === "TB") serviceIcon = "⚓";
+    else if (p.serviceTag === "AD") serviceIcon = "🐚";
+
+    // Icona di stato per la PRIMA RIGA (mostra l'animale se cachato, clessidra se download)
+    const isCached = ["RD", "AD", "TB"].includes(p.serviceTag);
+    const statusIcon = isCached ? serviceIcon : "⏳";
 
     const brandName = toStylized("LEVIATHAN", "small"); 
-    const name = `[${p.serviceTag}]🦑${brandName}`;
+    const serviceStyled = toStylized(p.serviceTag, "bold");
+    
+    // PRIMA RIGA: [Delfino] [RD] 🦑 [LEVIATHAN]
+    const name = `${statusIcon} ${serviceStyled} 🦑 ${brandName}`;
 
     let techSpecs = [p.quality, ...p.cleanTags].filter(Boolean);
     techSpecs = [...new Set(techSpecs)]; 
     let techLine = techSpecs.map(t => toStylized(t, 'small')).join(" • ");
 
     const lines = [];
+    // Riga Titolo
     lines.push(`${titleIcon} ${toStylized(p.cleanName, "bold")} ${p.epTag}`);
+    
+    // RIGA TECNICA: Qui usiamo il TRIDENTE (techIcon) invece del Delfino (serviceIcon)
     if (techLine) lines.push(`${techIcon} ${techLine}`);
     
     let audioPart = [cleanAudio, p.audioChannels].filter(Boolean).join(" ");
@@ -440,6 +444,7 @@ function styleLeviathan(p) {
     if (p.seedersStr) fileInfo += `  |  ${p.seedersStr}`;
     lines.push(fileInfo);
 
+    // Riga Sorgente (qui teniamo il Delfino per indicare da dove viene)
     let sourceRow = `${p.serviceIconTitle} ${p.displaySource}`;
     if (p.releaseGroup) {
         const styledGroup = toStylized(p.releaseGroup, 'small');
@@ -591,10 +596,11 @@ function styleCustom(p, template) {
 function formatStreamSelector(fileTitle, source, size, seeders, serviceTag = "RD", config = {}, infoHash = null, isLazy = false, isPackItem = false) {
     let { quality, qDetails, qIcon, videoTags, cleanTags, lang, codec, audioTag, audioChannels, rawInfo, releaseGroup } = extractStreamInfo(fileTitle, source);
     
-    let serviceIconTitle = "🦈"; 
-    if (serviceTag === "RD") { qIcon = "🐋"; serviceIconTitle = "🐋"; }
-    else if (serviceTag === "TB") { qIcon = "⚓"; serviceIconTitle = "⚓"; }
-    else if (serviceTag === "AD") { qIcon = "🐚"; serviceIconTitle = "🐚"; }
+    // ICONE SERVIZI MODIFICATE
+    let serviceIconTitle = "🦈"; // Default P2P
+    if (serviceTag === "RD") { qIcon = "🐬"; serviceIconTitle = "🐬"; }     // RD = Delfino
+    else if (serviceTag === "TB") { qIcon = "⚓"; serviceIconTitle = "⚓"; } // TB = Ancora
+    else if (serviceTag === "AD") { qIcon = "🐚"; serviceIconTitle = "🐚"; } // AD = Conchiglia
     
     let sizeString = size ? formatBytes(size) : "";
     if (!sizeString || size === 0) {
