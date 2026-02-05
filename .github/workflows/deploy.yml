@@ -1,4 +1,4 @@
-name: Deploy to Beamup (Final Git Method)
+name: Deploy to Beamup (Correct Address)
 
 on:
   push:
@@ -21,21 +21,25 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: 🕵️ Debug SSH Connection (Il momento della verità)
+      - name: 🕵️ Debug SSH Connection
         run: |
           mkdir -p ~/.ssh
-          # Pulisce l'indirizzo host
-          CLEAN_HOST="git.baby-beamup.club"
+          
+          # CORREZIONE: Usiamo l'indirizzo originale senza 'git.' davanti
+          CLEAN_HOST="a.baby-beamup.club"
+          
+          echo "Aggiungo $CLEAN_HOST ai known_hosts..."
           ssh-keyscan -H "$CLEAN_HOST" >> ~/.ssh/known_hosts
           
           echo "Test connessione verso $CLEAN_HOST..."
-          # Proviamo a connetterci. ssh -T non esegue comandi, controlla solo l'accesso.
-          # Se esce con "Permission denied", lo script si fermerà qui e sapremo che è la chiave.
+          # Se qui dice "Welcome" o "Authenticated", abbiamo vinto.
+          # Se dice "Permission denied", la chiave non è ancora attiva (aspetta 20 min).
           ssh -T -o StrictHostKeyChecking=no git@$CLEAN_HOST || true
 
       - name: 🚀 Deploy via Git Push
         run: |
           # 1. Configurazione Variabili .env
+          echo "Generazione file .env..."
           echo "DB_HOST=${{ secrets.DB_HOST }}" > .env
           echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
           echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
@@ -54,8 +58,9 @@ jobs:
           git commit -m "Deploy: Configurazione inclusa" || echo "Nessuna modifica da committare"
 
           # 4. Setup Remote e Push
-          # Usiamo l'indirizzo standard per inizializzare il progetto
-          git remote add beamup ssh://git@git.baby-beamup.club/${{ secrets.PROJECT_NAME }}
+          # CORREZIONE: Uso l'indirizzo corretto a.baby-beamup.club
+          # Sintassi: ssh://git@HOST/PROJECT_NAME
+          git remote add beamup ssh://git@a.baby-beamup.club/${{ secrets.PROJECT_NAME }}
           
           echo "Eseguo il Push..."
           git push beamup HEAD:master --force
