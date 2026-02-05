@@ -458,27 +458,22 @@ async function fetchTmdbMeta(tmdbId, type, userApiKey) {
 
 async function getMetadata(id, type, config = {}) {
   try {
-    // 🆕 GESTIONE KITSU DEDICATA (Priorità su ID 'kitsu:' o type 'anime')
+    // 🆕 GESTIONE KITSU DEDICATA (Migliorata per ID composti e Alias)
     if (type === 'anime' || id.toString().startsWith('kitsu:')) {
         let kitsuId = id.toString();
-        let season = 0;
         let episode = 0;
         
-        // Parse ID se composto (kitsu:123:1)
+        // Parse ID se composto (kitsu:123:1) -> ID: 123, EP: 1
         if (kitsuId.includes(':')) {
             const parts = kitsuId.split(':');
-            kitsuId = parts[1]; // Prende l'ID numerico
-            if (parts.length > 2) {
-                // Kitsu episodes are usually absolute, but stremio convention sometimes varies.
-                // Generally passed as index. For simplicity we map roughly.
-                episode = parseInt(parts[2]);
-            }
+            // parts[0] è 'kitsu'
+            if (parts.length >= 2) kitsuId = parts[1]; 
+            if (parts.length >= 3) episode = parseInt(parts[2]);
         }
         
-        // 🔥 LOGICA KITSU DEDICATA (Using anime-kitsu.strem.fun)
-        // La logica si basa su metadata.js fornito: url + axios
+        // Costruzione URL Kitsu standard per Meta
         const kitsuUrl = `${CONFIG.KITSU_URL}/meta/anime/kitsu:${kitsuId}.json`;
-        logger.info(`⛩️ [META] Fetching Kitsu (Direct): ${kitsuUrl}`);
+        logger.info(`⛩️ [META] Fetching Kitsu: ${kitsuUrl}`);
 
         try {
             const { data } = await axios.get(kitsuUrl, { timeout: CONFIG.TIMEOUTS.TMDB });
@@ -487,18 +482,20 @@ async function getMetadata(id, type, config = {}) {
                 const year = kMeta.year ? kMeta.year.split("–")[0] : (kMeta.releaseInfo ? kMeta.releaseInfo.substring(0,4) : "");
                 
                 return {
-                    title: kMeta.name,
+                    title: kMeta.name, // Es: "Naruto"
                     originalTitle: kMeta.name,
+                    slug: kMeta.slug, // Es: "naruto" vs "naruto-shippuden"
+                    aliases: kMeta.aliases || [], // Titoli alternativi
                     year: year,
                     imdb_id: kMeta.imdb_id || null, 
-                    kitsu_id: kitsuId, // Importante per il filtro
-                    isSeries: true, // Anime su Kitsu è trattato come serie
-                    season: 1, // Kitsu usa spesso stagioni assolute o singole
+                    kitsu_id: kitsuId, 
+                    isSeries: true, 
+                    season: 1, // Kitsu usa stagioni assolute, forziamo 1 per logica interna
                     episode: episode
                 };
             }
         } catch (e) {
-            logger.warn(`⚠️ Errore Metadata Kitsu: ${e.message} - Fallback sconsigliato ma tentiamo clean`);
+            logger.warn(`⚠️ Errore Metadata Kitsu: ${e.message}`);
         }
     }
 
@@ -1077,6 +1074,7 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
 
   const langMode = config.filters?.language || (config.filters?.allowEng ? "all" : "ita");
 
+// ⬇️⬇️⬇️ MODIFICA: Filtro Aggressivo con FIX STAGIONI e FIX ENG ⬇️⬇️⬇️
   const aggressiveFilter = (item) => {
       if (!item?.magnet) return false;
       const source = (item.source || "").toLowerCase();
@@ -1085,7 +1083,42 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
       const t = item.title; 
       const tLower = t.toLowerCase();
       
+      // --- LOGICA SPECIFICA PER ANIME (KITSU FIX) ---
+      if (meta.kitsu_id || type === 'anime' || meta.isSeries) {
+          const metaTitleLower = meta.title.toLowerCase();
+
+          // 1. SEQUEL GUARD
+          const sequelKeywords = ["shippuuden", "shippuden", "boruto", "super", "kai", "z", "gt"];
+          for (const word of sequelKeywords) {
+              if (new RegExp(`\\b${word}\\b`, 'i').test(tLower)) {
+                  if (!metaTitleLower.includes(word)) return false; 
+              }
+          }
+
+          // 2. MOVIE GUARD
+          const movieKeywords = ["movie", "gekijouban", "the last", "road to ninja", "film", "motion picture"];
+          if (!metaTitleLower.includes("movie") && !metaTitleLower.includes("film")) {
+              for (const word of movieKeywords) {
+                  if (new RegExp(`\\b${word}\\b`, 'i').test(tLower)) return false; 
+              }
+          }
+          
+          // 3. Controllo Episodio Assoluto per Kitsu
+          const e = meta.episode;
+          if (e > 0 && (meta.kitsu_id || type === 'anime')) {
+              const absoluteEpRegex = new RegExp(`(?:^|\\s|[.\\-_\\[\\(])(?:e|ep|episode|#)?\\s*0*${e}(?:$|\\s|[.\\-_\\]\\)]|v\\d)`, 'i');
+              if (absoluteEpRegex.test(tLower)) return true; 
+          }
+      }
+
+      // --- LOGICA FILTRI LINGUA ---
       if (langMode === "ita") {
+           // 🔥 BLOCCO ENG FORZATO: Se dice ENG/ENGLISH e NON dice ITA/MULTI -> VIA!
+           // Questo elimina il file [IceBlue] che è marcato solo ENG
+           if (/\b(eng|english|en)\b/i.test(t) && !/\b(ita|italian|multi|sub\W*ita)\b/i.test(t)) {
+               return false;
+           }
+
            const isTrustedGroup = REGEX_TRUSTED_GROUPS.test(t) || /\bcorsaro\b/i.test(source);
            if (!isTrustedGroup) {
                const hasStrongIta = REGEX_STRONG_ITA.test(t) || REGEX_MULTI_ITA.test(t);
@@ -1111,44 +1144,50 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
            const hasStrongIta = REGEX_STRONG_ITA.test(t) || REGEX_MULTI_ITA.test(t);
            const hasContextIt = REGEX_CONTEXT_IT.test(t);
            const isTrustedItaGroup = REGEX_TRUSTED_GROUPS.test(t);
-
            if (hasStrongIta || hasContextIt || isTrustedItaGroup) return false;
       }
       
+      // Controllo Anno
       const metaYear = parseInt(meta.year);
       if (metaYear === 2025 && /frankenstein/i.test(meta.title)) {
            if (!item.title.includes("2025")) return false;
       }
-
       if (!isNaN(metaYear)) {
            const fileYearMatch = item.title.match(REGEX_YEAR);
            if (fileYearMatch) {
                const fileYear = parseInt(fileYearMatch[0]);
-               if (Math.abs(fileYear - metaYear) > 1) return false; 
+               if (!meta.isSeries && Math.abs(fileYear - metaYear) > 1) return false; 
            }
       }
 
+      // --- CONTROLLO STAGIONI/EPISODI ---
       if (meta.isSeries) {
           const s = meta.season;
           const e = meta.episode;
           
-          // 🔥 FIX ANIME / KITSU: Supporto Numerazione Assoluta + Prefissi 🔥
-          // Accetta: "Naruto - 001", "Naruto.EP001", "Naruto [01]", etc.
           if (meta.kitsu_id || type === 'anime') {
-              const absoluteEpRegex = new RegExp(`(?:^|\\s|[.\\-_\\[\\(])(?:e|ep|episode)?\\s*0*${e}(?:$|\\s|[.\\-_\\]\\)]|v\\d)`, 'i');
-              
-              if (absoluteEpRegex.test(tLower)) {
-                   // Se il titolo del file contiene il numero episodio in formato assoluto, è valido.
-                   return true;
-              }
+             const absoluteEpRegex = new RegExp(`(?:^|\\s|[.\\-_\\[\\(])(?:e|ep|episode|#)?\\s*0*${e}(?:$|\\s|[.\\-_\\]\\)]|v\\d)`, 'i');
+             if (absoluteEpRegex.test(tLower)) return true;
           }
 
-          const wrongSeasonRegex = /(?:s|stagione|season)\s*0?(\d+)(?!\d)/gi;
+          // Cerca stagioni esplicite nel file (Stagione 05, Season 5, S05)
+          const seasonRegex = /(?:s|stagione|season)\s*0?(\d+)(?!\d)/gi;
           let match;
-          while ((match = wrongSeasonRegex.exec(tLower)) !== null) {
+          while ((match = seasonRegex.exec(tLower)) !== null) {
               const foundSeason = parseInt(match[1]);
-              // Se troviamo una stagione esplicita DIVERSA da quella richiesta, scartiamo (a meno che non sia Kitsu)
-              if (foundSeason !== s && !meta.kitsu_id) return false; 
+              
+              // 🔥 FIX STAGIONE ERRATA: Se trovo una stagione diversa da quella che cerco
+              if (foundSeason !== s) {
+                  // Se sto cercando episodi bassi (es. ep 5) e trovo "Stagione 5",
+                  // è matematicamente impossibile che l'episodio 5 assoluto sia nella stagione 5.
+                  // Quindi scartiamo.
+                  if (meta.kitsu_id || type === 'anime') {
+                      if (foundSeason > 1 && e < 25) return false; 
+                  } else {
+                      // Per serie TV normali, deve corrispondere esattamente
+                      return false;
+                  }
+              }
           }
 
           const xMatch = tLower.match(/(\d+)x(\d+)/i);
@@ -1160,7 +1199,6 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
 
           const hasRightSeason = new RegExp(`(?:s|stagione|season|^)\\s*0?${s}(?!\\d)`, 'i').test(tLower);
           const hasRightEpisode = new RegExp(`(?:e|x|ep|episode|^)\\s*0?${e}(?!\\d)`, 'i').test(tLower);
-          
           const hasAnyEpisodeTag = /(?:e|x|ep|episode)\s*0?\d+/i.test(tLower);
           const isExplicitPack = /(?:complete|pack|stagione\s*\d+\s*$|season\s*\d+\s*$|tutta|completa)/i.test(tLower);
           
