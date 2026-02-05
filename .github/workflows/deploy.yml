@@ -4,9 +4,8 @@ on:
   push:
     branches:
       - main
+      - master
   workflow_dispatch:
-  release:
-    types: [published]
 
 jobs:
   deploy:
@@ -22,29 +21,24 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: 🧮 Generate Beamup Hash
-        id: hash
-        run: |
-          # Calcolo Hash ufficiale Beamup
-          USER_LOWER=$(echo "${{ secrets.USERNAME_GITHUB }}" | tr '[:upper:]' '[:lower:]')
-          HASH=$(echo -n "$USER_LOWER" | shasum -a 256 | cut -c1-12)
-          echo "USER_HASH=$HASH" >> $GITHUB_ENV
-          echo "Generated Hash: $HASH"
-
       - name: 🔗 Add Beamup Remote
         run: |
-          # Pulizia dell'host per evitare errori DNS (rimuove eventuali spazi o protocolli)
+          mkdir -p ~/.ssh
+          # Pulisce l'host da http/https o slash finali per sicurezza
           CLEAN_HOST=$(echo "${{ secrets.BEAMUP_HOST }}" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
           
-          mkdir -p ~/.ssh
+          # Aggiunge l'host ai known_hosts
           ssh-keyscan -H "$CLEAN_HOST" >> ~/.ssh/known_hosts
           
-          # URL format: dokku@HOST:HASH/PROJECT
-          git remote add beamup dokku@$CLEAN_HOST:${{ env.USER_HASH }}/${{ secrets.PROJECT_NAME }}
+          # CONFIGURAZIONE STANDARD PER PRIMO DEPLOY
+          # Sintassi: ssh://git@HOST/PROJECT_NAME
+          # Questo è il metodo più compatibile per inizializzare il repo
+          git remote add beamup "ssh://git@$CLEAN_HOST/${{ secrets.PROJECT_NAME }}"
 
-      - name: 🚀 Deploy to Beamup
+      - name: 🚀 Deploy to Beamup (con .env)
         run: |
-          # 1. Creazione del file .env (con tutte le tue variabili)
+          # 1. Creazione del file .env con le tue variabili
+          echo "Generazione file .env..."
           echo "DB_HOST=${{ secrets.DB_HOST }}" > .env
           echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
           echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
@@ -52,17 +46,17 @@ jobs:
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
           echo "INDEXER_URL=${{ secrets.INDEXER_URL }}" >> .env
           echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" >> .env
-          # Aggiungi qui le altre se necessario...
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+          # Aggiungi qui altre variabili se mancano
 
-          # 2. CONFIGURAZIONE GIT (Necessaria per poter fare il commit del .env)
-          git config --global user.email "deploy@github.com"
-          git config --global user.name "Deploy Action"
+          # 2. Configura Git User fittizio (serve per il commit)
+          git config --global user.email "deploy@actions.github.com"
+          git config --global user.name "Beamup Deploy Action"
 
-          # 3. COMMIT FORZATO DEL .ENV
-          # Spesso il .env è nel .gitignore, quindi usiamo -f
+          # 3. Aggiunge forzatamente il .env al commit
           git add -f .env
-          git commit -m "Include production env" || echo "No changes to commit"
+          git commit -m "Deploy: Configurazione produzione inclusa" || echo "Nessuna modifica al codice, procedo comunque"
 
-          # 4. PUSH
-          echo "Eseguo il push forzato su Beamup..."
+          # 4. Push forzato
+          echo "Tentativo di Push su Beamup..."
           git push beamup HEAD:master --force
