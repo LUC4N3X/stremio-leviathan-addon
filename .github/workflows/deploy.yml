@@ -1,64 +1,57 @@
-name: Deploy to Beamup (CLI Method)
+name: Deploy to Beamup
 
 on:
   push:
     branches:
       - main
-      - master
   workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-      - name: 🔑 Setup SSH
+      - name: Setup SSH
         uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: 🛠 Install Beamup CLI
-        run: npm install -g beamup-cli
-
-      - name: ⚙️ Configure Beamup
+      - name: Generate Beamup Hash
+        id: hash
         run: |
-          # Configura la CLI come se fossimo sul tuo PC
-          beamup config url https://a.baby-beamup.club/
-          beamup config hostname git.baby-beamup.club
-          
-          # Aggiunge l'host ai known_hosts per evitare blocchi
+          # OFFICIAL LOGIC: echo (with newline) -> lowercase -> shasum -> cut 12
+          HASH=$(echo "${{ secrets.USERNAME_GITHUB }}" | awk '{print tolower($0)}' | shasum -a 256 | cut -c1-12)
+          echo "USER_HASH=$HASH" >> $GITHUB_ENV
+          echo "Generated Hash: $HASH"
+
+      - name: Add Beamup Remote
+        run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H git.baby-beamup.club >> ~/.ssh/known_hosts
+          ssh-keyscan ${{ secrets.BEAMUP_HOST }} >> ~/.ssh/known_hosts
+          # URL format: dokku@HOST:HASH/PROJECT
+          git remote add beamup dokku@${{ secrets.BEAMUP_HOST }}:${{ env.USER_HASH }}/${{ secrets.PROJECT_NAME }}
 
-      - name: 🚀 Deploy via CLI
-        env:
-          # Passiamo le variabili d'ambiente necessarie
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PORT: ${{ secrets.DB_PORT }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          INDEXER_URL: ${{ secrets.INDEXER_URL }}
-          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - name: Deploy to Beamup
         run: |
-          # 1. Creiamo il file .env (necessario per la CLI)
-          echo "Generazione .env..."
-          echo "DB_HOST=$DB_HOST" > .env
-          echo "DB_PORT=$DB_PORT" >> .env
-          echo "DB_NAME=$DB_NAME" >> .env
-          echo "DB_USER=$DB_USER" >> .env
-          echo "DB_PASSWORD=$DB_PASSWORD" >> .env
-          echo "INDEXER_URL=$INDEXER_URL" >> .env
-          echo "TMDB_API_KEY=$TMDB_API_KEY" >> .env
-          echo "DATABASE_URL=$DATABASE_URL" >> .env
-
-          # 2. Eseguiamo il deploy usando la CLI
-          # La CLI cercherà di capire chi sei tramite la chiave SSH caricata
-          echo "Avvio deploy per il progetto: ${{ secrets.PROJECT_NAME }}"
+          # Create .env file for Beamup to use during build/start
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DEBUG_MODE=${{ secrets.DEBUG_MODE }}" >> .env
+          echo "ENRICHMENT_API_KEY=${{ secrets.ENRICHMENT_API_KEY }}" >> .env
+          echo "ENRICHMENT_PORT=${{ secrets.ENRICHMENT_PORT }}" >> .env
+          echo "ENRICHMENT_SERVER_URL=${{ secrets.ENRICHMENT_SERVER_URL }}" >> .env
+          echo "ENRICHMENT_SERVER_URL_2=${{ secrets.ENRICHMENT_SERVER_URL_2 }}" >> .env
+          echo "SEEDER_UPDATE_URL=${{ secrets.SEEDER_UPDATE_URL }}" >> .env
+          echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" >> .env
           
-          # Forziamo il deploy. Se il progetto non esiste, la CLI potrebbe fallire
-          # ma ci darà un errore molto più chiaro di "Permission denied".
-          beamup deploy
+          # Force push to beamup master/main
+          git push beamup HEAD:master --force
