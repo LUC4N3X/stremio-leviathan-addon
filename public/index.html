@@ -1633,36 +1633,58 @@
             let name = "", desc = "";
 
             if (skin === 'leviathan') {
-                // LOGICA COPIATA DA styleLeviathan in formatter.js
-                
-                // Configurazione Icone
+                // LOGICA AGGIORNATA AL NUOVO FORMATTER (Con Delfini, Tridenti e Bolle)
+
                 const titleIcon = "▶️";
-                const techIcon = "🔱";
+                const techIcon = "🔱"; // Tridente
 
-                // Header Spaziato
-                const brandName = toStylized("LEVIATHAN", "spaced");
-                name = `[${p.serviceTag}] 🦑 ${brandName}`;
+                // 1. Calcolo Icona Servizio (Logica "Animali")
+                let serviceIcon = "🦈"; // Default P2P (Squalo)
+                if (p.serviceTag === "RD") serviceIcon = "🐬";      // RD = Delfino
+                else if (p.serviceTag === "TB") serviceIcon = "⚓"; // TB = Ancora
+                else if (p.serviceTag === "AD") serviceIcon = "🐚"; // AD = Conchiglia
 
-                // Riga Tech
+                // 2. Icona Stato (Animale se cached, Clessidra se P2P non cached/download)
+                // Nell'anteprima simuliamo che i debrid siano cached
+                const isCached = ["RD", "TB", "AD"].includes(p.serviceTag);
+                const statusIcon = isCached ? serviceIcon : "⏳";
+
+                // 3. Header: [Icona] [SERVICE_BOLD] 🦑 ʟᴇᴠɪᴀᴛʜᴀɴ_SMALL
+                const brandName = toStylized("LEVIATHAN", "small");
+                const serviceStyled = toStylized(p.serviceTag, "bold");
+                name = `${statusIcon} ${serviceStyled} 🦑 ${brandName}`;
+
+                const lines = [];
+
+                // RIGA 1: Titolo (Play + Titolo Bold + Ep)
+                lines.push(`${titleIcon} ${toStylized(p.cleanName, "bold")} ${p.epTag}`);
+
+                // RIGA 2: Tech (Tridente + Info Small)
                 let techSpecs = [p.quality, ...p.cleanTags].filter(Boolean);
                 techSpecs = [...new Set(techSpecs)];
                 let techLine = techSpecs.map(t => toStylized(t, 'small')).join(" • ");
-
-                const lines = [];
-                // RIGA 1: Titolo (Play + Titolo + Ep)
-                lines.push(`${titleIcon} ${toStylized(p.cleanName, "bold")} ${p.epTag}`);
-                // RIGA 2: Tech (Tridente + Info)
                 if (techLine) lines.push(`${techIcon} ${techLine}`);
-                // RIGA 3: Lingua/Audio
-                let cleanAudio = p.audioTag; 
+
+                // RIGA 3: Lingua/Audio (Bolle 🫧)
+                let cleanAudio = p.audioTag;
                 let audioPart = [cleanAudio, p.audioChannels].filter(Boolean).join(" ");
-                lines.push(`🗣️ ${p.lang}  |  🔊 ${audioPart}`);
+                lines.push(`🗣️ ${p.lang}  |  🫧 ${audioPart}`);
+
                 // RIGA 4: Info File
-                lines.push(`🧲 ${p.sizeString}  |  ${p.serviceIconTitle} ${p.displaySource}`);
+                let fileInfo = `🧲 ${p.sizeString}`;
+                if (p.seedersStr) fileInfo += `  |  ${p.seedersStr}`;
+                lines.push(fileInfo);
+
+                // RIGA 5: Sorgente e Gruppo
+                let sourceRow = `${serviceIcon} ${p.displaySource}`;
+                const styledGroup = toStylized("LEVIATHAN", 'small'); // Gruppo simulato
+                sourceRow += ` | 🏷️ ${styledGroup}`;
+                lines.push(sourceRow);
 
                 desc = lines.join("\n");
-            } 
-            else if (skin === 'lev2') {
+            }
+            
+			else if (skin === 'lev2') {
                 // styleLeviathanTwo
                 const levText = toStylized("LEVIATHAN", "small");
                 name = `🦑 ${levText} ${p.serviceIconTitle} │ ${p.quality}`;
