@@ -1,0 +1,54 @@
+name: Deploy to Beamup
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout del codice
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔑 Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.BEAMUP_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 📝 Genera Configurazione (.env)
+        run: |
+          # Creiamo il file .env usando i segreti di GitHub
+          echo "DB_HOST=${{ secrets.DB_HOST }}" > .env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "INDEXER_URL=${{ secrets.INDEXER_URL }}" >> .env
+          
+          # Verifica che il file sia stato creato (senza mostrare il contenuto)
+          ls -la .env
+
+      - name: 🚀 Push su Beamup
+        run: |
+          # Configura un utente git fittizio per il commit di deploy
+          git config --global user.name "Beamup Deploy Action"
+          git config --global user.email "deploy@actions.github.com"
+
+          # Aggiunge forzatamente il file .env al commit (anche se è in .gitignore)
+          git add -f .env
+          git commit -m "Deploy: Aggiunta configurazione produzione" || echo "Nessuna modifica da committare"
+
+          # Setup del remote e Push
+          # Usa l'URL SSH standard
+          git remote add beamup ssh://git@${{ secrets.BEAMUP_HOST }}/${{ secrets.PROJECT_NAME }}
+          
+          echo "Eseguo il push del codice e della configurazione..."
+          git push beamup HEAD:master -f
