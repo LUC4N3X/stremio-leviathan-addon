@@ -71,7 +71,7 @@ const { generateSmartQueries } = require("./ai_query");
 const { smartMatch } = require("./smart_parser");
 const { rankAndFilterResults } = require("./ranking");
 const { tmdbToImdb, imdbToTmdb, getTmdbAltTitles } = require("./id_converter");
-const kitsuHandler = require("./kitsu_handler");
+// const kitsuHandler = require("./kitsu_handler"); // RIMOSSO: USIAMO LOGICA INTERNA
 const RD = require("./debrid/realdebrid");
 const AD = require("./debrid/alldebrid");
 const TB = require("./debrid/torbox");
@@ -85,6 +85,7 @@ dbHelper.initDatabase();
 const CONFIG = {
   INDEXER_URL: process.env.INDEXER_URL || "", 
   CINEMETA_URL: "https://v3-cinemeta.strem.io",
+  KITSU_URL: "https://anime-kitsu.strem.fun", // 🆕 URL KITSU AGGIUNTO
   REAL_SIZE_FILTER: 80 * 1024 * 1024,
   MAX_RESULTS: 70,
   TIMEOUTS: {
@@ -329,11 +330,13 @@ function isSafeForItalian(item) {
 }
 
 function validateStreamRequest(type, id) {
-  const validTypes = ['movie', 'series'];
+  // 🔥 Aggiunto 'anime' ai tipi validi
+  const validTypes = ['movie', 'series', 'anime']; 
   if (!validTypes.includes(type)) {
     throw new Error(`Tipo non valido: ${type}`);
   }
   const cleanIdToCheck = id.replace('ai-recs:', '');
+  // Aggiunto supporto regex per kitsu:
   const idPattern = /^(tt\d+|\d+|tmdb:\d+|kitsu:\d+)(:\d+)?(:\d+)?$/;
   if (!idPattern.test(cleanIdToCheck) && !idPattern.test(id)) {
     throw new Error(`Formato ID non valido: ${id}`);
@@ -456,14 +459,68 @@ async function fetchTmdbMeta(tmdbId, type, userApiKey) {
 
 async function getMetadata(id, type, config = {}) {
   try {
+    // 🆕 GESTIONE KITSU STRICT MODE (SOLO KITSU SE RILEVATO)
+    // Se type è 'anime' o l'id inizia con 'kitsu:', usiamo SOLO l'API Kitsu
+    // per evitare il problema "Naruto -> One Piece" causato dalla conversione ID.
+    if (type === 'anime' || id.toString().startsWith('kitsu:')) {
+        let kitsuId = id.toString();
+        let season = 0;
+        let episode = 0;
+        
+        // Parse ID se composto (kitsu:123:1)
+        if (kitsuId.includes(':')) {
+            const parts = kitsuId.split(':');
+            kitsuId = parts[1]; // Prende l'ID numerico puro
+            if (parts.length > 2) {
+                // Kitsu usa solitamente indici assoluti per gli episodi.
+                // Mappiamo approssimativamente.
+                episode = parseInt(parts[2]);
+            }
+        }
+        
+        // 🔥 LOGICA KITSU DEDICATA (Copiata/Adattata dai file allegati)
+        // definisce la URL base e l'uso di axios.
+        const kitsuUrl = `${CONFIG.KITSU_URL}/meta/anime/kitsu:${kitsuId}.json`;
+        logger.info(`⛩️ [META] Fetching Kitsu (Strict): ${kitsuUrl}`);
+
+        try {
+            const { data } = await axios.get(kitsuUrl, { timeout: CONFIG.TIMEOUTS.TMDB });
+            if (data && data.meta) {
+                const kMeta = data.meta;
+                // sanitize meta
+                const year = kMeta.year ? kMeta.year.split("–")[0] : (kMeta.releaseInfo ? kMeta.releaseInfo.substring(0,4) : "");
+                
+                return {
+                    title: kMeta.name,
+                    originalTitle: kMeta.name, // Kitsu spesso ha il titolo romanizzato come name
+                    year: year,
+                    imdb_id: kMeta.imdb_id || null, 
+                    kitsu_id: kitsuId,
+                    isSeries: true, // Anime su Kitsu = Series (generalmente)
+                    season: 1, // Kitsu usa stagioni assolute solitamente
+                    episode: episode
+                };
+            }
+        } catch (e) {
+            logger.warn(`⚠️ Errore Metadata Kitsu: ${e.message}`);
+            // Se fallisce Kitsu, NON facciamo fallback su TMDB per evitare ID mismatch
+            return null;
+        }
+    }
+
+    // --- LOGICA STANDARD (TMDB / CINEMETA) PER FILM/SERIE NON-ANIME ---
     const allowedTypes = ["movie", "series"];
-    if (!allowedTypes.includes(type)) return null;
+    // Se era 'anime' ma non è entrato nel blocco Kitsu (impossibile con la logica sopra)
+    // o se è un tipo diverso, lo puliamo.
+    const cleanType = (type === 'anime') ? 'series' : type;
+
+    if (!allowedTypes.includes(cleanType)) return null;
 
     let imdbId = id; 
     let season = 0; 
     let episode = 0;
 
-    if (type === "series" && id.includes(":")) {
+    if (cleanType === "series" && id.includes(":")) {
         const parts = id.split(":");
         imdbId = parts[0];
         season = parseInt(parts[1]);
@@ -478,7 +535,7 @@ async function getMetadata(id, type, config = {}) {
         const { tmdbId } = await imdbToTmdb(cleanId, userTmdbKey);
 
         if (tmdbId) {
-            const tmdbData = await fetchTmdbMeta(tmdbId, type, userTmdbKey);
+            const tmdbData = await fetchTmdbMeta(tmdbId, cleanType, userTmdbKey);
             if (tmdbData) {
                 const title = tmdbData.title || tmdbData.name;
                 const originalTitle = tmdbData.original_title || tmdbData.original_name;
@@ -491,7 +548,7 @@ async function getMetadata(id, type, config = {}) {
                     year: year,
                     imdb_id: cleanId,
                     tmdb_id: tmdbId, 
-                    isSeries: type === "series",
+                    isSeries: cleanType === "series",
                     season: season,
                     episode: episode
                 };
@@ -502,14 +559,14 @@ async function getMetadata(id, type, config = {}) {
     }
 
     logger.info(`ℹ️ [META] Fallback a Cinemeta per ${cleanId}`);
-    const { data: cData } = await axios.get(`${CONFIG.CINEMETA_URL}/meta/${type}/${cleanId}.json`, { timeout: CONFIG.TIMEOUTS.TMDB }).catch(() => ({ data: {} }));
+    const { data: cData } = await axios.get(`${CONFIG.CINEMETA_URL}/meta/${cleanType}/${cleanId}.json`, { timeout: CONFIG.TIMEOUTS.TMDB }).catch(() => ({ data: {} }));
     
     return cData?.meta ? {
       title: cData.meta.name,
       originalTitle: cData.meta.name, 
       year: cData.meta.year?.split("–")[0],
       imdb_id: cleanId,
-      isSeries: type === "series",
+      isSeries: cleanType === "series",
       season: season,
       episode: episode
     } : null;
@@ -1014,23 +1071,16 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           }
       } catch (err) {}
   }
-  if (finalId.startsWith("kitsu:")) {
-      try {
-          const parts = finalId.split(":");
-          const kData = await kitsuHandler(parts[1]);
-          if (kData && kData.imdbID) {
-              const s = kData.season || 1;
-              finalId = kData.type === 'series' || type === 'series' ? `${kData.imdbID}:${s}:${parts[2] || 1}` : kData.imdbID;
-          }
-      } catch (err) {}
-  }
+  
+  // Kitsu ID handling is now strictly inside getMetadata to avoid "Naruto -> One Piece" conversion issues.
 
   const meta = await getMetadata(finalId, type, config);
   if (!meta) return { streams: [] };
 
   logger.info(`🚀 [SPEED] Start search for: ${meta.title}`);
   
-  const tmdbIdLookup = meta.tmdb_id || (await imdbToTmdb(meta.imdb_id, userTmdbKey))?.tmdbId;
+  // Se kitsu_id è presente, non cerchiamo di convertire in tmdbId, usiamo l'id fornito se possibile o cerchiamo via text
+  const tmdbIdLookup = meta.tmdb_id || (meta.kitsu_id ? null : (await imdbToTmdb(meta.imdb_id, userTmdbKey))?.tmdbId);
   const dbOnlyMode = config.filters?.dbOnly === true; 
 
   const langMode = config.filters?.language || (config.filters?.allowEng ? "all" : "ita");
