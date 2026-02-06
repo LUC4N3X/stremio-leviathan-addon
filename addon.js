@@ -1197,7 +1197,11 @@ async function generateStream(type, id, config, userConfStr, reqHost) {
           const isExplicitPack = /(?:complete|pack|stagione\s*\d+\s*$|season\s*\d+\s*$|tutta|completa)/i.test(tLower);
           
           if (hasRightSeason && hasRightEpisode) return true;
-          
+
+          // 🔥 MODIFICA AGGRESSIVE FILTER: Supporto Absolute Numbering per Kitsu (Anime) 🔥
+          // Se è un Anime/Kitsu e abbiamo l'episodio corretto, accettiamo anche se manca "S01"
+          if (meta.kitsu_id && hasRightEpisode) return true; 
+
           if (hasRightSeason && (isExplicitPack || !hasAnyEpisodeTag)) {
               item._isPack = true; 
               return true;
