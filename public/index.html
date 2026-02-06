@@ -1285,13 +1285,13 @@
                     <div class="stremio-mock-row">
                         <div class="mock-poster"><i class="fas fa-image"></i></div>
                         <div class="mock-content">
-                            <div class="mock-title" id="prev-name">🦑 𝗟 𝗘 𝗩 𝗜 𝗔 𝗧 𝗛 𝗔 𝗡 ☄️┃ 𝟰𝗞</div>
+                            <div class="mock-title" id="prev-name">🐬 𝗥𝗗 🦑 ʟᴇᴠɪᴀᴛʜᴀɴ</div>
 
-                            <div class="mock-info" id="prev-desc">📁 Dune Part Two (2024)
-🗣️ 🇮🇹 • 🔊⚡ TrueHD ┃ 7.1
-💎 𝗥𝗘𝗠𝗨𝗫 • 🔥 𝗛𝗗𝗥 • 👁️ 𝗗𝗩
-🧲 64.20 GB • 👥 1337x
-☄️ [RD] P2P</div>
+                            <div class="mock-info" id="prev-desc">▶️ 𝗗𝘂𝗻𝗲 𝗣𝗮𝗿𝘁 𝗧𝘄𝗼
+🔱 𝟰𝗞 • ʀᴇᴍᴜx • ᴅᴠ+ʜᴅʀ
+🗣️ 🇮🇹 ITA  |  🫧 TrueHD 7.1
+🧲 64.20 GB  |  👥 1337
+🐬 1337x | 🏷️ ʟᴇᴠɪᴀᴛʜᴀɴ</div>
                         </div>
                     </div>
                 </div>
@@ -1323,6 +1323,9 @@
                     </div>
                     <div class="skin-btn" id="skin_lad" onclick="selectSkin('lad')">
                         <span class="skin-icon">🎟️</span><span class="skin-name">Compact</span>
+                    </div>
+                     <div class="skin-btn" id="skin_torrentio" onclick="selectSkin('torrentio')">
+                        <span class="skin-icon">📜</span><span class="skin-name">Torrentio</span>
                     </div>
                     <div class="skin-btn" id="skin_custom" onclick="selectSkin('custom')">
                         <span class="skin-icon">🛠️</span><span class="skin-name">Custom</span>
@@ -1530,7 +1533,7 @@
             const maps = {
                 'bold': {
                     nums: {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵'},
-                    chars: {'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭','a':'𝗮','b':'𝗯','c':'𝗰','d':'𝗱','e':'𝗲','f':'𝗳','g':'𝗴','h':'𝗵','i':'𝗶','j':'𝗷','k':'𝗸','l':'𝗹','m':'𝗺','n':'𝗻','o':'𝗼','p':'𝗽','q':'𝗾','r':'𝗿','s':'𝘀','t':'𝘁','u':'𝘂','v':'𝘃','w':'𝘄','x':'𝘅','y':'𝘆','z':'𝘇'}
+                    chars: {'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭','a':'𝗮','b':'𝗯','c':'𝗰','d':'𝗱','e':'𝗲','f':'𝗳','g':'𝗴','h':'𝗵','i':'𝗶','j':'𝗷','k':'𝗸','l':'𝗹','m':'𝗺','n':'𝗻','o':'𝗼','p':'𝗽','q':'𝗾','r':'𝗿','s':'𝘀','t':'𝘁','u':'𝘂','v':'𝘃','w':'ᴡ','x':'𝘅','y':'𝘆','z':'𝘇'}
                 },
                 'spaced': {
                     // Mappa speciale per testo spaziato
@@ -1661,7 +1664,7 @@
 
                 // RIGA 2: Tech (Tridente + Info Small)
                 let techSpecs = [p.quality, ...p.cleanTags].filter(Boolean);
-                techSpecs = [...new Set(techSpecs)];
+                techSpecs = [...new Set(techSpecs)]; 
                 let techLine = techSpecs.map(t => toStylized(t, 'small')).join(" • ");
                 if (techLine) lines.push(`${techIcon} ${techLine}`);
 
@@ -1723,6 +1726,20 @@
             else if (skin === 'pri') {
                 name = `[${p.serviceTag}]⚡️☁️\n4K🔥UHD\n[Leviathan]`;
                 desc = `🎬 ${p.cleanName}\n${p.cleanTags.join(' ')}\n🎧 TrueHD | 🔊 7.1 | 🗣️ ITA\n📁 ${p.sizeString} | 🏷️ ${p.displaySource}\n📄 ▶️ ${p.fileTitle} ◀️`;
+            }
+             else if (skin === 'torrentio') {
+                name = `[${p.serviceTag}]\n${p.quality}`;
+                const lines = [];
+                lines.push(`📄 ${p.fileTitle}`);
+                lines.push(`📦 ${p.sizeString} 👤 ${p.seeders}`);
+                lines.push(`🔍 ${p.displaySource}`);
+                
+                // Mocking clean language logic like formatter.js
+                let cleanLang = p.lang.replace(/[\u{1F1E6}-\u{1F1FF}]{2}/gu, "").trim(); 
+                if (!cleanLang.replace(/[^a-zA-Z]/g, "")) cleanLang = p.lang;
+                lines.push(`🔊 ${cleanLang}`);
+                
+                desc = lines.join("\n");
             }
             else if (skin === 'custom') {
                 let tpl = document.getElementById('customTemplate').value;
@@ -1924,10 +1941,17 @@
                         if (config.sort) setSortMode(config.sort); else setSortMode('balanced');
                     }
                     checkWebVisibility();
+                    // FORCE UPDATE PREVIEW TO FIX DEFAULT LOAD STATE
                     updatePreview(document.getElementById('selectedSkin').value);
                     updateFluxStream();
+                } else {
+                     // Caso di default senza config: forza l'anteprima corretta
+                     updatePreview('leviathan');
                 }
-            } catch (e) {}
+            } catch (e) {
+                // In caso di errore nel parsing, comunque aggiorna l'anteprima
+                updatePreview('leviathan');
+            }
         };
 
         function selectService(service, skipReset = false) {
