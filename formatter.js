@@ -328,7 +328,13 @@ function extractStreamInfo(title, source) {
   const uniqueLangs = [...new Map(detectedLangs.map(item => [item.id, item])).values()];
   let lang = "🇬🇧 ENG"; 
 
-  if (uniqueLangs.length > 0) {
+  // ============================================================
+  // CHECK: Se viene da nyaasi, forzo bandiere ITA/ENG
+  // ============================================================
+  if (source && /nyaasi/i.test(source)) {
+      lang = "🇮🇹" + LANG_SEP + "🇬🇧";
+  } 
+  else if (uniqueLangs.length > 0) {
       uniqueLangs.sort((a, b) => (a.id === 'ita' ? -1 : (b.id === 'ita' ? 1 : 0)));
       if (uniqueLangs.length === 1) {
           lang = `${uniqueLangs[0].flag} ${uniqueLangs[0].label}`;
@@ -667,4 +673,3 @@ function formatStreamSelector(fileTitle, source, size, seeders, serviceTag = "RD
 }
 
 module.exports = { formatStreamSelector, cleanFilename, formatBytes, extractStreamInfo, getEpisodeTag };
-
