@@ -895,7 +895,7 @@ const mobileHTML = `
 
                     <div class="m-cred-deck">
                         <div class="m-cred-opt cred-rd m-srv-btn active" onclick="setMService('rd', this)">
-                            <div class="m-cred-icon">🐋</div>
+                            <div class="m-cred-icon">🐬</div>
                             <div class="m-cred-name">REAL-DEBRID</div>
                         </div>
                         <div class="m-cred-opt cred-tb m-srv-btn" onclick="setMService('tb', this)">
@@ -1427,19 +1427,21 @@ const langDescriptions = {
 const skinMaps = {
     'bold': {
         nums: {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵'},
-        chars: {'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭','a':'𝗮','b':'𝗯','c':'𝗰','d':'𝗱','e':'𝗲','f':'𝗳','g':'𝗴','h':'𝗵','i':'𝗶','j':'j','k':'𝗸','l':'𝗹','m':'𝗺','n':'𝗻','o':'ᴏ','p':'ᴘ','q':'𝗾','r':'𝗿','s':'𝘀','t':'𝘁','u':'𝘂','v':'𝘃','w':'𝘄','x':'𝘅','y':'𝘆','z':'ᴢ'}
-    },
-    'spaced': {
-        nums: {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗'},
-        chars: {'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭'}
+        chars: {
+            'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭',
+            'a':'𝗮','b':'𝗯','c':'𝗰','d':'𝗱','e':'𝗲','f':'𝗳','g':'𝗴','h':'𝗵','i':'𝗶','j':'𝗷','k':'𝗸','l':'𝗹','m':'𝗺','n':'𝗻','o':'𝗼','p':'𝗽','q':'𝗾','r':'𝗿','s':'𝘀','t':'𝘁','u':'𝘂','v':'𝘃','w':'𝘄','x':'𝘅','y':'𝘆','z':'𝘇'
+        }
     },
     'small': {
         nums: {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9'},
         chars: {'A':'ᴀ','B':'ʙ','C':'ᴄ','D':'ᴅ','E':'ᴇ','F':'ꜰ','G':'ɢ','H':'ʜ','I':'ɪ','J':'ᴊ','K':'ᴋ','L':'ʟ','M':'ᴍ','N':'ɴ','O':'ᴏ','P':'ᴘ','Q':'ǫ','R':'ʀ','S':'ꜱ','T':'ᴛ','U':'ᴜ','V':'ᴠ','W':'ᴡ','X':'x','Y':'ʏ','Z':'ᴢ','a':'ᴀ','b':'ʙ','c':'ᴄ','d':'ᴅ','e':'ᴇ','f':'ꜰ','g':'ɢ','h':'ʜ','i':'ɪ','j':'ᴊ','k':'ᴋ','l':'ʟ','m':'ᴍ','n':'ɴ','o':'ᴏ','p':'ᴘ','q':'ǫ','r':'ʀ','s':'ꜱ','t':'ᴛ','u':'ᴜ','v':'ᴠ','w':'ᴡ','x':'x','y':'ʏ','z':'ᴢ'}
-    }
+    },
 };
 
 function toStylized(text, type = 'std') {
+    if (!text) return "";
+    text = String(text);
+    
     if (type === 'spaced') {
         return text.split('').map(c => {
             const map = skinMaps['bold'];
@@ -1524,82 +1526,249 @@ function updateMobilePreview() {
     let langStr = "🇮🇹 ITA";
     if(mLangMode === 'ita-eng') langStr = "🇮🇹 ITA 🇺🇸 ENG";
     if(mLangMode === 'eng') langStr = "🇺🇸 ENG";
+    
+    let serviceTag = "RD";
+    if(mCurrentService === 'tb') serviceTag = "TB";
+    if(mCurrentService === 'p2p') serviceTag = "P2P";
 
+    // SERVICE ICONS
+    let serviceIconTitle = "🦈"; // Default P2P
+    if (serviceTag === "RD") { serviceIconTitle = "🐬"; }     // RD = Delfino
+    else if (serviceTag === "TB") { serviceIconTitle = "⚓"; } // TB = Ancora
+    else if (serviceTag === "AD") { serviceIconTitle = "🐚"; } // AD = Conchiglia
+    
+    // MOCK DATA TO SIMULATE FORMATTER.JS INPUT
     const p = {
-        title: "Dune Parte Due",
-        cleanName: "Dune Parte Due (2024)",
+        cleanName: "Dune Parte Due",
+        fileTitle: "Dune.Parte.Due.2024.2160p.ITA.ENG.TrueHD.7.1.x265-Leviathan",
         quality: "4K",
+        qDetails: "4K",
         sizeString: "67.81 GB",
-        source: "ilCorSaRoNeRo",
         displaySource: "ilCorSaRoNeRo",
-        serviceTag: mCurrentService === 'p2p' ? "P2P" : mCurrentService.toUpperCase(),
-        serviceIcon: mCurrentService === 'rd' ? "☄️" : (mCurrentService === 'tb' ? "📦" : "🦈"),
+        serviceTag: serviceTag,
+        serviceIconTitle: serviceIconTitle,
         lang: langStr,
-        audioInfo: "🔊 ⚡ Stereo",
-        info: "💎 𝗥𝗘𝗠𝗨𝗫 • 🔥 𝗛𝗗𝗥 • 👁️ 𝗗𝗩 • ⚙️ 𝗛𝗘𝗩𝗖", 
-        cleanInfo: "Remux • HDR • DV",
-        seedersStr: "152"
+        audioTag: "TrueHD",
+        audioChannels: "7.1",
+        audioInfo: "TrueHD ┃ 7.1",
+        codec: "HEVC",
+        videoTags: ["💎 𝗥𝗘𝗠𝗨𝗫", "🔥 𝗛𝗗𝗥", "👁️ 𝗗𝗩", "⚙️ 𝗛𝗘𝗩𝗖"],
+        cleanTags: ["Remux", "HDR", "DV", "HEVC"],
+        seeders: 152,
+        seedersStr: "👥 152",
+        epTag: "",
+        releaseGroup: "Leviathan",
+        sourceLine: `${serviceIconTitle} [${serviceTag}] ilCorSaRoNeRo`
     };
 
     let name = "", desc = "";
 
-    if (mSkin === 'leviathan') {
-        const qualityBold = toStylized(p.quality, 'bold');
-        const qIconOverride = p.serviceIcon;
-        name = `🦑 𝗟𝗘𝗩𝗜𝗔𝗧𝗛𝗔𝗡\n${qIconOverride} ┃ ${qualityBold}`;
-        desc = `📁 ${p.cleanName}\n🗣️ ${p.lang} • ${p.audioInfo}\n${p.info}\n🧲 ${p.sizeString} • 👥 ${p.seedersStr}\n${p.serviceIcon} [${p.serviceTag}] ${p.displaySource}`;
-    } else if (mSkin === 'lev2') {
+    // --- EMBEDDED FORMATTER LOGIC ---
+    // This strictly mimics the logic from formatter.js
+
+    const styleLeviathan = (p) => {
+        let cleanAudio = p.audioTag.replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, "").trim();
+        if (!cleanAudio) cleanAudio = p.audioTag; 
+        
+        const titleIcon = "▶️"; 
+        const techIcon = "🔱"; 
+    
+        // LOGICA ICONE SERVIZI
+        let serviceIcon = "🦈"; 
+        if (p.serviceTag === "RD") serviceIcon = "🐬";
+        else if (p.serviceTag === "TB") serviceIcon = "⚓";
+        else if (p.serviceTag === "AD") serviceIcon = "🐚";
+
+        // Icona di stato per la PRIMA RIGA
+        const isCached = ["RD", "AD", "TB"].includes(p.serviceTag);
+        const statusIcon = isCached ? serviceIcon : "⏳";
+
+        const brandName = toStylized("LEVIATHAN", "small"); 
+        const serviceStyled = toStylized(p.serviceTag, "bold");
+        
+        // PRIMA RIGA: [Delfino] [RD] 🦑 [LEVIATHAN]
+        const name = `${statusIcon} ${serviceStyled} 🦑 ${brandName}`;
+    
+        let techSpecs = [p.quality, ...p.cleanTags].filter(Boolean);
+        techSpecs = [...new Set(techSpecs)]; 
+        let techLine = techSpecs.map(t => toStylized(t, 'small')).join(" • ");
+    
+        const lines = [];
+        lines.push(`${titleIcon} ${toStylized(p.cleanName, "bold")} ${p.epTag}`);
+        if (techLine) lines.push(`${techIcon} ${techLine}`);
+        
+        let audioPart = [cleanAudio, p.audioChannels].filter(Boolean).join(" ");
+        lines.push(`🗣️ ${p.lang}  |  🫧 ${audioPart}`);
+    
+        let fileInfo = `🧲 ${p.sizeString}`;
+        if (p.seedersStr) fileInfo += `  |  ${p.seedersStr}`;
+        lines.push(fileInfo);
+    
+        let sourceRow = `${p.serviceIconTitle} ${p.displaySource}`;
+        if (p.releaseGroup) {
+            const styledGroup = toStylized(p.releaseGroup, 'small');
+            sourceRow += ` | 🏷️ ${styledGroup}`;
+        }
+        lines.push(sourceRow);
+    
+        return { name, title: lines.join("\n") };
+    };
+
+    const styleLeviathanTwo = (p) => {
         const levText = toStylized("LEVIATHAN", "small");
-        const qText = toStylized("4K", "bold");
-        const sizeSmall = toStylized("64.20", "bold") + " " + toStylized("GB", "small");
-        name = `🦑 ${levText} ${p.serviceIcon} │ ${qText}`;
-        const titleBold = toStylized(p.cleanName, "bold");
-        const audioSmall = toStylized("TrueHD 7.1", "small");
-        const langSmall = toStylized("ITA ENG", "small");
-        const srcSmall = toStylized(p.displaySource, "small");
-        let servSmall = "ᴘ𝟚ᴘ";
-        if(p.serviceTag === "RD") servSmall = "ʀᴇᴀʟ-ᴅᴇʙʀɪᴅ";
-        if(p.serviceTag === "TB") servSmall = "ᴛᴏʀʙᴏx";
-        desc = `🎬 ${titleBold}\n📦 ${sizeSmall} │ ʀᴇᴍᴜx │ ᴅᴏʟʙʏ ᴠɪsɪᴏɴ\n🔊 ${audioSmall} • 🇮🇹 ${langSmall}\n🔗 ${servSmall} │ ${srcSmall}`;
-    } else if (mSkin === 'fra') {
-        name = `⚡️ Leviathan 4K`;
-        desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ ${p.lang} • TrueHD\n✨ ❯ ${p.serviceTag} • ${p.source}\n🔥 ❯ 4K • Remux • HDR\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337`;
-    } else if (mSkin === 'comet') {
-        name = `[${p.serviceTag} ⚡]\nLeviathan\n4K`;
-        desc = `📄 ${p.cleanName}\n📹 HEVC • ${p.cleanInfo} | TrueHD\n⭐ ${p.source}\n💾 ${p.sizeString} 👥 1337\n🌍 ${p.lang}`;
-    } else if (mSkin === 'stremio_ita') {
-        name = `⚡️ Leviathan 4K`;
-        desc = `📄 ❯ ${p.cleanName}\n🌎 ❯ ${p.lang}\n✨ ❯ ${p.serviceTag} • ${p.source}\n🔥 ❯ 4K • HEVC • ${p.cleanInfo}\n💾 ❯ ${p.sizeString} / 👥 ❯ 1337\n🔉 ❯ TrueHD • 7.1`;
-    } else if (mSkin === 'dav') {
-        name = `🎥4K UHD HEVC`;
-        desc = `📺 ${p.cleanName}\n🎧 TrueHD 7.1 | 🎞️ HEVC\n🗣️ ${p.lang} | 📦 ${p.sizeString}\n⏱️ 1337 Seeds | 🏷️ ${p.source}\n${p.serviceIcon} Leviathan 📡 ${p.serviceTag}\n📂 ${p.title}`;
-    } else if (mSkin === 'and') {
-        name = `🎬 ${p.cleanName}`;
-        desc = `4K ⚡\n─ ─ ─ ─ ─ ─ ─ ─ ─ ─\nLingue: ${p.lang}\nSpecifiche: 4K | 📺 Remux HDR | 🔊 TrueHD\n─ ─ ─ ─ ─ ─ ─ ─ ─ ─\n📂 ${p.sizeString} | ☁️ ${p.serviceTag} | 🛰️ Leviathan`;
-    } else if (mSkin === 'lad') {
-        name = `🖥️ 4K ${p.serviceTag}`;
-        desc = `🎟️ ${p.cleanName}\n📜 Movie\n🎥 4K 🎞️ HEVC 🎧 TrueHD\n📦 ${p.sizeString} • 🔗 Leviathan\n🌐 ${p.lang}`;
-    } else if (mSkin === 'pri') {
-        name = `[${p.serviceTag}]⚡️☁️\n4K🔥UHD\n[Leviathan]`;
-        desc = `🎬 ${toStylized(p.cleanName, 'bold')}\n💎 ʀᴇᴍᴜx 🔆 HDR\n🎧 TrueHD | 🔊 7.1 | 🗣️ ${p.lang}\n📁 ${p.sizeString} | 🏷️ ${p.source}\n📄 ▶️ ${p.title} ◀️`;
-    } else if (mSkin === 'custom') {
+        const name = `🦑 ${levText} ${p.serviceIconTitle} │ ${p.quality}`;
+        const lines = [];
+        lines.push(`🎬 ${toStylized(p.cleanName, "bold")}`);
+        lines.push(`📦 ${p.sizeString} │ ${p.codec} ${p.cleanTags.filter(x=>!x.includes(p.codec)).join(" ")}`);
+        lines.push(`🔊 ${p.audioTag} ${p.audioChannels} • ${p.lang}`);
+        
+        let sourceRow = `🔗 ${p.sourceLine}`;
+        if (p.seedersStr) sourceRow += ` ${p.seedersStr}`;
+        lines.push(sourceRow);
+        
+        return { name, title: lines.join("\n") };
+    };
+
+    const styleFra = (p) => {
+        let qShort = p.quality === "1080p" ? "FHD" : (p.quality === "4K" ? "4K" : "HD");
+        const name = `⚡️ Leviathan ${qShort}`;
+        const tagString = p.cleanTags.join(' • ');
+        const lines = [
+            `📄 ❯ ${p.fileTitle}`, 
+            `🌎 ❯ ${p.lang} • ${p.audioTag}`, 
+            `✨ ❯ ${p.serviceTag} • ${p.displaySource}`, 
+            `🔥 ❯ ${p.quality} • ${tagString}`, 
+            `💾 ❯ ${p.sizeString} / 👥 ❯ ${p.seeders}`
+        ];
+        return { name, title: lines.join("\n") };
+    };
+
+    const styleDav = (p) => {
+        let header = p.quality === "4K" ? "🎥 4K UHD" : (p.quality === "1080p" ? "📀 FHD" : "💿 HD");
+        const name = `${header} ${p.codec}`;
+        const lines = [];
+        lines.push(`📺 ${p.cleanName} ${p.epTag}`);
+        lines.push(`🎧 ${p.audioTag} ${p.audioChannels} | 🎞️ ${p.codec}`);
+        lines.push(`🗣️ ${p.lang} | 📦 ${p.sizeString}`);
+        lines.push(`⏱️ ${p.seeders} Seeds | 🏷️ ${p.displaySource}`);
+        lines.push(`${p.serviceIconTitle} Leviathan 📡 ${p.serviceTag}`);
+        lines.push(`📂 ${p.fileTitle}`);
+        return { name, title: lines.join("\n") };
+    };
+
+    const styleAnd = (p) => {
+        const name = `🎬 ${p.cleanName} ${p.epTag}`;
+        const lines = [];
+        const cachedIcon = p.serviceTag === "RD" ? "⚡" : "⏳";
+        lines.push(`${p.quality} ${cachedIcon}`);
+        lines.push(`─ ─ ─ ─ ─ ─ ─ ─ ─ ─`);
+        lines.push(`Lingue: ${p.lang}`);
+        lines.push(`Specifiche: ${p.quality} | 📺 ${p.cleanTags.join(' ')} | 🔊 ${p.audioTag}`);
+        lines.push(`─ ─ ─ ─ ─ ─ ─ ─ ─ ─`);
+        lines.push(`📂 ${p.sizeString} | ☁️ ${p.serviceTag} | 🛰️ Leviathan`);
+        return { name, title: lines.join("\n") };
+    };
+
+    const styleLad = (p) => {
+        const name = `🖥️ ${p.quality} ${p.serviceTag}`;
+        const lines = [];
+        lines.push(`🎟️ ${p.cleanName}`);
+        lines.push(`📜 ${p.epTag || "Movie"}`);
+        lines.push(`🎥 ${p.quality} 🎞️ ${p.codec} 🎧 ${p.audioTag}`);
+        lines.push(`📦 ${p.sizeString} • 🔗 Leviathan`);
+        lines.push(`🌐 ${p.lang}`);
+        return { name, title: lines.join("\n") };
+    };
+
+    const stylePri = (p) => {
+        let resIcon = p.quality === "4K" ? "4K🔥UHD" : (p.quality === "1080p" ? "FHD🚀1080p" : "HD💿720p");
+        const name = `[${p.serviceTag}]⚡️☁️\n${resIcon}\n[Leviathan]`;
+        const lines = [];
+        lines.push(`🎬 ${p.cleanName} ${p.epTag}`);
+        lines.push(`${p.cleanTags.join(" ")}`);
+        lines.push(`🎧 ${p.audioTag} | 🔊 ${p.audioChannels} | 🗣️ ${p.lang}`);
+        lines.push(`📁 ${p.sizeString} | 🏷️ ${p.displaySource}`);
+        lines.push(`📄 ▶️ ${p.fileTitle} ◀️`);
+        return { name, title: lines.join("\n") };
+    };
+
+    const styleComet = (p) => {
+        const name = `[${p.serviceTag} ⚡]\nLeviathan\n${p.quality}`;
+        const lines = [];
+        lines.push(`📄 ${p.fileTitle}`);
+        const techStack = [p.codec, ...p.cleanTags].filter(Boolean).join(" • ");
+        const videoPart = techStack ? techStack : "Video";
+        lines.push(`📹 ${videoPart} | ${p.audioTag}`);
+        lines.push(`⭐ ${p.displaySource}`);
+        const provider = p.seeders != null ? `👥 ${p.seeders}` : "🔎 Leviathan";
+        lines.push(`💾 ${p.sizeString} ${provider}`);
+        lines.push(`🌍 ${p.lang}`);
+        return { name, title: lines.join("\n") };
+    };
+
+    const styleStremioIta = (p) => {
+        const isCached = ["RD", "TB", "AD"].includes(p.serviceTag);
+        const statusIcon = isCached ? "⚡️" : "⏳";
+        const name = `${statusIcon} Leviathan ${p.qDetails}`;
+        const lines = [];
+        lines.push(`📄 ❯ ${p.fileTitle}`);
+        lines.push(`🌎 ❯ ${p.lang.replace(/ITA/i, "ita").replace(/ENG/i, "eng").replace(/MULTI/i, "multi")}`);
+        let typeIcon = "✨";
+        if (!isCached) typeIcon = "⬇️"; 
+        lines.push(`${typeIcon} ❯ ${p.serviceTag} • ${p.displaySource}`);
+        
+        let qualIcon = "📀";
+        if (p.cleanTags.some(t => /bluray|web|hdr|dv/i.test(t)) || p.quality === "4K") qualIcon = "🔥";
+        
+        const tagsJoined = p.cleanTags.join(' • ');
+        const qualLine = tagsJoined ? `${p.quality} • ${tagsJoined}` : p.quality;
+        lines.push(`${qualIcon} ❯ ${qualLine}`);
+        
+        let sizeLine = `💾 ❯ ${p.sizeString}`;
+        if (!isCached && p.seeders !== null) {
+            sizeLine += ` / 👥 ❯ ${p.seeders}`;
+        }
+        lines.push(sizeLine);
+        const audioLine = [p.audioTag, p.audioChannels].filter(Boolean).join(" • ");
+        if (audioLine) lines.push(`🔉 ❯ ${audioLine}`);
+        return { name, title: lines.join("\n") };
+    };
+
+    const styleCustom = (p) => {
         let tpl = document.getElementById('m-customTemplate').value || "Lev {quality} ||| {title} - {size}";
-        tpl = tpl.replace("{title}", p.cleanName).replace("{quality}", p.quality)
-                 .replace("{size}", p.sizeString).replace("{source}", p.source)
-                 .replace("{service}", p.serviceTag).replace("{lang}", p.lang)
-                 .replace("{audio}", p.audioInfo).replace(/\\n/g, "\n");
+        const vars = {
+            "{title}": p.cleanName, "{originalTitle}": p.fileTitle, "{ep}": p.epTag || "",
+            "{quality}": p.quality, "{quality_bold}": toStylized(p.quality, 'bold'),
+            "{size}": p.sizeString, "{source}": p.displaySource, "{service}": p.serviceTag,
+            "{lang}": p.lang, "{audio}": p.audioInfo, "{seeders}": p.seedersStr, "{n}": "\n" 
+        };
+        Object.keys(vars).forEach(key => { tpl = tpl.replace(new RegExp(key, "g"), vars[key]); });
+        tpl = tpl.replace(/\\n/g, "\n");
         if (tpl.includes("|||")) {
             const parts = tpl.split("|||");
-            name = parts[0].trim();
-            desc = parts[1].trim();
+            return { name: parts[0].trim(), title: parts[1].trim() };
         } else {
-            name = `Leviathan ${p.serviceTag}\n${p.quality}`;
-            desc = tpl;
+            return { name: `Leviathan ${p.quality}`, title: tpl };
         }
+    };
+
+    let result = { name: "", title: "" };
+
+    switch (mSkin) {
+        case "lev2": result = styleLeviathanTwo(p); break;
+        case "fra": result = styleFra(p); break;
+        case "dav": result = styleDav(p); break;
+        case "and": result = styleAnd(p); break;
+        case "lad": result = styleLad(p); break;
+        case "pri": result = stylePri(p); break;
+        case "comet": result = styleComet(p); break;
+        case "stremio_ita": result = styleStremioIta(p); break;
+        case "custom": result = styleCustom(p); break;
+        case "leviathan": default: result = styleLeviathan(p); break;
     }
 
-    document.getElementById('m-prev-title').innerText = name;
-    document.getElementById('m-prev-info').innerText = desc;
+    document.getElementById('m-prev-title').innerText = result.name;
+    document.getElementById('m-prev-info').innerText = result.title;
 }
 
 function toggleMobileAIOLock() {
