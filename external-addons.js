@@ -3,27 +3,16 @@ const axios = require("axios");
 // --- CONFIGURAZIONE ADDON ESTERNI ---
 const EXTERNAL_ADDONS = {
     torrentio: {
-        // Configurazione con FAILOVER (triplo link)
+        // Configurazione UNICA richiesta
         baseUrls: [
-            
-         // 2. Vecchio link 
-            'https://torrentio.stremioluca.dpdns.org/oResults=false/aHR0cHM6Ly90b3JyZW50aW8uc3RyZW0uZnVuL3Byb3ZpZGVycz15dHMsZXp0dixyYXJiZywxMzM3eCx0aGVwaXJhdGViYXksa2lja2Fzc3RvcnJlbnRzLHRvcnJlbnRnYWxheHksbWFnbmV0ZGwsaG9ycmlibGVzdWJzLG55YWFzaSx0b2t5b3Rvc2hvLGFuaWRleCxydXRvcixydXRyYWNrZXIsY29tYW5kbyxibHVkdix0b3JyZW50OSxpbGNvcnNhcm9uZXJvLG1lam9ydG9ycmVudCx3b2xmbWF4NGssY2luZWNhbGlkYWQsYmVzdHRvcnJlbnRzfGxhbmd1YWdlPWl0YWxpYW4=',
-            
-            // 3. Link di EMERGENZA 
-            'https://torrentio.strem.fun/providers=nyaasi,ilcorsaronero%7Clanguage=italian%7Cdebridoptions=nodownloadlinks'
+            // URL Aggiornato 
+            'https://torrentio.stremioluca.dpdns.org/oResults=false/aHR0cHM6Ly90b3JyZW50aW8uc3RyZW0uZnVuL3Byb3ZpZGVycz15dHMsZXp0dixyYXJiZywxMzM3eCx0aGVwaXJhdGViYXksa2lja2Fzc3RvcnJlbnRzLHRvcnJlbnRnYWxheHksbWFnbmV0ZGwsaG9ycmlibGVzdWJzLG55YWFzaSx0b2t5b3Rvc2hvLGFuaWRleCxydXRvcixydXRyYWNrZXIsY29tYW5kbyxibHVkdix0b3JyZW50OSxpbGNvcnNhcm9uZXJvLG1lam9ydG9ycmVudCx3b2xmbWF4NGssY2luZWNhbGlkYWQsYmVzdHRvcnJlbnRzfGxhbmd1YWdlPWl0YWxpYW4='
         ],
         name: 'Torrentio',
         emoji: '🅣',
-        timeout: 2500
-    },
-    mediafusion: {
-        // URL MediaFusion
-        baseUrl: 'https://mediafusion.stremio.ru/D-T67taQDYh1r-Zq9_jdKJwgJfyPyZypBcztc8rIcsLJqQDS1eBLvFIssvKFXj-u0U',
-        name: 'MediaFusion',
-        emoji: '🅜',
-        timeout: 2500,
-        filterIta: true 
+        timeout: 4000 
     }
+    
 };
 
 // ============================================================================
@@ -201,8 +190,15 @@ function buildMagnetLink(infoHash, sources) {
 async function fetchExternalAddon(addonKey, type, id) {
     const addon = EXTERNAL_ADDONS[addonKey];
     if (!addon) {
-        console.error(`❌ [External] Unknown addon: ${addonKey}`);
+        // Se l'addon è stato rimosso dalla config (es. MediaFusion), non facciamo nulla
+        // console.error(`❌ [External] Unknown addon: ${addonKey}`);
         return [];
+    }
+
+    // --- LOGICA KITSU/ANIME (COMPATIBILE CON ADDON.JS) ---
+    let fetchType = type;
+    if (type === 'anime' || id.toString().startsWith('kitsu:')) {
+        if (fetchType === 'anime') fetchType = 'series';
     }
 
     const urlsToTry = [];
@@ -217,9 +213,9 @@ async function fetchExternalAddon(addonKey, type, id) {
     for (let i = 0; i < urlsToTry.length; i++) {
         // Pulisce l'URL e lo costruisce
         const baseUrl = urlsToTry[i].replace(/\/$/, '');
-        const url = `${baseUrl}/stream/${type}/${id}.json`;
+        const url = `${baseUrl}/stream/${fetchType}/${id}.json`;
         
-        console.log(`🌐 [${addon.name}] Attempt ${i + 1}/${urlsToTry.length} ...`);
+        console.log(`🌐 [${addon.name}] Attempt ${i + 1}/${urlsToTry.length} ... (Type: ${fetchType}, ID: ${id})`);
 
         try {
             const controller = new AbortController();
@@ -252,22 +248,11 @@ async function fetchExternalAddon(addonKey, type, id) {
 
             let streams = data.streams || [];
 
-            // =========================================================
-            //  FIX: SE TROVA 0 STREAM, LO CONSIDERA FALLITO E VA AVANTI
-            // =========================================================
             if (streams.length === 0) {
                 console.warn(`⚠️ [${addon.name}] Link ${i + 1} returned 0 streams. Trying next mirror...`);
-                // Se non è l'ultimo link, prova il prossimo
                 if (i < urlsToTry.length - 1) {
                     continue; 
                 }
-            }
-
-            // FILTRI SPECIALI
-            if (i === 2 && addonKey === 'torrentio') { 
-                 const countBefore = streams.length;
-                 streams = streams.filter(isItalianContent);
-                 console.log(`⚠️ [Torrentio Emergency] Filtered ${countBefore} -> ${streams.length} (ITA Only)`);
             }
 
             if (addonKey === 'mediafusion' && addon.filterIta === true) {
