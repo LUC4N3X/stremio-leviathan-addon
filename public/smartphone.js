@@ -1154,6 +1154,10 @@ const mobileHTML = `
                             <div class="m-chip-icon">🎟️</div>
                             <div class="m-chip-label">Compact</div>
                         </div>
+                        <div class="m-cortex-chip" id="msk_torrentio" onclick="selectMobileSkin('torrentio')">
+                            <div class="m-chip-icon">📜</div>
+                            <div class="m-chip-label">Torrentio</div>
+                        </div>
                         <div class="m-cortex-chip" id="msk_custom" onclick="selectMobileSkin('custom')" style="grid-column: span 3; border-style: dashed; background: rgba(0,0,0,0.3);">
                             <div class="m-chip-icon">🛠️</div>
                             <div class="m-chip-label">CUSTOM BUILDER</div>
@@ -1429,7 +1433,7 @@ const skinMaps = {
         nums: {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵'},
         chars: {
             'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭',
-            'a':'𝗮','b':'𝗯','c':'𝗰','d':'𝗱','e':'𝗲','f':'𝗳','g':'𝗴','h':'𝗵','i':'𝗶','j':'𝗷','k':'𝗸','l':'𝗹','m':'𝗺','n':'𝗻','o':'𝗼','p':'𝗽','q':'𝗾','r':'𝗿','s':'𝘀','t':'𝘁','u':'𝘂','v':'𝘃','w':'𝘄','x':'𝘅','y':'𝘆','z':'𝘇'
+            'a':'𝗮','b':'𝗯','c':'𝗰','d':'𝗱','e':'𝗲','f':'𝗳','g':'𝗴','h':'𝗵','i':'𝗶','j':'𝗷','k':'𝗸','l':'𝗹','m':'𝗺','n':'𝗻','o':'𝗼','p':'𝗽','q':'𝗾','r':'𝗿','s':'𝘀','t':'𝘁','u':'𝘂','v':'𝘃','w':'ᴡ','x':'𝘅','y':'𝘆','z':'𝘇'
         }
     },
     'small': {
@@ -1734,6 +1738,33 @@ function updateMobilePreview() {
         return { name, title: lines.join("\n") };
     };
 
+    const styleTorrentio = (p) => {
+        const name = `[${p.serviceTag}]\n${p.quality}`;
+        const lines = [];
+        
+        // RIGA 1: Filename completo con icona foglio
+        lines.push(`📄 ${p.fileTitle}`);
+
+        // RIGA 2: Size (Box) e Seeders (Silhouette)
+        let sizeLine = `📦 ${p.sizeString}`;
+        // p.seeders is a number, p.seedersStr is "👥 152". We reconstruct it manually for "👤 152"
+        if (p.seeders !== null && p.seeders !== undefined) {
+            sizeLine += ` 👤 ${p.seeders}`;
+        }
+        lines.push(sizeLine);
+
+        // RIGA 3: Sorgente con lente d'ingrandimento
+        lines.push(`🔍 ${p.displaySource}`);
+
+        // RIGA 4: Lingue con altoparlante
+        // Clean flags like in formatter.js
+        let cleanLang = p.lang.replace(/[\u{1F1E6}-\u{1F1FF}]{2}/gu, "").trim(); 
+        if (!cleanLang.replace(/[^a-zA-Z]/g, "")) cleanLang = p.lang; 
+        lines.push(`🔊 ${cleanLang}`);
+
+        return { name, title: lines.join("\n") };
+    };
+
     const styleCustom = (p) => {
         let tpl = document.getElementById('m-customTemplate').value || "Lev {quality} ||| {title} - {size}";
         const vars = {
@@ -1763,6 +1794,7 @@ function updateMobilePreview() {
         case "pri": result = stylePri(p); break;
         case "comet": result = styleComet(p); break;
         case "stremio_ita": result = styleStremioIta(p); break;
+        case "torrentio": result = styleTorrentio(p); break; // AGGIUNTO
         case "custom": result = styleCustom(p); break;
         case "leviathan": default: result = styleLeviathan(p); break;
     }
