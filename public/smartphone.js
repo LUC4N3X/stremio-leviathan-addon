@@ -1158,6 +1158,10 @@ const mobileHTML = `
                             <div class="m-chip-icon">📜</div>
                             <div class="m-chip-label">Torrentio</div>
                         </div>
+                        <div class="m-cortex-chip" id="msk_vertical" onclick="selectMobileSkin('vertical')">
+                            <div class="m-chip-icon">📑</div>
+                            <div class="m-chip-label">Vertical</div>
+                        </div>
                         <div class="m-cortex-chip" id="msk_custom" onclick="selectMobileSkin('custom')" style="grid-column: span 3; border-style: dashed; background: rgba(0,0,0,0.3);">
                             <div class="m-chip-icon">🛠️</div>
                             <div class="m-chip-label">CUSTOM BUILDER</div>
@@ -1742,25 +1746,51 @@ function updateMobilePreview() {
         const name = `[${p.serviceTag}]\n${p.quality}`;
         const lines = [];
         
-        // RIGA 1: Filename completo con icona foglio
         lines.push(`📄 ${p.fileTitle}`);
 
-        // RIGA 2: Size (Box) e Seeders (Silhouette)
         let sizeLine = `📦 ${p.sizeString}`;
-        // p.seeders is a number, p.seedersStr is "👥 152". We reconstruct it manually for "👤 152"
         if (p.seeders !== null && p.seeders !== undefined) {
             sizeLine += ` 👤 ${p.seeders}`;
         }
         lines.push(sizeLine);
 
-        // RIGA 3: Sorgente con lente d'ingrandimento
         lines.push(`🔍 ${p.displaySource}`);
 
-        // RIGA 4: Lingue con altoparlante
-        // Clean flags like in formatter.js
         let cleanLang = p.lang.replace(/[\u{1F1E6}-\u{1F1FF}]{2}/gu, "").trim(); 
         if (!cleanLang.replace(/[^a-zA-Z]/g, "")) cleanLang = p.lang; 
         lines.push(`🔊 ${cleanLang}`);
+
+        return { name, title: lines.join("\n") };
+    };
+
+    // === NUOVO FORMATTER AGGIUNTO: Vertical Style ===
+    const styleVertical = (p) => {
+        const isCached = ["RD", "TB", "AD"].includes(p.serviceTag);
+        const cacheIcon = isCached ? "⚡" : "☁️";
+        
+        // Header: Calamaro + Nome + Qualità + Cache
+        const name = `🦑 Leviathan ${p.quality} ${cacheIcon} Cached`;
+        
+        const lines = [];
+        
+        // Riga 1: Titolo (Popcorn 🍿)
+        lines.push(`🍿 ${p.cleanName}`);
+
+        // Riga 2: Sorgente (Cassetta 📼)
+        const videoInfo = p.cleanTags.length > 0 ? `📼 WEB-DL • ${p.cleanTags[0]}` : `📼 WEB-DL`;
+        lines.push(videoInfo);
+
+        // Riga 3: Codec (Ingranaggio ⚙️)
+        lines.push(`⚙️ ${p.codec}`);
+
+        // Riga 4: Audio (Speaker 🔊)
+        lines.push(`🔊 ${p.audioTag} (${p.audioChannels})`);
+
+        // Riga 5: Lingua (Fumetto 💬)
+        lines.push(`💬 ${p.lang}`);
+
+        // Riga 6: Size (Magnete 🧲)
+        lines.push(`🧲 ${p.sizeString}`);
 
         return { name, title: lines.join("\n") };
     };
@@ -1794,7 +1824,8 @@ function updateMobilePreview() {
         case "pri": result = stylePri(p); break;
         case "comet": result = styleComet(p); break;
         case "stremio_ita": result = styleStremioIta(p); break;
-        case "torrentio": result = styleTorrentio(p); break; // AGGIUNTO
+        case "torrentio": result = styleTorrentio(p); break;
+        case "vertical": result = styleVertical(p); break; // <--- NUOVO CASE AGGIUNTO
         case "custom": result = styleCustom(p); break;
         case "leviathan": default: result = styleLeviathan(p); break;
     }
