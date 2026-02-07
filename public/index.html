@@ -1300,6 +1300,15 @@
                     <div class="skin-btn active" id="skin_leviathan" onclick="selectSkin('leviathan')">
                         <span class="skin-icon">🦑</span><span class="skin-name">Leviathan</span>
                     </div>
+                    <div class="skin-btn" id="skin_complex" onclick="selectSkin('complex')">
+                        <span class="skin-icon">🔲</span><span class="skin-name">Template</span>
+                    </div>
+                    <div class="skin-btn" id="skin_android" onclick="selectSkin('android')">
+                        <span class="skin-icon">📺</span><span class="skin-name">Android TV</span>
+                    </div>
+                    <div class="skin-btn" id="skin_picture" onclick="selectSkin('picture')">
+                        <span class="skin-icon">🖼️</span><span class="skin-name">Picture</span>
+                    </div>
                     <div class="skin-btn" id="skin_lev2" onclick="selectSkin('lev2')">
                         <span class="skin-icon">🧬</span><span class="skin-name">Architect</span>
                     </div>
@@ -1690,6 +1699,24 @@
                 desc = lines.join("\n");
             }
             
+            else if (skin === 'complex') {
+                // NUOVO COMPLEX (TEMPLATE STYLE)
+                name = `🔲 4K │ ⛁ 64.20 GB`;
+                desc = `☰ 🇮🇹 ITA · TrueHD · 7.1\n☲ 4K · HEVC · Remux · DV+HDR\n☵ Leviathan · LEVIATHAN · 1337x · [${p.serviceTag}]\n☶ ${p.cleanName}`;
+            }
+
+            else if (skin === 'android') {
+                // NUOVO ANDROID TV
+                name = `4K | DV | ${p.serviceTag}`;
+                desc = `🎞️ HEVC\n🎧 TrueHD 7.1\n⚙️ 1337x\n🇮🇹 ITA\n${p.fileTitle}`;
+            }
+
+            else if (skin === 'picture') {
+                // NUOVO PICTURE (JURASSIC STYLE)
+                name = `✅ UHD HDR ATMOS 4K`;
+                desc = `🎬 ${p.cleanName}\n✨ 4K 🔆 DV | HDR\n🎧 TrueHD 🔊 7.1\n💿 Blu-ray Remux\n📦 64.20 GB\n🏷️ Blu-ray Remux T1 (LEVIATHAN)\n⚡ Comet ${p.serviceTag}`;
+            }
+
 			else if (skin === 'lev2') {
                 // styleLeviathanTwo
                 const levText = toStylized("LEVIATHAN", "small");
