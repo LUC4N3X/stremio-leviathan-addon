@@ -514,7 +514,7 @@
         .lock-icon { font-size: 3rem; color: var(--secondary); margin-bottom: 15px; filter: drop-shadow(0 0 10px var(--secondary)); }
         .lock-msg { font-family: 'Rajdhani', sans-serif; font-size: 1.5rem; font-weight: 800; color: #fff; letter-spacing: 2px; text-transform: uppercase; }
         
-        .disabled-core .skin-selector-container, .disabled-core .custom-area {
+        .disabled-core .skin-selector-container, .disabled-core .custom-area, .disabled-core .custom-mode-trigger {
             opacity: 0.3; filter: grayscale(1); pointer-events: none;
         }
 
@@ -523,9 +523,15 @@
             display: grid; 
             grid-template-columns: repeat(5, 1fr); /* Default desktop */
             gap: 15px; 
-            margin-bottom: 25px;
+            margin-bottom: 15px;
             padding: 10px;
             background: radial-gradient(circle at center, rgba(0, 242, 255, 0.05) 0%, transparent 70%);
+            transition: opacity 0.3s ease;
+        }
+        
+        /* Quando la custom mode è attiva, nascondiamo o attenuamo la griglia */
+        .skin-selector-container.hidden-by-custom {
+            opacity: 0.3; pointer-events: none; filter: blur(2px);
         }
 
         /* NEW SKIN BUTTON STYLE - CYBER PLATE */
@@ -679,6 +685,39 @@
         .mock-title { color: #fff; font-size: 1.15rem; font-weight: 500; white-space: pre-wrap; line-height: 1.3; text-shadow: 0 0 5px rgba(0,0,0,0.5); }
         .mock-info { color: #aaa; font-size: 0.9rem; white-space: pre-wrap; line-height: 1.6; font-weight: 400; font-family: 'Outfit', sans-serif; opacity: 0.9; }
         
+        /* Custom Mode Toggle "Fighissimo" */
+        .custom-mode-trigger {
+            background: rgba(10, 5, 20, 0.6);
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            margin-top: 15px; margin-bottom: 25px;
+            padding: 15px; border-radius: 12px;
+            display: flex; align-items: center; gap: 15px;
+            cursor: pointer; transition: 0.3s;
+            position: relative; overflow: hidden;
+        }
+        .custom-mode-trigger:hover { border-color: var(--primary); background: rgba(0, 242, 255, 0.05); }
+        .custom-mode-trigger.active {
+            border-style: solid; border-color: var(--primary);
+            background: linear-gradient(90deg, rgba(0, 242, 255, 0.1), transparent);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
+        }
+        .custom-mode-trigger .trigger-icon { font-size: 1.5rem; color: #555; transition: 0.3s; }
+        .custom-mode-trigger.active .trigger-icon { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+        
+        .trigger-text { flex: 1; display: flex; flex-direction: column; }
+        .main-text { font-family: 'Rajdhani'; font-weight: 800; font-size: 1.1rem; color: #fff; letter-spacing: 2px; text-transform: uppercase; }
+        .sub-text { font-size: 0.8rem; color: #777; font-family: 'Outfit'; }
+        
+        .trigger-status {
+            font-family: 'Rajdhani'; font-weight: 800; color: #444;
+            padding: 5px 10px; border: 1px solid #333; border-radius: 4px;
+            transition: 0.3s;
+        }
+        .custom-mode-trigger.active .trigger-status {
+            color: #000; background: var(--primary); border-color: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
         .custom-area {
             display: none; background: #0a0a0a; padding: 0; border-radius: 10px; 
             border: 1px solid #333; margin-top: 15px; animation: fadeInRow 0.3s ease;
@@ -1300,15 +1339,6 @@
                     <div class="skin-btn active" id="skin_leviathan" onclick="selectSkin('leviathan')">
                         <span class="skin-icon">🦑</span><span class="skin-name">Leviathan</span>
                     </div>
-                    <div class="skin-btn" id="skin_complex" onclick="selectSkin('complex')">
-                        <span class="skin-icon">🔲</span><span class="skin-name">Template</span>
-                    </div>
-                    <div class="skin-btn" id="skin_android" onclick="selectSkin('android')">
-                        <span class="skin-icon">📺</span><span class="skin-name">Android TV</span>
-                    </div>
-                    <div class="skin-btn" id="skin_picture" onclick="selectSkin('picture')">
-                        <span class="skin-icon">🖼️</span><span class="skin-name">Picture</span>
-                    </div>
                     <div class="skin-btn" id="skin_lev2" onclick="selectSkin('lev2')">
                         <span class="skin-icon">🧬</span><span class="skin-name">Architect</span>
                     </div>
@@ -1339,10 +1369,27 @@
                     <div class="skin-btn" id="skin_vertical" onclick="selectSkin('vertical')">
                         <span class="skin-icon">📑</span><span class="skin-name">Vertical</span>
                     </div>
-                    <div class="skin-btn" id="skin_custom" onclick="selectSkin('custom')">
-                        <span class="skin-icon">🛠️</span><span class="skin-name">Custom</span>
+                    
+                    <div class="skin-btn" id="skin_android" onclick="selectSkin('android')">
+                        <span class="skin-icon">📺</span><span class="skin-name">Android TV</span>
+                    </div>
+                     <div class="skin-btn" id="skin_picture" onclick="selectSkin('picture')">
+                        <span class="skin-icon">🖼️</span><span class="skin-name">Picture</span>
+                    </div>
+                    <div class="skin-btn" id="skin_complex" onclick="selectSkin('complex')">
+                        <span class="skin-icon">🔲</span><span class="skin-name">Template</span>
                     </div>
                 </div>
+
+                <div class="custom-mode-trigger" id="customTriggerBtn" onclick="toggleCustomMode()">
+                    <div class="trigger-icon"><i class="fas fa-terminal"></i></div>
+                    <div class="trigger-text">
+                        <span class="main-text">MANUAL OVERRIDE</span>
+                        <span class="sub-text">Inietta codice formatter personalizzato</span>
+                    </div>
+                    <div class="trigger-status">OFF</div>
+                </div>
+
                 <input type="hidden" id="selectedSkin" value="leviathan">
 
                 <div class="custom-area" id="customSkinArea">
@@ -1571,6 +1618,44 @@
             }).join('');
         }
 
+        // NEW FUNCTION: TOGGLE CUSTOM MODE
+        function toggleCustomMode() {
+            const btn = document.getElementById('customTriggerBtn');
+            const isActive = btn.classList.contains('active');
+            const statusLabel = btn.querySelector('.trigger-status');
+            const grid = document.getElementById('visualCoreContainer');
+            
+            if (isActive) {
+                // TURN OFF
+                btn.classList.remove('active');
+                statusLabel.innerText = "OFF";
+                grid.classList.remove('hidden-by-custom');
+                // Revert to Leviathan (default) or keep previous logic? Let's revert to Leviathan.
+                selectSkin('leviathan');
+            } else {
+                // TURN ON
+                btn.classList.add('active');
+                statusLabel.innerText = "ACTIVE";
+                grid.classList.add('hidden-by-custom');
+                
+                // Deselect grid items visually
+                document.querySelectorAll('.skin-btn').forEach(b => b.classList.remove('active'));
+                
+                // Set hidden input
+                document.getElementById('selectedSkin').value = 'custom';
+                document.getElementById('prev-mode-label').innerText = "CUSTOM OVERRIDE";
+                
+                // Show Input Area
+                const customArea = document.getElementById('customSkinArea');
+                const customInput = document.getElementById('customTemplate');
+                customArea.classList.add('show');
+                customInput.disabled = false;
+                
+                updatePreview('custom');
+                updateFluxStream();
+            }
+        }
+
         function selectSkin(skinId) {
             // CHECK AIO LOCK
             const isAIO = document.getElementById('aiostreams_mode').checked;
@@ -1578,25 +1663,29 @@
                 triggerAIODenied();
                 return;
             }
+            
+            // IF selecting a normal skin, ensure Custom Mode is OFF
+            const customBtn = document.getElementById('customTriggerBtn');
+            if (customBtn.classList.contains('active')) {
+                customBtn.classList.remove('active');
+                customBtn.querySelector('.trigger-status').innerText = "OFF";
+                document.getElementById('visualCoreContainer').classList.remove('hidden-by-custom');
+            }
 
             document.querySelectorAll('.skin-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('skin_' + skinId).classList.add('active');
+            const btn = document.getElementById('skin_' + skinId);
+            if(btn) btn.classList.add('active');
+            
             document.getElementById('selectedSkin').value = skinId;
             document.getElementById('prev-mode-label').innerText = skinId.toUpperCase();
             
             const customArea = document.getElementById('customSkinArea');
             const customInput = document.getElementById('customTemplate');
             
-            if(skinId === 'custom') {
-                customArea.classList.add('show');
-                customInput.disabled = false; 
-                if(customInput.value.trim() === "") customInput.focus();
-            } else {
-                customArea.classList.remove('show');
-                customInput.disabled = true; 
-            }
+            // Reset Custom Area (Hidden for standard skins)
+            customArea.classList.remove('show');
+            customInput.disabled = true; 
             
-            // NO EFFECT - INSTANT UPDATE FOR SKINS
             updatePreview(skinId);
             updateFluxStream();
         }
@@ -1811,16 +1900,19 @@
             const isAIO = document.getElementById('aiostreams_mode').checked;
             const skinContainer = document.getElementById('visualCoreContainer');
             const customArea = document.getElementById('customSkinArea');
+            const customTrigger = document.getElementById('customTriggerBtn');
             const overlay = document.getElementById('aioLockOverlay');
             if (isAIO) {
                 skinContainer.classList.add('disabled-core');
                 customArea.classList.add('disabled-core');
+                customTrigger.classList.add('disabled-core');
                 overlay.style.display = 'flex';
                 selectSkin('leviathan'); 
                 showToast("AIO MODE ATTIVO: SKIN RESETTATE", "info");
             } else {
                 skinContainer.classList.remove('disabled-core');
                 customArea.classList.remove('disabled-core');
+                customTrigger.classList.remove('disabled-core');
                 overlay.style.display = 'none';
             }
         }
@@ -1938,7 +2030,13 @@
                     } else if (config.filters && config.filters.enableP2P) {
                         selectService('p2p', true);
                     }
-                    if (config.formatter) selectSkin(config.formatter); 
+                    if (config.formatter) {
+                         if (config.formatter === 'custom') {
+                             toggleCustomMode();
+                         } else {
+                             selectSkin(config.formatter);
+                         }
+                    }
                     if (config.customTemplate) document.getElementById('customTemplate').value = config.customTemplate;
                     if (config.aiostreams_mode) {
                         document.getElementById('aiostreams_mode').checked = true;
