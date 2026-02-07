@@ -413,7 +413,7 @@ function styleLeviathan(p) {
     if (!cleanAudio) cleanAudio = p.audioTag; 
     
     const titleIcon = "▶️"; 
-    const techIcon = "🔱"; // <--- ECCOLO! Il tridente torna qui per le specifiche tecniche
+    const techIcon = "🔱"; 
 
     // LOGICA ICONE SERVIZI
     // RD = Delfino, TB = Ancora, AD = Conchiglia, P2P = Squalo
@@ -450,7 +450,7 @@ function styleLeviathan(p) {
     if (p.seedersStr) fileInfo += `  |  ${p.seedersStr}`;
     lines.push(fileInfo);
 
-    // Riga Sorgente (qui teniamo il Delfino per indicare da dove viene)
+    // Riga Sorgente
     let sourceRow = `${p.serviceIconTitle} ${p.displaySource}`;
     if (p.releaseGroup) {
         const styledGroup = toStylized(p.releaseGroup, 'small');
@@ -599,11 +599,42 @@ function styleTorrentio(p) {
     lines.push(`🔍 ${p.displaySource}`);
 
     // RIGA 4: Lingue con altoparlante
-    // Rimuoviamo le bandiere per avvicinarci allo stile testuale "GB / IT" dell'immagine
-    // (o usiamo p.lang standard se la regex toglie tutto)
     let cleanLang = p.lang.replace(/[\u{1F1E6}-\u{1F1FF}]{2}/gu, "").trim(); 
-    if (!cleanLang.replace(/[^a-zA-Z]/g, "")) cleanLang = p.lang; // Fallback se rimuove tutto
+    if (!cleanLang.replace(/[^a-zA-Z]/g, "")) cleanLang = p.lang; 
     lines.push(`🔊 ${cleanLang}`);
+
+    return { name, title: lines.join("\n") };
+}
+
+// === NUOVO FORMATTER AGGIUNTO: Vertical Style ===
+function styleVertical(p) {
+    // Ispirato allo stile AIO/Jackettio modificato su richiesta
+    const isCached = ["RD", "TB", "AD"].includes(p.serviceTag);
+    const cacheIcon = isCached ? "⚡" : "☁️";
+    
+    // Header: Calamaro + Nome + Qualità + Cache
+    const name = `🦑 Leviathan ${p.quality} ${cacheIcon} Cached`;
+    
+    const lines = [];
+    
+    // Riga 1: Titolo (Popcorn 🍿)
+    lines.push(`🍿 ${p.cleanName}`);
+
+    // Riga 2: Sorgente (Cassetta 📼)
+    const videoInfo = p.cleanTags.length > 0 ? `📼 WEB-DL • ${p.cleanTags[0]}` : `📼 WEB-DL`;
+    lines.push(videoInfo);
+
+    // Riga 3: Codec (Ingranaggio ⚙️)
+    lines.push(`⚙️ ${p.codec}`);
+
+    // Riga 4: Audio (Speaker 🔊)
+    lines.push(`🔊 ${p.audioTag} (${p.audioChannels})`);
+
+    // Riga 5: Lingua (Fumetto 💬)
+    lines.push(`💬 ${p.lang}`);
+
+    // Riga 6: Size (Magnete 🧲)
+    lines.push(`🧲 ${p.sizeString}`);
 
     return { name, title: lines.join("\n") };
 }
@@ -689,7 +720,8 @@ function formatStreamSelector(fileTitle, source, size, seeders, serviceTag = "RD
         case "pri": result = stylePri(params); break;
         case "comet": result = styleComet(params); break;
         case "stremio_ita": result = styleStremioIta(params); break;
-        case "torrentio": result = styleTorrentio(params); break; // <--- NUOVO FORMATTER AGGIUNTO
+        case "torrentio": result = styleTorrentio(params); break; 
+        case "vertical": result = styleVertical(params); break; // <--- NUOVO CASE AGGIUNTO
         case "custom": result = styleCustom(params, config.customTemplate || ""); break;
         case "leviathan": 
         default: 
