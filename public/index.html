@@ -1327,6 +1327,9 @@
                      <div class="skin-btn" id="skin_torrentio" onclick="selectSkin('torrentio')">
                         <span class="skin-icon">📜</span><span class="skin-name">Torrentio</span>
                     </div>
+                    <div class="skin-btn" id="skin_vertical" onclick="selectSkin('vertical')">
+                        <span class="skin-icon">📑</span><span class="skin-name">Vertical</span>
+                    </div>
                     <div class="skin-btn" id="skin_custom" onclick="selectSkin('custom')">
                         <span class="skin-icon">🛠️</span><span class="skin-name">Custom</span>
                     </div>
@@ -1739,6 +1742,20 @@
                 if (!cleanLang.replace(/[^a-zA-Z]/g, "")) cleanLang = p.lang;
                 lines.push(`🔊 ${cleanLang}`);
                 
+                desc = lines.join("\n");
+            }
+            else if (skin === 'vertical') {
+                const isCached = ["RD", "TB", "AD"].includes(p.serviceTag);
+                const cacheIcon = isCached ? "⚡" : "☁️";
+                name = `🦑 Leviathan ${p.quality} ${cacheIcon} Cached`;
+                const lines = [];
+                lines.push(`🍿 ${p.cleanName}`);
+                const videoInfo = p.cleanTags.length > 0 ? `📼 WEB-DL • ${p.cleanTags[0]}` : `📼 WEB-DL`;
+                lines.push(videoInfo);
+                lines.push(`⚙️ ${p.codec}`);
+                lines.push(`🔊 ${p.audioTag} (${p.audioChannels})`);
+                lines.push(`💬 ${p.lang}`);
+                lines.push(`🧲 ${p.sizeString}`);
                 desc = lines.join("\n");
             }
             else if (skin === 'custom') {
